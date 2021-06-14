@@ -8,10 +8,11 @@ loop:
       blt  t1,t0,loop
       
       add  t2,t0,t1
+
 ## label_start: 
 ##   bge  t1,t0, label_end
 ##   addi t1,t1,1
 ##   add  t3,t1,x0
 ##   jal  x0,label_start
 ##   label_end:
-##   add t2,t1,t0   
+##   add t2,t1,t0
