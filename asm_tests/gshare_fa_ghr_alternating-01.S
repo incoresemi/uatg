@@ -1,3 +1,5 @@
+# ASM program to fill the global history register with alternating 0's and 1's
+
 #include "model_test.h"
 #include "arch_test.h"
 RVTEST_ISA("RV32I")
@@ -8,37 +10,35 @@ rvtest_entry_point:
 RVMODEL_BOOT
 RVTEST_CODE_BEGIN
 
-  addi t0,x0,0	#initialize           GHR 
-  addi t1,x0,1
-
-  beq t0, t1, lab1	#not equal 		0
-  addi t0, x0, 1  	#so make it equal
+	addi t0, x0, 1	
+	beq  t0, x0, lab0	
+	addi t0, t0, -1	
+lab0:
+	beq  t0, x0, lab1	
 lab1:
-  beq t0, t1, lab2	#equal			1
+	addi t0, t0, 1	
+	beq  t0, x0, lab2	
+	addi t0, t0, -1	
 lab2:
-  addi t0, t0, -1	#so make it inequal
-  beq t0, t1, lab3	#not equal		0
-  addi t0, t0, 1	#so make it equal
+	beq  t0, x0, lab3	
 lab3:
-  beq t0, t1, lab4	#equal			1
+	addi t0, t0, 1	
+	beq  t0, x0, lab4	
+	addi t0, t0, -1	
 lab4:
-  addi t0, t0, -1	#so make it inequal
-  beq t0, t1, lab5	#not equal		0
-  addi t0, t0, 1	#so make it equal
+	beq  t0, x0, lab5	
 lab5:
-  beq t0, t1, lab6	#equal			1
+	addi t0, t0, 1	
+	beq  t0, x0, lab6	
+	addi t0, t0, -1	
 lab6:
-  addi t0, t0, -1	#so make it inequal
-  beq t0, t1, lab7	#not equal		0
-  addi t0, t0, 1	#so make it equal
+	beq  t0, x0, lab7	
 lab7:
-  beq t0, t1, lab8	#equal			1
+	addi t0, t0, 1	
+	beq  t0, x0, lab8	
+	addi t0, t0, -1	
 lab8:
-  addi t0, t0, -1	#so make it inequal
-  beq t0, t1, lab9	#not equal		0
-  addi t0, t0, 1	#so make it equal
-lab9:
-  addi x0,x0,0
+	j lab8
 
 RVTEST_CODE_END
 RVMODEL_HALT
