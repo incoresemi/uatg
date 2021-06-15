@@ -10,35 +10,35 @@ rvtest_entry_point:
 RVMODEL_BOOT
 RVTEST_CODE_BEGIN
 
-	addi t0, x0, 1	
-	beq  t0, x0, lab0	
-	addi t0, t0, -1	
+	addi t0, x0, 1
+	beq  t0, x0, lab0
+	addi t0, t0, -1
 lab0:
-	beq  t0, x0, lab1	
+	beq  t0, x0, lab1
 lab1:
-	addi t0, t0, 1	
-	beq  t0, x0, lab2	
-	addi t0, t0, -1	
+	addi t0, t0, 1
+	beq  t0, x0, lab2
+	addi t0, t0, -1
 lab2:
-	beq  t0, x0, lab3	
+	beq  t0, x0, lab3
 lab3:
-	addi t0, t0, 1	
-	beq  t0, x0, lab4	
-	addi t0, t0, -1	
+	addi t0, t0, 1
+	beq  t0, x0, lab4
+	addi t0, t0, -1
 lab4:
-	beq  t0, x0, lab5	
+	beq  t0, x0, lab5
 lab5:
-	addi t0, t0, 1	
-	beq  t0, x0, lab6	
-	addi t0, t0, -1	
+	addi t0, t0, 1
+	beq  t0, x0, lab6
+	addi t0, t0, -1
 lab6:
-	beq  t0, x0, lab7	
+	beq  t0, x0, lab7
 lab7:
-	addi t0, t0, 1	
-	beq  t0, x0, lab8	
-	addi t0, t0, -1	
+	addi t0, t0, 1
+	beq  t0, x0, lab8
+	addi t0, t0, -1
 lab8:
-	j lab8
+	
 
 RVTEST_CODE_END
 RVMODEL_HALT

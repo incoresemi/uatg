@@ -26,7 +26,7 @@ def gshare_fa_ghr_alternating_01(history_len=8, overflow_times=0):
         else:
             asm += 'lab' + str(i) + ':\n'
             asm += '\tbeq  t0, x0, lab'+ str(i+1) +'\t\n'
-    asm += 'lab' + str(history_len + overflow_times) + ':\n\tj lab' +  str(history_len + overflow_times)
-    print(asm)
+    asm += 'lab' + str(history_len + overflow_times) + ':\n'
+    return(asm)
 
 testcase_11()
