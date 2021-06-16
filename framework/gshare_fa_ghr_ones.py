@@ -11,3 +11,5 @@ def gshare_fa_ghr_ones_01(ghr_width=8):
     
     asm = "\n  addi t0,x0,"+str(loop_count)+"\n  addi t1,x0,0\n\nloop:\n"
     asm = asm + "  addi t1,t1,1\n  blt t1,t0,loop\n"
+
+    return(asm)
