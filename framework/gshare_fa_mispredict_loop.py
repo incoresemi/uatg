@@ -14,5 +14,7 @@ def gshare_fa_mispredict_loop_01(ghr_width=8):
     loop_count = 2*ghr_width # the should iterate atleast 2 times more than the actual ghr width
                              # for the BPU to predict correctly atleast once. We assume 2x arbitrarily
     
-    asm = "\n\taddi t0,x0,"+str(loop_count)+"\n\taddi t1,x0,0\n\nloop:\n"
-    asm = asm + "\taddi t1,t1,1\n\tblt t1,t0,loop\n"
+    asm = "\n  addi t0,x0,"+str(loop_count)+"\n  addi t1,x0,0\n\nloop:\n"
+    asm = asm + "  addi t1,t1,1\n  blt t1,t0,loop\n"
+
+    return(asm)
