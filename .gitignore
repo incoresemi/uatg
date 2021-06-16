@@ -1,2 +1,3 @@
 asm_tests/*.txt
-
+asm_tests/build/*
+framework/__pycache__/*
