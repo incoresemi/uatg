@@ -15,3 +15,5 @@ def gshare_fa_ghr_zeros_01(ghr_width=8):
         asm = asm + "branch_" + str(i) + ":\n"
         asm = asm + "  beq t0,x0,branch_" + str(i) + "\n"
         asm = asm + "  addi t0,t0,1\n"
+
+    return(asm)
