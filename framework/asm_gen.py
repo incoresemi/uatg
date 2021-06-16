@@ -5,7 +5,7 @@ from gshare_fa_ghr_alternating import *
 from gshare_fa_ghr_zeros import *
 from gshare_fa_ghr_ones import *
 
-## to-do import all functions using syspath or import.utils .... 
+## to-do import all functions using syspath or import.utils ....
 
 def asm_gen(select = 0):
     '''
@@ -17,7 +17,8 @@ def asm_gen(select = 0):
     tests = ["gshare_fa_mispredict_loop_01",
              "gshare_fa_ghr_alternating_01",
              "gshare_fa_ghr_zeros_01",
-             "gshare_fa_ghr_ones_01"]
+             "gshare_fa_ghr_ones_0100",
+             "gshare_fa_ghr_alternating_01"]
 
     asm_header = "#include \"model_test.h\"\n#include \"arch_test.h\"\n"
     asm_header = asm_header + "RVTEST_ISA(\"RV64I\")\n\n"
