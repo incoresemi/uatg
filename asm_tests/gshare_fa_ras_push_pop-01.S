@@ -23,7 +23,7 @@ lab2:
     call x3, lab3
     nop
     ret
-l
+
 lab3:
     nop
     call x4, lab4
