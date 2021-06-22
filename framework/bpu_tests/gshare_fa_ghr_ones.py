@@ -1,5 +1,7 @@
 # python program to generate an assembly file which fills the ghr with ones
 # the ghr will have a zero entry when the loop exits
+from yapsy.IPlugin import IPlugin
+
 class gshare_fa_ghr_ones(IPlugin):
     def __init__(self):
         self.ghr_width = 8
