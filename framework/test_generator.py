@@ -21,7 +21,6 @@ def create_plugins(work_dir):
     for i in files:
         if('.py' in i):
             module_name = i[0:-3]
-            #print(work_dir+'/'+module_name + '.yapsy-pugin', "w")
             f = open(work_dir+'/'+module_name + '.yapsy-plugin', "w")
             f.write("[Core]\nName="+module_name+"\nModule="+module_name)
             f.close()
@@ -70,12 +69,12 @@ def load_yaml(foo):
             print("error")
 def main():
 
-    inp = "/home/purushoth/incoresemi/river_core_quickstart/chromite/sample_config/default.yaml" #yaml file containing the configuration details
+    inp = "../target/default.yaml" #yaml file containing the configuration details
     inp_yaml = load_yaml(inp)
     bpu = branch_predictor(inp_yaml['branch_predictor'])
     bpu.print_config()
 
-    create_plugins('/home/purushoth/incoresemi/micro-arch-tests/framework/bpu_tests')
+    create_plugins('bpu_tests/')
     yapsy_test()
 
 if __name__ == "__main__":
