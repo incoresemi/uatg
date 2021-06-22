@@ -1,6 +1,32 @@
 import ruamel
 from ruamel.yaml import YAML
-from asm_gen import *
+#from asm_gen import *
+import os
+from yapsy.PluginManager import PluginManager
+
+def yapsy_test():
+    # load the plugins from the plugin directory
+
+    manager = PluginManager()
+    manager.setPluginPlaces(["bpu_tests/"])
+    manager.collectPlugins()
+    # Loop around and find the plugins - print the names
+    for plugin in manager.getAllPlugins():
+        print(plugin.plugin_object.generate_asm())
+
+
+
+def create_plugins(work_dir):
+    files = os.listdir(work_dir)
+    for i in files:
+        if('.py' in i):
+            module_name = i[0:-3]
+            #print(work_dir+'/'+module_name + '.yapsy-pugin', "w")
+            f = open(work_dir+'/'+module_name + '.yapsy-plugin', "w")
+            f.write("[Core]\nName="+module_name+"\nModule="+module_name)
+            f.close()
+
+
 class branch_predictor(object):
     """Branch Predictor's parameters
         branch_predictor:
@@ -42,8 +68,15 @@ def load_yaml(foo):
             return yaml.load(file)
     except ruamel.yaml.constructor.DuplicateKeyError as msg:
             print("error")
+def main():
 
-inp = "config.yaml" #yaml file containing the configuration details
-inp_yaml = load_yaml(inp)
-bpu = branch_predictor(inp_yaml['branch_predictor'])
-bpu.print_config()
+    inp = "/home/purushoth/incoresemi/river_core_quickstart/chromite/sample_config/default.yaml" #yaml file containing the configuration details
+    inp_yaml = load_yaml(inp)
+    bpu = branch_predictor(inp_yaml['branch_predictor'])
+    bpu.print_config()
+
+    create_plugins('/home/purushoth/incoresemi/micro-arch-tests/framework/bpu_tests')
+    yapsy_test()
+
+if __name__ == "__main__":
+    main()
