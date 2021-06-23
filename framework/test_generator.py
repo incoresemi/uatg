@@ -4,17 +4,35 @@ from ruamel.yaml import YAML
 import os
 from yapsy.PluginManager import PluginManager
 
+def asm_head():
+    
+    asm_header = "#include \"model_test.h\"\n#include \"arch_test.h\"\n"
+    asm_header = asm_header + "RVTEST_ISA(\"RV64I\")\n\n"
+    asm_header = asm_header + ".section .text.init\n.globl rvtest_entry_point\nrvtest_entry_point:\n"
+    asm_header = asm_header + "RVMODEL_BOOT\nRVTEST_CODE_BEGIN\n\n"
+    return(asm_header)   
+
+def asm_foot():
+    
+    asm_footer = "\nRVTEST_CODE_END\nRVMODEL_HALT\n\nRVTEST_DATA_BEGIN\n.align 4\nrvtest_data:\n"
+    asm_footer = asm_footer + ".word 0xbabecafe\nRVTEST_DATA_END\n\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END"
+    return(asm_footer)
+
+
 def yapsy_test():
-    # load the plugins from the plugin directory
+    # load the plugins from the plugin directory and create the asm testfiles in a new directory
 
     manager = PluginManager()
     manager.setPluginPlaces(["bpu_tests/"])
     manager.collectPlugins()
-    # Loop around and find the plugins - print the names
+    os.makedirs("bpu_tests/tests/", exist_ok = True)
+    # Loop around and find the plugins and writes the contents from the plugins into an asm file 
     for plugin in manager.getAllPlugins():
-        print(plugin.plugin_object.generate_asm())
-
-
+        name = (str(plugin.plugin_object).split(".",1))
+        f = open('bpu_tests/tests/'+((name[1].split(" ",1))[0])+'.S',"w")
+        asm = asm_head() + plugin.plugin_object.generate_asm() + asm_foot()
+        f.write(asm)
+        f.close()
 
 def create_plugins(work_dir):
     files = os.listdir(work_dir)
