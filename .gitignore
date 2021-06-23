@@ -1,7 +1,7 @@
 asm_tests/*.txt
 asm_tests/build/*
 framework/__pycache__/*
-framework/bpu_tests/__pycache__/*
-framework/bpu_tests/tests
+framework/bpu/__pycache__/*
+framework/bpu/tests
 **.pyc
 **.yapsy-plugin
