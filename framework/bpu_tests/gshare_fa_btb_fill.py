@@ -37,8 +37,8 @@ class gshare_fa_btb_fill(IPlugin):
                     asm_jump = asm_jump + "  add t1,t1,t2\n  jal x0,entry_"+str(i+1)+"\n  addi x0,x0,0\n\n"
 
             else:
-                if (i>3*branch_count): break
-                asm_call = asm_call + "entry_"+str(i)+":\n"
+                if (i>=3*branch_count): break
+                asm_call = asm_call + "entry_"+str(i+1)+":\n"
                 for i in range(2):
                     asm_call = asm_call + "  addi x0,x0,0\n"
                 asm_call = asm_call + "  ret\n\n"
