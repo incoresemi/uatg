@@ -1,36 +1,22 @@
 import ruamel
 from ruamel.yaml import YAML
-#from asm_gen import *
 import os
 from yapsy.PluginManager import PluginManager
 
-def asm_head():
-    
-    asm_header = "#include \"model_test.h\"\n#include \"arch_test.h\"\n"
-    asm_header = asm_header + "RVTEST_ISA(\"RV64I\")\n\n"
-    asm_header = asm_header + ".section .text.init\n.globl rvtest_entry_point\nrvtest_entry_point:\n"
-    asm_header = asm_header + "RVMODEL_BOOT\nRVTEST_CODE_BEGIN\n\n"
-    return(asm_header)   
 
-def asm_foot():
-    
-    asm_footer = "\nRVTEST_CODE_END\nRVMODEL_HALT\n\nRVTEST_DATA_BEGIN\n.align 4\nrvtest_data:\n"
-    asm_footer = asm_footer + ".word 0xbabecafe\nRVTEST_DATA_END\n\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END"
-    return(asm_footer)
-
-
-def yapsy_test():
+def yapsy_test(test_file_dir="bpu_tests/"):
+    # specify the location where the python test files are located with a following /
     # load the plugins from the plugin directory and create the asm testfiles in a new directory
-
     manager = PluginManager()
-    manager.setPluginPlaces(["bpu_tests/"])
+    manager.setPluginPlaces([test_file_dir])
     manager.collectPlugins()
-    os.makedirs("bpu_tests/tests/", exist_ok = True)
-    # Loop around and find the plugins and writes the contents from the plugins into an asm file 
+    os.makedirs(test_file_dir + "tests/", exist_ok = True)
+    # Loop around and find the plugins and writes the contents from the plugins into an asm file
     for plugin in manager.getAllPlugins():
         name = (str(plugin.plugin_object).split(".",1))
+        print()
         f = open('bpu_tests/tests/'+((name[1].split(" ",1))[0])+'.S',"w")
-        asm = asm_head() + plugin.plugin_object.generate_asm() + asm_foot()
+        asm = asm_header + plugin.plugin_object.generate_asm() + asm_footer
         f.write(asm)
         f.close()
 
@@ -89,11 +75,26 @@ def main():
 
     inp = "../target/default.yaml" #yaml file containing the configuration details
     inp_yaml = load_yaml(inp)
+
+    isa = inp_yaml['ISA']
+
     bpu = branch_predictor(inp_yaml['branch_predictor'])
     bpu.print_config()
 
+    global asm_header
+    global asm_footer
+
+    asm_header = "\n#include \"model_test.h\"\n#include \"arch_test.h\"\n" \
+    + "RVTEST_ISA(\""+ isa +"\")\n\n" + ".section .text.init" \
+    + "\n.globl rvtest_entry_point\nrvtest_entry_point:\n" \
+    + "RVMODEL_BOOT\nRVTEST_CODE_BEGIN\n\n"
+
+    asm_footer = "\nRVTEST_CODE_END\nRVMODEL_HALT\n\nRVTEST_DATA_BEGIN" \
+    + "\n.align 4\nrvtest_data:\n.word 0xbabecafe\nRVTEST_DATA_END\n"  \
+    + "\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END\n"
+
     create_plugins('bpu_tests/')
-    yapsy_test()
+    yapsy_test(test_file_dir="bpu_tests/")
 
 if __name__ == "__main__":
     main()
