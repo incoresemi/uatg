@@ -14,7 +14,6 @@ def yapsy_test(test_file_dir="bpu_tests/"):
     # Loop around and find the plugins and writes the contents from the plugins into an asm file
     for plugin in manager.getAllPlugins():
         name = (str(plugin.plugin_object).split(".",1))
-        print()
         f = open('bpu_tests/tests/'+((name[1].split(" ",1))[0])+'.S',"w")
         asm = asm_header + plugin.plugin_object.generate_asm() + asm_footer
         f.write(asm)
@@ -79,7 +78,6 @@ def main():
     isa = inp_yaml['ISA']
 
     bpu = branch_predictor(inp_yaml['branch_predictor'])
-    bpu.print_config()
 
     global asm_header
     global asm_footer
