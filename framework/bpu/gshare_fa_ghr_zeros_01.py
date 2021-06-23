@@ -1,7 +1,7 @@
 # This program generates a assembly code which fills the ghr with zeros
 from yapsy.IPlugin import IPlugin
 
-class gshare_fa_ghr_zeros(IPlugin):
+class gshare_fa_ghr_zeros_01(IPlugin):
     
     def __init__(self):
         self.ghr_width = 8

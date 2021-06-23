@@ -7,7 +7,7 @@
 
 from yapsy.IPlugin import IPlugin
 
-class gshare_fa_mispredict_loop(IPlugin):
+class gshare_fa_mispredict_loop_01(IPlugin):
     def __init__(self):
         self.ghr_width = 8
 

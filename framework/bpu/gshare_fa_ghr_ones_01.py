@@ -2,7 +2,7 @@
 # the ghr will have a zero entry when the loop exits
 from yapsy.IPlugin import IPlugin
 
-class gshare_fa_ghr_ones(IPlugin):
+class gshare_fa_ghr_ones_01(IPlugin):
     def __init__(self):
         self.ghr_width = 8
 

@@ -2,7 +2,7 @@
 #ghr repeating pattern 010101010....
 from yapsy.IPlugin import IPlugin
 
-class gshare_fa_ghr_alternating(IPlugin):
+class gshare_fa_ghr_alternating_01(IPlugin):
     def __init__(self):
         self.btb_depth = 32
         self.history_len=8

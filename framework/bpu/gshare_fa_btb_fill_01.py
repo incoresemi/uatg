@@ -2,7 +2,7 @@
 ## there are 33 control insts in the generated program, 1 jump from the includes and 32  in the program
 from yapsy.IPlugin import IPlugin
 
-class gshare_fa_btb_fill(IPlugin):
+class gshare_fa_btb_fill_01(IPlugin):
     def __init__(self):
         self.btb_depth = 32
 
