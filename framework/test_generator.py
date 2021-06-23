@@ -4,7 +4,7 @@ import os
 from yapsy.PluginManager import PluginManager
 
 
-def yapsy_test(test_file_dir="bpu_tests/"):
+def yapsy_test(test_file_dir="bpu/"):
     # specify the location where the python test files are located with a following /
     # load the plugins from the plugin directory and create the asm testfiles in a new directory
     manager = PluginManager()
@@ -14,7 +14,7 @@ def yapsy_test(test_file_dir="bpu_tests/"):
     # Loop around and find the plugins and writes the contents from the plugins into an asm file
     for plugin in manager.getAllPlugins():
         name = (str(plugin.plugin_object).split(".",1))
-        f = open('bpu_tests/tests/'+((name[1].split(" ",1))[0])+'.S',"w")
+        f = open('tests/tests/'+((name[1].split(" ",1))[0])+'.S',"w")
         asm = asm_header + plugin.plugin_object.generate_asm() + asm_footer
         f.write(asm)
         f.close()
@@ -91,8 +91,8 @@ def main():
     + "\n.align 4\nrvtest_data:\n.word 0xbabecafe\nRVTEST_DATA_END\n"  \
     + "\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END\n"
 
-    create_plugins('bpu_tests/')
-    yapsy_test(test_file_dir="bpu_tests/")
+    create_plugins('bpu/')
+    yapsy_test(test_file_dir="bpu/")
 
 if __name__ == "__main__":
     main()
