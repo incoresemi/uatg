@@ -17,10 +17,15 @@ class gshare_fa_mispredict_loop_01(IPlugin):
         mispredictions occur during the warm-up phase of the BPU
         '''
         ghr_width = self.ghr_width
-        loop_count = 2*ghr_width # the should iterate atleast 2 times more than the actual ghr width
+        loop_count = 4*ghr_width # the should iterate atleast 2 times more than the actual ghr width
                                  # for the BPU to predict correctly atleast once. We assume 2x arbitrarily
         
-        asm = "\n  addi t0,x0,"+str(loop_count)+"\n  addi t1,x0,0\n\nloop:\n"
-        asm = asm + "  addi t1,t1,1\n  blt t1,t0,loop\n"
+        asm = "\n  addi t0,x0,"+str(loop_count)+"\n  addi t1,x0,0\n  addi t2,x0,2\n\nloop:\n"
+        asm = asm + "  addi t1,t1,1\n" \
+                + "  addi t2,t2,10\n  add t2,t2,t2\n" \
+                + "  addi t2,t2,-10\n   addi t2,t2,20\n"\
+                + "  add t2,t2,t2\n  addi t2,t2,-10\n"\
+                + "  blt t1,t0,loop\n\n"
+        asm = asm + "  add t2,t0.t1\n"
 
         return(asm)
