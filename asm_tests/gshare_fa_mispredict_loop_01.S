@@ -7,15 +7,23 @@
 RVTEST_ISA("RV64I")
 
 .section .text.init
+.option norvc
 .globl rvtest_entry_point
 rvtest_entry_point:
 RVMODEL_BOOT
 RVTEST_CODE_BEGIN
 
-  addi t0,x0,15
+  addi t0,x0,30
   addi t1,x0,0
+  addi t2,x0,2
 loop: 
   addi t1,t1,1
+  addi t2,t2,10
+  addi t2,t2,10
+  addi t2,t2,-10
+  addi t2,t2,-10
+  add  t2,t2,t2
+  add  t2,t2,-10
   blt  t1,t0,loop
       
   add  t2,t0,t1
