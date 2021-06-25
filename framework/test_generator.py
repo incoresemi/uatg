@@ -22,7 +22,7 @@ def yapsy_test(module_class, test_file_dir="bpu/"):
     for plugin in manager.getAllPlugins():
         name = (str(plugin.plugin_object).split(".", 1))
         test_code = plugin.plugin_object.generate_asm(module_class)
-        if (test_code != None):
+        if test_code != None:
             f = open('bpu/tests/' + ((name[1].split(" ", 1))[0]) + '.S', "w")
             asm = asm_header + test_code + asm_footer
             f.write(asm)

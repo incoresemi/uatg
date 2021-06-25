@@ -17,7 +17,7 @@ class gshare_fa_ghr_zeros_01(IPlugin):
             return None
 
         loop_count = bpu_class.history_len + 2
-        asm = "## test: gshare_fa_ghr_zeros_01\n\n\n\n"
+        asm = "\n\n## test: gshare_fa_ghr_zeros_01 ##\n\n"
         asm += "  addi t0,x0,1\n"
 
         for i in range(1, loop_count):
