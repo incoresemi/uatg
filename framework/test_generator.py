@@ -12,22 +12,27 @@ def yapsy_test(test_file_dir="bpu/"):
     manager = PluginManager()
     manager.setPluginPlaces([test_file_dir])
     manager.collectPlugins()
-    os.makedirs(test_file_dir + "tests/", exist_ok = True)
+    os.makedirs(test_file_dir + "tests/", exist_ok=True)
     # Loop around and find the plugins and writes the contents from the plugins into an asm file
     for plugin in manager.getAllPlugins():
-        name = (str(plugin.plugin_object).split(".",1))
-        f = open('bpu/tests/'+((name[1].split(" ",1))[0])+'.S',"w")
-        asm = asm_header + plugin.plugin_object.generate_asm() + asm_footer
-        f.write(asm)
-        f.close()
+        name = (str(plugin.plugin_object).split(".", 1))
+        test_code = plugin.plugin_object.generate_asm()
+        if (test_code != None):
+            f = open('bpu/tests/' + ((name[1].split(" ", 1))[0]) + '.S', "w")
+            asm = asm_header + test_code + asm_footer
+            f.write(asm)
+            f.close()
+        else:
+            pass
+
 
 def create_plugins(work_dir):
     files = os.listdir(work_dir)
     for i in files:
-        if('.py' in i):
+        if ('.py' in i):
             module_name = i[0:-3]
-            f = open(work_dir+'/'+module_name + '.yapsy-plugin', "w")
-            f.write("[Core]\nName="+module_name+"\nModule="+module_name)
+            f = open(work_dir + '/' + module_name + '.yapsy-plugin', "w")
+            f.write("[Core]\nName=" + module_name + "\nModule=" + module_name)
             f.close()
 
 
@@ -45,7 +50,7 @@ class branch_predictor(object):
       """
 
     def __init__(self, bpu_instance):
-        super (branch_predictor, self).__init__()
+        super(branch_predictor, self).__init__()
         self.instantiate = bpu_instance['instantiate']
         self.predictor = bpu_instance['predictor']
         self.on_reset = bpu_instance['on_reset']
@@ -60,8 +65,9 @@ class branch_predictor(object):
         self.bht_depth, self.history_len, self.history_bits)
 
     def test_create():
-        if(instantiate==True):
+        if (instantiate == True):
             pass
+
 
 def load_yaml(foo):
     yaml = YAML(typ="rt")
@@ -71,10 +77,12 @@ def load_yaml(foo):
         with open(foo, "r") as file:
             return yaml.load(file)
     except ruamel.yaml.constructor.DuplicateKeyError as msg:
-            print("error")
+        print("error")
+
+
 def main():
 
-    inp = "../target/default.yaml" #yaml file containing the configuration details
+    inp = "../target/default.yaml"  #yaml file containing the configuration details
     inp_yaml = load_yaml(inp)
 
     isa = inp_yaml['ISA']
@@ -94,13 +102,14 @@ def main():
     + "RVTEST_ISA(\""+ isa +"\")\n\n" + ".section .text.init" \
     + "\n.globl rvtest_entry_point\nrvtest_entry_point:\n" \
     + "RVMODEL_BOOT\nRVTEST_CODE_BEGIN\n\n"
- 
+
     asm_footer = "\nRVTEST_CODE_END\nRVMODEL_HALT\n\nRVTEST_DATA_BEGIN" \
     + "\n.align 4\nrvtest_data:\n.word 0xbabecafe\nRVTEST_DATA_END\n"  \
     + "\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END\n"
 
     create_plugins('bpu/')
     yapsy_test(test_file_dir="bpu/")
+
 
 if __name__ == "__main__":
     main()
