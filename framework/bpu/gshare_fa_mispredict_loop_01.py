@@ -13,7 +13,7 @@ class gshare_fa_mispredict_loop_01(IPlugin):
     def __init__(self):
         self.ghr_width = 8
 
-    def generate_asm(self):
+    def generate_asm(self, bpu_class):
         '''
         The program creates a simple loop in assembly which checks if 
         mispredictions occur during the warm-up phase of the BPU

@@ -8,7 +8,7 @@ class gshare_fa_btb_fill_01(IPlugin):
     def __init__(self):
         self.btb_depth = 32
 
-    def generate_asm(self):
+    def generate_asm(self, bpu_class):
         '''
           it is assumed that the btb_depth will be a multiple of 4 at all times"
         '''

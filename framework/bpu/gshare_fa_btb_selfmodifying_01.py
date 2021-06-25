@@ -5,7 +5,7 @@ from yapsy.IPlugin import IPlugin
 
 class gshare_fa_btb_selfmodifying_01(IPlugin):
 
-    def generate_asm(self):
+    def generate_asm(self, bpu_class):
         '''
           This method returns the asm file.
         '''

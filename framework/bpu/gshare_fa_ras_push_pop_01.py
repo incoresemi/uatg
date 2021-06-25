@@ -8,7 +8,7 @@ class gshare_fa_ras_push_pop_01(IPlugin):
     def __init__(self):
         self.recurse_level = 5
 
-    def generate_asm(self):
+    def generate_asm(self, bpu_class):
         """
         reg x30 is used as looping variable. reg x31 used as a temp variable
         """

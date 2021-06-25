@@ -10,7 +10,7 @@ class gshare_fa_ghr_alternating_01(IPlugin):
         self.history_len = 8
         self.overflow_times = 0
 
-    def generate_asm(self):
+    def generate_asm(self, bpu_class):
         '''
         This function creates assembly code to populate the Global History register
         with alternating 0's and 1's pattern. eg. 010101010....

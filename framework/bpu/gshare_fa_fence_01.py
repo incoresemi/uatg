@@ -11,7 +11,7 @@ class gshare_fa_fence_01(IPlugin):
     def __init__(self):
         self.recurse_level = 5
 
-    def generate_asm(self):
+    def generate_asm(self, bpu_class):
         '''
         This code is derived from the ras_push_pop code. Fence instructions are introduced.
         reg x30 is used as looping variable. reg x31 used as a temp variable

@@ -8,7 +8,7 @@ class gshare_fa_ghr_ones_01(IPlugin):
     def __init__(self):
         self.ghr_width = 8
 
-    def generate_asm(self):
+    def generate_asm(self, bpu_class):
         ghr_width = self.ghr_width
         '''
         The generated assembly file fills the ghr with ones
