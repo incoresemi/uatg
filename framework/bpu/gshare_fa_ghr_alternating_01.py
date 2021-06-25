@@ -2,11 +2,14 @@
 #ghr repeating pattern 010101010....
 from yapsy.IPlugin import IPlugin
 
+
 class gshare_fa_ghr_alternating_01(IPlugin):
+
     def __init__(self):
         self.btb_depth = 32
-        self.history_len=8
-        self.overflow_times=0
+        self.history_len = 8
+        self.overflow_times = 0
+
     def generate_asm(self):
         '''
         This function creates assembly code to populate the Global History register
@@ -19,20 +22,20 @@ class gshare_fa_ghr_alternating_01(IPlugin):
         The generated assembly code will use the t0 register to alternatively enter
         and exit branches.
         '''
-        history_len=self.history_len
-        overflow_times=self.overflow_times
+        history_len = self.history_len
+        overflow_times = self.overflow_times
 
         asm = '\taddi t0, x0, 1\t\n'
         asm = asm + '\tbeq  t0, x0, lab0\t\n\taddi t0, t0, -1\t\n'
 
         for i in range(history_len + overflow_times):
-            if(i%2):
+            if (i % 2):
                 asm += 'lab' + str(i) + ':\n'
                 asm += '\taddi t0, t0, 1\t\n'
-                asm += '\tbeq  t0, x0, lab'+ str(i+1) +'\t\n'
+                asm += '\tbeq  t0, x0, lab' + str(i + 1) + '\t\n'
                 asm += '\taddi t0, t0, -1\t\n'
             else:
                 asm += 'lab' + str(i) + ':\n'
-                asm += '\tbeq  t0, x0, lab'+ str(i+1) +'\t\n'
+                asm += '\tbeq  t0, x0, lab' + str(i + 1) + '\t\n'
         asm += 'lab' + str(history_len + overflow_times) + ':\n'
-        return(asm)
+        return (asm)

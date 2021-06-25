@@ -2,8 +2,9 @@
 
 from yapsy.IPlugin import IPlugin
 
+
 class gshare_fa_btb_selfmodifying_01(IPlugin):
-    
+
     def generate_asm(self):
         '''
           This method returns the asm file.
@@ -16,4 +17,4 @@ class gshare_fa_btb_selfmodifying_01(IPlugin):
         asm = asm + "  addi t1,x0,0x33\n  addi t3,x0,4\n  sw t1,0(t0)\n  fence.i\n  jal x0,first\n\n"
         asm = asm + "fin:\n"
 
-        return(asm)
+        return (asm)
