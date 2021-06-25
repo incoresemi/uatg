@@ -20,7 +20,8 @@ def main():
     misprediction_result = re.findall(misprediction_pattern, log_file)
     fence_executed_result = re.findall(fence_executed_pattern, log_file)
 
-    print(bpu_match_result)
+    for i in bpu_match_result:
+        print(i)
 
 
 if __name__ == '__main__':
