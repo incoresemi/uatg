@@ -5,3 +5,4 @@ framework/bpu/__pycache__/*
 framework/bpu/tests
 **.pyc
 **.yapsy-plugin
+.idea/*
