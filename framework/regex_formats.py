@@ -33,3 +33,8 @@ bht_ind_target_pattern = "\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\s" \
 
 misprediction_pattern = "\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\s" \
 + "Misprediction\sfired\.\sRestoring\sghr\:\s\d+"
+
+fence_executed_pattern = "(\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\sFenced\,\s" \
++ "Valid\sBits\s\-\>\s0+\s\n)(.*\n)(\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\s" \
++ "rg_allocate\s\-\>\s\d+\s\n)(\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\s"\
++ "current_ghr\s\-\>\s0+\s\n)"

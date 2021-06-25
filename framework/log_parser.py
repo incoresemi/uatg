@@ -18,6 +18,7 @@ def main():
     new_ghr_result = re.findall(new_ghr_pattern, log_file)
     bht_ind_target_result = re.findall(bht_ind_target_pattern, log_file)
     misprediction_result = re.findall(misprediction_pattern, log_file)
+    fence_executed_result = re.findall(fence_executed_pattern, log_file)
 
     print(bpu_match_result)
 
