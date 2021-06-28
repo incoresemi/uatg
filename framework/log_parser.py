@@ -26,7 +26,8 @@ def main():
     bht_ind_target_result = re.findall(bht_ind_target_pattern, log_file)
     misprediction_result = re.findall(misprediction_pattern, log_file)
     fence_executed_result = re.findall(fence_executed_pattern, log_file)
-
+    f.close()
+    
     for i in bpu_match_result:
         print(i)
 
