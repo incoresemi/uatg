@@ -3,7 +3,14 @@ from regex_formats import *
 
 
 def main():
-    f = open('../asm_tests/build/log', "r")
+
+    ## the path to the log files is to be entered in the path.txt file and suitable lines can be
+    ## selected and parsed
+    fi = open('path.txt', 'r')
+    paths = (fi.readlines())
+    fi.close()
+
+    f = open(((paths[1]).split('\n'))[0], "r")
     log_file = f.read()
 
     bpu_match_result = re.findall(bpu_match_pattern, log_file)
