@@ -7,3 +7,4 @@ framework/bpu/tests
 **.yapsy-plugin
 .idea/*
 framework/path.txt
+.*
