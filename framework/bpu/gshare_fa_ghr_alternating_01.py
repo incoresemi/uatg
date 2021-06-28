@@ -6,11 +6,11 @@ from yapsy.IPlugin import IPlugin
 class gshare_fa_ghr_alternating_01(IPlugin):
 
     def __init__(self):
-        self.btb_depth = 32
-        self.history_len = 8
+        #self.btb_depth = 32
+        #self.history_len = 8
         self.overflow_times = 0
 
-    def generate_asm(self, bpu_class):
+    def generate_asm(self, _bpu_dict):
         """
         This function creates assembly code to populate the Global History
         register with alternating 0's and 1's pattern. eg. 010101010....
@@ -23,20 +23,34 @@ class gshare_fa_ghr_alternating_01(IPlugin):
         The generated assembly code will use the t0 register to alternatively
         enter and exit branches.
         """
-        history_len = self.history_len
+
+        _en_bpu = _bpu_dict['instantiate']
+        _history_len = _bpu_dict['history_len']
         overflow_times = self.overflow_times
 
-        asm = '\taddi t0, x0, 1\t\n'
-        asm = asm + '\tbeq  t0, x0, lab0\t\n\taddi t0, t0, -1\t\n'
+        if (_en_bpu and _history_len):
+            asm = '\taddi t0, x0, 1\t\n'
+            asm = asm + '\tbeq  t0, x0, lab0\t\n\taddi t0, t0, -1\t\n'
 
-        for i in range(history_len + overflow_times):
-            if i % 2:
-                asm += 'lab' + str(i) + ':\n'
-                asm += '\taddi t0, t0, 1\t\n'
-                asm += '\tbeq  t0, x0, lab' + str(i + 1) + '\t\n'
-                asm += '\taddi t0, t0, -1\t\n'
-            else:
-                asm += 'lab' + str(i) + ':\n'
-                asm += '\tbeq  t0, x0, lab' + str(i + 1) + '\t\n'
-        asm += 'lab' + str(history_len + overflow_times) + ':\n'
-        return asm
+            for i in range(history_len + overflow_times):
+                if i % 2:
+                    asm += 'lab' + str(i) + ':\n'
+                    asm += '\taddi t0, t0, 1\t\n'
+                    asm += '\tbeq  t0, x0, lab' + str(i + 1) + '\t\n'
+                    asm += '\taddi t0, t0, -1\t\n'
+                else:
+                    asm += 'lab' + str(i) + ':\n'
+                    asm += '\tbeq  t0, x0, lab' + str(i + 1) + '\t\n'
+            asm += 'lab' + str(history_len + overflow_times) + ':\n'
+            return asm
+        else:
+            return (0)
+
+    def check_log(self, log_file_path):
+        """
+          check if the ghr value is alternating. 
+          it should be 01010101 or 10101010 before being fenced 
+        """
+        f = open(log_file_path, "r")
+        log_file = f.read()
+        f.close()
