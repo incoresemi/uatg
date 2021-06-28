@@ -17,11 +17,7 @@ def yapsy_test(yaml_dict, test_file_dir="bpu/"):
     manager = PluginManager()
     manager.setPluginPlaces([test_file_dir])
     manager.collectPlugins()
-    try:
-        os.rmdir(test_file_dir + "tests/")
-    except OSError:
-        pass
-    os.mkdirs(test_file_dir + "tests/")
+    os.makedirs(test_file_dir + "tests/", exist_ok = True)
     # Loop around and find the plugins and writes the contents from the plugins into an asm file
     for plugin in manager.getAllPlugins():
         name = (str(plugin.plugin_object).split(".", 1))
