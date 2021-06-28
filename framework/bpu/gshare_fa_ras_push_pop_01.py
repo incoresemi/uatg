@@ -1,10 +1,8 @@
 # python script to automate test 11 in microarch test
 
 from yapsy.IPlugin import IPlugin
-
-
-# import ruamel
-# from ruamel.yaml import YAML
+import regex_formats as rf
+import re
 
 
 class gshare_fa_ras_push_pop_01(IPlugin):
@@ -39,9 +37,22 @@ class gshare_fa_ras_push_pop_01(IPlugin):
         else:
             return 0
 
-    def check_log(self):
+    def check_log(self, log_file_path):
         """
         check for pushes and pops in this file. There should be 8 pushes and
-        4 pops (unrelated - should check why that happens, there should be 8
-        pops)
+        4 pops
+        TODO: (should check why that happens, there should be 8pops)
         """
+        f = open(log_file_path, "r")
+        log_file = f.read()
+        f.close()
+
+        pushing_to_ras_result = re.findall(rf.pushing_to_ras_pattern,
+                                           log_file)
+        choosing_top_ras_result = re.findall(rf.choosing_top_ras_pattern,
+                                             log_file)
+        if len(pushing_to_ras_result) != 8 and \
+                len(choosing_top_ras_result) != 4:
+            return False
+
+        return True
