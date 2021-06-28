@@ -24,13 +24,15 @@ def yapsy_test(yaml_dict, test_file_dir="bpu/"):
     for plugin in manager.getAllPlugins():
         asm_body = plugin.plugin_object.generate_asm(yaml_dict)
         if (asm_body):
-            name = (str(plugin.plugin_object).split(".",1))
-            f = open('bpu/tests/'+((name[1].split(" ",1))[0])+'.S',"w")
+            name = (str(plugin.plugin_object).split(".", 1))
+            f = open('bpu/tests/' + ((name[1].split(" ", 1))[0]) + '.S', "w")
             asm = asm_header + asm_body + asm_footer
             f.write(asm)
             f.close()
         else:
-            print("skipped ",(((str(plugin.plugin_object).split(".",1))[1]).split(" ",1))[0])
+            print("skipped ",
+                  (((str(plugin.plugin_object).split(".", 1))[1]).split(" ",
+                                                                        1))[0])
             continue
 
 
