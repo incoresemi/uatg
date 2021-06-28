@@ -18,7 +18,9 @@ def yapsy_test(yaml_dict, test_file_dir="bpu/"):
     manager = PluginManager()
     manager.setPluginPlaces([test_file_dir])
     manager.collectPlugins()
-    rmtree(test_file_dir + "tests/")
+    dirpath = os.path.join(test_file_dir,'tests')
+    if ((os.path.isdir(dirpath)) and os.path.exists(dirpath)):
+        rmtree(test_file_dir + "tests/")
     os.mkdir(test_file_dir + "tests/")
     # Loop around and find the plugins and writes the contents from the plugins into an asm file
     for plugin in manager.getAllPlugins():
@@ -98,7 +100,7 @@ def main():
     os.system("river_core compile -t mywork/test_list.yaml")
     # run tests in river_core
     os.chdir(cwd)  # get back to present dir
-    os.system("python log_parser.py")  # parse the logs and check for matching
+    os.system("python bpu/log_parser.py")  # parse the logs and check for matching
 
 
 if __name__ == "__main__":
