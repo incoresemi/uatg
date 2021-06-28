@@ -1,6 +1,7 @@
 import ruamel
 from ruamel.yaml import YAML
 import os
+from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
 from yapsy.PluginManager import PluginManager
@@ -17,18 +18,20 @@ def yapsy_test(yaml_dict, test_file_dir="bpu/"):
     manager = PluginManager()
     manager.setPluginPlaces([test_file_dir])
     manager.collectPlugins()
-    os.makedirs(test_file_dir + "tests/", exist_ok = True)
+    rmtree(test_file_dir + "tests/")
+    os.mkdir(test_file_dir + "tests/")
     # Loop around and find the plugins and writes the contents from the plugins into an asm file
     for plugin in manager.getAllPlugins():
-        name = (str(plugin.plugin_object).split(".", 1))
-        test_code = plugin.plugin_object.generate_asm(yaml_dict)
-        if test_code is not None:
-            f = open('bpu/tests/' + ((name[1].split(" ", 1))[0]) + '.S', "w")
-            asm = asm_header + test_code + asm_footer
+        asm_body = plugin.plugin_object.generate_asm(yaml_dict)
+        if (asm_body):
+            name = (str(plugin.plugin_object).split(".",1))
+            f = open('bpu/tests/'+((name[1].split(" ",1))[0])+'.S',"w")
+            asm = asm_header + asm_body + asm_footer
             f.write(asm)
             f.close()
         else:
-            pass
+            print("skipped ",(((str(plugin.plugin_object).split(".",1))[1]).split(" ",1))[0])
+            continue
 
 
 def create_plugins(work_dir):
