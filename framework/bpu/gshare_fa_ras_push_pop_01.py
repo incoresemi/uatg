@@ -1,8 +1,10 @@
-#python script to automate test 11 in microarch test
+# python script to automate test 11 in microarch test
 
 from yapsy.IPlugin import IPlugin
-#import ruamel
-#from ruamel.yaml import YAML
+
+
+# import ruamel
+# from ruamel.yaml import YAML
 
 
 class gshare_fa_ras_push_pop_01(IPlugin):
@@ -17,7 +19,7 @@ class gshare_fa_ras_push_pop_01(IPlugin):
         _en_ras = _bpu_dict['ras_depth']
         _en_bpu = _bpu_dict['instantiate']
 
-        if (_en_ras and _en_bpu):
+        if _en_ras and _en_bpu:
             recurse_level = self.recurse_level
             no_ops = '\taddi x31, x0, 5\n\taddi x31, x0, -5\n'
             asm = '\taddi x30, x0, ' + str(recurse_level) + '\n'
@@ -25,20 +27,21 @@ class gshare_fa_ras_push_pop_01(IPlugin):
 
             for i in range(1, recurse_level + 1):
                 asm += 'lab' + str(i) + ':\n'
-                if (i == recurse_level):
+                if i == recurse_level:
                     asm += '\taddi x30, x30, -1\n'
                 else:
                     asm += no_ops * 3 + '\tcall x' + str(i + 1) + ', lab' + str(
                         i + 1) + '\n'
                 asm += no_ops * 3 + '\tret\n'
             asm += 'end:\n\tnop\n'
-            return (asm)
+            return asm
 
         else:
-            return (0)
+            return 0
 
     def check_log(self):
         """
-          check for pushes and pops in this file. 
-          There should be 8 pushes and 4 pops (unrelated - should check why that happens, there should be 8 pops)
+        check for pushes and pops in this file. There should be 8 pushes and
+        4 pops (unrelated - should check why that happens, there should be 8
+        pops)
         """

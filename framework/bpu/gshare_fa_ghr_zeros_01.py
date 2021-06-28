@@ -7,16 +7,16 @@ class gshare_fa_ghr_zeros_01(IPlugin):
     def __init__(self):
         self.ghr_width = 8
 
-    def generate_asm(self, _instance):
-        '''
-          the for loop iterates ghr_width + 2 times printing an 
-          assembly program which contains ghr_width + 2 branches which 
+    def generate_asm(self, _bpu_dict):
+        """
+          the for loop iterates ghr_width + 2 times printing an
+          assembly program which contains ghr_width + 2 branches which
           will are *NOT TAKEN*. This fills the ghr with zeros
-        '''
-        _history_len = _instance['history_len']
-        _en_bpu = _instance['instantiate']
+        """
+        _history_len = _bpu_dict['history_len']
+        _en_bpu = _bpu_dict['instantiate']
 
-        if (_en_bpu and _history_len):
+        if _en_bpu and _history_len:
             loop_count = _history_len + 2
             asm = "\n\n## test: gshare_fa_ghr_zeros_01 ##\n\n"
             asm += "  addi t0,x0,1\n"
@@ -26,10 +26,10 @@ class gshare_fa_ghr_zeros_01(IPlugin):
                 asm = asm + "  beq t0,x0,branch_" + str(i) + "\n"
                 asm = asm + "  addi t0,t0,1\n"
 
-            return (asm)
+            return asm
 
         else:
-            return (0)
+            return 0
 
     def check_log(self):
         """
