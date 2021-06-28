@@ -31,7 +31,7 @@ class gshare_fa_ghr_ones_01(IPlugin):
 
     def check_log(self, log_file_path):
         """
-          check if all the ghr values are zero throughout the test
+          check if all the ghr values are fully ones atleast once during the test
         """
         f = open(log_file_path, "r")
         log_file = f.read()

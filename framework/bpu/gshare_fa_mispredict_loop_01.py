@@ -42,7 +42,7 @@ class gshare_fa_mispredict_loop_01(IPlugin):
 
     def check_log(self, log_file_path):
         """
-          check if all the ghr values are zero throughout the test
+          check if there is a mispredict atleast once after a BTBHit. 
         """
         f = open(log_file_path, "r")
         log_file = f.read()
