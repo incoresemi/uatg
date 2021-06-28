@@ -6,7 +6,7 @@ from datetime import datetime
 from yapsy.PluginManager import PluginManager
 
 
-def yapsy_test(module_class, test_file_dir="bpu/"):
+def yapsy_test(yaml_dict, test_file_dir="bpu/"):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the asm test files in a new directory.
@@ -21,7 +21,7 @@ def yapsy_test(module_class, test_file_dir="bpu/"):
     # Loop around and find the plugins and writes the contents from the plugins into an asm file
     for plugin in manager.getAllPlugins():
         name = (str(plugin.plugin_object).split(".", 1))
-        test_code = plugin.plugin_object.generate_asm(module_class)
+        test_code = plugin.plugin_object.generate_asm(yaml_dict)
         if test_code is not None:
             f = open('bpu/tests/' + ((name[1].split(" ", 1))[0]) + '.S', "w")
             asm = asm_header + test_code + asm_footer
@@ -34,40 +34,11 @@ def yapsy_test(module_class, test_file_dir="bpu/"):
 def create_plugins(work_dir):
     files = os.listdir(work_dir)
     for i in files:
-        if '.py' in i:
+        if (('.py' in i) and (not i.startswith('.'))):
             module_name = i[0:-3]
             f = open(work_dir + '/' + module_name + '.yapsy-plugin', "w")
             f.write("[Core]\nName=" + module_name + "\nModule=" + module_name)
             f.close()
-
-
-class branch_predictor(object):
-    """Branch Predictor's parameters
-        branch_predictor:
-          instantiate: True #boolean value indicating if the predictor needs to be instantiated
-          predictor: gshare #string indicating the type of predictor to be implemented. Valid values are: ‘gshare’
-          on_reset: enable  #Indicates if the predictor should be enabled on system-reset or not.
-          btb_depth: 32     #integer indicating the size of the branch target buffer
-          bht_depth: 512    #integer indicating the size of the bracnh history buffer
-          history_len: 8    #integer indicating the size of the global history register
-          history_bits: 5   #integer indicating the number of bits used for indexing bht/btb
-          ras_depth: 8      #integer indicating the size of the return address stack
-      """
-
-    def __init__(self, bpu_instance):
-        super(branch_predictor, self).__init__()
-        self.instantiate = bpu_instance['instantiate']
-        self.predictor = bpu_instance['predictor']
-        self.on_reset = bpu_instance['on_reset']
-        self.btb_depth = bpu_instance['btb_depth']
-        self.bht_depth = bpu_instance['bht_depth']
-        self.history_len = bpu_instance['history_len']
-        self.history_bits = bpu_instance['history_bits']
-        self.ras_depth = bpu_instance['ras_depth']
-
-    def print_config(self):
-        print(self.instantiate, self.predictor, self.on_reset, self.btb_depth,
-              self.bht_depth, self.history_len, self.history_bits)
 
 
 def load_yaml(foo):
@@ -87,7 +58,7 @@ def main():
 
     isa = inp_yaml['ISA']
 
-    bpu = branch_predictor(inp_yaml['branch_predictor'])
+    bpu = inp_yaml['branch_predictor']
 
     username = getuser()
     time = ((str(datetime.now())).split("."))[0]
@@ -109,9 +80,16 @@ def main():
                  + "\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END\n"
 
     create_plugins('bpu/')
-    yapsy_test(module_class=bpu, test_file_dir="bpu/")
+    yapsy_test(yaml_dict=bpu, test_file_dir="bpu/")
     cwd = os.getcwd()
-    os.chdir("goto/river_core_quickstart/location/")  # change dir to river_core
+
+    ## add the path to the river_core to a file named 'path.txt' within the framework
+    ## the first line will be used as the path to river_core
+    fi = open("path.txt", "r")
+    river_path = (fi.readline()).strip('\n')
+    fi.close()
+
+    os.chdir(river_path)  # change dir to river_core
     os.system("river_core compile -t mywork/test_list.yaml")
     # run tests in river_core
     os.chdir(cwd)  # get back to present dir
