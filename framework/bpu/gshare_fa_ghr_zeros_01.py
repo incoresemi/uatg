@@ -1,6 +1,7 @@
 # This program generates a assembly code which fills the ghr with zeros
 from yapsy.IPlugin import IPlugin
-
+import regex_formats
+import re
 
 class gshare_fa_ghr_zeros_01(IPlugin):
 
@@ -31,7 +32,18 @@ class gshare_fa_ghr_zeros_01(IPlugin):
         else:
             return 0
 
-    def check_log(self):
+    def check_log(self, log_file_path):
         """
           check if all the ghr values are zero throughout the test
         """
+        f = open(log_file_path, "r")
+        log_file = f.read()
+        f.close()
+
+        new_ghr_result = re.findall(regex_formats.newghr_pattern, log_file)
+        for i in new_ghr_result:
+            if self.ghr_width* "0" in i:
+                pass
+            else:
+                return False
+        return True
