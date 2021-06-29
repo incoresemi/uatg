@@ -8,6 +8,7 @@ import re
 class gshare_fa_btb_selfmodifying_01(IPlugin):
 
     def __init__(self):
+        super().__init__()
         pass
 
     def generate_asm(self, _bpu_dict):
