@@ -7,7 +7,7 @@ from datetime import datetime
 from yapsy.PluginManager import PluginManager
 
 
-def yapsy_test(yaml_dict, test_file_dir="bpu/"):
+def generate_test(yaml_dict, test_file_dir="bpu/"):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the asm test files in a new directory.
@@ -67,7 +67,7 @@ def main():
     global asm_footer
     global river_path
 
-    inp = "../target/default.yaml" # yaml file containing configuration details
+    inp = "../target/default.yaml"  # yaml file containing configuration details
     inp_yaml = load_yaml(inp)
     river_path = "path/to/river_core"
 
@@ -91,7 +91,7 @@ def main():
                  + "RVTEST_DATA_END\n\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END\n"
 
     create_plugins('bpu/')
-    yapsy_test(yaml_dict=bpu, test_file_dir="bpu/")
+    generate_test(yaml_dict=bpu, test_file_dir="bpu/")
     cwd = os.getcwd()
 
     os.chdir(river_path)  # change dir to river_core
