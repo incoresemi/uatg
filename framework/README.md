@@ -55,7 +55,9 @@ Before adding new test cases to the framework, one needs to understand the conve
       2. Using the regex patterns given from the `regex_formats.py` file, and `re` module, parse the log file.
       3. Create conditions that test for successful execution and fail cases.
       4. If the assembly test passes, return `True` else return `False `.
+       
 
+  5. If the `regex-formats.py` file does not have suitable regex patterns, frame the regex pattern and store it in the file with suitable naming.
 
 A generic test `test_name.py` is written in this manner.
 
