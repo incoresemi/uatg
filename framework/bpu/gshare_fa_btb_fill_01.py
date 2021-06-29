@@ -3,69 +3,87 @@
 # 1 jump from the includes and 32  in the program
 
 from yapsy.IPlugin import IPlugin
+import regex_formats as rf
+import re
 
 
 class gshare_fa_btb_fill_01(IPlugin):
 
     def __init__(self):
-        pass
-        ##self.btb_depth = 32
+        super().__init__()
+        self._btb_depth = 32
 
     def generate_asm(self, _bpu_dict):
-        '''
+        """
           it is assumed that the btb_depth will be a multiple of 4 at all times"
-        '''
+        """
         _en_bpu = _bpu_dict['instantiate']
-        _btb_depth = _bpu_dict['btb_depth']
+        self._btb_depth = _bpu_dict['btb_depth']
 
-        if (_en_bpu and _btb_depth):
-            asm_start = "  addi t1,x0,0\n  addi t2,x0,1\n\n"
-            branch_count = int(_btb_depth / 4)
+        if _en_bpu and self._btb_depth:
+            asm_start = "\taddi t1,x0,0\n\taddi t2,x0,1\n\n"
+            branch_count = int(self._btb_depth / 4)
             asm_branch = ""
-            asm_jump = "  add t1,t1,t2\n  jal x0,entry_" + str(branch_count +
+            asm_jump = "\tadd t1,t1,t2\n\tjal x0,entry_" + str(branch_count +
                                                                1) + "\n\n"
             asm_call = "entry_" + str((2 * branch_count) + 1) + ":\n\n"
-            asm_end = "exit:\n\n  addi x0,x0,0\n  add x0,x0,0\n\n"
-            for i in range((2 * branch_count) + 2, ((3 * branch_count) + 1)):
-                asm_call = asm_call + "  call x1,entry_" + str(i) + "\n"
-            asm_call = asm_call + "  j exit\n\n"
-            for i in range(1, btb_depth):
-                if (i <= branch_count):
-                    if ((i % 2) == 1):
-                        asm_branch = asm_branch + "entry_" + str(i) + ":\n"
-                        asm_branch = asm_branch + "  add t1,t1,t2\n  beq t1,t2,entry_" + str(
-                            i) + "\n\n"
+            asm_end = "exit:\n\n\taddi x0,x0,0\n\tadd x0,x0,0\n\n"
+            for j in range((2 * branch_count) + 2, ((3 * branch_count) + 1)):
+                asm_call += "\tcall x1,entry_" + str(j) + "\n"
+            asm_call += "\tj exit\n\n"
+            for i in range(1, self._btb_depth):
+                if i <= branch_count:
+                    if (i % 2) == 1:
+                        asm_branch += "entry_" + str(i) + ":\n"
+                        asm_branch += "add t1,t1,t2\n\tbeq t1,t2," \
+                                      "entry_" + str(i) + "\n\n"
                     else:
-                        asm_branch = asm_branch + "entry_" + str(i) + ":\n"
-                        asm_branch = asm_branch + "  sub t1,t1,t2\n  beq t1,t2,entry_" + str(
-                            i) + "\n\n"
-                elif (i > branch_count and i <= 2 * branch_count):
-                    if ((i % 2) == 1):
-                        asm_jump = asm_jump + "entry_" + str(i) + ":\n"
-                        asm_jump = asm_jump + "  sub t1,t1,t2\n  jal x0,entry_" + str(
-                            i + 1) + "\n  addi x0,x0,0\n\n"
+                        asm_branch += "entry_" + str(i) + ":\n"
+                        asm_branch += "sub t1,t1,t2\n\tbeq t1,t2," \
+                                      "entry_" + str(i) + "\n\n"
+                elif branch_count < i <= 2 * branch_count:
+                    if (i % 2) == 1:
+                        asm_jump += "entry_" + str(i) + ":\n"
+                        asm_jump += "\tsub t1,t1,t2\n\tjal x0,entry_" + \
+                                    str(i + 1) + "\n\taddi x0,x0,0\n\n"
                     else:
-                        asm_jump = asm_jump + "entry_" + str(i) + ":\n"
-                        asm_jump = asm_jump + "  add t1,t1,t2\n  jal x0,entry_" + str(
-                            i + 1) + "\n  addi x0,x0,0\n\n"
+                        asm_jump += "entry_" + str(i) + ":\n"
+                        asm_jump += "\tadd t1,t1,t2\n\tjal x0,entry_" + \
+                                    str(i + 1) + "\n\taddi x0,x0,0\n\n"
 
                 else:
-                    if (i >= 3 * branch_count):
+                    if i >= 3 * branch_count:
                         break
                     asm_call = asm_call + "entry_" + str(i + 1) + ":\n"
-                    for i in range(2):
-                        asm_call = asm_call + "  addi x0,x0,0\n"
-                    asm_call = asm_call + "  ret\n\n"
+                    for j in range(2):
+                        asm_call = asm_call + "\taddi x0,x0,0\n"
+                    asm_call = asm_call + "\tret\n\n"
 
             asm = asm_start + asm_branch + asm_jump + asm_call + asm_end
-            return (asm)
+            return asm
         else:
-            return(0)
+            return 0
 
-    def check_log(self):
+    def check_log(self, log_file_path):
         """
-          check if the rg_allocate register value starts at zero and traverses till 31.
-          This makes sure that the BTB was successfully filled.
-          Also check if all the 4 Control instructions are encountered atleast once
-          This can be checked from the training data -> [      5610] [ 0]BPU : Received Training: Training_data........
+        check if the rg_allocate register value starts at 0 and traverses
+        till 31. This makes sure that the BTB was successfully filled. Also
+        check if all the 4 Control instructions are encountered at least once
+        This can be checked from the training data -> [      5610] [ 0]BPU :
+        Received Training: Training_data........
         """
+
+        f = open(log_file_path, "r")
+        log_file = f.read()
+        f.close()
+
+        alloc_newind_result = re.findall(rf.alloc_newind_pattern, log_file)
+        for i in range(len(alloc_newind_result)):
+            alloc_newind_result[i] = alloc_newind_result[i][23:]
+            # selecting the pattern "Allocating new index: dd ghr: dddddddd"
+        alloc_newind_result.sort()  # sorting them and removing duplicates
+        alloc_newind_result = list(set(alloc_newind_result))
+        for i in range(self._btb_depth):
+            if str(i) not in alloc_newind_result[i]:
+                return False
+        return True
