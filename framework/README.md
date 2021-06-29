@@ -36,17 +36,20 @@ Framework/
 Before adding new test cases to the framework, one needs to understand the conventions that are followed to ensure code compatibility and automation.
 
   1. Modules needed for the script are imported
-      1. Yapsy: for plugin management
-      2. regex_formats: file containing regex expressions for commonly used log patterns
-      3. re: python regular expression library
- 
+     1. Yapsy: for plugin management
+     2. regex_formats: file containing regex expressions for commonly used log patterns
+     3. re: python regular expression library
+
+
   2. Creating a class with same name as that of the test_name and initializing with default parameters that might be needed for generating the assembly program.
  
+
   3. Defining the `generate_asm` function:
-      1. Obtain the relevant variable values from the block dictionary input (e.g. `_bpu_dict`).
-      2. Frame the conditions satisfying which the test must generate an assembly code. 
-      3. If the test is to be generated, return the assembly code as a `string` object. Else return `0`.
+     1. Obtain the relevant variable values from the block dictionary input (e.g. `_bpu_dict`).
+     2. Frame the conditions satisfying which the test must generate an assembly code. 
+     3. If the test is to be generated, return the assembly code as a `string` object. Else return `0`.
   
+
   4. Defining the `check_log` function:
       1. Read the log file from `log_file_path` variable.
       2. Using the regex patterns given from the `regex_formats.py` file, and `re` module, parse the log file.
@@ -77,8 +80,8 @@ class test_name(IPlugin):
     """ Registers used and their functions, instructions called and their purposes etc"""
 
     # _block_parameters( in this case _bpu_dict) are the details of the configuration of a particular block given as a dictionary
-    ras_depth = _bpu_dict[
-      'ras_depth']  # obtain the needed external parameters from the input dictionary
+    ras_depth = _bpu_dict['ras_depth']  
+    # obtain the needed external parameters from the input dictionary
     bpu_enabled = _bpu_dict['instantiate']
 
     # IMPORTANT: check for conditions in which the test needs to be generated
@@ -99,7 +102,7 @@ class test_name(IPlugin):
     f.close()
 
     # parse the log file, extract the needed patterns.
-    # based on the occurences and frequency validate the execution
+    # based on the occurrences and frequency validate the execution
     ghr_update_result = re.findall(rf.ghr_update_pattern, log_file)
 
     # design your own conditions based on the need and return True if test has passed 
