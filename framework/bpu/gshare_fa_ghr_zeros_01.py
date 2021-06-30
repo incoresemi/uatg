@@ -50,7 +50,7 @@ class gshare_fa_ghr_zeros_01(IPlugin):
             log_file = f.read()
             f.close()
 
-            new_ghr_result = re.findall(rf.newghr_pattern, log_file)
+            new_ghr_result = re.findall(rf.new_ghr_pattern, log_file)
             for i in new_ghr_result:
                 if self.ghr_width * "0" in i:
                     pass
