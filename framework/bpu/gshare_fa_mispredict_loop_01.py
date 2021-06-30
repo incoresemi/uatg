@@ -44,7 +44,7 @@ class gshare_fa_mispredict_loop_01(IPlugin):
                 + "\taddi t2,t2,-10\n\taddi t2,t2,20\n"\
                 + "\tadd t2,t2,t2\n\taddi t2,t2,-10\n"\
                 + "\tblt t1,t0,loop\n\n"
-            asm += "\tadd t2,t0.t1\n"
+            asm += "\tadd t2,t0,t1\n"
 
             return asm
         else:
