@@ -21,8 +21,7 @@ train_data_pattern = "\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\sReceived\s" \
                           + "\shistory\:\s'h\d{2}\s\}"
 
 # [ 5580] [ 0]BPU : Training existing Entry index:  2 ghr: 00000000
-train_existing_pattern = "\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\sTraining\s" \
-                         + "existing\sEntry\sindex\:\s+[0-9]+\sghr\:\s\d+"
+train_existing_pattern = "\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\sTraining\sexisting\sEntry\sindex\:\s+\d+\s+ghr\:\s\d+"
 
 # [ 5430] [ 0]BPU : Allocating new index:  1 ghr: 00000000
 alloc_newind_pattern = "\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\sAllocating\snew\s" \

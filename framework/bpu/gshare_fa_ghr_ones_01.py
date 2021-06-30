@@ -48,4 +48,9 @@ class gshare_fa_ghr_ones_01(IPlugin):
             log_file = f.read()
             f.close()
 
+            train_existing_result = re.findall(rf.train_existing_pattern, log_file)
+            for i in train_existing_result:
+                if self._history_len * "1" in i:
+                    return True
+            return False
         return None
