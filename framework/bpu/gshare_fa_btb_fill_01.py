@@ -85,13 +85,15 @@ class gshare_fa_btb_fill_01(IPlugin):
             f.close()
 
             alloc_newind_result = re.findall(rf.alloc_newind_pattern, log_file)
+            new_arr = []
             for i in range(len(alloc_newind_result)):
-                alloc_newind_result[i] = alloc_newind_result[i][23:]
-                # selecting the pattern "Allocating new index: dd ghr: dddddddd"
-            alloc_newind_result.sort()  # sorting them and removing duplicates
-            alloc_newind_result = list(set(alloc_newind_result))
+                new_arr.append(alloc_newind_result[i][23:])
+            # selecting the pattern "Allocating new index: dd ghr: dddddddd"
+            # sorting them and removing duplicates
+            new_arr = list(set(new_arr))
+            new_arr.sort()
             for i in range(self._btb_depth):
-                if str(i) not in alloc_newind_result[i]:
+                if str(i) not in new_arr[i]:
                     return False
             return True
         return None
