@@ -71,6 +71,7 @@ def validate_tests(yaml_dict, test_file_dir="bpu/"):
     manager.collectPlugins()
     pass_ct = 0
     fail_ct = 0
+    tot_ct = 1
     for plugin in manager.getAllPlugins():
         name = (str(plugin.plugin_object).split(".", 1))
         test_name = ((name[1].split(" ", 1))[0])
@@ -78,21 +79,23 @@ def validate_tests(yaml_dict, test_file_dir="bpu/"):
                                                 log_file_path=test_file_dir +
                                                 'tests/' + test_name + '/log')
         if result and result is not None:
-            print(colored("minimal test:" + test_name + " has passed", 'green'))
+            print(colored(str(tot_ct) + ".\tminimal test:" + test_name + " has passed", 'green'))
             pass_ct += 1
+            tot_ct += 1
         elif not result:
-            print(colored("minimal test:" + test_name + " has failed", 'red'))
+            print(colored(str(tot_ct) + ".\tminimal test:" + test_name + " has failed", 'red'))
             fail_ct += 1
+            tot_ct += 1
     print("\n\nMinimal Verification Results\n" + "=" * 28)
-    print("Total Tests : ", pass_ct + fail_ct)
+    print("Total Tests : ", tot_ct-1)
     print(
         colored(
             "Tests Passed : {} - [{} %]".format(
-                pass_ct, 100 * pass_ct // (pass_ct + fail_ct)), 'green'))
+                pass_ct, 100 * pass_ct // (tot_ct-1)), 'green'))
     print(
         colored(
             "Tests Failed : {} - [{} %]".format(
-                fail_ct, 100 * fail_ct // (pass_ct + fail_ct)), 'red'))
+                fail_ct, 100 * fail_ct // (tot_ct-1)), 'red'))
 
 
 def main():
@@ -102,7 +105,8 @@ def main():
 
     inp = "../target/default.yaml"  # yaml file containing configuration details
     inp_yaml = load_yaml(inp)
-    river_path = "path/to/river_core"
+    river_path = "/home/purushoth/incoresemi/river_core_quickstart"
+    # "path/to/river_core"
 
     isa = inp_yaml['ISA']
     bpu = inp_yaml['branch_predictor']
@@ -129,7 +133,7 @@ def main():
     os.chdir(river_path)  # change dir to river_core
     os.system("river_core compile -t mywork/test_list.yaml")
     # run tests in river_core
-    os.chdir(cwd)  # get back to present dir
+    #os.chdir(cwd)  # get back to present dir
 
     validate_tests(yaml_dict=bpu, test_file_dir='bpu/')
 
