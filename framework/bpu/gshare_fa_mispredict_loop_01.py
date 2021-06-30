@@ -1,4 +1,4 @@
-# python program to generate an assembly file which checks if mispredictions
+# python program to generate an assembly file which checks if mis-predictions
 # occur In addition to this, the GHR is also filled with ones (additional
 # test case) uses assembly macros
 
@@ -6,25 +6,34 @@
 # assembler directives complying to the test format spec
 
 from yapsy.IPlugin import IPlugin
+import regex_formats as rf
+import re
 
 
 class gshare_fa_mispredict_loop_01(IPlugin):
 
     def __init__(self):
         super().__init__()
-        # self.ghr_width = 8
+        self._history_len = 8
         pass
 
-    def generate_asm(self, _bpu_dict):
-        """
-        The program creates a simple loop in assembly which checks if
-        mispredictions occur during the warm-up phase of the BPU
-        """
+    def execute(self, _bpu_dict):
         _history_len = _bpu_dict['history_len']
         _en_bpu = _bpu_dict['instantiate']
 
         if _en_bpu and _history_len:
-            loop_count = 4 * _history_len  # the should iterate at least 2
+            return True
+        else:
+            return False
+
+    def generate_asm(self, _bpu_dict):
+        """
+        The program creates a simple loop in assembly which checks if
+        mis-predictions occur during the warm-up phase of the BPU
+        """
+
+        if self.execute(_bpu_dict):
+            loop_count = 4 * self._history_len  # the should iterate at least 2
             # times more than the actual ghr width for the BPU to predict
             # correctly at least once. We assume 2x arbitrarily
 
@@ -41,10 +50,13 @@ class gshare_fa_mispredict_loop_01(IPlugin):
         else:
             return 0
 
-    def check_log(self, log_file_path):
+    def check_log(self, _bpu_dict, log_file_path):
         """
           check if there is a mispredict atleast once after a BTBHit. 
         """
-        f = open(log_file_path, "r")
-        log_file = f.read()
-        f.close()
+        if self.execute(_bpu_dict):
+            f = open(log_file_path, "r")
+            log_file = f.read()
+            f.close()
+
+        return None

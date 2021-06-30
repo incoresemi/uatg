@@ -1,4 +1,4 @@
-## Python program to generate the selfmodifyinf assembly test program
+# Python program to generate the self modifying assembly test program
 
 from yapsy.IPlugin import IPlugin
 import regex_formats as rf
@@ -11,13 +11,20 @@ class gshare_fa_btb_selfmodifying_01(IPlugin):
         super().__init__()
         pass
 
+    def execute(self, _bpu_dict):
+        _en_bpu = _bpu_dict['instantiate']
+        if _en_bpu:
+            return True
+        else:
+            return False
+
     def generate_asm(self, _bpu_dict):
         """
           This method returns the asm file.
         """
         _en_bpu = _bpu_dict['instantiate']
 
-        if _en_bpu:
+        if self.execute(_bpu_dict):
             asm = ".option norvc\n\n"
             asm += "  addi t3,x0,0\n\taddi t4,x0,3\n\tjal x0,first\n\n"
             asm += "first:\n\taddi t3,t3,1\n\tbeq t3,t4,end\n\tjal x0,first" \
@@ -32,19 +39,20 @@ class gshare_fa_btb_selfmodifying_01(IPlugin):
         else:
             return 0
 
-    def check_log(self, log_file_path):
+    def check_log(self, _bpu_dict, log_file_path):
         """
           check if fence is executed properly. 
-          The BTBTags should be invalidated and the rg_allocate should return to 0
+          The BTBTags should be invalidated and the rg_allocate should return 0
         """
+        if self.execute(_bpu_dict):
+            f = open(log_file_path, "r")
+            log_file = f.read()
+            f.close()
 
-        f = open(log_file_path, "r")
-        log_file = f.read()
-        f.close()
-
-        fence_executed_result = re.findall(rf.fence_executed_pattern, log_file)
-        if len(fence_executed_result) <= 1:
-            # check for execution of more than one fence inst
-            return False
-        return True
-
+            fence_executed_result = re.findall(rf.fence_executed_pattern,
+                                               log_file)
+            if len(fence_executed_result) <= 1:
+                # check for execution of more than one fence inst
+                return False
+            return True
+        return None

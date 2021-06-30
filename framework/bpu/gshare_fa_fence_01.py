@@ -15,16 +15,22 @@ class gshare_fa_fence_01(IPlugin):
         super().__init__()
         self.recurse_level = 5
 
+    def execute(self, _bpu_dict):
+        _en_ras = _bpu_dict['ras_depth']
+        _en_bpu = _bpu_dict['instantiate']
+        # TODO why  recursing in the asm test?
+        if _en_ras and _en_bpu:
+            return True
+        else:
+            return False
+
     def generate_asm(self, _bpu_dict):
         """
         This code is derived from the ras_push_pop code. Fence instructions are
         introduced.reg x30 is used as looping variable. reg x31 used as
         a temp variable
         """
-        _en_ras = _bpu_dict['ras_depth']
-        _en_bpu = _bpu_dict['instantiate']
-        #TODO why  recursing in the asm test?
-        if _en_ras and _en_bpu:
+        if self.execute(_bpu_dict):
             recurse_level = self.recurse_level
             no_ops = "\taddi x31,x0,5\n  addi x31,x0,-5\n"
             asm = "\taddi x30,x0," + str(recurse_level) + "\n"
@@ -44,19 +50,20 @@ class gshare_fa_fence_01(IPlugin):
         else:
             return 0
 
-    def check_log(self, log_file_path):
+    def check_log(self, _bpu_dict, log_file_path):
         """
-        check if rg_allocate becomes zero ofater encountering fence.
+        check if rg_allocate becomes zero after encountering fence.
         also check if the valid bits become zero
         and if the ghr becomes zero
         """
+        if self.execute(_bpu_dict):
+            f = open(log_file_path, "r")
+            log_file = f.read()
+            f.close()
 
-        f = open(log_file_path, "r")
-        log_file = f.read()
-        f.close()
-
-        fence_executed_result = re.findall(rf.fence_executed_pattern, log_file)
-        if len(fence_executed_result) <= 1:
-            # check for execution of more than one fence inst
-            return False
-        return True
+            fence_executed_result = re.findall(rf.fence_executed_pattern,
+                                               log_file)
+            if len(fence_executed_result) <= 1:
+                # check for execution of more than one fence inst
+                return False
+            return True

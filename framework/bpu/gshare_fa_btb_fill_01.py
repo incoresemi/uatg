@@ -1,4 +1,4 @@
-# # this module has a function which generates assembly program to fill the
+# This module has a function which generates assembly program to fill the
 # BTB with entries # there are 33 control insts in the generated program,
 # 1 jump from the includes and 32  in the program
 
@@ -12,15 +12,22 @@ class gshare_fa_btb_fill_01(IPlugin):
     def __init__(self):
         super().__init__()
         self._btb_depth = 32
+        self.test_created = False
+
+    def execute(self, _bpu_dict):
+        _en_bpu = _bpu_dict['instantiate']
+        self._btb_depth = _bpu_dict['btb_depth']
+        if _en_bpu and self._btb_depth:
+            return True
+        else:
+            return False
 
     def generate_asm(self, _bpu_dict):
         """
           it is assumed that the btb_depth will be a multiple of 4 at all times"
         """
-        _en_bpu = _bpu_dict['instantiate']
-        self._btb_depth = _bpu_dict['btb_depth']
 
-        if _en_bpu and self._btb_depth:
+        if self.execute(_bpu_dict):
             asm_start = "\taddi t1,x0,0\n\taddi t2,x0,1\n\n"
             branch_count = int(self._btb_depth / 4)
             asm_branch = ""
@@ -64,7 +71,7 @@ class gshare_fa_btb_fill_01(IPlugin):
         else:
             return 0
 
-    def check_log(self, log_file_path):
+    def check_log(self, _bpu_dict, log_file_path):
         """
         check if the rg_allocate register value starts at 0 and traverses
         till 31. This makes sure that the BTB was successfully filled. Also
@@ -72,18 +79,19 @@ class gshare_fa_btb_fill_01(IPlugin):
         This can be checked from the training data -> [      5610] [ 0]BPU :
         Received Training: Training_data........
         """
+        if self.execute(_bpu_dict):
+            f = open(log_file_path, "r")
+            log_file = f.read()
+            f.close()
 
-        f = open(log_file_path, "r")
-        log_file = f.read()
-        f.close()
-
-        alloc_newind_result = re.findall(rf.alloc_newind_pattern, log_file)
-        for i in range(len(alloc_newind_result)):
-            alloc_newind_result[i] = alloc_newind_result[i][23:]
-            # selecting the pattern "Allocating new index: dd ghr: dddddddd"
-        alloc_newind_result.sort()  # sorting them and removing duplicates
-        alloc_newind_result = list(set(alloc_newind_result))
-        for i in range(self._btb_depth):
-            if str(i) not in alloc_newind_result[i]:
-                return False
-        return True
+            alloc_newind_result = re.findall(rf.alloc_newind_pattern, log_file)
+            for i in range(len(alloc_newind_result)):
+                alloc_newind_result[i] = alloc_newind_result[i][23:]
+                # selecting the pattern "Allocating new index: dd ghr: dddddddd"
+            alloc_newind_result.sort()  # sorting them and removing duplicates
+            alloc_newind_result = list(set(alloc_newind_result))
+            for i in range(self._btb_depth):
+                if str(i) not in alloc_newind_result[i]:
+                    return False
+            return True
+        return None

@@ -1,4 +1,4 @@
-# python script to automate test 11 in microarch test
+# python script to automate test 11 in micro-arch test
 
 from yapsy.IPlugin import IPlugin
 import regex_formats as rf
@@ -8,16 +8,24 @@ import re
 class gshare_fa_ras_push_pop_01(IPlugin):
 
     def __init__(self):
+        super().__init__()
         self.recurse_level = 5
+
+    def execute(self, _bpu_dict):
+        _en_ras = _bpu_dict['ras_depth']
+        _en_bpu = _bpu_dict['instantiate']
+
+        if _en_ras and _en_bpu:
+            return True
+        else:
+            return False
 
     def generate_asm(self, _bpu_dict):
         """
         reg x30 is used as looping variable. reg x31 used as a temp variable
         """
-        _en_ras = _bpu_dict['ras_depth']
-        _en_bpu = _bpu_dict['instantiate']
 
-        if _en_ras and _en_bpu:
+        if self.execute(_bpu_dict):
             recurse_level = self.recurse_level
             no_ops = '\taddi x31, x0, 5\n\taddi x31, x0, -5\n'
             asm = '\taddi x30, x0, ' + str(recurse_level) + '\n'
@@ -37,22 +45,24 @@ class gshare_fa_ras_push_pop_01(IPlugin):
         else:
             return 0
 
-    def check_log(self, log_file_path):
+    def check_log(self, _bpu_dict, log_file_path):
         """
         check for pushes and pops in this file. There should be 8 pushes and
         4 pops
         TODO: (should check why that happens, there should be 8pops)
         """
-        f = open(log_file_path, "r")
-        log_file = f.read()
-        f.close()
+        if self.execute(_bpu_dict):
+            f = open(log_file_path, "r")
+            log_file = f.read()
+            f.close()
 
-        pushing_to_ras_result = re.findall(rf.pushing_to_ras_pattern,
-                                           log_file)
-        choosing_top_ras_result = re.findall(rf.choosing_top_ras_pattern,
-                                             log_file)
-        if len(pushing_to_ras_result) != 8 and \
-                len(choosing_top_ras_result) != 4:
-            return False
+            pushing_to_ras_result = re.findall(rf.pushing_to_ras_pattern,
+                                               log_file)
+            choosing_top_ras_result = re.findall(rf.choosing_top_ras_pattern,
+                                                 log_file)
+            if len(pushing_to_ras_result) != 8 and \
+                    len(choosing_top_ras_result) != 4:
+                return False
 
-        return True
+            return True
+        return None
