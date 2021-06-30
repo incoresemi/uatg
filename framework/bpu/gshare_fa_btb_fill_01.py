@@ -85,5 +85,5 @@ class gshare_fa_btb_fill_01(IPlugin):
         alloc_newind_result = list(set(alloc_newind_result))
         for i in range(self._btb_depth):
             if str(i) not in alloc_newind_result[i]:
-                return False
-        return True
+                return "gshare_fa_btb_fill_01 failed"
+        return "gshare_fa_btb_fill_01 passed"

@@ -46,5 +46,5 @@ class gshare_fa_ghr_zeros_01(IPlugin):
             if self.ghr_width * "0" in i:
                 pass
             else:
-                return False
-        return True
+                return "gshare_fa_ghr_zeros_01 failed"
+        return "gshare_fa_ghr_zeros_01 passed"
