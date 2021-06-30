@@ -5,9 +5,31 @@ from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
 from yapsy.PluginManager import PluginManager
+from termcolor import colored, cprint
 
 
-def generate_test(yaml_dict, test_file_dir="bpu/"):
+def load_yaml(foo):
+    yaml = YAML(typ="rt")
+    yaml.default_flow_style = False
+    yaml.allow_unicode = True
+    try:
+        with open(foo, "r") as file:
+            return yaml.load(file)
+    except ruamel.yaml.constructor.DuplicateKeyError as msg:
+        print("error: ", msg)
+
+
+def create_plugins(work_dir):
+    files = os.listdir(work_dir)
+    for i in files:
+        if ('.py' in i) and (not i.startswith('.')):
+            module_name = i[0:-3]
+            f = open(work_dir + '/' + module_name + '.yapsy-plugin', "w")
+            f.write("[Core]\nName=" + module_name + "\nModule=" + module_name)
+            f.close()
+
+
+def generate_tests(yaml_dict, test_file_dir="bpu/"):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the asm test files in a new directory.
@@ -19,8 +41,8 @@ def generate_test(yaml_dict, test_file_dir="bpu/"):
     manager.setPluginPlaces([test_file_dir])
     manager.collectPlugins()
 
-    dirpath = os.path.join(test_file_dir, 'tests')
-    if (os.path.isdir(dirpath)) and os.path.exists(dirpath):
+    dir_path = os.path.join(test_file_dir, 'tests')
+    if (os.path.isdir(dir_path)) and os.path.exists(dir_path):
         rmtree(test_file_dir + "tests/")
 
     os.mkdir(test_file_dir + "tests/")
@@ -41,25 +63,17 @@ def generate_test(yaml_dict, test_file_dir="bpu/"):
             continue
 
 
-def create_plugins(work_dir):
-    files = os.listdir(work_dir)
-    for i in files:
-        if ('.py' in i) and (not i.startswith('.')):
-            module_name = i[0:-3]
-            f = open(work_dir + '/' + module_name + '.yapsy-plugin', "w")
-            f.write("[Core]\nName=" + module_name + "\nModule=" + module_name)
-            f.close()
+def validate_tests(yaml_dict, log_file_dir, test_file_dir="bpu/"):
+    manager = PluginManager()
+    manager.setPluginPlaces([test_file_dir])
+    manager.collectPlugins()
 
-
-def load_yaml(foo):
-    yaml = YAML(typ="rt")
-    yaml.default_flow_style = False
-    yaml.allow_unicode = True
-    try:
-        with open(foo, "r") as file:
-            return yaml.load(file)
-    except ruamel.yaml.constructor.DuplicateKeyError as msg:
-        print("error")
+    for plugin in manager.getAllPlugins():
+        result = plugin.plugin_object.check_log(yaml_dict, log_file_dir)
+    if "passed" in result:
+        print(colored(result, 'green'))
+    else:
+        print(colored(result, 'red'))
 
 
 def main():
@@ -72,7 +86,6 @@ def main():
     river_path = "path/to/river_core"
 
     isa = inp_yaml['ISA']
-
     bpu = inp_yaml['branch_predictor']
 
     username = getuser()
@@ -91,15 +104,14 @@ def main():
                  + "RVTEST_DATA_END\n\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END\n"
 
     create_plugins('bpu/')
-    generate_test(yaml_dict=bpu, test_file_dir="bpu/")
-    cwd = os.getcwd()
+    generate_tests(yaml_dict=bpu, test_file_dir="bpu/")
 
+    cwd = os.getcwd()
     os.chdir(river_path)  # change dir to river_core
     os.system("river_core compile -t mywork/test_list.yaml")
     # run tests in river_core
     os.chdir(cwd)  # get back to present dir
-    os.system(
-        "python bpu/log_parser.py")  # parse the logs and check for matching
+    os.system("python bpu/log_parser.py")  # parse the logs and validate
 
 
 if __name__ == "__main__":
