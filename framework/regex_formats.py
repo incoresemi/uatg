@@ -58,7 +58,8 @@ misprediction_pattern = "\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\s" \
 [     10980] [ 0]BPU : rg_allocate -> 00 
 [     10980] [ 0]BPU : current_ghr -> 00000000 
 """
-fence_executed_pattern = "\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\sFenced\,\s" \
-                              + "Valid\sBits\s\-\>\s0+\s\n)(.*\n)(\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\s" \
-                              + "rg_allocate\s\-\>\s\d+\s\n)(\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\s" \
-                              + "current_ghr\s\-\>\s0+\s\n)"
+fence_executed_pattern = "(\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\sFenced\," \
+                         "\sValid\sBits\s\-\>\s0)(.*\n){2}(\[\s*[0-9]*\]\s\[" \
+                         "\s*[0-9]*\]BPU\s\:\srg\_allocate\s\-\>\s[0-9]*\n)(" \
+                         "\[\s*[0-9]*\]\s\[\s*[" \
+                         "0-9]*\]BPU\s\:\scurrent_ghr\s\-\>\s0+)"
