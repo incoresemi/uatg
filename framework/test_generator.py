@@ -5,7 +5,7 @@ from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
 from yapsy.PluginManager import PluginManager
-from termcolor import colored
+from termcolor import colored, cprint
 
 
 def load_yaml(foo):
@@ -69,15 +69,30 @@ def validate_tests(yaml_dict, test_file_dir="bpu/"):
     manager = PluginManager()
     manager.setPluginPlaces([test_file_dir])
     manager.collectPlugins()
-    # TODO Fix issues here
+    pass_ct = 0
+    fail_ct = 0
     for plugin in manager.getAllPlugins():
         name = (str(plugin.plugin_object).split(".", 1))
         test_name = ((name[1].split(" ", 1))[0])
-        result = plugin.plugin_object.check_log(yaml_dict, log_file_path=test_file_dir + 'tests/' + test_name + '/log')
-        if result  and result is not None:
-            print(colored("minimal test:" + test_name + "has passed", 'green'))
+        result = plugin.plugin_object.check_log(yaml_dict,
+                                                log_file_path=test_file_dir +
+                                                'tests/' + test_name + '/log')
+        if result and result is not None:
+            print(colored("minimal test:" + test_name + " has passed", 'green'))
+            pass_ct += 1
         elif not result:
-            print(colored("minimal test:" + test_name + "has failed", 'red'))
+            print(colored("minimal test:" + test_name + " has failed", 'red'))
+            fail_ct += 1
+    print("\n\nMinimal Verification Results\n" + "=" * 28)
+    print("Total Tests : ", pass_ct + fail_ct)
+    print(
+        colored(
+            "Tests Passed : {} - [{} %]".format(
+                pass_ct, 100 * pass_ct // (pass_ct + fail_ct)), 'green'))
+    print(
+        colored(
+            "Tests Failed : {} - [{} %]".format(
+                fail_ct, 100 * fail_ct // (pass_ct + fail_ct)), 'red'))
 
 
 def main():
@@ -117,6 +132,7 @@ def main():
     os.chdir(cwd)  # get back to present dir
 
     validate_tests(yaml_dict=bpu, test_file_dir='bpu/')
+
 
 if __name__ == "__main__":
     main()
