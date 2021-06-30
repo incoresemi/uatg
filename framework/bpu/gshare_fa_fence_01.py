@@ -67,3 +67,4 @@ class gshare_fa_fence_01(IPlugin):
                 # check for execution of more than one fence inst
                 return False
             return True
+        return None
