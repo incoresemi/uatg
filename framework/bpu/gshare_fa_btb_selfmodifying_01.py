@@ -45,6 +45,6 @@ class gshare_fa_btb_selfmodifying_01(IPlugin):
         fence_executed_result = re.findall(rf.fence_executed_pattern, log_file)
         if len(fence_executed_result) <= 1:
             # check for execution of more than one fence inst
-            return "gshare_fa_btb_selfmodifying_01 failed"
-        return "gshare_fa_btb_selfmodifying_01 failed"
+            return False
+        return True
 

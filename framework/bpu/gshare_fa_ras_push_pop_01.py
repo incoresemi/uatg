@@ -53,5 +53,6 @@ class gshare_fa_ras_push_pop_01(IPlugin):
                                              log_file)
         if len(pushing_to_ras_result) != 8 and \
                 len(choosing_top_ras_result) != 4:
-            return "gshare_fa_ras_push_pop_01 failed"
-        return "gshare_fa_ras_push_pop_01 passed"
+            return False
+
+        return True
