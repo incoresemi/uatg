@@ -151,7 +151,7 @@ def main():
     global asm_footer
     global river_path
 
-    inp = "../target/default.yaml"  # yaml file containing configuration details
+    inp = "../target/dut_config.yaml"  # yaml file containing configuration details
     inp_yaml = load_yaml(inp)
 
     # first line in path should be river cores's directory
