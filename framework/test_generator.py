@@ -41,6 +41,8 @@ def generate_tests(yaml_dict, test_file_dir="bpu/"):
     manager.setPluginPlaces([test_file_dir])
     manager.collectPlugins()
 
+    ## To-Do : find a way to send yaml_dict to the class. 
+
     dir_path = os.path.join(test_file_dir, 'tests')
     if (os.path.isdir(dir_path)) and os.path.exists(dir_path):
         rmtree(test_file_dir + "tests/")
