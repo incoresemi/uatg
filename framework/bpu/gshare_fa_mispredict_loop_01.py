@@ -32,31 +32,26 @@ class gshare_fa_mispredict_loop_01(IPlugin):
         mis-predictions occur during the warm-up phase of the BPU
         """
 
-        if self.execute(_bpu_dict):
-            loop_count = 4 * self._history_len  # the should iterate at least 2
-            # times more than the actual ghr width for the BPU to predict
-            # correctly at least once. We assume 2x arbitrarily
+        loop_count = 4 * self._history_len  # the should iterate at least 2
+        # times more than the actual ghr width for the BPU to predict
+        # correctly at least once. We assume 2x arbitrarily
+        asm = "\n  addi t0,x0," + str(
+        loop_count) + "\n  addi t1,x0,0\n  addi t2,x0,2\n\nloop:\n"
+        asm += "\taddi t1,t1,1\n" \
+            + "\taddi t2,t2,10\n\tadd t2,t2,t2\n" \
+            + "\taddi t2,t2,-10\n\taddi t2,t2,20\n"\
+            + "\tadd t2,t2,t2\n\taddi t2,t2,-10\n"\
+            + "\tblt t1,t0,loop\n\n"
+        asm += "\tadd t2,t0,t1\n"
 
-            asm = "\n  addi t0,x0," + str(
-                loop_count) + "\n  addi t1,x0,0\n  addi t2,x0,2\n\nloop:\n"
-            asm += "\taddi t1,t1,1\n" \
-                + "\taddi t2,t2,10\n\tadd t2,t2,t2\n" \
-                + "\taddi t2,t2,-10\n\taddi t2,t2,20\n"\
-                + "\tadd t2,t2,t2\n\taddi t2,t2,-10\n"\
-                + "\tblt t1,t0,loop\n\n"
-            asm += "\tadd t2,t0,t1\n"
-
-            return asm
-        else:
-            return 0
+        return asm
 
     def check_log(self, _bpu_dict, log_file_path):
         """
           check if there is a mispredict atleast once after a BTBHit. 
         """
-        if self.execute(_bpu_dict):
-            f = open(log_file_path, "r")
-            log_file = f.read()
-            f.close()
+        f = open(log_file_path, "r")
+        log_file = f.read()
+        f.close()
 
-        return None
+        return False
