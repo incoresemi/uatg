@@ -25,25 +25,21 @@ class gshare_fa_ras_push_pop_01(IPlugin):
         reg x30 is used as looping variable. reg x31 used as a temp variable
         """
 
-        if self.execute(_bpu_dict):
-            recurse_level = self.recurse_level
-            no_ops = '\taddi x31, x0, 5\n\taddi x31, x0, -5\n'
-            asm = '\taddi x30, x0, ' + str(recurse_level) + '\n'
-            asm += '\tcall x1, lab1\n\tbeq  x30, x0, end\n'
+        recurse_level = self.recurse_level
+        no_ops = '\taddi x31, x0, 5\n\taddi x31, x0, -5\n'
+        asm = '\taddi x30, x0, ' + str(recurse_level) + '\n'
+        asm += '\tcall x1, lab1\n\tbeq  x30, x0, end\n'
 
-            for i in range(1, recurse_level + 1):
-                asm += 'lab' + str(i) + ':\n'
-                if i == recurse_level:
-                    asm += '\taddi x30, x30, -1\n'
-                else:
-                    asm += no_ops * 3 + '\tcall x' + str(i + 1) + ', lab' + str(
-                        i + 1) + '\n'
-                asm += no_ops * 3 + '\tret\n'
-            asm += 'end:\n\tnop\n'
-            return asm
-
-        else:
-            return 0
+        for i in range(1, recurse_level + 1):
+            asm += 'lab' + str(i) + ':\n'
+            if i == recurse_level:
+                asm += '\taddi x30, x30, -1\n'
+            else:
+                asm += no_ops * 3 + '\tcall x' + str(i + 1) + ', lab' + str(
+                    i + 1) + '\n'
+            asm += no_ops * 3 + '\tret\n'
+        asm += 'end:\n\tnop\n'
+        return asm
 
     def check_log(self, _bpu_dict, log_file_path):
         """
@@ -51,18 +47,16 @@ class gshare_fa_ras_push_pop_01(IPlugin):
         4 pops
         TODO: (should check why that happens, there should be 8pops)
         """
-        if self.execute(_bpu_dict):
-            f = open(log_file_path, "r")
-            log_file = f.read()
-            f.close()
 
-            pushing_to_ras_result = re.findall(rf.pushing_to_ras_pattern,
-                                               log_file)
-            choosing_top_ras_result = re.findall(rf.choosing_top_ras_pattern,
-                                                 log_file)
-            if len(pushing_to_ras_result) != 8 and \
-                    len(choosing_top_ras_result) != 4:
-                return False
+        f = open(log_file_path, "r")
+        log_file = f.read()
+        f.close()
 
-            return True
-        return None
+        pushing_to_ras_result = re.findall(rf.pushing_to_ras_pattern, log_file)
+        choosing_top_ras_result = re.findall(rf.choosing_top_ras_pattern,
+                                             log_file)
+        if len(pushing_to_ras_result) != 8 and \
+                len(choosing_top_ras_result) != 4:
+            return False
+
+        return True

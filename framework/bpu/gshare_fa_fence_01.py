@@ -30,25 +30,22 @@ class gshare_fa_fence_01(IPlugin):
         introduced.reg x30 is used as looping variable. reg x31 used as
         a temp variable
         """
-        if self.execute(_bpu_dict):
-            recurse_level = self.recurse_level
-            no_ops = "\taddi x31,x0,5\n  addi x31,x0,-5\n"
-            asm = "\taddi x30,x0," + str(recurse_level) + "\n"
-            asm = asm + "\tcall x1,lab1\n\tbeq x30,x0,end\n\tfence.i\n"
+        recurse_level = self.recurse_level
+        no_ops = "\taddi x31,x0,5\n  addi x31,x0,-5\n"
+        asm = "\taddi x30,x0," + str(recurse_level) + "\n"
+        asm = asm + "\tcall x1,lab1\n\tbeq x30,x0,end\n\tfence.i\n"
 
-            for i in range(1, recurse_level + 1):
-                asm += "lab" + str(i) + ":\n"
-                if i == recurse_level:
-                    asm += "\tfence.i\n\taddi x30,x30,-1\n"
-                else:
-                    asm = asm + no_ops * 3 + "  call x" + str(
-                        i + 1) + ", lab" + str(i + 1) + "\n"
-                asm = asm + no_ops * 3 + "\tret\n"
-            asm = asm + "end:\n\tnop\n"
+        for i in range(1, recurse_level + 1):
+            asm += "lab" + str(i) + ":\n"
+            if i == recurse_level:
+                asm += "\tfence.i\n\taddi x30,x30,-1\n"
+            else:
+                asm = asm + no_ops * 3 + "  call x" + str(
+                    i + 1) + ", lab" + str(i + 1) + "\n"
+            asm = asm + no_ops * 3 + "\tret\n"
+        asm = asm + "end:\n\tnop\n"
 
-            return asm
-        else:
-            return 0
+        return asm
 
     def check_log(self, _bpu_dict, log_file_path):
         """
@@ -56,15 +53,12 @@ class gshare_fa_fence_01(IPlugin):
         also check if the valid bits become zero
         and if the ghr becomes zero
         """
-        if self.execute(_bpu_dict):
-            f = open(log_file_path, "r")
-            log_file = f.read()
-            f.close()
+        f = open(log_file_path, "r")
+        log_file = f.read()
+        f.close()
 
-            fence_executed_result = re.findall(rf.fence_executed_pattern,
-                                               log_file)
-            if len(fence_executed_result) <= 1:
-                # check for execution of more than one fence inst
-                return False
-            return True
-        return None
+        fence_executed_result = re.findall(rf.fence_executed_pattern, log_file)
+        if len(fence_executed_result) <= 1:
+            # check for execution of more than one fence inst
+            return False
+        return True
