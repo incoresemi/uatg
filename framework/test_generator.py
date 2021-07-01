@@ -71,39 +71,37 @@ def validate_tests(yaml_dict, test_file_dir="bpu/"):
     manager = PluginManager()
     manager.setPluginPlaces([test_file_dir])
     manager.collectPlugins()
-    pass_ct = 0
-    fail_ct = 0
-    tot_ct = 1
+    _pass_ct = 0
+    _fail_ct = 0
+    _tot_ct = 1
     for plugin in manager.getAllPlugins():
-        name = (str(plugin.plugin_object).split(".", 1))
-        test_name = ((name[1].split(" ", 1))[0])
-        result = plugin.plugin_object.check_log(yaml_dict,
-                                                log_file_path=test_file_dir +
-                                                              'tests/' + test_name + '/log')
-        if result is None:
-            print(colored(".\tMinimal test:" + test_name + " Skipped", 'white'))
-        elif result:
-            print(colored(
-                str(tot_ct) + ".\tMinimal test:" + test_name + " has passed",
-                'green'))
-            pass_ct += 1
-            tot_ct += 1
-        elif not result:
-            print(colored(
-                str(tot_ct) + ".\tMinimal test:" + test_name + " has failed",
-                'red'))
-            fail_ct += 1
-            tot_ct += 1
+        _name = (str(plugin.plugin_object).split(".", 1))
+        _test_name = ((_name[1].split(" ", 1))[0])
+        _check = plugin.plugin_object.execute(yaml_dict)
+
+        if _check:
+            _result = plugin.plugin_object.check_log(yaml_dict, log_file_path=test_file_dir +'tests/' + _test_name + '/log')
+            if _result:
+                print(colored(str(_tot_ct) + ".\tMinimal test:" + _test_name + " has passed", 'green'))
+                _pass_ct += 1
+                _tot_ct += 1
+            else:
+                print(colored(str(_tot_ct) + ".\tMinimal test:" + _test_name + " has failed", 'red'))
+                _fail_ct += 1
+                _tot_ct += 1
+        else:
+            print(colored(".\tNo asm generated for " + _test_name + ". Skipping", 'white'))
+            
     print("\n\nMinimal Verification Results\n" + "=" * 28)
-    print("Total Tests : ", tot_ct - 1)
+    print("Total Tests : ", _tot_ct - 1)
     print(
         colored(
             "Tests Passed : {} - [{} %]".format(
-                pass_ct, 100 * pass_ct // (tot_ct - 1)), 'green'))
+                _pass_ct, 100 * _pass_ct // (_tot_ct - 1)), 'green'))
     print(
         colored(
             "Tests Failed : {} - [{} %]".format(
-                fail_ct, 100 * fail_ct // (tot_ct - 1)), 'red'))
+                _fail_ct, 100 * _fail_ct // (_tot_ct - 1)), 'red'))
 
 
 def generate_yaml(yaml_dict, work_dir="bpu/"):
