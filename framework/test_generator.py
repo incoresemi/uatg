@@ -51,8 +51,9 @@ def generate_tests(yaml_dict, test_file_dir="bpu/"):
     # Loop around and find the plugins and writes the contents from the
     # plugins into an asm file
     for plugin in manager.getAllPlugins():
-        asm_body = plugin.plugin_object.generate_asm(yaml_dict)
-        if asm_body:
+        _check = plugin.plugin_object.execute(yaml_dict)
+        if _check:
+            asm_body = plugin.plugin_object.generate_asm(yaml_dict)
             name = (str(plugin.plugin_object).split(".", 1))
             test_name = ((name[1].split(" ", 1))[0])
             os.mkdir('bpu/tests/' + test_name)
@@ -64,7 +65,6 @@ def generate_tests(yaml_dict, test_file_dir="bpu/"):
             print("skipped ",
                   (((str(plugin.plugin_object).split(".", 1))[1]).split(" ",
                                                                         1))[0])
-            continue
 
 
 def validate_tests(yaml_dict, test_file_dir="bpu/"):
