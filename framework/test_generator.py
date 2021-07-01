@@ -94,15 +94,12 @@ def validate_tests(yaml_dict, test_file_dir="bpu/"):
             
     print("\n\nMinimal Verification Results\n" + "=" * 28)
     print("Total Tests : ", _tot_ct - 1)
-    print(
-        colored(
-            "Tests Passed : {} - [{} %]".format(
-                _pass_ct, 100 * _pass_ct // (_tot_ct - 1)), 'green'))
-    print(
-        colored(
-            "Tests Failed : {} - [{} %]".format(
-                _fail_ct, 100 * _fail_ct // (_tot_ct - 1)), 'red'))
 
+    if (_tot_ct-1):
+        print(colored("Tests Passed : {} - [{} %]".format(_pass_ct, 100 * _pass_ct // (_tot_ct - 1)), 'green'))
+        print(colored("Tests Failed : {} - [{} %]".format(_fail_ct, 100 * _fail_ct // (_tot_ct - 1)), 'red'))
+    else:
+        print(colored("No tests were created", 'yellow'))
 
 def generate_yaml(yaml_dict, work_dir="bpu/"):
     """
@@ -116,6 +113,7 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
 
     _path = river_path + "/mywork/"
     _data = ""
+    _generated_tests = 0
     
     ## To-Do -> Create Yaml the proper way. Do not use strings!!
 
@@ -140,11 +138,13 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
             _data = _data + "  isa: rv64imafdc\n"
             _data = _data + "  result: Unknown\n"
             _data = _data + "  work_dir: " + _path_to_tests +"\n\n"
+            _generated_tests = _generated_tests + 1
         else:
             print('No test generated for '+ _name +', skipping it in test_list')
 
     with open( _path + 'test_list.yaml' , 'w') as outfile:
         outfile.write(_data)
+    return(_generated_tests)
 
 def main():
     global asm_header
@@ -179,14 +179,17 @@ def main():
 
     create_plugins(plugins_path='bpu/')
     generate_tests(yaml_dict=bpu, test_file_dir="bpu/")
-    generate_yaml(yaml_dict=bpu, work_dir="bpu/")
-    cwd = os.getcwd()
-    os.chdir(river_path)  # change dir to river_core
-    os.system("river_core compile -t mywork/test_list.yaml")
-    # run tests in river_core
-    os.chdir(cwd)  # get back to present dir
+    generated = generate_yaml(yaml_dict=bpu, work_dir="bpu/")
+    if (generated):
+        print(colored("Invoking RiVer core", 'yellow'))
+        cwd = os.getcwd()
+        os.chdir(river_path)  # change dir to river_core
+        os.system("river_core compile -t mywork/test_list.yaml")
+        # run tests in river_core
+        os.chdir(cwd)  # get back to present dir
+    else:
+        print(colored("No tests were created, not invoking RiVer Core", 'yellow'))
     validate_tests(yaml_dict=bpu, test_file_dir='bpu/')
-
 
 if __name__ == "__main__":
     main()
