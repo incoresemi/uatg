@@ -189,8 +189,7 @@ def main():
     os.chdir(river_path)  # change dir to river_core
     os.system("river_core compile -t mywork/test_list.yaml")
     # run tests in river_core
-    #os.chdir(cwd)  # get back to present dir
-
+    os.chdir(cwd)  # get back to present dir
     validate_tests(yaml_dict=bpu, test_file_dir='bpu/')
 
 
