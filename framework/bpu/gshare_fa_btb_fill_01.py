@@ -22,7 +22,7 @@ class gshare_fa_btb_fill_01(IPlugin):
         else:
             return False
 
-    def generate_asm(self, _bpu_dict):
+    def generate_asm(self):
         """
           it is assumed that the btb_depth will be a multiple of 4 at all times"
         """
@@ -68,7 +68,7 @@ class gshare_fa_btb_fill_01(IPlugin):
         asm = asm_start + asm_branch + asm_jump + asm_call + asm_end
         return asm
 
-    def check_log(self, _bpu_dict, log_file_path):
+    def check_log(self, log_file_path):
         """
         check if the rg_allocate register value starts at 0 and traverses
         till 31. This makes sure that the BTB was successfully filled. Also

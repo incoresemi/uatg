@@ -20,7 +20,7 @@ class gshare_fa_ras_push_pop_01(IPlugin):
         else:
             return False
 
-    def generate_asm(self, _bpu_dict):
+    def generate_asm(self):
         """
         reg x30 is used as looping variable. reg x31 used as a temp variable
         """
@@ -41,7 +41,7 @@ class gshare_fa_ras_push_pop_01(IPlugin):
         asm += 'end:\n\tnop\n'
         return asm
 
-    def check_log(self, _bpu_dict, log_file_path):
+    def check_log(self, log_file_path):
         """
         check for pushes and pops in this file. There should be 8 pushes and
         4 pops

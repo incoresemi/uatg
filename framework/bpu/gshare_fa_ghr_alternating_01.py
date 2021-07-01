@@ -25,7 +25,7 @@ class gshare_fa_ghr_alternating_01(IPlugin):
         else:
             return False
 
-    def generate_asm(self, _bpu_dict):
+    def generate_asm(self):
         """
         This function creates assembly code to populate the Global History
         register with alternating 0's and 1's pattern. eg. 010101010....
@@ -61,7 +61,7 @@ class gshare_fa_ghr_alternating_01(IPlugin):
         asm = asm + '\tbeq  t2,x0,lab0\n'
         return asm
 
-    def check_log(self, _bpu_dict, log_file_path):
+    def check_log(self, log_file_path):
         """
           check if the ghr value is alternating. 
           it should be 01010101 or 10101010 before being fenced 

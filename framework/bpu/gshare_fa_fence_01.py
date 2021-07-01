@@ -24,7 +24,7 @@ class gshare_fa_fence_01(IPlugin):
         else:
             return False
 
-    def generate_asm(self, _bpu_dict):
+    def generate_asm(self):
         """
         This code is derived from the ras_push_pop code. Fence instructions are
         introduced.reg x30 is used as looping variable. reg x31 used as
@@ -47,7 +47,7 @@ class gshare_fa_fence_01(IPlugin):
 
         return asm
 
-    def check_log(self, _bpu_dict, log_file_path):
+    def check_log(self, log_file_path):
         """
         check if rg_allocate becomes zero after encountering fence.
         also check if the valid bits become zero

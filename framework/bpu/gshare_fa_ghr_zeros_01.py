@@ -19,7 +19,7 @@ class gshare_fa_ghr_zeros_01(IPlugin):
         else:
             return False
 
-    def generate_asm(self, _bpu_dict):
+    def generate_asm(self):
         """
           the for loop iterates ghr_width + 2 times printing an
           assembly program which contains ghr_width + 2 branches which
@@ -36,7 +36,7 @@ class gshare_fa_ghr_zeros_01(IPlugin):
 
         return asm
 
-    def check_log(self, _bpu_dict, log_file_path):
+    def check_log(self, log_file_path):
         """
           check if all the ghr values are zero throughout the test
         """

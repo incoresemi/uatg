@@ -26,7 +26,7 @@ class gshare_fa_mispredict_loop_01(IPlugin):
         else:
             return False
 
-    def generate_asm(self, _bpu_dict):
+    def generate_asm(self):
         """
         The program creates a simple loop in assembly which checks if
         mis-predictions occur during the warm-up phase of the BPU
@@ -46,7 +46,7 @@ class gshare_fa_mispredict_loop_01(IPlugin):
 
         return asm
 
-    def check_log(self, _bpu_dict, log_file_path):
+    def check_log(self, log_file_path):
         """
           check if there is a mispredict atleast once after a BTBHit. 
         """

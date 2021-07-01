@@ -19,7 +19,7 @@ class gshare_fa_ghr_ones_01(IPlugin):
         else:
             return False
 
-    def generate_asm(self, _bpu_dict):
+    def generate_asm(self):
         """
         The generated assembly file fills the ghr with ones
         """
@@ -34,7 +34,7 @@ class gshare_fa_ghr_ones_01(IPlugin):
 
         return asm
 
-    def check_log(self, _bpu_dict, log_file_path):
+    def check_log(self, log_file_path):
         """
           check if all the ghr values are fully ones at least once during the
           test

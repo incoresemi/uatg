@@ -18,7 +18,7 @@ class gshare_fa_btb_selfmodifying_01(IPlugin):
         else:
             return False
 
-    def generate_asm(self, _bpu_dict):
+    def generate_asm(self):
         """
           This method returns the asm file.
         """
@@ -35,7 +35,7 @@ class gshare_fa_btb_selfmodifying_01(IPlugin):
 
         return asm
 
-    def check_log(self, _bpu_dict, log_file_path):
+    def check_log(self, log_file_path):
         """
           check if fence is executed properly. 
           The BTBTags should be invalidated and the rg_allocate should return 0
