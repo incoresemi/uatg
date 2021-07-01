@@ -53,7 +53,7 @@ def generate_tests(yaml_dict, test_file_dir="bpu/"):
     for plugin in manager.getAllPlugins():
         _check = plugin.plugin_object.execute(yaml_dict)
         if _check:
-            asm_body = plugin.plugin_object.generate_asm(yaml_dict)
+            asm_body = plugin.plugin_object.generate_asm()
             name = (str(plugin.plugin_object).split(".", 1))
             test_name = ((name[1].split(" ", 1))[0])
             os.mkdir('bpu/tests/' + test_name)
@@ -81,7 +81,6 @@ def validate_tests(yaml_dict, test_file_dir="bpu/"):
 
         if _check:
             _result = plugin.plugin_object.check_log(
-                yaml_dict,
                 log_file_path=test_file_dir + 'tests/' + _test_name + '/log')
             if _result:
                 print(
