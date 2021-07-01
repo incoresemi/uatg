@@ -25,36 +25,29 @@ class gshare_fa_ghr_zeros_01(IPlugin):
           assembly program which contains ghr_width + 2 branches which
           will are *NOT TAKEN*. This fills the ghr with zeros
         """
+        loop_count = self._history_len + 2
+        asm = "\n\n## test: gshare_fa_ghr_zeros_01 ##\n\n"
+        asm += "  addi t0,x0,1\n"
 
-        if self.execute(_bpu_dict):
-            loop_count = self._history_len + 2
-            asm = "\n\n## test: gshare_fa_ghr_zeros_01 ##\n\n"
-            asm += "  addi t0,x0,1\n"
+        for i in range(1, loop_count):
+            asm = asm + "branch_" + str(i) + ":\n"
+            asm = asm + "  beq t0,x0,branch_" + str(i) + "\n"
+            asm = asm + "  addi t0,t0,1\n"
 
-            for i in range(1, loop_count):
-                asm = asm + "branch_" + str(i) + ":\n"
-                asm = asm + "  beq t0,x0,branch_" + str(i) + "\n"
-                asm = asm + "  addi t0,t0,1\n"
-
-            return asm
-
-        else:
-            return 0
+        return asm
 
     def check_log(self, _bpu_dict, log_file_path):
         """
           check if all the ghr values are zero throughout the test
         """
-        if self.execute(_bpu_dict):
-            f = open(log_file_path, "r")
-            log_file = f.read()
-            f.close()
+        f = open(log_file_path, "r")
+        log_file = f.read()
+        f.close()
 
-            new_ghr_result = re.findall(rf.new_ghr_pattern, log_file)
-            for i in new_ghr_result:
-                if self.ghr_width * "0" in i:
-                    pass
-                else:
-                    return False
-            return True
-        return None
+        new_ghr_result = re.findall(rf.new_ghr_pattern, log_file)
+        for i in new_ghr_result:
+            if self.ghr_width * "0" in i:
+                pass
+            else:
+                return False
+        return True
