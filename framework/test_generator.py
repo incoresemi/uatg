@@ -79,16 +79,16 @@ def validate_tests(yaml_dict, test_file_dir="bpu/"):
                                                 log_file_path=test_file_dir +
                                                               'tests/' + test_name + '/log')
         if result is None:
-            print(colored(".\tminimal test:" + test_name + " Skipped", 'white'))
+            print(colored(".\tMinimal test:" + test_name + " Skipped", 'white'))
         elif result:
             print(colored(
-                str(tot_ct) + ".\tminimal test:" + test_name + " has passed",
+                str(tot_ct) + ".\tMinimal test:" + test_name + " has passed",
                 'green'))
             pass_ct += 1
             tot_ct += 1
         elif not result:
             print(colored(
-                str(tot_ct) + ".\tminimal test:" + test_name + " has failed",
+                str(tot_ct) + ".\tMinimal test:" + test_name + " has failed",
                 'red'))
             fail_ct += 1
             tot_ct += 1
@@ -118,42 +118,37 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
     manager.setPluginPlaces([work_dir])
     manager.collectPlugins()
 
-    # # the third line in path contains the path where the test_list.yaml
-    # will be found
-    river_path = _paths[2].strip('\n')
-    data = dict()
+    _path = river_path + "/mywork/"
+    data = ""
+    
+    ## To-Do -> Create Yaml the proper way. Do not use strings!!
 
     for plugin in manager.getAllPlugins():
-        asm_body = plugin.plugin_object.generate_asm(yaml_dict)
+        test_exists = plugin.plugin_object.execute(yaml_dict)
         _name = (((str(plugin.plugin_object).split(".", 1))[1]).split(" ", 1))[0]
         current_dir = os.getcwd()+'/'
-        path_to_tests = current_dir + work_dir + _name + '/'
-        if asm_body:
-            data[_name] = {
-                    'asm_file' : path_to_tests + _name + '.S',
-                    'cc' : 'riscv64-unknown-elf-gcc',
-                    'cc_args' : ' -mcmodel=medany -static -std=gnu99 -O2 -fno-common -fno-builtin-printf -fvisibility=hidden ',
-                    'compile_macros' : "[XLEN=64]", 
-                    'extra_compile' : [],
-                    'generator' : 'custom_micro_arch_test',
-                    'include' : "[" + current_dir + '../env/ , ' + current_dir + '../target/' + "]",
-                    'isa' : 'rv64imafdc',
-                    'linker_args' : '-static -nostdlib -nostartfiles -lm -lgcc -T',
-                    'linker_file' : current_dir + '../target/link.ld',
-                    'mabi' : 'lp64',
-                    'march' : 'rv64imafdc',
-                    'result' : 'Unknown',
-                    'work_dir' : path_to_tests,
-                    }
+        path_to_tests = current_dir + work_dir + 'tests/' + _name + '/'
+        if (test_exists):
+            data = data + _name + ":\n"
+            data = data + "  asm_file: " + path_to_tests + _name + ".S\n"
+            data = data + "  cc: riscv64-unknown-elf-gcc\n"
+            data = data + "  cc_args: \' -mcmodel=medany -static -std=gnu99 -O2 -fno-common -fno-builtin-printf -fvisibility=hidden \'\n"
+            data = data + "  compile_macros: [XLEN=64]\n"
+            data = data + "  extra_compile: []\n"
+            data = data + "  generator: micro_arch_test_v0.0.1\n"
+            data = data + "  include: [" + current_dir + "../env/ , " + current_dir + "../target/" + "]\n"
+            data = data + "  linker_args: -static -nostdlib -nostartfiles -lm -lgcc -T\n"
+            data = data + "  linker_file: "+ current_dir + "../target/link.ld\n"
+            data = data + "  mabi: lp64\n"
+            data = data + "  march: rv64imafdc\n"
+            data = data + "  isa: rv64imafdc\n"
+            data = data + "  result: Unknown\n"
+            data = data + "  work_dir: " + path_to_tests +"\n\n"
         else:
-            print('No test generated for '+_name+', skipping it in test_list')
+            print('No test generated for '+ _name +', skipping it in test_list')
 
-    yaml = YAML()
-    with open(river_path+'test_list.yaml','w') as outfile:
-        yaml.default_flow_style = False
-        yaml.allow_unicode = True
-        yaml.dump(data, outfile)
-
+    with open( _path + 'test_list.yaml' , 'w') as outfile:
+        outfile.write(data)
 
 def main():
     global asm_header
@@ -188,7 +183,7 @@ def main():
 
     create_plugins(plugins_path='bpu/')
     generate_tests(yaml_dict=bpu, test_file_dir="bpu/")
-
+    generate_yaml(yaml_dict=bpu, work_dir="bpu/")
     cwd = os.getcwd()
     os.chdir(river_path)  # change dir to river_core
     os.system("river_core compile -t mywork/test_list.yaml")
