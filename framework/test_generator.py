@@ -5,7 +5,7 @@ from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
 from yapsy.PluginManager import PluginManager
-from termcolor import colored, cprint
+from termcolor import colored
 
 
 def load_yaml(foo):
@@ -77,25 +77,31 @@ def validate_tests(yaml_dict, test_file_dir="bpu/"):
         test_name = ((name[1].split(" ", 1))[0])
         result = plugin.plugin_object.check_log(yaml_dict,
                                                 log_file_path=test_file_dir +
-                                                'tests/' + test_name + '/log')
-        if result and result is not None:
-            print(colored(str(tot_ct) + ".\tminimal test:" + test_name + " has passed", 'green'))
+                                                              'tests/' + test_name + '/log')
+        if result is None:
+            print(colored(".\tminimal test:" + test_name + " Skipped", 'white'))
+        elif result:
+            print(colored(
+                str(tot_ct) + ".\tminimal test:" + test_name + " has passed",
+                'green'))
             pass_ct += 1
             tot_ct += 1
         elif not result:
-            print(colored(str(tot_ct) + ".\tminimal test:" + test_name + " has failed", 'red'))
+            print(colored(
+                str(tot_ct) + ".\tminimal test:" + test_name + " has failed",
+                'red'))
             fail_ct += 1
             tot_ct += 1
     print("\n\nMinimal Verification Results\n" + "=" * 28)
-    print("Total Tests : ", tot_ct-1)
+    print("Total Tests : ", tot_ct - 1)
     print(
         colored(
             "Tests Passed : {} - [{} %]".format(
-                pass_ct, 100 * pass_ct // (tot_ct-1)), 'green'))
+                pass_ct, 100 * pass_ct // (tot_ct - 1)), 'green'))
     print(
         colored(
             "Tests Failed : {} - [{} %]".format(
-                fail_ct, 100 * fail_ct // (tot_ct-1)), 'red'))
+                fail_ct, 100 * fail_ct // (tot_ct - 1)), 'red'))
 
 
 def generate_yaml(yaml_dict, work_dir="bpu/"):
@@ -111,17 +117,18 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
     manager = PluginManager()
     manager.setPluginPlaces([work_dir])
     manager.collectPlugins()
-    
-    ## the third line in path contains the path where the test_list.yaml will be found
+
+    # # the third line in path contains the path where the test_list.yaml
+    # will be found
     river_path = _paths[2].strip('\n')
     data = dict()
-    
+
     for plugin in manager.getAllPlugins():
         asm_body = plugin.plugin_object.generate_asm(yaml_dict)
         _name = (((str(plugin.plugin_object).split(".", 1))[1]).split(" ", 1))[0]
         current_dir = os.getcwd()+'/'
         path_to_tests = current_dir + work_dir + _name + '/'
-        if (asm_body):
+        if asm_body:
             data[_name] = {
                     'asm_file' : path_to_tests + _name + '.S',
                     'cc' : 'riscv64-unknown-elf-gcc',
@@ -156,13 +163,10 @@ def main():
     inp = "../target/default.yaml"  # yaml file containing configuration details
     inp_yaml = load_yaml(inp)
 
-    ## first line in path should be river cores's directory
+    # first line in path should be river cores's directory
     fi = open("path.txt", "r")
     river_path = (fi.readline()).strip('\n')
     fi.close()
-
-    ## river_path = "/home/purushoth/incoresemi/river_core_quickstart"
-    # "path/to/river_core"
 
     isa = inp_yaml['ISA']
     bpu = inp_yaml['branch_predictor']
