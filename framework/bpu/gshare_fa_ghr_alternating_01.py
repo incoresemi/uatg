@@ -74,4 +74,17 @@ class gshare_fa_ghr_alternating_01(IPlugin):
             log_file = f.read()
             f.close()
 
+            train_existing_result = re.findall(rf.train_existing_pattern, log_file)
+            a = None
+            b = None
+            if self._history_len%2:
+                a = "01" * (self._history_len // 2) + '0'
+                b = "10" * (self._history_len // 2) + '1'
+            else:
+                a = "01" * (self._history_len // 2)
+                b = "10" * (self._history_len // 2)
+            for i in train_existing_result:
+                if a in i or b in i:
+                    return True
+            return False
         return None
