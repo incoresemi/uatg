@@ -53,5 +53,9 @@ class gshare_fa_mispredict_loop_01(IPlugin):
         f = open(log_file_path, "r")
         log_file = f.read()
         f.close()
-
-        return False
+        misprediction_result = re.findall(rf.misprediction_pattern, log_file)
+        if len(misprediction_result) <=1:
+            return False
+        else:
+            return True
+        return None
