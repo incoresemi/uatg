@@ -41,7 +41,7 @@ def generate_tests(yaml_dict, test_file_dir="bpu/"):
     manager.setPluginPlaces([test_file_dir])
     manager.collectPlugins()
 
-    ## To-Do : find a way to send yaml_dict to the class.
+    # To-Do : find a way to send yaml_dict to the class.
 
     dir_path = os.path.join(test_file_dir, 'tests')
     if (os.path.isdir(dir_path)) and os.path.exists(dir_path):
@@ -74,11 +74,11 @@ def validate_tests(yaml_dict, test_file_dir="bpu/"):
     _pass_ct = 0
     _fail_ct = 0
     _tot_ct = 1
+    print("\n\n\n")
     for plugin in manager.getAllPlugins():
         _name = (str(plugin.plugin_object).split(".", 1))
         _test_name = ((_name[1].split(" ", 1))[0])
         _check = plugin.plugin_object.execute(yaml_dict)
-
         if _check:
             _result = plugin.plugin_object.check_log(
                 log_file_path=test_file_dir + 'tests/' + _test_name + '/log')
@@ -104,7 +104,7 @@ def validate_tests(yaml_dict, test_file_dir="bpu/"):
     print("\n\nMinimal Verification Results\n" + "=" * 28)
     print("Total Tests : ", _tot_ct - 1)
 
-    if (_tot_ct - 1):
+    if _tot_ct - 1:
         print(
             colored(
                 "Tests Passed : {} - [{} %]".format(
@@ -131,7 +131,7 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
     _data = ""
     _generated_tests = 0
 
-    ## To-Do -> Create Yaml the proper way. Do not use strings!!
+    # To-Do -> Create Yaml the proper way. Do not use strings!!
 
     for plugin in manager.getAllPlugins():
         _check = plugin.plugin_object.execute(yaml_dict)
@@ -139,22 +139,25 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
                                                                       1))[0]
         _current_dir = os.getcwd() + '/'
         _path_to_tests = _current_dir + work_dir + 'tests/' + _name + '/'
-        if (_check):
-            _data = _data + _name + ":\n"
-            _data = _data + "  asm_file: " + _path_to_tests + _name + ".S\n"
-            _data = _data + "  cc: riscv64-unknown-elf-gcc\n"
-            _data = _data + "  cc_args: \' -mcmodel=medany -static -std=gnu99 -O2 -fno-common -fno-builtin-printf -fvisibility=hidden \'\n"
-            _data = _data + "  compile_macros: [XLEN=64]\n"
-            _data = _data + "  extra_compile: []\n"
-            _data = _data + "  generator: micro_arch_test_v0.0.1\n"
-            _data = _data + "  include: [" + _current_dir + "../env/ , " + _current_dir + "../target/" + "]\n"
-            _data = _data + "  linker_args: -static -nostdlib -nostartfiles -lm -lgcc -T\n"
-            _data = _data + "  linker_file: " + _current_dir + "../target/link.ld\n"
-            _data = _data + "  mabi: lp64\n"
-            _data = _data + "  march: rv64imafdc\n"
-            _data = _data + "  isa: rv64imafdc\n"
-            _data = _data + "  result: Unknown\n"
-            _data = _data + "  work_dir: " + _path_to_tests + "\n\n"
+        if _check:
+            _data += _name + ":\n"
+            _data += "  asm_file: " + _path_to_tests + _name + ".S\n"
+            _data += "  cc: riscv64-unknown-elf-gcc\n"
+            _data += "  cc_args: \' -mcmodel=medany -static -std=gnu99 -O2 " \
+                     "-fno-common -fno-builtin-printf -fvisibility=hidden \'\n"
+            _data += "  compile_macros: [XLEN=64]\n"
+            _data += "  extra_compile: []\n"
+            _data += "  generator: micro_arch_test_v0.0.1\n"
+            _data += "  include: [" + _current_dir + "../env/ , " + \
+                     _current_dir + "../target/" + "]\n"
+            _data += "  linker_args: -static -nostdlib -nostartfiles" \
+                     "-lm -lgcc -T\n"
+            _data += "  linker_file: " + _current_dir + "../target/link.ld\n"
+            _data += "  mabi: lp64\n"
+            _data += "  march: rv64imafdc\n"
+            _data += "  isa: rv64imafdc\n"
+            _data += "  result: Unknown\n"
+            _data += "  work_dir: " + _path_to_tests + "\n\n"
             _generated_tests = _generated_tests + 1
         else:
             print('No test generated for ' + _name +
@@ -162,7 +165,7 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
 
     with open(_path + 'test_list.yaml', 'w') as outfile:
         outfile.write(_data)
-    return (_generated_tests)
+    return _generated_tests
 
 
 def main():
@@ -170,7 +173,7 @@ def main():
     global asm_footer
     global river_path
 
-    inp = "../target/dut_config.yaml"  # yaml file containing configuration details
+    inp = "../target/dut_config.yaml"  # yaml file with configuration details
     inp_yaml = load_yaml(inp)
 
     # first line in path should be river cores's directory
@@ -199,7 +202,7 @@ def main():
     create_plugins(plugins_path='bpu/')
     generate_tests(yaml_dict=bpu, test_file_dir="bpu/")
     generated = generate_yaml(yaml_dict=bpu, work_dir="bpu/")
-    if (generated):
+    if generated:
         print(colored("Invoking RiVer core", 'yellow'))
         cwd = os.getcwd()
         os.chdir(river_path)  # change dir to river_core
