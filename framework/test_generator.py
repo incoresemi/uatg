@@ -151,7 +151,7 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
             _data += "  include: [" + _current_dir + "../env/ , " + \
                      _current_dir + "../target/" + "]\n"
             _data += "  linker_args: -static -nostdlib -nostartfiles" \
-                     "-lm -lgcc -T\n"
+                     " -lm -lgcc -T\n"
             _data += "  linker_file: " + _current_dir + "../target/link.ld\n"
             _data += "  mabi: lp64\n"
             _data += "  march: rv64imafdc\n"
