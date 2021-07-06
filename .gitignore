@@ -6,5 +6,5 @@ micro-arch-tests/tests/bpu/tests
 **.S
 **.yapsy-plugin
 .idea/*
-micro-arch-tests/tests/path.txt
+micro-arch-tests/path.txt
 .*
