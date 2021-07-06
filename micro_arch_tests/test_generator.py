@@ -6,6 +6,7 @@ from getpass import getuser
 from datetime import datetime
 from yapsy.PluginManager import PluginManager
 from termcolor import colored
+from micro_arch_tests.log import logger
 
 global asm_header
 global asm_footer
@@ -60,8 +61,8 @@ def generate_tests(yaml_dict, test_file_dir="bpu/"):
             asm_body = plugin.plugin_object.generate_asm()
             name = (str(plugin.plugin_object).split(".", 1))
             test_name = ((name[1].split(" ", 1))[0])
-            os.mkdir('bpu/tests/' + test_name)
-            f = open('bpu/tests/' + test_name + '/' + test_name + '.S', "w")
+            os.mkdir('tests/bpu/tests/' + test_name)
+            f = open('tests/bpu/tests/' + test_name + '/' + test_name + '.S', "w")
             asm = asm_header + asm_body + asm_footer
             f.write(asm)
             f.close()
@@ -102,11 +103,11 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
             _data += "  compile_macros: [XLEN=64]\n"
             _data += "  extra_compile: []\n"
             _data += "  generator: micro_arch_test_v0.0.1\n"
-            _data += "  include: [" + _current_dir + "../env/ , " + \
-                     _current_dir + "../target/" + "]\n"
+            _data += "  include: [" + _current_dir + "env/ , " + \
+                     _current_dir + "target/" + "]\n"
             _data += "  linker_args: -static -nostdlib -nostartfiles" \
                      " -lm -lgcc -T\n"
-            _data += "  linker_file: " + _current_dir + "../target/link.ld\n"
+            _data += "  linker_file: " + _current_dir + "target/link.ld\n"
             _data += "  mabi: lp64\n"
             _data += "  march: rv64imafdc\n"
             _data += "  isa: rv64imafdc\n"
@@ -187,8 +188,10 @@ def validate_tests(yaml_dict, test_file_dir="bpu/", clean=False):
 
 def main():
 
-    inp = "../target/dut_config.yaml"  # yaml file with configuration details
+    inp = "target/dut_config.yaml"  # yaml file with configuration details
     inp_yaml = load_yaml(inp)
+
+    global asm_header, asm_footer, river_path
 
     # first line in path should be river cores's directory
     fi = open("path.txt", "r")
@@ -213,10 +216,10 @@ def main():
                  + "\n.align 4\nrvtest_data:\n.word 0xbabecafe\n" \
                  + "RVTEST_DATA_END\n\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END\n"
 
-    create_plugins(plugins_path='bpu/')
-    generate_tests(yaml_dict=bpu, test_file_dir="bpu/")
+    create_plugins(plugins_path='tests/bpu/')
+    generate_tests(yaml_dict=bpu, test_file_dir="tests/bpu/")
     
-    if generate_yaml(yaml_dict=bpu, work_dir="bpu/"):
+    if generate_yaml(yaml_dict=bpu, work_dir="tests/bpu/"):
         print(colored("Invoking RiVer core", 'yellow'))
         cwd = os.getcwd()
         os.chdir(river_path)  # change dir to river_core
@@ -226,7 +229,7 @@ def main():
     else:
         print(
             colored("No tests were created, not invoking RiVer Core", 'yellow'))
-    validate_tests(yaml_dict=bpu, test_file_dir='bpu/', clean=False)
+    validate_tests(yaml_dict=bpu, test_file_dir='tests/bpu/', clean=False)
 
 
 if __name__ == "__main__":
