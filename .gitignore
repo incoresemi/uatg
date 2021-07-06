@@ -8,3 +8,4 @@ micro-arch-tests/tests/bpu/tests
 .idea/*
 micro-arch-tests/path.txt
 .*
+*.egg-info
