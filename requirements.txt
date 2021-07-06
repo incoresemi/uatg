@@ -1,3 +1,0 @@
-yapsy>=1.12.2
-ruamel.yaml>=0.17.9
-termcolor>=1.0.1
