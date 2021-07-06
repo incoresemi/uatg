@@ -1,9 +1,10 @@
-asm_tests/
-framework/__pycache__/*
-framework/bpu/__pycache__/*
-framework/bpu/tests
+micro-arch-tests/asm_tests/
+micro-arch-tests/tests__pycache__/*
+micro-arch-tests/tests/bpu/__pycache__/*
+micro-arch-tests/tests/bpu/tests
 **.pyc
+**.S
 **.yapsy-plugin
 .idea/*
-framework/path.txt
+micro-arch-tests/tests/path.txt
 .*

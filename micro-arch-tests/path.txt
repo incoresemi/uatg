@@ -1,0 +1,3 @@
+/home/purushoth/incoresemi/river_core_quickstart
+----
+/home/purushoth/incoresemi/river_core_quickstart/mywork/test_list.yaml
