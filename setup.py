@@ -14,7 +14,7 @@ def read(*parts):
 
 
 def read_requires():
-    with open(os.path.join(here, "micro-arch-tests/requirements.txt"),
+    with open(os.path.join(here, "micro_arch_tests/requirements.txt"),
               "r") as reqfile:
         return reqfile.read().splitlines()
 
@@ -28,7 +28,7 @@ setup_requirements = []
 test_requirements = []
 
 setup(
-    name='micro-arch-tests',
+    name='micro_arch_tests',
     version='dev-0.0.1',
     description="RISC-V micro-architectural tests generator",
     long_description=readme + '\n\n',
@@ -42,8 +42,8 @@ setup(
     author_email='incorebot@gmail.com',
     license="BSD-3-Clause",
     packages=find_packages(),
-    package_dir={'micro-arch-tests': 'micro-arch-tests'},
-    package_data={'micro-arch-tests': ['requirements.txt', 'target/*', 'env/*']},
+    package_dir={'micro_arch_tests': 'micro_arch_tests'},
+    package_data={'micro_arch_tests': ['requirements.txt', 'target/*', 'env/*']},
     install_requires=read_requires(),
     python_requires='>=3.6.0',
     #TODO: define entry points.
@@ -51,7 +51,7 @@ setup(
     #    'console_scripts': ['riscv_ctg=riscv_ctg.main:cli',],
     #},
     include_package_data=True,
-    keywords='micro-arch-tests',
+    keywords='micro_arch_tests',
     test_suite='tests',
     tests_require=test_requirements,
     zip_safe=False,
