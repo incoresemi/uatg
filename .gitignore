@@ -1,5 +1,4 @@
-asm_tests/*.txt
-asm_tests/build/*
+asm_tests/
 framework/__pycache__/*
 framework/bpu/__pycache__/*
 framework/bpu/tests
