@@ -1,7 +1,7 @@
 micro-arch-tests/asm_tests/
-micro-arch-tests/tests__pycache__/*
-micro-arch-tests/tests/bpu/__pycache__/*
-micro-arch-tests/tests/bpu/tests
+micro_arch_tests/tests/__pycache__/
+micro_arch_tests/tests/bpu/__pycache__/
+micro_arch_tests/tests/bpu/tests/*
 **.pyc
 **.S
 **.yapsy-plugin
