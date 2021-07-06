@@ -1,0 +1,8 @@
+include LICENSE.incore
+include README.md
+include micro-arch-tests/requirements.txt
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *.yapsy-plugin
+recursive-exclude micro-arch-tests/asm_tests/ *
