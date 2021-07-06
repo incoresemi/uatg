@@ -5,13 +5,8 @@ from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
 from yapsy.PluginManager import PluginManager
-from termcolor import colored
 from micro_arch_tests.log import logger
-
-global asm_header
-global asm_footer
-global river_path
-
+from micro_arch_tests.__init__ import __version__
 
 def load_yaml(foo):
     yaml = YAML(typ="rt")
@@ -21,7 +16,7 @@ def load_yaml(foo):
         with open(foo, "r") as file:
             return yaml.load(file)
     except ruamel.yaml.constructor.DuplicateKeyError as msg:
-        print("error: ", msg)
+        logger.error('error: {0}'.format(msg))
 
 
 def create_plugins(plugins_path):
@@ -57,19 +52,17 @@ def generate_tests(yaml_dict, test_file_dir="bpu/"):
     # plugins into an asm file
     for plugin in manager.getAllPlugins():
         _check = plugin.plugin_object.execute(yaml_dict)
+        _name = (str(plugin.plugin_object).split(".", 1))
+        _test_name = ((_name[1].split(" ", 1))[0])
         if _check:
-            asm_body = plugin.plugin_object.generate_asm()
-            name = (str(plugin.plugin_object).split(".", 1))
-            test_name = ((name[1].split(" ", 1))[0])
-            os.mkdir('tests/bpu/tests/' + test_name)
-            f = open('tests/bpu/tests/' + test_name + '/' + test_name + '.S', "w")
-            asm = asm_header + asm_body + asm_footer
-            f.write(asm)
+            _asm_body = plugin.plugin_object.generate_asm()
+            os.mkdir('tests/bpu/tests/' + _test_name)
+            f = open('tests/bpu/tests/' + _test_name + '/' + _test_name + '.S', "w")
+            _asm = asm_header + _asm_body + asm_footer
+            f.write(_asm)
             f.close()
         else:
-            print("skipped ",
-                  (((str(plugin.plugin_object).split(".", 1))[1]).split(" ",
-                                                                        1))[0])
+            logger.critical('Skipped {0}'.format(_test_name))
 
 
 def generate_yaml(yaml_dict, work_dir="bpu/"):
@@ -115,8 +108,7 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
             _data += "  work_dir: " + _path_to_tests + "\n\n"
             _generated_tests = _generated_tests + 1
         else:
-            print('No test generated for ' + _name +
-                  ', skipping it in test_list')
+            logger.critical('No test generated for {0}, skipping it in test_list'.format(_name))
 
     with open(_path + 'test_list.yaml', 'w') as outfile:
         outfile.write(_data)
@@ -130,7 +122,7 @@ def validate_tests(yaml_dict, test_file_dir="bpu/", clean=False):
     _pass_ct = 0
     _fail_ct = 0
     _tot_ct = 1
-    print("\n\n\n")
+    print("\n")
     for plugin in manager.getAllPlugins():
         _name = (str(plugin.plugin_object).split(".", 1))
         _test_name = ((_name[1].split(" ", 1))[0])
@@ -139,38 +131,28 @@ def validate_tests(yaml_dict, test_file_dir="bpu/", clean=False):
             _result = plugin.plugin_object.check_log(
                 log_file_path=test_file_dir + 'tests/' + _test_name + '/log')
             if _result:
-                print(
-                    colored(
-                        str(_tot_ct) + ".\tMinimal test:" + _test_name +
-                        " has passed", 'green'))
+                logger.info('{0}. Minimal test: {1} has passed.'.format(_tot_ct, _test_name))
                 _pass_ct += 1
                 _tot_ct += 1
             else:
-                print(
-                    colored(
-                        str(_tot_ct) + ".\tMinimal test:" + _test_name +
-                        " has failed", 'red'))
+                logger.critical('{0}. Minimal test: {1} has failed.'.format(_tot_ct, _test_name))
                 _fail_ct += 1
                 _tot_ct += 1
         else:
-            print(
-                colored(".\tNo asm generated for " + _test_name + ". Skipping",
-                        'white'))
+            logger.warn('No asm generated for {0}. Skipping'.format(_test_name))
 
-    print("\n\nMinimal Verification Results\n" + "=" * 28)
-    print("Total Tests : ", _tot_ct - 1)
+    print('\n\n')
+    logger.info("Minimal Verification Results")
+    logger.info( "=" * 28)
+    logger.info("Total Tests : {0}".format(_tot_ct - 1))
 
     if _tot_ct - 1:
-        print(
-            colored(
-                "Tests Passed : {} - [{} %]".format(
-                    _pass_ct, 100 * _pass_ct // (_tot_ct - 1)), 'green'))
-        print(
-            colored(
-                "Tests Failed : {} - [{} %]".format(
-                    _fail_ct, 100 * _fail_ct // (_tot_ct - 1)), 'red'))
+        logger.info("Tests Passed : {0} - [{1} %]".format(
+                    _pass_ct, 100 * _pass_ct // (_tot_ct - 1)))
+        logger.warn("Tests Failed : {0} - [{1} %]".format(
+                    _fail_ct, 100 * _fail_ct // (_tot_ct - 1)))
     else:
-        print(colored("No tests were created", 'yellow'))
+        logger.warn("No tests were created")
 
     if clean:
         files = os.listdir(test_file_dir)
@@ -178,20 +160,29 @@ def validate_tests(yaml_dict, test_file_dir="bpu/", clean=False):
         for file in plugins:
             path_to_file = os.path.join(test_file_dir, file)
             os.remove(path_to_file)
-        print("Plugins Cleaned")
+        logger.info("Plugins Cleaned")
         for i in os.listdir(test_file_dir + "__pycache__"):
             os.remove(os.path.join(test_file_dir + "__pycache__", i))
         os.rmdir(test_file_dir + "__pycache__")
 
-        print("Python files Cleaned")
+        logger.info("Python files Cleaned")
 
 
 def main():
 
+    logger.level('debug') 
+    logger.info('****** Micro Architectural Tests *******')
+    logger.info('Version : {0}'.format(__version__))
+    logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
+    logger.info('All Rights Reserved.')
+    logger.info('****** Generating Tests ******')
+
     inp = "target/dut_config.yaml"  # yaml file with configuration details
     inp_yaml = load_yaml(inp)
 
-    global asm_header, asm_footer, river_path
+    global asm_header
+    global asm_footer
+    global river_path
 
     # first line in path should be river cores's directory
     fi = open("path.txt", "r")
@@ -220,16 +211,15 @@ def main():
     generate_tests(yaml_dict=bpu, test_file_dir="tests/bpu/")
     
     if generate_yaml(yaml_dict=bpu, work_dir="tests/bpu/"):
-        print(colored("Invoking RiVer core", 'yellow'))
+        logger.info('Invoking RiVer Core')
         cwd = os.getcwd()
         os.chdir(river_path)  # change dir to river_core
         os.system("river_core compile -t mywork/test_list.yaml")
         # run tests in river_core
         os.chdir(cwd)  # get back to present dir
     else:
-        print(
-            colored("No tests were created, not invoking RiVer Core", 'yellow'))
-    validate_tests(yaml_dict=bpu, test_file_dir='tests/bpu/', clean=False)
+        logger.warn('No tests were created, not invoking RiVer Core')
+    validate_tests(yaml_dict=bpu, test_file_dir='tests/bpu/', clean=True)
 
 
 if __name__ == "__main__":
