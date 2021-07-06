@@ -6,53 +6,51 @@ The framework is structured in the following manner.
 * Within each block's folder, a ```tests/``` folder is created to store the generated assembly codes. In addition, the python scripts to automate the assembly file generation are stored in the block's folder.
 * For automating the test generating process, we are using ```yapsy``` module which needs a plugin file (e.g. ```test_no_1.yapsy-plugin```) created for each python script. To avoid hassle, we have automated the process of creating the plugin files too. 
   The plugin files are created when ```test_generator.py``` is called. The plugin files are ignored by git.
+* The `test-generator.py` script parses through all the tests defined in the block folder and chooses specific tests based on their applicability (more about this in the `Adding new tests` section).
+* For each chosen test case, the script creates new folders with the test name inside the `tests/` folder and writes assembly files into each of the respective folders.
 
 ```shell
 framework/
-    ├──bpu/
-    │   ├── test_no_1.py
-    │   ├── test_no_2.py
-    │   ├── ...
-    │   ├── ...
-    │   ├── ...
-    │   ├── test_no_n.py
-    │   ├── *(test_no_1-n).yapsy-plugin
-    │   ├── log_parser.py
-    │   ├── regex_formats.py
-    │   └── tests/
-    │      ├── test_no_1/
-    |      |   ├── test_no_1.S
-    |      |   ├── ...
-    |      |   └── logfile
-    │      ├── test_no_2/
-    |      |   ├── test_no_2.S
-    |      |   ├── ...
-    |      |   └── logfile
-    │      ├── ...
-    │      ├── ...
-    │      └── test_no_m/
-    |          ├── test_no_m.S
-    |          ├── ...
-               └── logfile
-    ├──block2/
-    ├──block3/
-    ├── ...
-    ├── ...
-    ├── path.txt
-    ├── README.md
-    └── test_generator.py
+├── bpu
+│    ├── test_01.py
+│    ├── *test_01.yapsy-plugin
+│    ├── test_02.py
+│    ├── *test_02.yapsy-plugin
+│    ├── ...
+│    ├── ...
+│    ├── test_n.py
+│    ├── *test_n.yapsy-plugin
+│    └── tests
+│        ├── test_01
+│        │    ├── test_01.S
+│        │    ├── log
+│        │    └── ...
+│        ├── test_02
+│        │    ├── test_02.S
+│        │    ├── log
+│        │    └── ...
+│        │    ...
+│        │    ...
+│        └── test_m
+│             ├── test_m.S
+│             ├── log
+│             └── ...
+├── ...
+├── README.md
+├── regex_formats.py
+└── test_generator.py
 ```
-## Generating the tests and executing them on [RiVer Core](https://github.com/incoresemi/river_core)
+## Generating and Executing tests on [RiVer Core](https://github.com/incoresemi/river_core)
 
-Installl the required python packages. This can be done by running the command 
+Install the required python packages. This can be done by running the command 
 ```shell
 pip3 install -r ../requirements.txt
 ```
-If required, the user scan replace the `dut_config.yaml` file with the configuration file of their DUT in the `micro-arch-test/target/` directory. The test generator looks for a `dut_config.yaml` in the directory. 
+If required, the user can replace the `dut_config.yaml` file with the configuration file of their DUT in the `micro-arch-test/target/` directory. The test generator looks for a `dut_config.yaml` in the directory. 
 
 Now, To run the tests on RiVer Core, it is necessary that the user creates a `path.txt` file in this directory (`micro-arch-tests/framework`).
 
-The first line of the `path.txt` file should be the path to the working directory of RiVer Core. This directory would have been created by the user while setting up RiVerCore. This directory contains the `river_core.ini` file and the the `mywork` directory. More information of how to setup RiVer Core can be found [here](https://river-core.readthedocs.io/en/stable/installation.html) 
+The first line of the `path.txt` file should be the path to the working directory of RiVer Core. This directory would have been created by the user while setting up RiVerCore. This directory contains the `river_core.ini` file and the the `mywork` directory. More information of how to set up RiVer Core can be found [here](https://river-core.readthedocs.io/en/stable/installation.html) 
 
 Once the `path.txt` file is updated with the correct path to the working directory of RiVer Core, the tests can be generated and executed on RiVer Core using the command
 
@@ -69,7 +67,7 @@ This result from parsing the log is also displayed.
 ## Adding new tests
 Before adding new test cases to the framework, one needs to understand the conventions that are followed to ensure code compatibility and automation.
 
-Note : The execute,generate_asm and check_log functions are necessary. If the user decides to not implement them, it is advised to return `False` from the __execute__ method. 
+Note : The `execute`,`generate_asm` and `check_log` functions' implementation are **mandatory**. The default return values are as follows, `execute`:`False`, `generate_asm`:`''`, `check_log`:`None`. 
 
   1. Packages Imported by the test_generator
      1. Yapsy: for plugin management (version>=1.12.2)
@@ -77,11 +75,11 @@ Note : The execute,generate_asm and check_log functions are necessary. If the us
      3. re: python regular expression library
 
 
-  2. Creating a class with same name as that of the test_name and initializing with default parameters that might be needed for generating the assembly program.
+  2. Creating a class with same name as that of the test_name and initializing with default parameters that is needed for generating the assembly program.
  
   3. Defining the `execute` function:
      1. This function returns if the current DUT configuration has the necessary hardware implemented for this(new test to be added) test to be run on.
-     2. Obtain the requisite parameters from the DUT configuration yaml file and check if the test should be generated. An example parameter could be 'btbdepth' in the case of a 'gshare BPU'. It is recommended that the user checks if the harware unit would be __instantiated__ before moving on to other cases.
+     2. Obtain the requisite parameters from the DUT configuration yaml file and check if the test should be generated. An example parameter could be 'btbdepth' in the case of a 'gshare BPU'. It is recommended that the user checks if the hardware unit would be __instantiated__ before moving on to other cases.
      3. If the requisite hardware is implemented return `True` else return `False`
 
 
@@ -122,7 +120,7 @@ class test_name(IPlugin):
     _bpu_enabled = _bpu_dict['instantiate']
 
     # IMPORTANT: check for conditions in which the test needs to be generated
-    if ras_depth >= 1 and bpu_enabled:
+    if ras_depth >= 1 and _bpu_enabled:
       return True
     else:
       return False
@@ -139,19 +137,20 @@ class test_name(IPlugin):
   def check_log(self, log_file_path):
 
     """ Docstring for check_log, this function checks whether the Device under Test (DUT) has executed appropriately"""
-
-    f = open(log_file_path, "r")  # Reading the file from given path
-    log_file = f.read()
-    f.close()
-
-    # parse the log file, extract the needed patterns.
-    # based on the occurrences and frequency validate the execution
-    ghr_update_result = re.findall(rf.ghr_update_pattern, log_file)
-
-    # design your own conditions based on the need and return True if test has passed 
-    if len(ghr_update_result) != 8:
-      return False  # Return False if test has failed.
-    return True  # Return True if test has passed.
+    if self.execute(log_file_path):
+         f = open(log_file_path, "r")  # Reading the file from given path
+         log_file = f.read()
+         f.close()
+     
+         # parse the log file, extract the needed patterns.
+         # based on the occurrences and frequency validate the execution
+         ghr_update_result = re.findall(rf.ghr_update_pattern, log_file)
+     
+         # design your own conditions based on the need and return True if test has passed 
+         if len(ghr_update_result) != 8:
+           return False  # Return False if test has failed.
+         return True  # Return True if test has passed.
+    return None # To denote that test-case was not implemented/tested
 
 ```
 
