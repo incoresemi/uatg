@@ -10,3 +10,4 @@ uarch_tests/tests/bpu/tests/*
 uarch_test/path.txt
 .*
 *.egg-info
+docs/build/
