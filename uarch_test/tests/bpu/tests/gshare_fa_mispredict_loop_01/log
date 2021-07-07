@@ -1,0 +1,1494 @@
+[       120] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000000001000, fence: False, discard: False } ghr: 00000000
+[       120] [ 0]BPU : Match:00000000
+[       120] [ 0]BPU : BHTindex_:  0 Target:0000000000001000 Pred:1 ghr: 00000000
+[       130] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000000001004, fence: False, discard: False } ghr: 00000000
+[       130] [ 0]BPU : Match:00000000
+[       130] [ 0]BPU : BHTindex_:  1 Target:0000000000001004 Pred:1 ghr: 00000000
+[       140] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000000001008, fence: False, discard: False } ghr: 00000000
+[       140] [ 0]BPU : Match:00000000
+[       140] [ 0]BPU : BHTindex_:  2 Target:0000000000001008 Pred:1 ghr: 00000000
+[       250] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000000000100c, fence: False, discard: False } ghr: 00000000
+[       250] [ 0]BPU : Match:00000000
+[       250] [ 0]BPU : BHTindex_:  3 Target:000000000000100c Pred:1 ghr: 00000000
+[       360] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000000001010, fence: False, discard: False } ghr: 00000000
+[       360] [ 0]BPU : Match:00000000
+[       360] [ 0]BPU : BHTindex_:  4 Target:0000000000001010 Pred:1 ghr: 00000000
+[       470] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000000001014, fence: False, discard: False } ghr: 00000000
+[       470] [ 0]BPU : Match:00000000
+[       470] [ 0]BPU : BHTindex_:  5 Target:0000000000001014 Pred:1 ghr: 00000000
+[       580] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000000001018, fence: False, discard: False } ghr: 00000000
+[       580] [ 0]BPU : Match:00000000
+[       580] [ 0]BPU : BHTindex_:  6 Target:0000000000001018 Pred:1 ghr: 00000000
+[       690] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000000000100c, fence: False, discard: False } ghr: 00000000
+[       690] [ 0]BPU : Match:00000000
+[       690] [ 0]BPU : BHTindex_:  3 Target:000000000000100c Pred:1 ghr: 00000000
+[       800] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000000001010, fence: False, discard: False } ghr: 00000000
+[       800] [ 0]BPU : Match:00000000
+[       800] [ 0]BPU : BHTindex_:  4 Target:0000000000001010 Pred:1 ghr: 00000000
+[       910] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000000001014, fence: False, discard: False } ghr: 00000000
+[       910] [ 0]BPU : Match:00000000
+[       910] [ 0]BPU : BHTindex_:  5 Target:0000000000001014 Pred:1 ghr: 00000000
+[      1020] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000000001018, fence: False, discard: False } ghr: 00000000
+[      1020] [ 0]BPU : Match:00000000
+[      1020] [ 0]BPU : BHTindex_:  6 Target:0000000000001018 Pred:1 ghr: 00000000
+[      1130] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000000000101c, fence: False, discard: False } ghr: 00000000
+[      1130] [ 0]BPU : Match:00000000
+[      1130] [ 0]BPU : BHTindex_:  7 Target:000000000000101c Pred:1 ghr: 00000000
+[      1240] [ 0]BPU : Received Training: Training_data { pc: 'h0000000000001010, target: 'h0000000080000000, state: 'h3, ci: JAL, btbhit: False, instr16: False, history: 'h00 }
+[      1240] [ 0]BPU : Allocating new index:  0 ghr: 00000000
+[      1240] [ 0]BPU : Misprediction fired. Restoring ghr: 00000000
+[      1250] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000000, fence: False, discard: False } ghr: 00000000
+[      1250] [ 0]BPU : Match:00000000
+[      1250] [ 0]BPU : BHTindex_:  0 Target:0000000080000000 Pred:1 ghr: 00000000
+[      1350] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000004, fence: False, discard: False } ghr: 00000000
+[      1350] [ 0]BPU : Match:00000000
+[      1350] [ 0]BPU : BHTindex_:  1 Target:0000000080000004 Pred:1 ghr: 00000000
+[      1460] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000008, fence: False, discard: False } ghr: 00000000
+[      1460] [ 0]BPU : Match:00000000
+[      1460] [ 0]BPU : BHTindex_:  2 Target:0000000080000008 Pred:1 ghr: 00000000
+[      1580] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000000c, fence: False, discard: False } ghr: 00000000
+[      1580] [ 0]BPU : Match:00000000
+[      1580] [ 0]BPU : BHTindex_:  3 Target:000000008000000c Pred:1 ghr: 00000000
+[      1590] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000010, fence: False, discard: False } ghr: 00000000
+[      1590] [ 0]BPU : Match:00000000
+[      1590] [ 0]BPU : BHTindex_:  4 Target:0000000080000010 Pred:1 ghr: 00000000
+[      1600] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000014, fence: False, discard: False } ghr: 00000000
+[      1600] [ 0]BPU : Match:00000000
+[      1600] [ 0]BPU : BHTindex_:  5 Target:0000000080000014 Pred:1 ghr: 00000000
+[      1610] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000018, fence: False, discard: False } ghr: 00000000
+[      1610] [ 0]BPU : Match:00000000
+[      1610] [ 0]BPU : BHTindex_:  6 Target:0000000080000018 Pred:1 ghr: 00000000
+[      1620] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000001c, fence: False, discard: False } ghr: 00000000
+[      1620] [ 0]BPU : Match:00000000
+[      1620] [ 0]BPU : BHTindex_:  7 Target:000000008000001c Pred:1 ghr: 00000000
+[      1630] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000020, fence: False, discard: False } ghr: 00000000
+[      1630] [ 0]BPU : Match:00000000
+[      1630] [ 0]BPU : BHTindex_:  8 Target:0000000080000020 Pred:1 ghr: 00000000
+[      1640] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000024, fence: False, discard: False } ghr: 00000000
+[      1640] [ 0]BPU : Match:00000000
+[      1640] [ 0]BPU : BHTindex_:  9 Target:0000000080000024 Pred:1 ghr: 00000000
+[      1650] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000028, fence: False, discard: False } ghr: 00000000
+[      1650] [ 0]BPU : Match:00000000
+[      1650] [ 0]BPU : BHTindex_: 10 Target:0000000080000028 Pred:1 ghr: 00000000
+[      1660] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000002c, fence: False, discard: False } ghr: 00000000
+[      1660] [ 0]BPU : Match:00000000
+[      1660] [ 0]BPU : BHTindex_: 11 Target:000000008000002c Pred:1 ghr: 00000000
+[      1670] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000030, fence: False, discard: False } ghr: 00000000
+[      1670] [ 0]BPU : Match:00000000
+[      1670] [ 0]BPU : BHTindex_: 12 Target:0000000080000030 Pred:1 ghr: 00000000
+[      1680] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000034, fence: False, discard: False } ghr: 00000000
+[      1680] [ 0]BPU : Match:00000000
+[      1680] [ 0]BPU : BHTindex_: 13 Target:0000000080000034 Pred:1 ghr: 00000000
+[      1690] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000038, fence: False, discard: False } ghr: 00000000
+[      1690] [ 0]BPU : Match:00000000
+[      1690] [ 0]BPU : BHTindex_: 14 Target:0000000080000038 Pred:1 ghr: 00000000
+[      1700] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000003c, fence: False, discard: False } ghr: 00000000
+[      1700] [ 0]BPU : Match:00000000
+[      1700] [ 0]BPU : BHTindex_: 15 Target:000000008000003c Pred:1 ghr: 00000000
+[      1710] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000040, fence: False, discard: False } ghr: 00000000
+[      1710] [ 0]BPU : Match:00000000
+[      1710] [ 0]BPU : BHTindex_: 16 Target:0000000080000040 Pred:1 ghr: 00000000
+[      1720] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000044, fence: False, discard: False } ghr: 00000000
+[      1720] [ 0]BPU : Match:00000000
+[      1720] [ 0]BPU : BHTindex_: 17 Target:0000000080000044 Pred:1 ghr: 00000000
+[      1730] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000048, fence: False, discard: False } ghr: 00000000
+[      1730] [ 0]BPU : Match:00000000
+[      1730] [ 0]BPU : BHTindex_: 18 Target:0000000080000048 Pred:1 ghr: 00000000
+[      1850] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000004c, fence: False, discard: False } ghr: 00000000
+[      1850] [ 0]BPU : Match:00000000
+[      1850] [ 0]BPU : BHTindex_: 19 Target:000000008000004c Pred:1 ghr: 00000000
+[      1860] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000050, fence: False, discard: False } ghr: 00000000
+[      1860] [ 0]BPU : Match:00000000
+[      1860] [ 0]BPU : BHTindex_: 20 Target:0000000080000050 Pred:1 ghr: 00000000
+[      1870] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000054, fence: False, discard: False } ghr: 00000000
+[      1870] [ 0]BPU : Match:00000000
+[      1870] [ 0]BPU : BHTindex_: 21 Target:0000000080000054 Pred:1 ghr: 00000000
+[      1880] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000058, fence: False, discard: False } ghr: 00000000
+[      1880] [ 0]BPU : Match:00000000
+[      1880] [ 0]BPU : BHTindex_: 22 Target:0000000080000058 Pred:1 ghr: 00000000
+[      1890] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000005c, fence: False, discard: False } ghr: 00000000
+[      1890] [ 0]BPU : Match:00000000
+[      1890] [ 0]BPU : BHTindex_: 23 Target:000000008000005c Pred:1 ghr: 00000000
+[      1900] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000060, fence: False, discard: False } ghr: 00000000
+[      1900] [ 0]BPU : Match:00000000
+[      1900] [ 0]BPU : BHTindex_: 24 Target:0000000080000060 Pred:1 ghr: 00000000
+[      1910] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000064, fence: False, discard: False } ghr: 00000000
+[      1910] [ 0]BPU : Match:00000000
+[      1910] [ 0]BPU : BHTindex_: 25 Target:0000000080000064 Pred:1 ghr: 00000000
+[      1920] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000068, fence: False, discard: False } ghr: 00000000
+[      1920] [ 0]BPU : Match:00000000
+[      1920] [ 0]BPU : BHTindex_: 26 Target:0000000080000068 Pred:1 ghr: 00000000
+[      1930] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000006c, fence: False, discard: False } ghr: 00000000
+[      1930] [ 0]BPU : Match:00000000
+[      1930] [ 0]BPU : BHTindex_: 27 Target:000000008000006c Pred:1 ghr: 00000000
+[      1940] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000070, fence: False, discard: False } ghr: 00000000
+[      1940] [ 0]BPU : Match:00000000
+[      1940] [ 0]BPU : BHTindex_: 28 Target:0000000080000070 Pred:1 ghr: 00000000
+[      1950] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000074, fence: False, discard: False } ghr: 00000000
+[      1950] [ 0]BPU : Match:00000000
+[      1950] [ 0]BPU : BHTindex_: 29 Target:0000000080000074 Pred:1 ghr: 00000000
+[      1960] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000078, fence: False, discard: False } ghr: 00000000
+[      1960] [ 0]BPU : Match:00000000
+[      1960] [ 0]BPU : BHTindex_: 30 Target:0000000080000078 Pred:1 ghr: 00000000
+[      1970] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000007c, fence: False, discard: False } ghr: 00000000
+[      1970] [ 0]BPU : Match:00000000
+[      1970] [ 0]BPU : BHTindex_: 31 Target:000000008000007c Pred:1 ghr: 00000000
+[      1980] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000080, fence: False, discard: False } ghr: 00000000
+[      1980] [ 0]BPU : Match:00000000
+[      1980] [ 0]BPU : BHTindex_: 32 Target:0000000080000080 Pred:1 ghr: 00000000
+[      1990] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000084, fence: False, discard: False } ghr: 00000000
+[      1990] [ 0]BPU : Match:00000000
+[      1990] [ 0]BPU : BHTindex_: 33 Target:0000000080000084 Pred:1 ghr: 00000000
+[      2000] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000088, fence: False, discard: False } ghr: 00000000
+[      2000] [ 0]BPU : Match:00000000
+[      2000] [ 0]BPU : BHTindex_: 34 Target:0000000080000088 Pred:1 ghr: 00000000
+[      2120] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000008c, fence: False, discard: False } ghr: 00000000
+[      2120] [ 0]BPU : Match:00000000
+[      2120] [ 0]BPU : BHTindex_: 35 Target:000000008000008c Pred:1 ghr: 00000000
+[      2130] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000090, fence: False, discard: False } ghr: 00000000
+[      2130] [ 0]BPU : Match:00000000
+[      2130] [ 0]BPU : BHTindex_: 36 Target:0000000080000090 Pred:1 ghr: 00000000
+[      2140] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000094, fence: False, discard: False } ghr: 00000000
+[      2140] [ 0]BPU : Match:00000000
+[      2140] [ 0]BPU : BHTindex_: 37 Target:0000000080000094 Pred:1 ghr: 00000000
+[      2150] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000098, fence: False, discard: False } ghr: 00000000
+[      2150] [ 0]BPU : Match:00000000
+[      2150] [ 0]BPU : BHTindex_: 38 Target:0000000080000098 Pred:1 ghr: 00000000
+[      2160] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000009c, fence: False, discard: False } ghr: 00000000
+[      2160] [ 0]BPU : Match:00000000
+[      2160] [ 0]BPU : BHTindex_: 39 Target:000000008000009c Pred:1 ghr: 00000000
+[      2170] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000a0, fence: False, discard: False } ghr: 00000000
+[      2170] [ 0]BPU : Match:00000000
+[      2170] [ 0]BPU : BHTindex_: 40 Target:00000000800000a0 Pred:1 ghr: 00000000
+[      2180] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000a4, fence: False, discard: False } ghr: 00000000
+[      2180] [ 0]BPU : Match:00000000
+[      2180] [ 0]BPU : BHTindex_: 41 Target:00000000800000a4 Pred:1 ghr: 00000000
+[      2190] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000a8, fence: False, discard: False } ghr: 00000000
+[      2190] [ 0]BPU : Match:00000000
+[      2190] [ 0]BPU : BHTindex_: 42 Target:00000000800000a8 Pred:1 ghr: 00000000
+[      2200] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000ac, fence: False, discard: False } ghr: 00000000
+[      2200] [ 0]BPU : Match:00000000
+[      2200] [ 0]BPU : BHTindex_: 43 Target:00000000800000ac Pred:1 ghr: 00000000
+[      2210] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000b0, fence: False, discard: False } ghr: 00000000
+[      2210] [ 0]BPU : Match:00000000
+[      2210] [ 0]BPU : BHTindex_: 44 Target:00000000800000b0 Pred:1 ghr: 00000000
+[      2220] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000b4, fence: False, discard: False } ghr: 00000000
+[      2220] [ 0]BPU : Match:00000000
+[      2220] [ 0]BPU : BHTindex_: 45 Target:00000000800000b4 Pred:1 ghr: 00000000
+[      2230] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000b8, fence: False, discard: False } ghr: 00000000
+[      2230] [ 0]BPU : Match:00000000
+[      2230] [ 0]BPU : BHTindex_: 46 Target:00000000800000b8 Pred:1 ghr: 00000000
+[      2240] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000bc, fence: False, discard: False } ghr: 00000000
+[      2240] [ 0]BPU : Match:00000000
+[      2240] [ 0]BPU : BHTindex_: 47 Target:00000000800000bc Pred:1 ghr: 00000000
+[      2250] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000c0, fence: False, discard: False } ghr: 00000000
+[      2250] [ 0]BPU : Match:00000000
+[      2250] [ 0]BPU : BHTindex_: 48 Target:00000000800000c0 Pred:1 ghr: 00000000
+[      2260] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000c4, fence: False, discard: False } ghr: 00000000
+[      2260] [ 0]BPU : Match:00000000
+[      2260] [ 0]BPU : BHTindex_: 49 Target:00000000800000c4 Pred:1 ghr: 00000000
+[      2270] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000c8, fence: False, discard: False } ghr: 00000000
+[      2270] [ 0]BPU : Match:00000000
+[      2270] [ 0]BPU : BHTindex_: 50 Target:00000000800000c8 Pred:1 ghr: 00000000
+[      2390] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000cc, fence: False, discard: False } ghr: 00000000
+[      2390] [ 0]BPU : Match:00000000
+[      2390] [ 0]BPU : BHTindex_: 51 Target:00000000800000cc Pred:1 ghr: 00000000
+[      2400] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000d0, fence: False, discard: False } ghr: 00000000
+[      2400] [ 0]BPU : Match:00000000
+[      2400] [ 0]BPU : BHTindex_: 52 Target:00000000800000d0 Pred:1 ghr: 00000000
+[      2410] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000d4, fence: False, discard: False } ghr: 00000000
+[      2410] [ 0]BPU : Match:00000000
+[      2410] [ 0]BPU : BHTindex_: 53 Target:00000000800000d4 Pred:1 ghr: 00000000
+[      2420] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000d8, fence: False, discard: False } ghr: 00000000
+[      2420] [ 0]BPU : Match:00000000
+[      2420] [ 0]BPU : BHTindex_: 54 Target:00000000800000d8 Pred:1 ghr: 00000000
+[      2430] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000dc, fence: False, discard: False } ghr: 00000000
+[      2430] [ 0]BPU : Match:00000000
+[      2430] [ 0]BPU : BHTindex_: 55 Target:00000000800000dc Pred:1 ghr: 00000000
+[      2440] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000e0, fence: False, discard: False } ghr: 00000000
+[      2440] [ 0]BPU : Match:00000000
+[      2440] [ 0]BPU : BHTindex_: 56 Target:00000000800000e0 Pred:1 ghr: 00000000
+[      2450] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000e4, fence: False, discard: False } ghr: 00000000
+[      2450] [ 0]BPU : Match:00000000
+[      2450] [ 0]BPU : BHTindex_: 57 Target:00000000800000e4 Pred:1 ghr: 00000000
+[      2460] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000e8, fence: False, discard: False } ghr: 00000000
+[      2460] [ 0]BPU : Match:00000000
+[      2460] [ 0]BPU : BHTindex_: 58 Target:00000000800000e8 Pred:1 ghr: 00000000
+[      2470] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000ec, fence: False, discard: False } ghr: 00000000
+[      2470] [ 0]BPU : Match:00000000
+[      2470] [ 0]BPU : BHTindex_: 59 Target:00000000800000ec Pred:1 ghr: 00000000
+[      2480] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000f0, fence: False, discard: False } ghr: 00000000
+[      2480] [ 0]BPU : Match:00000000
+[      2480] [ 0]BPU : BHTindex_: 60 Target:00000000800000f0 Pred:1 ghr: 00000000
+[      2490] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000f4, fence: False, discard: False } ghr: 00000000
+[      2490] [ 0]BPU : Match:00000000
+[      2490] [ 0]BPU : BHTindex_: 61 Target:00000000800000f4 Pred:1 ghr: 00000000
+[      2500] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000f8, fence: False, discard: False } ghr: 00000000
+[      2500] [ 0]BPU : Match:00000000
+[      2500] [ 0]BPU : BHTindex_: 62 Target:00000000800000f8 Pred:1 ghr: 00000000
+[      2510] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800000fc, fence: False, discard: False } ghr: 00000000
+[      2510] [ 0]BPU : Match:00000000
+[      2510] [ 0]BPU : BHTindex_: 63 Target:00000000800000fc Pred:1 ghr: 00000000
+[      2520] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000100, fence: False, discard: False } ghr: 00000000
+[      2520] [ 0]BPU : Match:00000000
+[      2520] [ 0]BPU : BHTindex_: 64 Target:0000000080000100 Pred:1 ghr: 00000000
+[      2530] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000104, fence: False, discard: False } ghr: 00000000
+[      2530] [ 0]BPU : Match:00000000
+[      2530] [ 0]BPU : BHTindex_: 65 Target:0000000080000104 Pred:1 ghr: 00000000
+[      2540] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000108, fence: False, discard: False } ghr: 00000000
+[      2540] [ 0]BPU : Match:00000000
+[      2540] [ 0]BPU : BHTindex_: 66 Target:0000000080000108 Pred:1 ghr: 00000000
+[      2660] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000010c, fence: False, discard: False } ghr: 00000000
+[      2660] [ 0]BPU : Match:00000000
+[      2660] [ 0]BPU : BHTindex_: 67 Target:000000008000010c Pred:1 ghr: 00000000
+[      2670] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000110, fence: False, discard: False } ghr: 00000000
+[      2670] [ 0]BPU : Match:00000000
+[      2670] [ 0]BPU : BHTindex_: 68 Target:0000000080000110 Pred:1 ghr: 00000000
+[      2680] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000114, fence: False, discard: False } ghr: 00000000
+[      2680] [ 0]BPU : Match:00000000
+[      2680] [ 0]BPU : BHTindex_: 69 Target:0000000080000114 Pred:1 ghr: 00000000
+[      2690] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000118, fence: False, discard: False } ghr: 00000000
+[      2690] [ 0]BPU : Match:00000000
+[      2690] [ 0]BPU : BHTindex_: 70 Target:0000000080000118 Pred:1 ghr: 00000000
+[      2700] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000011c, fence: False, discard: False } ghr: 00000000
+[      2700] [ 0]BPU : Match:00000000
+[      2700] [ 0]BPU : BHTindex_: 71 Target:000000008000011c Pred:1 ghr: 00000000
+[      2710] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000120, fence: False, discard: False } ghr: 00000000
+[      2710] [ 0]BPU : Match:00000000
+[      2710] [ 0]BPU : BHTindex_: 72 Target:0000000080000120 Pred:1 ghr: 00000000
+[      2720] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000124, fence: False, discard: False } ghr: 00000000
+[      2720] [ 0]BPU : Match:00000000
+[      2720] [ 0]BPU : BHTindex_: 73 Target:0000000080000124 Pred:1 ghr: 00000000
+[      2730] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000128, fence: False, discard: False } ghr: 00000000
+[      2730] [ 0]BPU : Match:00000000
+[      2730] [ 0]BPU : BHTindex_: 74 Target:0000000080000128 Pred:1 ghr: 00000000
+[      2740] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000012c, fence: False, discard: False } ghr: 00000000
+[      2740] [ 0]BPU : Match:00000000
+[      2740] [ 0]BPU : BHTindex_: 75 Target:000000008000012c Pred:1 ghr: 00000000
+[      2750] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000130, fence: False, discard: False } ghr: 00000000
+[      2750] [ 0]BPU : Match:00000000
+[      2750] [ 0]BPU : BHTindex_: 76 Target:0000000080000130 Pred:1 ghr: 00000000
+[      2760] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000134, fence: False, discard: False } ghr: 00000000
+[      2760] [ 0]BPU : Match:00000000
+[      2760] [ 0]BPU : BHTindex_: 77 Target:0000000080000134 Pred:1 ghr: 00000000
+[      2770] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000138, fence: False, discard: False } ghr: 00000000
+[      2770] [ 0]BPU : Match:00000000
+[      2770] [ 0]BPU : BHTindex_: 78 Target:0000000080000138 Pred:1 ghr: 00000000
+[      2780] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000013c, fence: False, discard: False } ghr: 00000000
+[      2780] [ 0]BPU : Match:00000000
+[      2780] [ 0]BPU : BHTindex_: 79 Target:000000008000013c Pred:1 ghr: 00000000
+[      2790] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000140, fence: False, discard: False } ghr: 00000000
+[      2790] [ 0]BPU : Match:00000000
+[      2790] [ 0]BPU : BHTindex_: 80 Target:0000000080000140 Pred:1 ghr: 00000000
+[      2800] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000144, fence: False, discard: False } ghr: 00000000
+[      2800] [ 0]BPU : Match:00000000
+[      2800] [ 0]BPU : BHTindex_: 81 Target:0000000080000144 Pred:1 ghr: 00000000
+[      2810] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000148, fence: False, discard: False } ghr: 00000000
+[      2810] [ 0]BPU : Match:00000000
+[      2810] [ 0]BPU : BHTindex_: 82 Target:0000000080000148 Pred:1 ghr: 00000000
+[      2930] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000014c, fence: False, discard: False } ghr: 00000000
+[      2930] [ 0]BPU : Match:00000000
+[      2930] [ 0]BPU : BHTindex_: 83 Target:000000008000014c Pred:1 ghr: 00000000
+[      2940] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000150, fence: False, discard: False } ghr: 00000000
+[      2940] [ 0]BPU : Match:00000000
+[      2940] [ 0]BPU : BHTindex_: 84 Target:0000000080000150 Pred:1 ghr: 00000000
+[      2950] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000154, fence: False, discard: False } ghr: 00000000
+[      2950] [ 0]BPU : Match:00000000
+[      2950] [ 0]BPU : BHTindex_: 85 Target:0000000080000154 Pred:1 ghr: 00000000
+[      2960] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000158, fence: False, discard: False } ghr: 00000000
+[      2960] [ 0]BPU : Match:00000000
+[      2960] [ 0]BPU : BHTindex_: 86 Target:0000000080000158 Pred:1 ghr: 00000000
+[      2970] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000015c, fence: False, discard: False } ghr: 00000000
+[      2970] [ 0]BPU : Match:00000000
+[      2970] [ 0]BPU : BHTindex_: 87 Target:000000008000015c Pred:1 ghr: 00000000
+[      2980] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000160, fence: False, discard: False } ghr: 00000000
+[      2980] [ 0]BPU : Match:00000000
+[      2980] [ 0]BPU : BHTindex_: 88 Target:0000000080000160 Pred:1 ghr: 00000000
+[      2990] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000164, fence: False, discard: False } ghr: 00000000
+[      2990] [ 0]BPU : Match:00000000
+[      2990] [ 0]BPU : BHTindex_: 89 Target:0000000080000164 Pred:1 ghr: 00000000
+[      3000] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000168, fence: False, discard: False } ghr: 00000000
+[      3000] [ 0]BPU : Match:00000000
+[      3000] [ 0]BPU : BHTindex_: 90 Target:0000000080000168 Pred:1 ghr: 00000000
+[      3010] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000016c, fence: False, discard: False } ghr: 00000000
+[      3010] [ 0]BPU : Match:00000000
+[      3010] [ 0]BPU : BHTindex_: 91 Target:000000008000016c Pred:1 ghr: 00000000
+[      3020] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000170, fence: False, discard: False } ghr: 00000000
+[      3020] [ 0]BPU : Match:00000000
+[      3020] [ 0]BPU : BHTindex_: 92 Target:0000000080000170 Pred:1 ghr: 00000000
+[      3030] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000174, fence: False, discard: False } ghr: 00000000
+[      3030] [ 0]BPU : Match:00000000
+[      3030] [ 0]BPU : BHTindex_: 93 Target:0000000080000174 Pred:1 ghr: 00000000
+[      3040] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000178, fence: False, discard: False } ghr: 00000000
+[      3040] [ 0]BPU : Match:00000000
+[      3040] [ 0]BPU : BHTindex_: 94 Target:0000000080000178 Pred:1 ghr: 00000000
+[      3050] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000017c, fence: False, discard: False } ghr: 00000000
+[      3050] [ 0]BPU : Match:00000000
+[      3050] [ 0]BPU : BHTindex_: 95 Target:000000008000017c Pred:1 ghr: 00000000
+[      3060] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000180, fence: False, discard: False } ghr: 00000000
+[      3060] [ 0]BPU : Match:00000000
+[      3060] [ 0]BPU : BHTindex_: 96 Target:0000000080000180 Pred:1 ghr: 00000000
+[      3070] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000184, fence: False, discard: False } ghr: 00000000
+[      3070] [ 0]BPU : Match:00000000
+[      3070] [ 0]BPU : BHTindex_: 97 Target:0000000080000184 Pred:1 ghr: 00000000
+[      3080] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000188, fence: False, discard: False } ghr: 00000000
+[      3080] [ 0]BPU : Match:00000000
+[      3080] [ 0]BPU : BHTindex_: 98 Target:0000000080000188 Pred:1 ghr: 00000000
+[      3200] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000018c, fence: False, discard: False } ghr: 00000000
+[      3200] [ 0]BPU : Match:00000000
+[      3200] [ 0]BPU : BHTindex_: 99 Target:000000008000018c Pred:1 ghr: 00000000
+[      3210] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000190, fence: False, discard: False } ghr: 00000000
+[      3210] [ 0]BPU : Match:00000000
+[      3210] [ 0]BPU : BHTindex_:100 Target:0000000080000190 Pred:1 ghr: 00000000
+[      3220] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000194, fence: False, discard: False } ghr: 00000000
+[      3220] [ 0]BPU : Match:00000000
+[      3220] [ 0]BPU : BHTindex_:101 Target:0000000080000194 Pred:1 ghr: 00000000
+[      3230] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000198, fence: False, discard: False } ghr: 00000000
+[      3230] [ 0]BPU : Match:00000000
+[      3230] [ 0]BPU : BHTindex_:102 Target:0000000080000198 Pred:1 ghr: 00000000
+[      3240] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000019c, fence: False, discard: False } ghr: 00000000
+[      3240] [ 0]BPU : Match:00000000
+[      3240] [ 0]BPU : BHTindex_:103 Target:000000008000019c Pred:1 ghr: 00000000
+[      3250] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001a0, fence: False, discard: False } ghr: 00000000
+[      3250] [ 0]BPU : Match:00000000
+[      3250] [ 0]BPU : BHTindex_:104 Target:00000000800001a0 Pred:1 ghr: 00000000
+[      3260] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001a4, fence: False, discard: False } ghr: 00000000
+[      3260] [ 0]BPU : Match:00000000
+[      3260] [ 0]BPU : BHTindex_:105 Target:00000000800001a4 Pred:1 ghr: 00000000
+[      3270] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001a8, fence: False, discard: False } ghr: 00000000
+[      3270] [ 0]BPU : Match:00000000
+[      3270] [ 0]BPU : BHTindex_:106 Target:00000000800001a8 Pred:1 ghr: 00000000
+[      3280] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001ac, fence: False, discard: False } ghr: 00000000
+[      3280] [ 0]BPU : Match:00000000
+[      3280] [ 0]BPU : BHTindex_:107 Target:00000000800001ac Pred:1 ghr: 00000000
+[      3290] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001b0, fence: False, discard: False } ghr: 00000000
+[      3290] [ 0]BPU : Match:00000000
+[      3290] [ 0]BPU : BHTindex_:108 Target:00000000800001b0 Pred:1 ghr: 00000000
+[      3300] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001b4, fence: False, discard: False } ghr: 00000000
+[      3300] [ 0]BPU : Match:00000000
+[      3300] [ 0]BPU : BHTindex_:109 Target:00000000800001b4 Pred:1 ghr: 00000000
+[      3310] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001b8, fence: False, discard: False } ghr: 00000000
+[      3310] [ 0]BPU : Match:00000000
+[      3310] [ 0]BPU : BHTindex_:110 Target:00000000800001b8 Pred:1 ghr: 00000000
+[      3320] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001bc, fence: False, discard: False } ghr: 00000000
+[      3320] [ 0]BPU : Match:00000000
+[      3320] [ 0]BPU : BHTindex_:111 Target:00000000800001bc Pred:1 ghr: 00000000
+[      3330] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001c0, fence: False, discard: False } ghr: 00000000
+[      3330] [ 0]BPU : Match:00000000
+[      3330] [ 0]BPU : BHTindex_:112 Target:00000000800001c0 Pred:1 ghr: 00000000
+[      3340] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001c4, fence: False, discard: False } ghr: 00000000
+[      3340] [ 0]BPU : Match:00000000
+[      3340] [ 0]BPU : BHTindex_:113 Target:00000000800001c4 Pred:1 ghr: 00000000
+[      3350] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001c8, fence: False, discard: False } ghr: 00000000
+[      3350] [ 0]BPU : Match:00000000
+[      3350] [ 0]BPU : BHTindex_:114 Target:00000000800001c8 Pred:1 ghr: 00000000
+[      3470] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001cc, fence: False, discard: False } ghr: 00000000
+[      3470] [ 0]BPU : Match:00000000
+[      3470] [ 0]BPU : BHTindex_:115 Target:00000000800001cc Pred:1 ghr: 00000000
+[      3480] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001d0, fence: False, discard: False } ghr: 00000000
+[      3480] [ 0]BPU : Match:00000000
+[      3480] [ 0]BPU : BHTindex_:116 Target:00000000800001d0 Pred:1 ghr: 00000000
+[      3490] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001d4, fence: False, discard: False } ghr: 00000000
+[      3490] [ 0]BPU : Match:00000000
+[      3490] [ 0]BPU : BHTindex_:117 Target:00000000800001d4 Pred:1 ghr: 00000000
+[      3500] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001d8, fence: False, discard: False } ghr: 00000000
+[      3500] [ 0]BPU : Match:00000000
+[      3500] [ 0]BPU : BHTindex_:118 Target:00000000800001d8 Pred:1 ghr: 00000000
+[      3510] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001dc, fence: False, discard: False } ghr: 00000000
+[      3510] [ 0]BPU : Match:00000000
+[      3510] [ 0]BPU : BHTindex_:119 Target:00000000800001dc Pred:1 ghr: 00000000
+[      3520] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001e0, fence: False, discard: False } ghr: 00000000
+[      3520] [ 0]BPU : Match:00000000
+[      3520] [ 0]BPU : BHTindex_:120 Target:00000000800001e0 Pred:1 ghr: 00000000
+[      3530] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001e4, fence: False, discard: False } ghr: 00000000
+[      3530] [ 0]BPU : Match:00000000
+[      3530] [ 0]BPU : BHTindex_:121 Target:00000000800001e4 Pred:1 ghr: 00000000
+[      3540] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001e8, fence: False, discard: False } ghr: 00000000
+[      3540] [ 0]BPU : Match:00000000
+[      3540] [ 0]BPU : BHTindex_:122 Target:00000000800001e8 Pred:1 ghr: 00000000
+[      3550] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001ec, fence: False, discard: False } ghr: 00000000
+[      3550] [ 0]BPU : Match:00000000
+[      3550] [ 0]BPU : BHTindex_:123 Target:00000000800001ec Pred:1 ghr: 00000000
+[      3560] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001f0, fence: False, discard: False } ghr: 00000000
+[      3560] [ 0]BPU : Match:00000000
+[      3560] [ 0]BPU : BHTindex_:124 Target:00000000800001f0 Pred:1 ghr: 00000000
+[      3570] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001f4, fence: False, discard: False } ghr: 00000000
+[      3570] [ 0]BPU : Match:00000000
+[      3570] [ 0]BPU : BHTindex_:125 Target:00000000800001f4 Pred:1 ghr: 00000000
+[      3580] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001f8, fence: False, discard: False } ghr: 00000000
+[      3580] [ 0]BPU : Match:00000000
+[      3580] [ 0]BPU : BHTindex_:126 Target:00000000800001f8 Pred:1 ghr: 00000000
+[      3590] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800001fc, fence: False, discard: False } ghr: 00000000
+[      3590] [ 0]BPU : Match:00000000
+[      3590] [ 0]BPU : BHTindex_:127 Target:00000000800001fc Pred:1 ghr: 00000000
+[      3600] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000200, fence: False, discard: False } ghr: 00000000
+[      3600] [ 0]BPU : Match:00000000
+[      3600] [ 0]BPU : BHTindex_:128 Target:0000000080000200 Pred:1 ghr: 00000000
+[      3610] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000204, fence: False, discard: False } ghr: 00000000
+[      3610] [ 0]BPU : Match:00000000
+[      3610] [ 0]BPU : BHTindex_:129 Target:0000000080000204 Pred:1 ghr: 00000000
+[      3620] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000208, fence: False, discard: False } ghr: 00000000
+[      3620] [ 0]BPU : Match:00000000
+[      3620] [ 0]BPU : BHTindex_:130 Target:0000000080000208 Pred:1 ghr: 00000000
+[      3740] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000020c, fence: False, discard: False } ghr: 00000000
+[      3740] [ 0]BPU : Match:00000000
+[      3740] [ 0]BPU : BHTindex_:131 Target:000000008000020c Pred:1 ghr: 00000000
+[      3750] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000210, fence: False, discard: False } ghr: 00000000
+[      3750] [ 0]BPU : Match:00000000
+[      3750] [ 0]BPU : BHTindex_:132 Target:0000000080000210 Pred:1 ghr: 00000000
+[      3760] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000214, fence: False, discard: False } ghr: 00000000
+[      3760] [ 0]BPU : Match:00000000
+[      3760] [ 0]BPU : BHTindex_:133 Target:0000000080000214 Pred:1 ghr: 00000000
+[      3770] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000218, fence: False, discard: False } ghr: 00000000
+[      3770] [ 0]BPU : Match:00000000
+[      3770] [ 0]BPU : BHTindex_:134 Target:0000000080000218 Pred:1 ghr: 00000000
+[      3780] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000021c, fence: False, discard: False } ghr: 00000000
+[      3780] [ 0]BPU : Match:00000000
+[      3780] [ 0]BPU : BHTindex_:135 Target:000000008000021c Pred:1 ghr: 00000000
+[      3790] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000220, fence: False, discard: False } ghr: 00000000
+[      3790] [ 0]BPU : Match:00000000
+[      3790] [ 0]BPU : BHTindex_:136 Target:0000000080000220 Pred:1 ghr: 00000000
+[      3800] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000224, fence: False, discard: False } ghr: 00000000
+[      3800] [ 0]BPU : Match:00000000
+[      3800] [ 0]BPU : BHTindex_:137 Target:0000000080000224 Pred:1 ghr: 00000000
+[      3810] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000228, fence: False, discard: False } ghr: 00000000
+[      3810] [ 0]BPU : Match:00000000
+[      3810] [ 0]BPU : BHTindex_:138 Target:0000000080000228 Pred:1 ghr: 00000000
+[      3820] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000022c, fence: False, discard: False } ghr: 00000000
+[      3820] [ 0]BPU : Match:00000000
+[      3820] [ 0]BPU : BHTindex_:139 Target:000000008000022c Pred:1 ghr: 00000000
+[      3830] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000230, fence: False, discard: False } ghr: 00000000
+[      3830] [ 0]BPU : Match:00000000
+[      3830] [ 0]BPU : BHTindex_:140 Target:0000000080000230 Pred:1 ghr: 00000000
+[      3840] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000234, fence: False, discard: False } ghr: 00000000
+[      3840] [ 0]BPU : Match:00000000
+[      3840] [ 0]BPU : BHTindex_:141 Target:0000000080000234 Pred:1 ghr: 00000000
+[      3850] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000238, fence: False, discard: False } ghr: 00000000
+[      3850] [ 0]BPU : Match:00000000
+[      3850] [ 0]BPU : BHTindex_:142 Target:0000000080000238 Pred:1 ghr: 00000000
+[      3860] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000023c, fence: False, discard: False } ghr: 00000000
+[      3860] [ 0]BPU : Match:00000000
+[      3860] [ 0]BPU : BHTindex_:143 Target:000000008000023c Pred:1 ghr: 00000000
+[      3870] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000240, fence: False, discard: False } ghr: 00000000
+[      3870] [ 0]BPU : Match:00000000
+[      3870] [ 0]BPU : BHTindex_:144 Target:0000000080000240 Pred:1 ghr: 00000000
+[      3880] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000244, fence: False, discard: False } ghr: 00000000
+[      3880] [ 0]BPU : Match:00000000
+[      3880] [ 0]BPU : BHTindex_:145 Target:0000000080000244 Pred:1 ghr: 00000000
+[      3890] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000248, fence: False, discard: False } ghr: 00000000
+[      3890] [ 0]BPU : Match:00000000
+[      3890] [ 0]BPU : BHTindex_:146 Target:0000000080000248 Pred:1 ghr: 00000000
+[      4010] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000024c, fence: False, discard: False } ghr: 00000000
+[      4010] [ 0]BPU : Match:00000000
+[      4010] [ 0]BPU : BHTindex_:147 Target:000000008000024c Pred:1 ghr: 00000000
+[      4020] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000250, fence: False, discard: False } ghr: 00000000
+[      4020] [ 0]BPU : Match:00000000
+[      4020] [ 0]BPU : BHTindex_:148 Target:0000000080000250 Pred:1 ghr: 00000000
+[      4030] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000254, fence: False, discard: False } ghr: 00000000
+[      4030] [ 0]BPU : Match:00000000
+[      4030] [ 0]BPU : BHTindex_:149 Target:0000000080000254 Pred:1 ghr: 00000000
+[      4040] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000258, fence: False, discard: False } ghr: 00000000
+[      4040] [ 0]BPU : Match:00000000
+[      4040] [ 0]BPU : BHTindex_:150 Target:0000000080000258 Pred:1 ghr: 00000000
+[      4050] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000025c, fence: False, discard: False } ghr: 00000000
+[      4050] [ 0]BPU : Match:00000000
+[      4050] [ 0]BPU : BHTindex_:151 Target:000000008000025c Pred:1 ghr: 00000000
+[      4060] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000260, fence: False, discard: False } ghr: 00000000
+[      4060] [ 0]BPU : Match:00000000
+[      4060] [ 0]BPU : BHTindex_:152 Target:0000000080000260 Pred:1 ghr: 00000000
+[      4070] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000264, fence: False, discard: False } ghr: 00000000
+[      4070] [ 0]BPU : Match:00000000
+[      4070] [ 0]BPU : BHTindex_:153 Target:0000000080000264 Pred:1 ghr: 00000000
+[      4080] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000268, fence: False, discard: False } ghr: 00000000
+[      4080] [ 0]BPU : Match:00000000
+[      4080] [ 0]BPU : BHTindex_:154 Target:0000000080000268 Pred:1 ghr: 00000000
+[      4090] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000026c, fence: False, discard: False } ghr: 00000000
+[      4090] [ 0]BPU : Match:00000000
+[      4090] [ 0]BPU : BHTindex_:155 Target:000000008000026c Pred:1 ghr: 00000000
+[      4100] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000270, fence: False, discard: False } ghr: 00000000
+[      4100] [ 0]BPU : Match:00000000
+[      4100] [ 0]BPU : BHTindex_:156 Target:0000000080000270 Pred:1 ghr: 00000000
+[      4110] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000274, fence: False, discard: False } ghr: 00000000
+[      4110] [ 0]BPU : Match:00000000
+[      4110] [ 0]BPU : BHTindex_:157 Target:0000000080000274 Pred:1 ghr: 00000000
+[      4120] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000278, fence: False, discard: False } ghr: 00000000
+[      4120] [ 0]BPU : Match:00000000
+[      4120] [ 0]BPU : BHTindex_:158 Target:0000000080000278 Pred:1 ghr: 00000000
+[      4130] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000027c, fence: False, discard: False } ghr: 00000000
+[      4130] [ 0]BPU : Match:00000000
+[      4130] [ 0]BPU : BHTindex_:159 Target:000000008000027c Pred:1 ghr: 00000000
+[      4140] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000280, fence: False, discard: False } ghr: 00000000
+[      4140] [ 0]BPU : Match:00000000
+[      4140] [ 0]BPU : BHTindex_:160 Target:0000000080000280 Pred:1 ghr: 00000000
+[      4150] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000284, fence: False, discard: False } ghr: 00000000
+[      4150] [ 0]BPU : Match:00000000
+[      4150] [ 0]BPU : BHTindex_:161 Target:0000000080000284 Pred:1 ghr: 00000000
+[      4160] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000288, fence: False, discard: False } ghr: 00000000
+[      4160] [ 0]BPU : Match:00000000
+[      4160] [ 0]BPU : BHTindex_:162 Target:0000000080000288 Pred:1 ghr: 00000000
+[      4280] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000028c, fence: False, discard: False } ghr: 00000000
+[      4280] [ 0]BPU : Match:00000000
+[      4280] [ 0]BPU : BHTindex_:163 Target:000000008000028c Pred:1 ghr: 00000000
+[      4290] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000290, fence: False, discard: False } ghr: 00000000
+[      4290] [ 0]BPU : Match:00000000
+[      4290] [ 0]BPU : BHTindex_:164 Target:0000000080000290 Pred:1 ghr: 00000000
+[      4300] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000294, fence: False, discard: False } ghr: 00000000
+[      4300] [ 0]BPU : Match:00000000
+[      4300] [ 0]BPU : BHTindex_:165 Target:0000000080000294 Pred:1 ghr: 00000000
+[      4310] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000298, fence: False, discard: False } ghr: 00000000
+[      4310] [ 0]BPU : Match:00000000
+[      4310] [ 0]BPU : BHTindex_:166 Target:0000000080000298 Pred:1 ghr: 00000000
+[      4320] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000029c, fence: False, discard: False } ghr: 00000000
+[      4320] [ 0]BPU : Match:00000000
+[      4320] [ 0]BPU : BHTindex_:167 Target:000000008000029c Pred:1 ghr: 00000000
+[      4330] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002a0, fence: False, discard: False } ghr: 00000000
+[      4330] [ 0]BPU : Match:00000000
+[      4330] [ 0]BPU : BHTindex_:168 Target:00000000800002a0 Pred:1 ghr: 00000000
+[      4340] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002a4, fence: False, discard: False } ghr: 00000000
+[      4340] [ 0]BPU : Match:00000000
+[      4340] [ 0]BPU : BHTindex_:169 Target:00000000800002a4 Pred:1 ghr: 00000000
+[      4350] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002a8, fence: False, discard: False } ghr: 00000000
+[      4350] [ 0]BPU : Match:00000000
+[      4350] [ 0]BPU : BHTindex_:170 Target:00000000800002a8 Pred:1 ghr: 00000000
+[      4360] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002ac, fence: False, discard: False } ghr: 00000000
+[      4360] [ 0]BPU : Match:00000000
+[      4360] [ 0]BPU : BHTindex_:171 Target:00000000800002ac Pred:1 ghr: 00000000
+[      4370] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002b0, fence: False, discard: False } ghr: 00000000
+[      4370] [ 0]BPU : Match:00000000
+[      4370] [ 0]BPU : BHTindex_:172 Target:00000000800002b0 Pred:1 ghr: 00000000
+[      4380] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002b4, fence: False, discard: False } ghr: 00000000
+[      4380] [ 0]BPU : Match:00000000
+[      4380] [ 0]BPU : BHTindex_:173 Target:00000000800002b4 Pred:1 ghr: 00000000
+[      4390] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002b8, fence: False, discard: False } ghr: 00000000
+[      4390] [ 0]BPU : Match:00000000
+[      4390] [ 0]BPU : BHTindex_:174 Target:00000000800002b8 Pred:1 ghr: 00000000
+[      4400] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002bc, fence: False, discard: False } ghr: 00000000
+[      4400] [ 0]BPU : Match:00000000
+[      4400] [ 0]BPU : BHTindex_:175 Target:00000000800002bc Pred:1 ghr: 00000000
+[      4410] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002c0, fence: False, discard: False } ghr: 00000000
+[      4410] [ 0]BPU : Match:00000000
+[      4410] [ 0]BPU : BHTindex_:176 Target:00000000800002c0 Pred:1 ghr: 00000000
+[      4420] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002c4, fence: False, discard: False } ghr: 00000000
+[      4420] [ 0]BPU : Match:00000000
+[      4420] [ 0]BPU : BHTindex_:177 Target:00000000800002c4 Pred:1 ghr: 00000000
+[      4430] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002c8, fence: False, discard: False } ghr: 00000000
+[      4430] [ 0]BPU : Match:00000000
+[      4430] [ 0]BPU : BHTindex_:178 Target:00000000800002c8 Pred:1 ghr: 00000000
+[      4550] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002cc, fence: False, discard: False } ghr: 00000000
+[      4550] [ 0]BPU : Match:00000000
+[      4550] [ 0]BPU : BHTindex_:179 Target:00000000800002cc Pred:1 ghr: 00000000
+[      4560] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002d0, fence: False, discard: False } ghr: 00000000
+[      4560] [ 0]BPU : Match:00000000
+[      4560] [ 0]BPU : BHTindex_:180 Target:00000000800002d0 Pred:1 ghr: 00000000
+[      4570] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002d4, fence: False, discard: False } ghr: 00000000
+[      4570] [ 0]BPU : Match:00000000
+[      4570] [ 0]BPU : BHTindex_:181 Target:00000000800002d4 Pred:1 ghr: 00000000
+[      4580] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002d8, fence: False, discard: False } ghr: 00000000
+[      4580] [ 0]BPU : Match:00000000
+[      4580] [ 0]BPU : BHTindex_:182 Target:00000000800002d8 Pred:1 ghr: 00000000
+[      4590] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002dc, fence: False, discard: False } ghr: 00000000
+[      4590] [ 0]BPU : Match:00000000
+[      4590] [ 0]BPU : BHTindex_:183 Target:00000000800002dc Pred:1 ghr: 00000000
+[      4600] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002e0, fence: False, discard: False } ghr: 00000000
+[      4600] [ 0]BPU : Match:00000000
+[      4600] [ 0]BPU : BHTindex_:184 Target:00000000800002e0 Pred:1 ghr: 00000000
+[      4610] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002e4, fence: False, discard: False } ghr: 00000000
+[      4610] [ 0]BPU : Match:00000000
+[      4610] [ 0]BPU : BHTindex_:185 Target:00000000800002e4 Pred:1 ghr: 00000000
+[      4620] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002e8, fence: False, discard: False } ghr: 00000000
+[      4620] [ 0]BPU : Match:00000000
+[      4620] [ 0]BPU : BHTindex_:186 Target:00000000800002e8 Pred:1 ghr: 00000000
+[      4630] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002ec, fence: False, discard: False } ghr: 00000000
+[      4630] [ 0]BPU : Match:00000000
+[      4630] [ 0]BPU : BHTindex_:187 Target:00000000800002ec Pred:1 ghr: 00000000
+[      4640] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002f0, fence: False, discard: False } ghr: 00000000
+[      4640] [ 0]BPU : Match:00000000
+[      4640] [ 0]BPU : BHTindex_:188 Target:00000000800002f0 Pred:1 ghr: 00000000
+[      4650] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002f4, fence: False, discard: False } ghr: 00000000
+[      4650] [ 0]BPU : Match:00000000
+[      4650] [ 0]BPU : BHTindex_:189 Target:00000000800002f4 Pred:1 ghr: 00000000
+[      4660] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002f8, fence: False, discard: False } ghr: 00000000
+[      4660] [ 0]BPU : Match:00000000
+[      4660] [ 0]BPU : BHTindex_:190 Target:00000000800002f8 Pred:1 ghr: 00000000
+[      4670] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800002fc, fence: False, discard: False } ghr: 00000000
+[      4670] [ 0]BPU : Match:00000000
+[      4670] [ 0]BPU : BHTindex_:191 Target:00000000800002fc Pred:1 ghr: 00000000
+[      4680] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000300, fence: False, discard: False } ghr: 00000000
+[      4680] [ 0]BPU : Match:00000000
+[      4680] [ 0]BPU : BHTindex_:192 Target:0000000080000300 Pred:1 ghr: 00000000
+[      4690] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000304, fence: False, discard: False } ghr: 00000000
+[      4690] [ 0]BPU : Match:00000000
+[      4690] [ 0]BPU : BHTindex_:193 Target:0000000080000304 Pred:1 ghr: 00000000
+[      4700] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000308, fence: False, discard: False } ghr: 00000000
+[      4700] [ 0]BPU : Match:00000000
+[      4700] [ 0]BPU : BHTindex_:194 Target:0000000080000308 Pred:1 ghr: 00000000
+[      4820] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000030c, fence: False, discard: False } ghr: 00000000
+[      4820] [ 0]BPU : Match:00000000
+[      4820] [ 0]BPU : BHTindex_:195 Target:000000008000030c Pred:1 ghr: 00000000
+[      4830] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000310, fence: False, discard: False } ghr: 00000000
+[      4830] [ 0]BPU : Match:00000000
+[      4830] [ 0]BPU : BHTindex_:196 Target:0000000080000310 Pred:1 ghr: 00000000
+[      4840] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000314, fence: False, discard: False } ghr: 00000000
+[      4840] [ 0]BPU : Match:00000000
+[      4840] [ 0]BPU : BHTindex_:197 Target:0000000080000314 Pred:1 ghr: 00000000
+[      4850] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000318, fence: False, discard: False } ghr: 00000000
+[      4850] [ 0]BPU : Match:00000000
+[      4850] [ 0]BPU : BHTindex_:198 Target:0000000080000318 Pred:1 ghr: 00000000
+[      4860] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000031c, fence: False, discard: False } ghr: 00000000
+[      4860] [ 0]BPU : Match:00000000
+[      4860] [ 0]BPU : BHTindex_:199 Target:000000008000031c Pred:1 ghr: 00000000
+[      4870] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000320, fence: False, discard: False } ghr: 00000000
+[      4870] [ 0]BPU : Match:00000000
+[      4870] [ 0]BPU : BHTindex_:200 Target:0000000080000320 Pred:1 ghr: 00000000
+[      4880] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000324, fence: False, discard: False } ghr: 00000000
+[      4880] [ 0]BPU : Match:00000000
+[      4880] [ 0]BPU : BHTindex_:201 Target:0000000080000324 Pred:1 ghr: 00000000
+[      4890] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000328, fence: False, discard: False } ghr: 00000000
+[      4890] [ 0]BPU : Match:00000000
+[      4890] [ 0]BPU : BHTindex_:202 Target:0000000080000328 Pred:1 ghr: 00000000
+[      4900] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000032c, fence: False, discard: False } ghr: 00000000
+[      4900] [ 0]BPU : Match:00000000
+[      4900] [ 0]BPU : BHTindex_:203 Target:000000008000032c Pred:1 ghr: 00000000
+[      4910] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000330, fence: False, discard: False } ghr: 00000000
+[      4910] [ 0]BPU : Match:00000000
+[      4910] [ 0]BPU : BHTindex_:204 Target:0000000080000330 Pred:1 ghr: 00000000
+[      4920] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000334, fence: False, discard: False } ghr: 00000000
+[      4920] [ 0]BPU : Match:00000000
+[      4920] [ 0]BPU : BHTindex_:205 Target:0000000080000334 Pred:1 ghr: 00000000
+[      4930] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000338, fence: False, discard: False } ghr: 00000000
+[      4930] [ 0]BPU : Match:00000000
+[      4930] [ 0]BPU : BHTindex_:206 Target:0000000080000338 Pred:1 ghr: 00000000
+[      4940] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000033c, fence: False, discard: False } ghr: 00000000
+[      4940] [ 0]BPU : Match:00000000
+[      4940] [ 0]BPU : BHTindex_:207 Target:000000008000033c Pred:1 ghr: 00000000
+[      4950] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000340, fence: False, discard: False } ghr: 00000000
+[      4950] [ 0]BPU : Match:00000000
+[      4950] [ 0]BPU : BHTindex_:208 Target:0000000080000340 Pred:1 ghr: 00000000
+[      4960] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000344, fence: False, discard: False } ghr: 00000000
+[      4960] [ 0]BPU : Match:00000000
+[      4960] [ 0]BPU : BHTindex_:209 Target:0000000080000344 Pred:1 ghr: 00000000
+[      4970] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000348, fence: False, discard: False } ghr: 00000000
+[      4970] [ 0]BPU : Match:00000000
+[      4970] [ 0]BPU : BHTindex_:210 Target:0000000080000348 Pred:1 ghr: 00000000
+[      5090] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000034c, fence: False, discard: False } ghr: 00000000
+[      5090] [ 0]BPU : Match:00000000
+[      5090] [ 0]BPU : BHTindex_:211 Target:000000008000034c Pred:1 ghr: 00000000
+[      5100] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000350, fence: False, discard: False } ghr: 00000000
+[      5100] [ 0]BPU : Match:00000000
+[      5100] [ 0]BPU : BHTindex_:212 Target:0000000080000350 Pred:1 ghr: 00000000
+[      5110] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000354, fence: False, discard: False } ghr: 00000000
+[      5110] [ 0]BPU : Match:00000000
+[      5110] [ 0]BPU : BHTindex_:213 Target:0000000080000354 Pred:1 ghr: 00000000
+[      5120] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000358, fence: False, discard: False } ghr: 00000000
+[      5120] [ 0]BPU : Match:00000000
+[      5120] [ 0]BPU : BHTindex_:214 Target:0000000080000358 Pred:1 ghr: 00000000
+[      5130] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000035c, fence: False, discard: False } ghr: 00000000
+[      5130] [ 0]BPU : Match:00000000
+[      5130] [ 0]BPU : BHTindex_:215 Target:000000008000035c Pred:1 ghr: 00000000
+[      5140] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000360, fence: False, discard: False } ghr: 00000000
+[      5140] [ 0]BPU : Match:00000000
+[      5140] [ 0]BPU : BHTindex_:216 Target:0000000080000360 Pred:1 ghr: 00000000
+[      5150] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000364, fence: False, discard: False } ghr: 00000000
+[      5150] [ 0]BPU : Match:00000000
+[      5150] [ 0]BPU : BHTindex_:217 Target:0000000080000364 Pred:1 ghr: 00000000
+[      5160] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000368, fence: False, discard: False } ghr: 00000000
+[      5160] [ 0]BPU : Match:00000000
+[      5160] [ 0]BPU : BHTindex_:218 Target:0000000080000368 Pred:1 ghr: 00000000
+[      5170] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000036c, fence: False, discard: False } ghr: 00000000
+[      5170] [ 0]BPU : Match:00000000
+[      5170] [ 0]BPU : BHTindex_:219 Target:000000008000036c Pred:1 ghr: 00000000
+[      5180] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000370, fence: False, discard: False } ghr: 00000000
+[      5180] [ 0]BPU : Match:00000000
+[      5180] [ 0]BPU : BHTindex_:220 Target:0000000080000370 Pred:1 ghr: 00000000
+[      5190] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000374, fence: False, discard: False } ghr: 00000000
+[      5190] [ 0]BPU : Match:00000000
+[      5190] [ 0]BPU : BHTindex_:221 Target:0000000080000374 Pred:1 ghr: 00000000
+[      5200] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000378, fence: False, discard: False } ghr: 00000000
+[      5200] [ 0]BPU : Match:00000000
+[      5200] [ 0]BPU : BHTindex_:222 Target:0000000080000378 Pred:1 ghr: 00000000
+[      5210] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000037c, fence: False, discard: False } ghr: 00000000
+[      5210] [ 0]BPU : Match:00000000
+[      5210] [ 0]BPU : BHTindex_:223 Target:000000008000037c Pred:1 ghr: 00000000
+[      5220] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000380, fence: False, discard: False } ghr: 00000000
+[      5220] [ 0]BPU : Match:00000000
+[      5220] [ 0]BPU : BHTindex_:224 Target:0000000080000380 Pred:1 ghr: 00000000
+[      5230] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000384, fence: False, discard: False } ghr: 00000000
+[      5230] [ 0]BPU : Match:00000000
+[      5230] [ 0]BPU : BHTindex_:225 Target:0000000080000384 Pred:1 ghr: 00000000
+[      5240] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000388, fence: False, discard: False } ghr: 00000000
+[      5240] [ 0]BPU : Match:00000000
+[      5240] [ 0]BPU : BHTindex_:226 Target:0000000080000388 Pred:1 ghr: 00000000
+[      5360] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000038c, fence: False, discard: False } ghr: 00000000
+[      5360] [ 0]BPU : Match:00000000
+[      5360] [ 0]BPU : BHTindex_:227 Target:000000008000038c Pred:1 ghr: 00000000
+[      5370] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000390, fence: False, discard: False } ghr: 00000000
+[      5370] [ 0]BPU : Match:00000000
+[      5370] [ 0]BPU : BHTindex_:228 Target:0000000080000390 Pred:1 ghr: 00000000
+[      5380] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000394, fence: False, discard: False } ghr: 00000000
+[      5380] [ 0]BPU : Match:00000000
+[      5380] [ 0]BPU : BHTindex_:229 Target:0000000080000394 Pred:1 ghr: 00000000
+[      5390] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 00000000
+[      5390] [ 0]BPU : Match:00000000
+[      5390] [ 0]BPU : BHTindex_:230 Target:0000000080000398 Pred:1 ghr: 00000000
+[      5400] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 00000000
+[      5400] [ 0]BPU : Match:00000000
+[      5400] [ 0]BPU : BHTindex_:231 Target:000000008000039c Pred:1 ghr: 00000000
+[      5410] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 00000000
+[      5410] [ 0]BPU : Match:00000000
+[      5410] [ 0]BPU : BHTindex_:232 Target:00000000800003a0 Pred:1 ghr: 00000000
+[      5420] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 00000000
+[      5420] [ 0]BPU : Match:00000000
+[      5420] [ 0]BPU : BHTindex_:233 Target:00000000800003a4 Pred:1 ghr: 00000000
+[      5440] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 00000000
+[      5440] [ 0]BPU : Match:00000000
+[      5440] [ 0]BPU : BHTindex_:234 Target:00000000800003a8 Pred:1 ghr: 00000000
+[      5460] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003ac, fence: False, discard: False } ghr: 00000000
+[      5460] [ 0]BPU : Match:00000000
+[      5460] [ 0]BPU : BHTindex_:235 Target:00000000800003ac Pred:1 ghr: 00000000
+[      5480] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003b0, fence: False, discard: False } ghr: 00000000
+[      5480] [ 0]BPU : Match:00000000
+[      5480] [ 0]BPU : BHTindex_:236 Target:00000000800003b0 Pred:1 ghr: 00000000
+[      5500] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003b4, fence: False, discard: False } ghr: 00000000
+[      5500] [ 0]BPU : Match:00000000
+[      5500] [ 0]BPU : BHTindex_:237 Target:00000000800003b4 Pred:1 ghr: 00000000
+[      5510] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: False, instr16: False, history: 'h00 }
+[      5510] [ 0]BPU : Allocating new index:  1 ghr: 00000000
+[      5510] [ 0]BPU : Misprediction fired. Restoring ghr: 00000000
+[      5520] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 00000000
+[      5520] [ 0]BPU : Match:00000000
+[      5520] [ 0]BPU : BHTindex_:230 Target:0000000080000398 Pred:1 ghr: 00000000
+[      5530] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 00000000
+[      5530] [ 0]BPU : Match:00000000
+[      5530] [ 0]BPU : BHTindex_:231 Target:000000008000039c Pred:1 ghr: 00000000
+[      5540] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 00000000
+[      5540] [ 0]BPU : Match:00000000
+[      5540] [ 0]BPU : BHTindex_:232 Target:00000000800003a0 Pred:1 ghr: 00000000
+[      5550] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 00000000
+[      5550] [ 0]BPU : Match:00000002
+[      5550] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      5550] [ 0]BPU : New GHR: 00000000
+[      5550] [ 0]BPU : BHTindex_:233 Target:0000000080000398 Pred:1 ghr: 00000000
+[      5560] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 00000000
+[      5560] [ 0]BPU : Match:00000000
+[      5560] [ 0]BPU : BHTindex_:234 Target:00000000800003a8 Pred:1 ghr: 00000000
+[      5580] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003ac, fence: False, discard: False } ghr: 00000000
+[      5580] [ 0]BPU : Match:00000000
+[      5580] [ 0]BPU : BHTindex_:235 Target:00000000800003ac Pred:1 ghr: 00000000
+[      5600] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003b0, fence: False, discard: False } ghr: 00000000
+[      5600] [ 0]BPU : Match:00000000
+[      5600] [ 0]BPU : BHTindex_:236 Target:00000000800003b0 Pred:1 ghr: 00000000
+[      5610] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003b4, fence: False, discard: False } ghr: 00000000
+[      5610] [ 0]BPU : Match:00000000
+[      5610] [ 0]BPU : BHTindex_:237 Target:00000000800003b4 Pred:1 ghr: 00000000
+[      5620] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003b8, fence: False, discard: False } ghr: 00000000
+[      5620] [ 0]BPU : Match:00000000
+[      5620] [ 0]BPU : BHTindex_:238 Target:00000000800003b8 Pred:1 ghr: 00000000
+[      5630] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'h00 }
+[      5630] [ 0]BPU : Training existing Entry index:  1 	 ghr: 00000000
+[      5630] [ 0]BPU : Upd BHT entry: 233 with state: 3 	 ghr: 00000000 
+[      5630] [ 0]BPU : Misprediction fired. Restoring ghr: 10000000
+[      5640] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 10000000
+[      5640] [ 0]BPU : Match:00000000
+[      5640] [ 0]BPU : BHTindex_:230 Target:0000000080000398 Pred:1 ghr: 10000000
+[      5660] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 10000000
+[      5660] [ 0]BPU : Match:00000000
+[      5660] [ 0]BPU : BHTindex_:231 Target:000000008000039c Pred:1 ghr: 10000000
+[      5670] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 10000000
+[      5670] [ 0]BPU : Match:00000000
+[      5670] [ 0]BPU : BHTindex_:232 Target:00000000800003a0 Pred:1 ghr: 10000000
+[      5680] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 10000000
+[      5680] [ 0]BPU : Match:00000002
+[      5680] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      5680] [ 0]BPU : New GHR: 11000000
+[      5680] [ 0]BPU : BHTindex_:233 Target:0000000080000398 Pred:3 ghr: 10000000
+[      5690] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11000000
+[      5690] [ 0]BPU : Match:00000000
+[      5690] [ 0]BPU : BHTindex_:234 Target:00000000800003a8 Pred:1 ghr: 11000000
+[      5710] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11000000
+[      5710] [ 0]BPU : Match:00000000
+[      5710] [ 0]BPU : BHTindex_:230 Target:0000000080000398 Pred:1 ghr: 11000000
+[      5730] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11000000
+[      5730] [ 0]BPU : Match:00000000
+[      5730] [ 0]BPU : BHTindex_:231 Target:000000008000039c Pred:1 ghr: 11000000
+[      5740] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11000000
+[      5740] [ 0]BPU : Match:00000000
+[      5740] [ 0]BPU : BHTindex_:232 Target:00000000800003a0 Pred:1 ghr: 11000000
+[      5750] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11000000
+[      5750] [ 0]BPU : Match:00000002
+[      5750] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      5750] [ 0]BPU : New GHR: 11100000
+[      5750] [ 0]BPU : BHTindex_:233 Target:0000000080000398 Pred:3 ghr: 11000000
+[      5760] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hc0 }
+[      5760] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11100000
+[      5760] [ 0]BPU : Upd BHT entry: 233 with state: 3 	 ghr: 11100000 
+[      5770] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11100000
+[      5770] [ 0]BPU : Match:00000000
+[      5770] [ 0]BPU : BHTindex_:234 Target:00000000800003a8 Pred:1 ghr: 11100000
+[      5790] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11100000
+[      5790] [ 0]BPU : Match:00000000
+[      5790] [ 0]BPU : BHTindex_:230 Target:0000000080000398 Pred:1 ghr: 11100000
+[      5810] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11100000
+[      5810] [ 0]BPU : Match:00000000
+[      5810] [ 0]BPU : BHTindex_:231 Target:000000008000039c Pred:1 ghr: 11100000
+[      5830] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11100000
+[      5830] [ 0]BPU : Match:00000000
+[      5830] [ 0]BPU : BHTindex_:232 Target:00000000800003a0 Pred:1 ghr: 11100000
+[      5840] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'he0 }
+[      5840] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11100000
+[      5840] [ 0]BPU : Upd BHT entry: 233 with state: 3 	 ghr: 11100000 
+[      5850] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11100000
+[      5850] [ 0]BPU : Match:00000002
+[      5850] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      5850] [ 0]BPU : New GHR: 11110000
+[      5850] [ 0]BPU : BHTindex_:233 Target:0000000080000398 Pred:3 ghr: 11100000
+[      5860] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11110000
+[      5860] [ 0]BPU : Match:00000000
+[      5860] [ 0]BPU : BHTindex_:234 Target:00000000800003a8 Pred:1 ghr: 11110000
+[      5870] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11110000
+[      5870] [ 0]BPU : Match:00000000
+[      5870] [ 0]BPU : BHTindex_:230 Target:0000000080000398 Pred:1 ghr: 11110000
+[      5890] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11110000
+[      5890] [ 0]BPU : Match:00000000
+[      5890] [ 0]BPU : BHTindex_:231 Target:000000008000039c Pred:1 ghr: 11110000
+[      5910] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11110000
+[      5910] [ 0]BPU : Match:00000000
+[      5910] [ 0]BPU : BHTindex_:232 Target:00000000800003a0 Pred:1 ghr: 11110000
+[      5920] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hf0 }
+[      5920] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11110000
+[      5920] [ 0]BPU : Upd BHT entry: 233 with state: 3 	 ghr: 11110000 
+[      5930] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11110000
+[      5930] [ 0]BPU : Match:00000002
+[      5930] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      5930] [ 0]BPU : New GHR: 11111000
+[      5930] [ 0]BPU : BHTindex_:233 Target:0000000080000398 Pred:3 ghr: 11110000
+[      5940] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111000
+[      5940] [ 0]BPU : Match:00000000
+[      5940] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111000
+[      5950] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111000
+[      5950] [ 0]BPU : Match:00000000
+[      5950] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111000
+[      5970] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111000
+[      5970] [ 0]BPU : Match:00000000
+[      5970] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111000
+[      5990] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111000
+[      5990] [ 0]BPU : Match:00000000
+[      5990] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111000
+[      6000] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hf8 }
+[      6000] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111000
+[      6000] [ 0]BPU : Upd BHT entry: 233 with state: 3 	 ghr: 11111000 
+[      6010] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111000
+[      6010] [ 0]BPU : Match:00000002
+[      6010] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6010] [ 0]BPU : New GHR: 01111100
+[      6010] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:1 ghr: 11111000
+[      6020] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 01111100
+[      6020] [ 0]BPU : Match:00000000
+[      6020] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 01111100
+[      6030] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003ac, fence: False, discard: False } ghr: 01111100
+[      6030] [ 0]BPU : Match:00000000
+[      6030] [ 0]BPU : BHTindex_:251 Target:00000000800003ac Pred:1 ghr: 01111100
+[      6050] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003b0, fence: False, discard: False } ghr: 01111100
+[      6050] [ 0]BPU : Match:00000000
+[      6050] [ 0]BPU : BHTindex_:252 Target:00000000800003b0 Pred:1 ghr: 01111100
+[      6070] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003b4, fence: False, discard: False } ghr: 01111100
+[      6070] [ 0]BPU : Match:00000000
+[      6070] [ 0]BPU : BHTindex_:253 Target:00000000800003b4 Pred:1 ghr: 01111100
+[      6080] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'h7c }
+[      6080] [ 0]BPU : Training existing Entry index:  1 	 ghr: 01111100
+[      6080] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 01111100 
+[      6080] [ 0]BPU : Misprediction fired. Restoring ghr: 11111100
+[      6090] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111100
+[      6090] [ 0]BPU : Match:00000000
+[      6090] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111100
+[      6100] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111100
+[      6100] [ 0]BPU : Match:00000000
+[      6100] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111100
+[      6110] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111100
+[      6110] [ 0]BPU : Match:00000000
+[      6110] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111100
+[      6120] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111100
+[      6120] [ 0]BPU : Match:00000002
+[      6120] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6120] [ 0]BPU : New GHR: 11111110
+[      6120] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111100
+[      6130] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111110
+[      6130] [ 0]BPU : Match:00000000
+[      6130] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111110
+[      6150] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111110
+[      6150] [ 0]BPU : Match:00000000
+[      6150] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111110
+[      6170] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111110
+[      6170] [ 0]BPU : Match:00000000
+[      6170] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111110
+[      6180] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111110
+[      6180] [ 0]BPU : Match:00000000
+[      6180] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111110
+[      6190] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111110
+[      6190] [ 0]BPU : Match:00000002
+[      6190] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6190] [ 0]BPU : New GHR: 11111111
+[      6190] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111110
+[      6200] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hfe }
+[      6200] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      6200] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      6210] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      6210] [ 0]BPU : Match:00000000
+[      6210] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      6230] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      6230] [ 0]BPU : Match:00000000
+[      6230] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      6250] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      6250] [ 0]BPU : Match:00000000
+[      6250] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      6270] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      6270] [ 0]BPU : Match:00000000
+[      6270] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      6280] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      6280] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      6280] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      6290] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      6290] [ 0]BPU : Match:00000002
+[      6290] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6290] [ 0]BPU : New GHR: 11111111
+[      6290] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      6300] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      6300] [ 0]BPU : Match:00000000
+[      6300] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      6310] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      6310] [ 0]BPU : Match:00000000
+[      6310] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      6330] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      6330] [ 0]BPU : Match:00000000
+[      6330] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      6350] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      6350] [ 0]BPU : Match:00000000
+[      6350] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      6360] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      6360] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      6360] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      6370] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      6370] [ 0]BPU : Match:00000002
+[      6370] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6370] [ 0]BPU : New GHR: 11111111
+[      6370] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      6380] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      6380] [ 0]BPU : Match:00000000
+[      6380] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      6390] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      6390] [ 0]BPU : Match:00000000
+[      6390] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      6410] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      6410] [ 0]BPU : Match:00000000
+[      6410] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      6430] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      6430] [ 0]BPU : Match:00000000
+[      6430] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      6440] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      6440] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      6440] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      6450] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      6450] [ 0]BPU : Match:00000002
+[      6450] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6450] [ 0]BPU : New GHR: 11111111
+[      6450] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      6460] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      6460] [ 0]BPU : Match:00000000
+[      6460] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      6470] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      6470] [ 0]BPU : Match:00000000
+[      6470] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      6490] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      6490] [ 0]BPU : Match:00000000
+[      6490] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      6510] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      6510] [ 0]BPU : Match:00000000
+[      6510] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      6520] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      6520] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      6520] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      6530] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      6530] [ 0]BPU : Match:00000002
+[      6530] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6530] [ 0]BPU : New GHR: 11111111
+[      6530] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      6540] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      6540] [ 0]BPU : Match:00000000
+[      6540] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      6550] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      6550] [ 0]BPU : Match:00000000
+[      6550] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      6570] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      6570] [ 0]BPU : Match:00000000
+[      6570] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      6590] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      6590] [ 0]BPU : Match:00000000
+[      6590] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      6600] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      6600] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      6600] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      6610] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      6610] [ 0]BPU : Match:00000002
+[      6610] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6610] [ 0]BPU : New GHR: 11111111
+[      6610] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      6620] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      6620] [ 0]BPU : Match:00000000
+[      6620] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      6630] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      6630] [ 0]BPU : Match:00000000
+[      6630] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      6650] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      6650] [ 0]BPU : Match:00000000
+[      6650] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      6670] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      6670] [ 0]BPU : Match:00000000
+[      6670] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      6680] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      6680] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      6680] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      6690] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      6690] [ 0]BPU : Match:00000002
+[      6690] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6690] [ 0]BPU : New GHR: 11111111
+[      6690] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      6700] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      6700] [ 0]BPU : Match:00000000
+[      6700] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      6710] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      6710] [ 0]BPU : Match:00000000
+[      6710] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      6730] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      6730] [ 0]BPU : Match:00000000
+[      6730] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      6750] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      6750] [ 0]BPU : Match:00000000
+[      6750] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      6760] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      6760] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      6760] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      6770] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      6770] [ 0]BPU : Match:00000002
+[      6770] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6770] [ 0]BPU : New GHR: 11111111
+[      6770] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      6780] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      6780] [ 0]BPU : Match:00000000
+[      6780] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      6790] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      6790] [ 0]BPU : Match:00000000
+[      6790] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      6810] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      6810] [ 0]BPU : Match:00000000
+[      6810] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      6830] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      6830] [ 0]BPU : Match:00000000
+[      6830] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      6840] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      6840] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      6840] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      6850] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      6850] [ 0]BPU : Match:00000002
+[      6850] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6850] [ 0]BPU : New GHR: 11111111
+[      6850] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      6860] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      6860] [ 0]BPU : Match:00000000
+[      6860] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      6870] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      6870] [ 0]BPU : Match:00000000
+[      6870] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      6890] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      6890] [ 0]BPU : Match:00000000
+[      6890] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      6910] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      6910] [ 0]BPU : Match:00000000
+[      6910] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      6920] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      6920] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      6920] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      6930] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      6930] [ 0]BPU : Match:00000002
+[      6930] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      6930] [ 0]BPU : New GHR: 11111111
+[      6930] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      6940] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      6940] [ 0]BPU : Match:00000000
+[      6940] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      6950] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      6950] [ 0]BPU : Match:00000000
+[      6950] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      6970] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      6970] [ 0]BPU : Match:00000000
+[      6970] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      6990] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      6990] [ 0]BPU : Match:00000000
+[      6990] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7000] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7000] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7000] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7010] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7010] [ 0]BPU : Match:00000002
+[      7010] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7010] [ 0]BPU : New GHR: 11111111
+[      7010] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7020] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7020] [ 0]BPU : Match:00000000
+[      7020] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7030] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7030] [ 0]BPU : Match:00000000
+[      7030] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7050] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7050] [ 0]BPU : Match:00000000
+[      7050] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7070] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7070] [ 0]BPU : Match:00000000
+[      7070] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7080] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7080] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7080] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7090] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7090] [ 0]BPU : Match:00000002
+[      7090] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7090] [ 0]BPU : New GHR: 11111111
+[      7090] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7100] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7100] [ 0]BPU : Match:00000000
+[      7100] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7110] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7110] [ 0]BPU : Match:00000000
+[      7110] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7130] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7130] [ 0]BPU : Match:00000000
+[      7130] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7150] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7150] [ 0]BPU : Match:00000000
+[      7150] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7160] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7160] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7160] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7170] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7170] [ 0]BPU : Match:00000002
+[      7170] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7170] [ 0]BPU : New GHR: 11111111
+[      7170] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7180] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7180] [ 0]BPU : Match:00000000
+[      7180] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7190] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7190] [ 0]BPU : Match:00000000
+[      7190] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7210] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7210] [ 0]BPU : Match:00000000
+[      7210] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7230] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7230] [ 0]BPU : Match:00000000
+[      7230] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7240] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7240] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7240] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7250] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7250] [ 0]BPU : Match:00000002
+[      7250] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7250] [ 0]BPU : New GHR: 11111111
+[      7250] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7260] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7260] [ 0]BPU : Match:00000000
+[      7260] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7270] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7270] [ 0]BPU : Match:00000000
+[      7270] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7290] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7290] [ 0]BPU : Match:00000000
+[      7290] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7310] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7310] [ 0]BPU : Match:00000000
+[      7310] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7320] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7320] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7320] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7330] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7330] [ 0]BPU : Match:00000002
+[      7330] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7330] [ 0]BPU : New GHR: 11111111
+[      7330] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7340] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7340] [ 0]BPU : Match:00000000
+[      7340] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7350] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7350] [ 0]BPU : Match:00000000
+[      7350] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7370] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7370] [ 0]BPU : Match:00000000
+[      7370] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7390] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7390] [ 0]BPU : Match:00000000
+[      7390] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7400] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7400] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7400] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7410] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7410] [ 0]BPU : Match:00000002
+[      7410] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7410] [ 0]BPU : New GHR: 11111111
+[      7410] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7420] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7420] [ 0]BPU : Match:00000000
+[      7420] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7430] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7430] [ 0]BPU : Match:00000000
+[      7430] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7450] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7450] [ 0]BPU : Match:00000000
+[      7450] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7470] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7470] [ 0]BPU : Match:00000000
+[      7470] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7480] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7480] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7480] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7490] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7490] [ 0]BPU : Match:00000002
+[      7490] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7490] [ 0]BPU : New GHR: 11111111
+[      7490] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7500] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7500] [ 0]BPU : Match:00000000
+[      7500] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7510] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7510] [ 0]BPU : Match:00000000
+[      7510] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7530] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7530] [ 0]BPU : Match:00000000
+[      7530] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7550] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7550] [ 0]BPU : Match:00000000
+[      7550] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7560] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7560] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7560] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7570] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7570] [ 0]BPU : Match:00000002
+[      7570] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7570] [ 0]BPU : New GHR: 11111111
+[      7570] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7580] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7580] [ 0]BPU : Match:00000000
+[      7580] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7590] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7590] [ 0]BPU : Match:00000000
+[      7590] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7610] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7610] [ 0]BPU : Match:00000000
+[      7610] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7630] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7630] [ 0]BPU : Match:00000000
+[      7630] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7640] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7640] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7640] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7650] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7650] [ 0]BPU : Match:00000002
+[      7650] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7650] [ 0]BPU : New GHR: 11111111
+[      7650] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7660] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7660] [ 0]BPU : Match:00000000
+[      7660] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7670] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7670] [ 0]BPU : Match:00000000
+[      7670] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7690] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7690] [ 0]BPU : Match:00000000
+[      7690] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7710] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7710] [ 0]BPU : Match:00000000
+[      7710] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7720] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7720] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7720] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7730] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7730] [ 0]BPU : Match:00000002
+[      7730] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7730] [ 0]BPU : New GHR: 11111111
+[      7730] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7740] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7740] [ 0]BPU : Match:00000000
+[      7740] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7750] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7750] [ 0]BPU : Match:00000000
+[      7750] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7770] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7770] [ 0]BPU : Match:00000000
+[      7770] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7790] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7790] [ 0]BPU : Match:00000000
+[      7790] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7800] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7800] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7800] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7810] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7810] [ 0]BPU : Match:00000002
+[      7810] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7810] [ 0]BPU : New GHR: 11111111
+[      7810] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7820] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7820] [ 0]BPU : Match:00000000
+[      7820] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7830] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7830] [ 0]BPU : Match:00000000
+[      7830] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7850] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7850] [ 0]BPU : Match:00000000
+[      7850] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7870] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7870] [ 0]BPU : Match:00000000
+[      7870] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7880] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7880] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7880] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7890] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7890] [ 0]BPU : Match:00000002
+[      7890] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7890] [ 0]BPU : New GHR: 11111111
+[      7890] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7900] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7900] [ 0]BPU : Match:00000000
+[      7900] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7910] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7910] [ 0]BPU : Match:00000000
+[      7910] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      7930] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      7930] [ 0]BPU : Match:00000000
+[      7930] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      7950] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      7950] [ 0]BPU : Match:00000000
+[      7950] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      7960] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      7960] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      7960] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      7970] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      7970] [ 0]BPU : Match:00000002
+[      7970] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      7970] [ 0]BPU : New GHR: 11111111
+[      7970] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      7980] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      7980] [ 0]BPU : Match:00000000
+[      7980] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      7990] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      7990] [ 0]BPU : Match:00000000
+[      7990] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      8010] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      8010] [ 0]BPU : Match:00000000
+[      8010] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      8030] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      8030] [ 0]BPU : Match:00000000
+[      8030] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      8040] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h3, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      8040] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      8040] [ 0]BPU : Upd BHT entry: 249 with state: 3 	 ghr: 11111111 
+[      8050] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a4, fence: False, discard: False } ghr: 11111111
+[      8050] [ 0]BPU : Match:00000002
+[      8050] [ 0]BPU : BTB Hit: BTBEntry { target: 'h0000000080000398, ci: Branch, instr16: False, hi: True }
+[      8050] [ 0]BPU : New GHR: 11111111
+[      8050] [ 0]BPU : BHTindex_:249 Target:0000000080000398 Pred:3 ghr: 11111111
+[      8060] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a8, fence: False, discard: False } ghr: 11111111
+[      8060] [ 0]BPU : Match:00000000
+[      8060] [ 0]BPU : BHTindex_:250 Target:00000000800003a8 Pred:1 ghr: 11111111
+[      8070] [ 0]BPU : Received Request: PredictionRequest { pc: 'h0000000080000398, fence: False, discard: False } ghr: 11111111
+[      8070] [ 0]BPU : Match:00000000
+[      8070] [ 0]BPU : BHTindex_:246 Target:0000000080000398 Pred:1 ghr: 11111111
+[      8090] [ 0]BPU : Received Request: PredictionRequest { pc: 'h000000008000039c, fence: False, discard: False } ghr: 11111111
+[      8090] [ 0]BPU : Match:00000000
+[      8090] [ 0]BPU : BHTindex_:247 Target:000000008000039c Pred:1 ghr: 11111111
+[      8110] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003a0, fence: False, discard: False } ghr: 11111111
+[      8110] [ 0]BPU : Match:00000000
+[      8110] [ 0]BPU : BHTindex_:248 Target:00000000800003a0 Pred:1 ghr: 11111111
+[      8120] [ 0]BPU : Received Training: Training_data { pc: 'h00000000800003a6, target: 'h0000000080000398, state: 'h2, ci: Branch, btbhit: True, instr16: False, history: 'hff }
+[      8120] [ 0]BPU : Training existing Entry index:  1 	 ghr: 11111111
+[      8120] [ 0]BPU : Upd BHT entry: 249 with state: 2 	 ghr: 11111111 
+[      8120] [ 0]BPU : Misprediction fired. Restoring ghr: 01111111
+[      8130] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003aa, fence: False, discard: True } ghr: 01111111
+[      8130] [ 0]BPU : Match:00000000
+[      8130] [ 0]BPU : BHTindex_:250 Target:00000000800003aa Pred:1 ghr: 01111111
+[      8140] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003ac, fence: False, discard: False } ghr: 01111111
+[      8140] [ 0]BPU : Match:00000000
+[      8140] [ 0]BPU : BHTindex_:251 Target:00000000800003ac Pred:1 ghr: 01111111
+[      8150] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003b0, fence: False, discard: False } ghr: 01111111
+[      8150] [ 0]BPU : Match:00000000
+[      8150] [ 0]BPU : BHTindex_:252 Target:00000000800003b0 Pred:1 ghr: 01111111
+[      8160] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003b4, fence: False, discard: False } ghr: 01111111
+[      8160] [ 0]BPU : Match:00000000
+[      8160] [ 0]BPU : BHTindex_:253 Target:00000000800003b4 Pred:1 ghr: 01111111
+[      8170] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003b8, fence: False, discard: False } ghr: 01111111
+[      8170] [ 0]BPU : Match:00000000
+[      8170] [ 0]BPU : BHTindex_:254 Target:00000000800003b8 Pred:1 ghr: 01111111
+[      8180] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003bc, fence: False, discard: False } ghr: 01111111
+[      8180] [ 0]BPU : Match:00000000
+[      8180] [ 0]BPU : BHTindex_:255 Target:00000000800003bc Pred:1 ghr: 01111111
+[      8190] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003c0, fence: False, discard: False } ghr: 01111111
+[      8190] [ 0]BPU : Match:00000000
+[      8190] [ 0]BPU : BHTindex_:224 Target:00000000800003c0 Pred:1 ghr: 01111111
+[      8200] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003c4, fence: False, discard: False } ghr: 01111111
+[      8200] [ 0]BPU : Match:00000000
+[      8200] [ 0]BPU : BHTindex_:225 Target:00000000800003c4 Pred:1 ghr: 01111111
+[      8210] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003c8, fence: False, discard: False } ghr: 01111111
+[      8210] [ 0]BPU : Match:00000000
+[      8210] [ 0]BPU : BHTindex_:226 Target:00000000800003c8 Pred:1 ghr: 01111111
+[      8330] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003cc, fence: False, discard: False } ghr: 01111111
+[      8330] [ 0]BPU : Match:00000000
+[      8330] [ 0]BPU : BHTindex_:227 Target:00000000800003cc Pred:1 ghr: 01111111
+[      8340] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003d0, fence: False, discard: False } ghr: 01111111
+[      8340] [ 0]BPU : Match:00000000
+[      8340] [ 0]BPU : BHTindex_:228 Target:00000000800003d0 Pred:1 ghr: 01111111
+[      8350] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003d4, fence: False, discard: False } ghr: 01111111
+[      8350] [ 0]BPU : Match:00000000
+[      8350] [ 0]BPU : BHTindex_:229 Target:00000000800003d4 Pred:1 ghr: 01111111
+[     11180] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003be, fence: True, discard: True } ghr: 01111111
+[     11180] [ 0]BPU : Match:00000000
+[     11180] [ 0]BPU : BHTindex_:255 Target:00000000800003be Pred:1 ghr: 01111111
+[     11190] [ 0]BPU : Fence Encountered, Current vals are
+[     11190] [ 0]BPU : rg_allocate -> 02
+[     11190] [ 0]BPU : current_ghr -> 01111111
+[     11200] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003be, fence: False, discard: True } ghr: 00000000
+[     11200] [ 0]BPU : Fenced, Valid Bits -> 0
+[     11200] [ 0]BPU : Match:00000000
+[     11200] [ 0]BPU : BHTindex_:239 Target:00000000800003be Pred:1 ghr: 00000000
+[     11200] [ 0]BPU : rg_allocate -> 00
+[     11200] [ 0]BPU : current_ghr -> 00000000
+[     11230] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003c0, fence: False, discard: False } ghr: 00000000
+[     11230] [ 0]BPU : Match:00000000
+[     11230] [ 0]BPU : BHTindex_:240 Target:00000000800003c0 Pred:1 ghr: 00000000
+[     11240] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003c4, fence: False, discard: False } ghr: 00000000
+[     11240] [ 0]BPU : Match:00000000
+[     11240] [ 0]BPU : BHTindex_:241 Target:00000000800003c4 Pred:1 ghr: 00000000
+[     11360] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003c8, fence: False, discard: False } ghr: 00000000
+[     11360] [ 0]BPU : Match:00000000
+[     11360] [ 0]BPU : BHTindex_:242 Target:00000000800003c8 Pred:1 ghr: 00000000
+[     11480] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003cc, fence: False, discard: False } ghr: 00000000
+[     11480] [ 0]BPU : Match:00000000
+[     11480] [ 0]BPU : BHTindex_:243 Target:00000000800003cc Pred:1 ghr: 00000000
+[     11490] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003d0, fence: False, discard: False } ghr: 00000000
+[     11490] [ 0]BPU : Match:00000000
+[     11490] [ 0]BPU : BHTindex_:244 Target:00000000800003d0 Pred:1 ghr: 00000000
+[     11500] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003d4, fence: False, discard: False } ghr: 00000000
+[     11500] [ 0]BPU : Match:00000000
+[     11500] [ 0]BPU : BHTindex_:245 Target:00000000800003d4 Pred:1 ghr: 00000000
+[     11510] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003d8, fence: False, discard: False } ghr: 00000000
+[     11510] [ 0]BPU : Match:00000000
+[     11510] [ 0]BPU : BHTindex_:246 Target:00000000800003d8 Pred:1 ghr: 00000000
+[     11520] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003dc, fence: False, discard: False } ghr: 00000000
+[     11520] [ 0]BPU : Match:00000000
+[     11520] [ 0]BPU : BHTindex_:247 Target:00000000800003dc Pred:1 ghr: 00000000
+[     11530] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003e0, fence: False, discard: False } ghr: 00000000
+[     11530] [ 0]BPU : Match:00000000
+[     11530] [ 0]BPU : BHTindex_:248 Target:00000000800003e0 Pred:1 ghr: 00000000
+[     11540] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003e4, fence: False, discard: False } ghr: 00000000
+[     11540] [ 0]BPU : Match:00000000
+[     11540] [ 0]BPU : BHTindex_:249 Target:00000000800003e4 Pred:1 ghr: 00000000
+[     11550] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003e8, fence: False, discard: False } ghr: 00000000
+[     11550] [ 0]BPU : Match:00000000
+[     11550] [ 0]BPU : BHTindex_:250 Target:00000000800003e8 Pred:1 ghr: 00000000
+[     11650] [ 0]BPU : Received Request: PredictionRequest { pc: 'h00000000800003ec, fence: False, discard: False } ghr: 00000000
+[     11650] [ 0]BPU : Match:00000000
+[     11650] [ 0]BPU : BHTindex_:251 Target:00000000800003ec Pred:1 ghr: 00000000
+- /home/akrish/work/InCore/river_core/river_start/chromite/build/hw/verilog//mksign_dump.v:1313: Verilog $finish
