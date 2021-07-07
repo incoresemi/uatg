@@ -5,8 +5,8 @@ from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
 from yapsy.PluginManager import PluginManager
-from micro_arch_tests.log import logger
-from micro_arch_tests.__init__ import __version__
+from uarch_test.log import logger
+from uarch_test.__init__ import __version__
 
 def load_yaml(foo):
     yaml = YAML(typ="rt")
