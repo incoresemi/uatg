@@ -174,6 +174,42 @@ def validate_tests(yaml_dict, test_file_dir="bpu/", clean=False):
         logger.info("Python files Cleaned")
 
 
+def generate_sv(yaml_dict, test_file_dir="bpu/"):
+    """specify the location where the python test files are located for a
+    particular module with the folder following / , Then load the plugins from
+    the plugin directory and create the covergroups (System Verilog) for the test files in a new directory.
+    test_file_dir = bpu/
+    """
+
+    manager = PluginManager()
+    manager.setPluginPlaces([test_file_dir])
+    manager.collectPlugins()
+
+    # Loop around and find the plugins and writes the contents from the
+    # plugins into a System Verilog file
+    for plugin in manager.getAllPlugins():
+        _check = plugin.plugin_object.execute(yaml_dict)
+        _name = (str(plugin.plugin_object).split(".", 1))
+        _test_name = ((_name[1].split(" ", 1))[0])
+        if _check:
+            try:
+                _sv = plugin.plugin_object.generate_covergroups()
+                # To-Do -> Check what the name of the SV file should be
+                # To-Do -> Include the creation of TbTop and Interface SV files
+                with open(
+                        'tests/bpu/tests/' + _test_name + '/' + _test_name +
+                        '.sv', "w") as f:
+                    logger.info('Generating for {0}'.format(_test_name))
+                    f.write(_sv)
+
+            except AttributeError:
+                logger.warn('Skipping {0}'.format(_test_name))
+                pass
+
+        else:
+            logger.critical('Skipped {0}'.format(_test_name))
+
+
 def main():
 
     logger.level('debug')
@@ -208,13 +244,16 @@ def main():
                  + "RVTEST_DATA_END\n\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END\n"
 
     create_plugins(plugins_path='tests/bpu/')
-    generate_tests(yaml_dict=bpu, test_file_dir="tests/bpu/")
+    logger.warn("Yaml was not created, and the tests were not validated")
+    generate_sv(yaml_dict=bpu, test_file_dir="tests/bpu/")
 
-    if generate_yaml(yaml_dict=bpu, work_dir="tests/bpu/"):
-        logger.info('Generated test_list.yaml')
-    else:
-        logger.warn('No tests were created, test_list.yaml not generated')
-    validate_tests(yaml_dict=bpu, test_file_dir='tests/bpu/', clean=True)
+    ##generate_tests(yaml_dict=bpu, test_file_dir="tests/bpu/")
+
+    ##if generate_yaml(yaml_dict=bpu, work_dir="tests/bpu/"):
+    ##    logger.info('Generated test_list.yaml')
+    ##else:
+    ##    logger.warn('No tests were created, test_list.yaml not generated')
+    ##validate_tests(yaml_dict=bpu, test_file_dir='tests/bpu/', clean=True)
 
 
 if __name__ == "__main__":
