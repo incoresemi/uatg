@@ -8,6 +8,7 @@ from yapsy.PluginManager import PluginManager
 from uarch_test.log import logger
 from uarch_test.__init__ import __version__
 
+
 def load_yaml(foo):
     yaml = YAML(typ="rt")
     yaml.default_flow_style = False
@@ -34,7 +35,7 @@ def generate_tests(yaml_dict, test_file_dir="bpu/"):
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the asm test files in a new directory.
     eg. module_class  = branch_predictor's object
-        test_file_dir = bpu/
+    test_file_dir = bpu/
     """
 
     manager = PluginManager()
@@ -57,7 +58,8 @@ def generate_tests(yaml_dict, test_file_dir="bpu/"):
         if _check:
             _asm_body = plugin.plugin_object.generate_asm()
             os.mkdir('tests/bpu/tests/' + _test_name)
-            f = open('tests/bpu/tests/' + _test_name + '/' + _test_name + '.S', "w")
+            f = open('tests/bpu/tests/' + _test_name + '/' + _test_name + '.S',
+                     "w")
             _asm = asm_header + _asm_body + asm_footer
             f.write(_asm)
             f.close()
@@ -108,7 +110,9 @@ def generate_yaml(yaml_dict, work_dir="bpu/"):
             _data += "  work_dir: " + _path_to_tests + "\n\n"
             _generated_tests = _generated_tests + 1
         else:
-            logger.critical('No test generated for {0}, skipping it in test_list'.format(_name))
+            logger.critical(
+                'No test generated for {0}, skipping it in test_list'.format(
+                    _name))
 
     with open(_path + 'test_list.yaml', 'w') as outfile:
         outfile.write(_data)
@@ -131,11 +135,13 @@ def validate_tests(yaml_dict, test_file_dir="bpu/", clean=False):
             _result = plugin.plugin_object.check_log(
                 log_file_path=test_file_dir + 'tests/' + _test_name + '/log')
             if _result:
-                logger.info('{0}. Minimal test: {1} has passed.'.format(_tot_ct, _test_name))
+                logger.info('{0}. Minimal test: {1} has passed.'.format(
+                    _tot_ct, _test_name))
                 _pass_ct += 1
                 _tot_ct += 1
             else:
-                logger.critical('{0}. Minimal test: {1} has failed.'.format(_tot_ct, _test_name))
+                logger.critical('{0}. Minimal test: {1} has failed.'.format(
+                    _tot_ct, _test_name))
                 _fail_ct += 1
                 _tot_ct += 1
         else:
@@ -143,14 +149,14 @@ def validate_tests(yaml_dict, test_file_dir="bpu/", clean=False):
 
     print('\n\n')
     logger.info("Minimal Verification Results")
-    logger.info( "=" * 28)
+    logger.info("=" * 28)
     logger.info("Total Tests : {0}".format(_tot_ct - 1))
 
     if _tot_ct - 1:
         logger.info("Tests Passed : {0} - [{1} %]".format(
-                    _pass_ct, 100 * _pass_ct // (_tot_ct - 1)))
+            _pass_ct, 100 * _pass_ct // (_tot_ct - 1)))
         logger.warn("Tests Failed : {0} - [{1} %]".format(
-                    _fail_ct, 100 * _fail_ct // (_tot_ct - 1)))
+            _fail_ct, 100 * _fail_ct // (_tot_ct - 1)))
     else:
         logger.warn("No tests were created")
 
@@ -170,7 +176,7 @@ def validate_tests(yaml_dict, test_file_dir="bpu/", clean=False):
 
 def main():
 
-    logger.level('debug') 
+    logger.level('debug')
     logger.info('****** Micro Architectural Tests *******')
     logger.info('Version : {0}'.format(__version__))
     logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
@@ -209,7 +215,7 @@ def main():
 
     create_plugins(plugins_path='tests/bpu/')
     generate_tests(yaml_dict=bpu, test_file_dir="tests/bpu/")
-    
+
     if generate_yaml(yaml_dict=bpu, work_dir="tests/bpu/"):
         logger.info('Invoking RiVer Core')
         cwd = os.getcwd()
