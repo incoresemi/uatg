@@ -11,3 +11,4 @@ uarch_test/path.txt
 .*
 *.egg-info
 docs/build/
+uarch_test/target/*
