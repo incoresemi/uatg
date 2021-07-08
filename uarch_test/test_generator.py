@@ -188,12 +188,6 @@ def main():
 
     global asm_header
     global asm_footer
-    global river_path
-
-    # first line in path should be river cores's directory
-    fi = open("path.txt", "r")
-    river_path = (fi.readline()).strip('\n')
-    fi.close()
 
     isa = inp_yaml['ISA']
     bpu = inp_yaml['branch_predictor']
@@ -217,14 +211,9 @@ def main():
     generate_tests(yaml_dict=bpu, test_file_dir="tests/bpu/")
 
     if generate_yaml(yaml_dict=bpu, work_dir="tests/bpu/"):
-        logger.info('Invoking RiVer Core')
-        cwd = os.getcwd()
-        os.chdir(river_path)  # change dir to river_core
-        os.system("river_core compile -t mywork/test_list.yaml")
-        # run tests in river_core
-        os.chdir(cwd)  # get back to present dir
+        logger.info('Generated test_list.yaml')
     else:
-        logger.warn('No tests were created, not invoking RiVer Core')
+        logger.warn('No tests were created, test_list.yaml not generated')
     validate_tests(yaml_dict=bpu, test_file_dir='tests/bpu/', clean=True)
 
 
