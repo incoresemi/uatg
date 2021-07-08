@@ -57,12 +57,11 @@ def generate_tests(yaml_dict, test_file_dir="bpu/"):
         _test_name = ((_name[1].split(" ", 1))[0])
         if _check:
             _asm_body = plugin.plugin_object.generate_asm()
-            os.mkdir('tests/bpu/tests/' + _test_name)
-            f = open('tests/bpu/tests/' + _test_name + '/' + _test_name + '.S',
-                     "w")
             _asm = asm_header + _asm_body + asm_footer
-            f.write(_asm)
-            f.close()
+            os.mkdir('tests/bpu/tests/' + _test_name)
+            with open('tests/bpu/tests/' + _test_name + '/' + _test_name + '.S',
+                      "w") as f:
+                f.write(_asm)
         else:
             logger.critical('Skipped {0}'.format(_test_name))
 
@@ -244,16 +243,15 @@ def main():
                  + "RVTEST_DATA_END\n\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END\n"
 
     create_plugins(plugins_path='tests/bpu/')
+    generate_tests(yaml_dict=bpu, test_file_dir="tests/bpu/")
     logger.warn("Yaml was not created, and the tests were not validated")
     generate_sv(yaml_dict=bpu, test_file_dir="tests/bpu/")
 
-    ##generate_tests(yaml_dict=bpu, test_file_dir="tests/bpu/")
-
-    ##if generate_yaml(yaml_dict=bpu, work_dir="tests/bpu/"):
-    ##    logger.info('Generated test_list.yaml')
-    ##else:
-    ##    logger.warn('No tests were created, test_list.yaml not generated')
-    ##validate_tests(yaml_dict=bpu, test_file_dir='tests/bpu/', clean=True)
+    #if generate_yaml(yaml_dict=bpu, work_dir="tests/bpu/"):
+    #    logger.info('Generated test_list.yaml')
+    #else:
+    #    logger.warn('No tests were created, test_list.yaml not generated')
+    #validate_tests(yaml_dict=bpu, test_file_dir='tests/bpu/', clean=True)
 
 
 if __name__ == "__main__":
