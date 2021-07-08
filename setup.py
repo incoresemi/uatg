@@ -46,10 +46,9 @@ setup(
     package_data={'uarch_test': ['requirements.txt', 'target/*', 'env/*']},
     install_requires=read_requires(),
     python_requires='>=3.6.0',
-    #TODO: define entry points.
-    #entry_points={
-    #    'console_scripts': ['riscv_ctg=riscv_ctg.main:cli',],
-    #},
+    entry_points={
+        'console_scripts': ['uarch_test=uarch_test.main:cli'],
+    },
     include_package_data=True,
     keywords='uarch_test',
     test_suite='tests',
