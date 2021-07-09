@@ -1,29 +1,22 @@
 import os
+import glob
 from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
-from utils import load_yaml, create_plugins, generate_yaml
+from utils import load_yaml, create_plugins
 from yapsy.PluginManager import PluginManager
 from uarch_test.log import logger
 from uarch_test.__init__ import __version__
 
-# TODO: Change folder names like this:
-# parent_dir = 'modules/' or 'blocks/'    # uarch_test/modules/
-# module_dir = parent_dir + module + '/'  # uarch_test/modules/bpu/
-# module_tests_dir = module_dir + 'tests/'# uarch_test/modules/bpu/tests/
-
 '''
-* this script runs from the parent_dir. i.e. parent_dir = os.cwd()
-* each module like bpu are stored in parent_dir/bpu/
-* inside each module directory, python and yapsy-plugin files are stored. 
-    /parent_dir/bpu/gshare_fa_zeros.py, 
-    /parent_dir/bpu/gshare_fa_zeros.yapsy-plugin,
-* Generated ASM and SV files are stored in tests/ folder inside module dir
+File directories naming convention:
+    parent_dir = 'modules/'                 # uarch_test/modules/
+    module_dir = parent_dir + module + '/'  # uarch_test/modules/bpu/
+    module_tests_dir = module_dir + 'tests/'# uarch_test/modules/bpu/tests/
 '''
 
 
-def generate_tests(module='branch_predictor', inp="target/dut_config.yaml",
-                   module_path='tests/bpu/', test_file_dir="tests/bpu/"):
+def generate_tests(module='branch_predictor', inp="target/dut_config.yaml"):
 
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
@@ -31,6 +24,10 @@ def generate_tests(module='branch_predictor', inp="target/dut_config.yaml",
     eg. module_class  = branch_predictor's object
     test_file_dir = bpu/
     """
+
+    parent_dir = os.getcwd()
+    module_dir = os.path.join(parent_dir, 'modules', module)
+    module_tests_dir = os.path.join(module_dir, 'tests')
 
     inp_yaml = load_yaml(inp)
     isa = inp_yaml['ISA']
@@ -42,7 +39,8 @@ def generate_tests(module='branch_predictor', inp="target/dut_config.yaml",
     logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
     logger.info('All Rights Reserved.')
     logger.info('****** Generating Tests ******')
-    create_plugins(plugins_path=module_path)
+
+    create_plugins(plugins_path=module_dir)
 
     username = getuser()
     time = ((str(datetime.now())).split("."))[0]
@@ -60,16 +58,14 @@ def generate_tests(module='branch_predictor', inp="target/dut_config.yaml",
                  + "RVTEST_DATA_END\n\nRVMODEL_DATA_BEGIN\nRVMODEL_DATA_END\n"
 
     manager = PluginManager()
-    manager.setPluginPlaces([test_file_dir])
+    manager.setPluginPlaces([module_dir])  # plugins are stored in module_dir
     manager.collectPlugins()
 
-    # TODO : find a way to send module_params to the class.
+    # check if prior test files are present and remove them. create a new dir.
+    if (os.path.isdir(module_tests_dir)) and os.path.exists(module_tests_dir):
+        rmtree(module_tests_dir)
+    os.mkdir(module_tests_dir)
 
-    dir_path = os.path.join(test_file_dir, 'tests')
-    if (os.path.isdir(dir_path)) and os.path.exists(dir_path):
-        rmtree(test_file_dir + "tests/")
-
-    os.mkdir(test_file_dir + "tests/")
     # Loop around and find the plugins and writes the contents from the
     # plugins into an asm file
     for plugin in manager.getAllPlugins():
@@ -79,80 +75,32 @@ def generate_tests(module='branch_predictor', inp="target/dut_config.yaml",
         if _check:
             _asm_body = plugin.plugin_object.generate_asm()
             _asm = asm_header + _asm_body + asm_footer
-            os.mkdir('tests/bpu/tests/' + _test_name)
-            with open('tests/bpu/tests/' + _test_name + '/' + _test_name + '.S',
-                      "w") as f:
+            os.mkdir(os.path.join(module_tests_dir, _test_name))
+            with open(
+                    os.path.join(module_tests_dir, _test_name,
+                                 _test_name + '.S'), "w") as f:
                 f.write(_asm)
         else:
             logger.critical('Skipped {0}'.format(_test_name))
     logger.warn("Yaml was not created, and the tests were not validated")
-    generate_sv(module_params=module_params, test_file_dir="tests/bpu/")
+    generate_sv(module=module, inp=inp)
 
 
-def validate_tests(yaml_dict, test_file_dir="bpu/", clean=False):
-    manager = PluginManager()
-    manager.setPluginPlaces([test_file_dir])
-    manager.collectPlugins()
-    _pass_ct = 0
-    _fail_ct = 0
-    _tot_ct = 1
-    print("\n")
-    for plugin in manager.getAllPlugins():
-        _name = (str(plugin.plugin_object).split(".", 1))
-        _test_name = ((_name[1].split(" ", 1))[0])
-        _check = plugin.plugin_object.execute(yaml_dict)
-        if _check:
-            _result = plugin.plugin_object.check_log(
-                log_file_path=test_file_dir + 'tests/' + _test_name + '/log')
-            if _result:
-                logger.info('{0}. Minimal test: {1} has passed.'.format(
-                    _tot_ct, _test_name))
-                _pass_ct += 1
-                _tot_ct += 1
-            else:
-                logger.critical('{0}. Minimal test: {1} has failed.'.format(
-                    _tot_ct, _test_name))
-                _fail_ct += 1
-                _tot_ct += 1
-        else:
-            logger.warn('No asm generated for {0}. Skipping'.format(_test_name))
-
-    print('\n\n')
-    logger.info("Minimal Verification Results")
-    logger.info("=" * 28)
-    logger.info("Total Tests : {0}".format(_tot_ct - 1))
-
-    if _tot_ct - 1:
-        logger.info("Tests Passed : {0} - [{1} %]".format(
-            _pass_ct, 100 * _pass_ct // (_tot_ct - 1)))
-        logger.warn("Tests Failed : {0} - [{1} %]".format(
-            _fail_ct, 100 * _fail_ct // (_tot_ct - 1)))
-    else:
-        logger.warn("No tests were created")
-
-    if clean:
-        files = os.listdir(test_file_dir)
-        plugins = [file for file in files if file.endswith(".yapsy-plugin")]
-        for file in plugins:
-            path_to_file = os.path.join(test_file_dir, file)
-            os.remove(path_to_file)
-        logger.info("Plugins Cleaned")
-        for i in os.listdir(test_file_dir + "__pycache__"):
-            os.remove(os.path.join(test_file_dir + "__pycache__", i))
-        os.rmdir(test_file_dir + "__pycache__")
-
-        logger.info("Python files Cleaned")
-
-
-def generate_sv(module_params, test_file_dir="bpu/"):
+def generate_sv(module='branch_predictor', inp="target/dut_config.yaml"):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the covergroups (System Verilog) for the test files in a new directory.
     test_file_dir = bpu/
     """
+    parent_dir = os.getcwd()
+    module_dir = os.path.join(parent_dir, 'modules', module)
+    module_tests_dir = os.path.join(module_dir, 'tests')
+
+    inp_yaml = load_yaml(inp)
+    module_params = inp_yaml[module]
 
     manager = PluginManager()
-    manager.setPluginPlaces([test_file_dir])
+    manager.setPluginPlaces([module_dir])
     manager.collectPlugins()
 
     # Loop around and find the plugins and writes the contents from the
@@ -167,8 +115,8 @@ def generate_sv(module_params, test_file_dir="bpu/"):
                 # TODO: Check what the name of the SV file should be
                 # TODO: Include the creation of TbTop and Interface SV files
                 with open(
-                        'tests/bpu/tests/' + _test_name + '/' + _test_name +
-                        '.sv', "w") as f:
+                        os.path.join(module_tests_dir, _test_name,
+                                     _test_name + '.sv'), "w") as f:
                     logger.info('Generating for {0}'.format(_test_name))
                     f.write(_sv)
 
@@ -180,32 +128,75 @@ def generate_sv(module_params, test_file_dir="bpu/"):
             logger.critical('Skipped {0}'.format(_test_name))
 
 
-def main(module='branch_predictor', inp="target/dut_config.yaml",
-         module_path='tests/bpu/'):
-    logger.level('debug')
-    logger.info('****** Micro Architectural Tests *******')
-    logger.info('Version : {0}'.format(__version__))
-    logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
-    logger.info('All Rights Reserved.')
-    logger.info('****** Generating Tests ******')
+def validate_tests(module='branch_predictor', inp="target/dut_config.yaml"):
+    parent_dir = os.getcwd()
+    module_dir = os.path.join(parent_dir, 'modules', module)
+    module_tests_dir = os.path.join(module_dir, 'tests')
 
-    # inp = "target/dut_config.yaml"  # yaml file with configuration details
     inp_yaml = load_yaml(inp)
-    isa = inp_yaml['ISA']
     module_params = inp_yaml[module]
 
-    create_plugins(plugins_path=module_path)
-    generate_tests(isa=isa, module_params=module_params,
-                   test_file_dir=module_path)
-    logger.warn("Yaml was not created, and the tests were not validated")
-    generate_sv(module_params=module_params, test_file_dir="tests/bpu/")
+    manager = PluginManager()
+    manager.setPluginPlaces([module_dir])
+    manager.collectPlugins()
 
-    # if generate_yaml(yaml_dict=bpu, work_dir="tests/bpu/"):
-    #    logger.info('Generated test_list.yaml')
-    # else:
-    #    logger.warn('No tests were created, test_list.yaml not generated')
-    # validate_tests(yaml_dict=bpu, test_file_dir='tests/bpu/', clean=True)
+    _pass_ct = 0
+    _fail_ct = 0
+    _tot_ct = 1
+
+    for plugin in manager.getAllPlugins():
+        _name = (str(plugin.plugin_object).split(".", 1))
+        _test_name = ((_name[1].split(" ", 1))[0])
+        _check = plugin.plugin_object.execute(module_params)
+        if _check:
+            _result = plugin.plugin_object.check_log(
+                log_file_path=os.path.join(module_tests_dir, _test_name, 'log'))
+            if _result:
+                logger.info('{0}. Minimal test: {1} has passed.'.format(
+                    _tot_ct, _test_name))
+                _pass_ct += 1
+                _tot_ct += 1
+            else:
+                logger.critical('{0}. Minimal test: {1} has failed.'.format(
+                    _tot_ct, _test_name))
+                _fail_ct += 1
+                _tot_ct += 1
+        else:
+            logger.warn('No asm generated for {0}. Skipping'.format(_test_name))
+
+    logger.info("Minimal Verification Results")
+    logger.info("=" * 28)
+    logger.info("Total Tests : {0}".format(_tot_ct - 1))
+
+    if _tot_ct - 1:
+        logger.info("Tests Passed : {0} - [{1} %]".format(
+            _pass_ct, 100 * _pass_ct // (_tot_ct - 1)))
+        logger.warn("Tests Failed : {0} - [{1} %]".format(
+            _fail_ct, 100 * _fail_ct // (_tot_ct - 1)))
+    else:
+        logger.warn("No tests were created")
 
 
-if __name__ == "__main__":
-    main()
+def clean():
+
+    """
+    This function cleans unwanted files. Presently it removes __pycache__,
+    tests/ directory inside modules and yapsy plugins.
+    """
+
+    parent_dir = os.getcwd()
+    module_dir = os.path.join(parent_dir, 'modules', '**')
+    module_tests_dir = os.path.join(module_dir, 'tests')
+
+    yapsy_dir = os.path.join(module_dir, '*.yapsy-plugin')
+    pycache_dir = os.path.join(module_dir, '__pycache__')
+
+    tf = glob.glob(module_tests_dir)
+    pf = glob.glob(pycache_dir) + glob.glob(
+        os.path.join(parent_dir, '__pycache__'))
+    yf = glob.glob(yapsy_dir)
+    for i in tf + pf:
+        rmtree(i)
+    for i in yf:
+        os.remove(i)
+    logger.info("Generated Test files/folders removed")
