@@ -190,24 +190,24 @@ def generate_sv(yaml_dict, test_file_dir="bpu/"):
         _check = plugin.plugin_object.execute(yaml_dict)
         _name = (str(plugin.plugin_object).split(".", 1))
         _test_name = ((_name[1].split(" ", 1))[0])
+        _sv = ""
         if _check:
             try:
+                _sv = _sv + _sv
                 _sv = plugin.plugin_object.generate_covergroups()
                 # To-Do -> Check what the name of the SV file should be
                 # To-Do -> Include the creation of TbTop and Interface SV files
-                with open(
-                        'tests/bpu/tests/' + _test_name + '/' + _test_name +
-                        '.sv', "w") as f:
-                    logger.info('Generating for {0}'.format(_test_name))
-                    f.write(_sv)
-
+                
             except AttributeError:
                 logger.warn('Skipping {0}'.format(_test_name))
                 pass
 
         else:
             logger.critical('Skipped {0}'.format(_test_name))
-
+    # to do -> dump interface along with covergroups
+    with open('tests/bpu/tests/covergroup.sv', "w") as f:
+        logger.info('Generating for {0}'.format(_test_name))
+        f.write(_sv)
 
 def main():
 
