@@ -1,7 +1,7 @@
 uarch_test/asm_tests/
 uarch_test/modules/__pycache__/
-uarch_test/modules/bpu/__pycache__/
-uarch_test/modules/bpu/tests/
+uarch_test/modules/branch_predictor/__pycache__/
+uarch_test/modules/branch_predictor/tests/
 **.pyc
 **.pyo
 **.S
