@@ -7,16 +7,16 @@ from utils import load_yaml, create_plugins
 from yapsy.PluginManager import PluginManager
 from uarch_test.log import logger
 from uarch_test.__init__ import __version__
-
+# TODO: utils.py and regex.py are not getting imported!
 '''
 File directories naming convention:
-    parent_dir = 'modules/'                 # uarch_test/modules/
-    module_dir = parent_dir + module + '/'  # uarch_test/modules/bpu/
-    module_tests_dir = module_dir + 'tests/'# uarch_test/modules/bpu/tests/
+    parent_dir = 'modules/'                 uarch_test/modules/
+    module_dir = parent_dir + module + '/'  uarch_test/modules/branch_predictor/
+    module_tests_dir = module_dir + 'tests/'uarch_test/modules/branch_predictor/tests/
 '''
 
 
-def generate_tests(module='branch_predictor', inp="target/dut_config.yaml"):
+def generate_tests(module='branch_predictor', inp="target/dut_config.yaml", verbose='debug'):
 
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
@@ -33,7 +33,7 @@ def generate_tests(module='branch_predictor', inp="target/dut_config.yaml"):
     isa = inp_yaml['ISA']
     module_params = inp_yaml[module]
 
-    logger.level('debug')
+    logger.level(verbose)
     logger.info('****** Micro Architectural Tests *******')
     logger.info('Version : {0}'.format(__version__))
     logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
@@ -83,15 +83,17 @@ def generate_tests(module='branch_predictor', inp="target/dut_config.yaml"):
         else:
             logger.critical('Skipped {0}'.format(_test_name))
     logger.warn("Yaml was not created, and the tests were not validated")
-    generate_sv(module=module, inp=inp)
+    generate_sv(module=module, inp=inp, verbose=verbose)
 
 
-def generate_sv(module='branch_predictor', inp="target/dut_config.yaml"):
+def generate_sv(module='branch_predictor', inp="target/dut_config.yaml", verbose='debug'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the covergroups (System Verilog) for the test files in a new directory.
     test_file_dir = bpu/
     """
+
+    logger.level(verbose)
     parent_dir = os.getcwd()
     module_dir = os.path.join(parent_dir, 'modules', module)
     module_tests_dir = os.path.join(module_dir, 'tests')
@@ -128,7 +130,8 @@ def generate_sv(module='branch_predictor', inp="target/dut_config.yaml"):
             logger.critical('Skipped {0}'.format(_test_name))
 
 
-def validate_tests(module='branch_predictor', inp="target/dut_config.yaml"):
+def validate_tests(module='branch_predictor', inp="target/dut_config.yaml", verbose='debug'):
+    logger.level(verbose)
     parent_dir = os.getcwd()
     module_dir = os.path.join(parent_dir, 'modules', module)
     module_tests_dir = os.path.join(module_dir, 'tests')
@@ -177,13 +180,13 @@ def validate_tests(module='branch_predictor', inp="target/dut_config.yaml"):
         logger.warn("No tests were created")
 
 
-def clean():
+def clean_dirs(verbose='debug'):
 
     """
     This function cleans unwanted files. Presently it removes __pycache__,
     tests/ directory inside modules and yapsy plugins.
     """
-
+    logger.level(verbose)
     parent_dir = os.getcwd()
     module_dir = os.path.join(parent_dir, 'modules', '**')
     module_tests_dir = os.path.join(module_dir, 'tests')
