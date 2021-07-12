@@ -1,7 +1,7 @@
 # python program to generate an assembly file which fills the ghr with ones
 # the ghr will have a zero entry when the loop exits
 from yapsy.IPlugin import IPlugin
-import regex_formats as rf
+import uarch_test.regex_formats as rf
 import re
 
 

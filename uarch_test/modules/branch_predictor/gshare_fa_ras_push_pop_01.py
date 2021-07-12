@@ -1,7 +1,7 @@
 # python script to automate test 11 in micro-arch test
 
 from yapsy.IPlugin import IPlugin
-import regex_formats as rf
+import uarch_test.regex_formats as rf
 import re
 
 

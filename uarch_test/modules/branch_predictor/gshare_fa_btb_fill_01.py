@@ -3,7 +3,7 @@
 # 1 jump from the includes and 32  in the program
 
 from yapsy.IPlugin import IPlugin
-import regex_formats as rf
+import uarch_test.regex_formats as rf
 import re
 
 

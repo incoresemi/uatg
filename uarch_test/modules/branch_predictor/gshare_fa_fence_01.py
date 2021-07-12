@@ -1,7 +1,7 @@
 # This program fences the CPU and checks if the BTB entries are invalidated.
 
 from yapsy.IPlugin import IPlugin
-import regex_formats as rf
+import uarch_test.regex_formats as rf
 import re
 
 
