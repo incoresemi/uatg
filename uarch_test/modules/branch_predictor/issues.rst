@@ -4,11 +4,9 @@ List of known issues with Gshare FA BPU Testing
 
 Open issues
 ===========
-- The hashing function is not easily predictable, hence it is not possible to
-  create tests which require the BHT index to be fixed, say predict-mispredict
-  test. 
-  Tests dependent on this issue
-  -----------------------------
+- The hashing function is not easily predictable, hence it is not possible to create tests which require the BHT index to be fixed, say predict-mispredict test. 
+  
+  :Tests dependent on this issue:
   * **Predict-Mispredict test:** This test predicts a branch to be taken and not 
     taken correctly. Currently, the BPU gets trained to predict taken correctly, 
     but when attempting to correctly predict a not taken, the BHT index changes.
