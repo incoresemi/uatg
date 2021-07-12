@@ -3,7 +3,7 @@ import glob
 from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
-from utils import load_yaml, create_plugins
+from uarch_test.utils import load_yaml, create_plugins
 from yapsy.PluginManager import PluginManager
 from uarch_test.log import logger
 from uarch_test.__init__ import __version__
@@ -80,9 +80,13 @@ def generate_tests(module='branch_predictor', inp="target/dut_config.yaml", verb
                     os.path.join(module_tests_dir, _test_name,
                                  _test_name + '.S'), "w") as f:
                 f.write(_asm)
+            logger.info('Generating test for {0}'.format(_test_name))
         else:
             logger.critical('Skipped {0}'.format(_test_name))
+    logger.info('****** Finished Generating Tests ******')
+    
     logger.warn("Yaml was not created, and the tests were not validated")
+    
     generate_sv(module=module, inp=inp, verbose=verbose)
 
 
@@ -105,6 +109,8 @@ def generate_sv(module='branch_predictor', inp="target/dut_config.yaml", verbose
     manager.setPluginPlaces([module_dir])
     manager.collectPlugins()
 
+    logger.info('****** Generating Coverpoints ******')
+
     # Loop around and find the plugins and writes the contents from the
     # plugins into a System Verilog file
     for plugin in manager.getAllPlugins():
@@ -119,15 +125,17 @@ def generate_sv(module='branch_predictor', inp="target/dut_config.yaml", verbose
                 with open(
                         os.path.join(module_tests_dir, _test_name,
                                      _test_name + '.sv'), "w") as f:
-                    logger.info('Generating for {0}'.format(_test_name))
+                    logger.info('Generating coverpoints SV file for {0}'.format(_test_name))
                     f.write(_sv)
 
             except AttributeError:
-                logger.warn('Skipping {0}'.format(_test_name))
+                logger.warn('Skipping coverpoint generation for {0} as there is no gen_covergroup method'.format(_test_name))
                 pass
 
         else:
-            logger.critical('Skipped {0}'.format(_test_name))
+            logger.critical('Skipped {0} as this test is not created for the current DUT configuration'.format(_test_name))
+
+    logger.info('****** Finished Generating Coverpoints ******')
 
 
 def validate_tests(module='branch_predictor', inp="target/dut_config.yaml", verbose='debug'):
@@ -138,6 +146,8 @@ def validate_tests(module='branch_predictor', inp="target/dut_config.yaml", verb
 
     inp_yaml = load_yaml(inp)
     module_params = inp_yaml[module]
+
+    logger.info('****** Validating Test results, Minimal log checking ******')
 
     manager = PluginManager()
     manager.setPluginPlaces([module_dir])
@@ -178,7 +188,8 @@ def validate_tests(module='branch_predictor', inp="target/dut_config.yaml", verb
             _fail_ct, 100 * _fail_ct // (_tot_ct - 1)))
     else:
         logger.warn("No tests were created")
-
+    
+    logger.info('****** Finished Validating Test results ******')
 
 def clean_dirs(verbose='debug'):
 
@@ -191,6 +202,7 @@ def clean_dirs(verbose='debug'):
     module_dir = os.path.join(parent_dir, 'modules', '**')
     module_tests_dir = os.path.join(module_dir, 'tests')
 
+    logger.info('****** Cleaning ******')
     yapsy_dir = os.path.join(module_dir, '*.yapsy-plugin')
     pycache_dir = os.path.join(module_dir, '__pycache__')
 
