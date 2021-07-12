@@ -36,10 +36,11 @@ from uarch_test.__init__ import __version__
                    'False. Generates ASM files and SV Files',
               type=click.Choice(['True', 'False'], case_sensitive=False))
 def cli(verbose, config_file, gen_test, clean):
-    print(verbose, config_file, gen_test, clean)
+    #print(verbose, config_file, gen_test, clean)
 
-    if clean == 'True' or clean == 'true':
-        clean_dirs(verbose)
     if gen_test == 'True' or gen_test == 'true':
         generate_tests(module='branch_predictor', inp=config_file,
                        verbose=verbose)
+
+    if clean == 'True' or clean == 'true':
+        clean_dirs(verbose)
