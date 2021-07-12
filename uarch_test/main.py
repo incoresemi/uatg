@@ -26,17 +26,20 @@ from uarch_test.__init__ import __version__
               '-cl',
               default='False',
               help='Set to True if generated files needs to be cleaned.'
-              'Presently, __pycache__, tests/ folders are removed along with '
-              'yapsy-plugins',
+                   'Presently, __pycache__, tests/ folders are removed along with '
+                   'yapsy-plugins',
               type=click.Choice(['True', 'False'], case_sensitive=False))
 @click.option('--gen_test',
               '-g',
               default='False',
               help='Set to True if tests are to be generated. Else set it to '
-              'False. Generates ASM files and SV Files',
+                   'False. Generates ASM files and SV Files',
               type=click.Choice(['True', 'False'], case_sensitive=False))
 def cli(verbose, config_file, gen_test, clean):
-    if clean:
+    print(verbose, config_file, gen_test, clean)
+
+    if clean == 'True' or clean == 'true':
         clean_dirs(verbose)
-    if gen_test:
-        generate_tests(module='branch_predictor', inp=config_file, verbose=verbose)
+    if gen_test == 'True' or gen_test == 'true':
+        generate_tests(module='branch_predictor', inp=config_file,
+                       verbose=verbose)

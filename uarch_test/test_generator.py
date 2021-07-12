@@ -191,6 +191,7 @@ def validate_tests(module='branch_predictor', inp="target/dut_config.yaml", verb
     
     logger.info('****** Finished Validating Test results ******')
 
+
 def clean_dirs(verbose='debug'):
 
     """
