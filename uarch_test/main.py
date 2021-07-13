@@ -39,7 +39,14 @@ from uarch_test.__init__ import __version__
               help='val_test flag is set if generated tests are to be validated'
                    '. Validates log files & SV cover-points',
               )
-def cli(verbose, clean, config_file, gen_test, val_test):
+@click.option('--module',
+              '-m',
+              default='branch_predictor',
+              help="Select the module to generate tests. Use 'all' to "
+                   "generate for all supported modules",
+              type=click.Choice(['branch_predictor', 'all'],
+                                case_sensitive=False))
+def cli(verbose, clean, config_file, module, gen_test, val_test):
     logger.level(verbose)
 
     if (gen_test or val_test) and config_file is None:
@@ -48,11 +55,11 @@ def cli(verbose, clean, config_file, gen_test, val_test):
 
     if gen_test:
         logger.debug('invoking gen_test')
-        generate_tests(module='branch_predictor', inp=config_file,
+        generate_tests(module=module, inp=config_file,
                        verbose=verbose)
     if val_test:
         logger.debug('invoking val_test')
-        validate_tests(module='branch_predictor', inp=config_file,
+        validate_tests(module=module, inp=config_file,
                        verbose=verbose)
     if clean:
         clean_dirs(verbose)
