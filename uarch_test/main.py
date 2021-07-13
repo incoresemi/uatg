@@ -41,8 +41,6 @@ from uarch_test.__init__ import __version__
               )
 def cli(verbose, clean, config_file, gen_test, val_test):
     logger.level(verbose)
-    if clean:
-        clean_dirs(verbose)
 
     if (gen_test or val_test) and config_file is None:
         logger.error("config_file path is missing")
@@ -56,3 +54,5 @@ def cli(verbose, clean, config_file, gen_test, val_test):
         logger.debug('invoking val_test')
         validate_tests(module='branch_predictor', inp=config_file,
                        verbose=verbose)
+    if clean:
+        clean_dirs(verbose)
