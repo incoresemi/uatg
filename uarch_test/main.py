@@ -19,7 +19,7 @@ from uarch_test.__init__ import __version__
 @click.option('--clean',
               '-cl',
               is_flag=True,
-              help='Set to True if generated files needs to be cleaned.'
+              help='clean flag is set if generated files needs to be cleaned.'
                    'Presently, __pycache__, tests/ folders are removed along '
                    'with yapsy-plugins',)
 @click.option('--config_file',
@@ -31,16 +31,15 @@ from uarch_test.__init__ import __version__
 @click.option('--gen_test',
               '-gt',
               is_flag=True,
-              help='Set to True if tests are to be generated. Else set it to '
-                   'False. Generates ASM files and SV Files')
+              help='gen_test flag is set if tests are to be generated. '
+                   'Generates ASM files and SV Files')
 @click.option('--val_test',
               '-vt',
               is_flag=True,
-              help='Set to True if generated tests are to be validated. Else '
-                   'set it to False. Validates log files & SV cover-points',
+              help='val_test flag is set if generated tests are to be validated'
+                   '. Validates log files & SV cover-points',
               )
 def cli(verbose, clean, config_file, gen_test, val_test):
-    print(verbose, clean, config_file, gen_test, val_test)
 
     if clean:
         clean_dirs(verbose)
