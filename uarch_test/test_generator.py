@@ -3,6 +3,7 @@ import glob
 from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
+import uarch_test
 from uarch_test.utils import load_yaml, create_plugins
 from yapsy.PluginManager import PluginManager
 from uarch_test.log import logger
@@ -16,7 +17,7 @@ File directories naming convention:
 '''
 
 
-def generate_tests(module='branch_predictor', inp="target/dut_config.yaml", verbose='debug'):
+def generate_tests(module='branch_predictor/', inp="target/dut_config.yaml", verbose='debug'):
 
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
@@ -25,7 +26,7 @@ def generate_tests(module='branch_predictor', inp="target/dut_config.yaml", verb
     test_file_dir = bpu/
     """
 
-    parent_dir = os.getcwd()
+    parent_dir = os.path.dirname(uarch_test.__file__)
     module_dir = os.path.join(parent_dir, 'modules', module)
     module_tests_dir = os.path.join(module_dir, 'tests')
 
@@ -39,8 +40,15 @@ def generate_tests(module='branch_predictor', inp="target/dut_config.yaml", verb
     logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
     logger.info('All Rights Reserved.')
     logger.info('****** Generating Tests ******')
+    logger.info('parent dir is {0}'.format(parent_dir))
+    logger.info('module dir is {0}'.format(module_dir))
+    logger.info('module test dir is {0}'.format(module_tests_dir))
+
+    logger.info('Starting plugin Creation')
 
     create_plugins(plugins_path=module_dir)
+
+    logger.info('Created plugins')
 
     username = getuser()
     time = ((str(datetime.now())).split("."))[0]
@@ -98,7 +106,7 @@ def generate_sv(module='branch_predictor', inp="target/dut_config.yaml", verbose
     """
 
     logger.level(verbose)
-    parent_dir = os.getcwd()
+    parent_dir = os.path.dirname(uarch_test.__file__)
     module_dir = os.path.join(parent_dir, 'modules', module)
     module_tests_dir = os.path.join(module_dir, 'tests')
 
@@ -140,7 +148,7 @@ def generate_sv(module='branch_predictor', inp="target/dut_config.yaml", verbose
 
 def validate_tests(module='branch_predictor', inp="target/dut_config.yaml", verbose='debug'):
     logger.level(verbose)
-    parent_dir = os.getcwd()
+    parent_dir = os.path.dirname(uarch_test.__file__)
     module_dir = os.path.join(parent_dir, 'modules', module)
     module_tests_dir = os.path.join(module_dir, 'tests')
 
@@ -199,7 +207,7 @@ def clean_dirs(verbose='debug'):
     tests/ directory inside modules and yapsy plugins.
     """
     logger.level(verbose)
-    parent_dir = os.getcwd()
+    parent_dir = os.path.dirname(uarch_test.__file__)
     module_dir = os.path.join(parent_dir, 'modules', '**')
     module_tests_dir = os.path.join(module_dir, 'tests')
 
