@@ -21,7 +21,7 @@ from uarch_test.__init__ import __version__
               is_flag=True,
               help='clean flag is set if generated files needs to be cleaned.'
                    'Presently, __pycache__, tests/ folders are removed along '
-                   'with yapsy-plugins',)
+                   'with yapsy-plugins', )
 @click.option('--config_file',
               '-cf',
               multiple=False,
@@ -40,15 +40,19 @@ from uarch_test.__init__ import __version__
                    '. Validates log files & SV cover-points',
               )
 def cli(verbose, clean, config_file, gen_test, val_test):
-
+    logger.level(verbose)
     if clean:
         clean_dirs(verbose)
 
-    if gen_test and config_file is not None:
+    if (gen_test or val_test) and config_file is None:
+        logger.error("config_file path is missing")
+        exit(0)
+
+    if gen_test:
+        logger.debug('invoking gen_test')
         generate_tests(module='branch_predictor', inp=config_file,
                        verbose=verbose)
-
-    if val_test and config_file is not None:
+    if val_test:
+        logger.debug('invoking val_test')
         validate_tests(module='branch_predictor', inp=config_file,
                        verbose=verbose)
-        print('validated')
