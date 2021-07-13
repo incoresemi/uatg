@@ -25,6 +25,18 @@ def create_plugins(plugins_path):
             f.write("[Core]\nName=" + module_name + "\nModule=" + module_name)
             f.close()
 
+def create_linker(target_dir='target/'):
+    out = ""
+    out += "OUTPUT_ARCH( \"riscv\" )\nENTRY(rvtest_entry_point)\n\n"
+    out += "SECTIONS\n{\n  . = 0x80000000;\n  .text.init : { *(.text.init) }\n"
+    out += "  . = ALIGN(0x1000);\n  .tohost : { *(.tohost) }\n"
+    out += "  . = ALIGN(0x1000);\n  .text : { *(.text) }\n"
+    out += "  . = ALIGN(0x1000);\n  .data : { *(.data) }\n"
+    out += "  .data.string : { *(.data.string)}\n  .bss : { *(.bss) }\n"
+    out += "  _end = .;\n}\n"
+
+    with open(target_dir+"link.ld","w") as outfile:
+        outfile.write(out)
 
 def generate_yaml(module='branch_predictor', inp='target/dut_config.yaml', river_path="/", work_dir="bpu/"):
     """
@@ -82,5 +94,3 @@ def generate_yaml(module='branch_predictor', inp='target/dut_config.yaml', river
     with open(_path + 'test_list.yaml', 'w') as outfile:
         outfile.write(_data)
     return _generated_tests
-
-
