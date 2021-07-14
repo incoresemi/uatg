@@ -26,14 +26,24 @@ def create_plugins(plugins_path):
             f.close()
 
 def create_linker(target_dir='target/'):
-    out = ""
-    out += "OUTPUT_ARCH( \"riscv\" )\nENTRY(rvtest_entry_point)\n\n"
-    out += "SECTIONS\n{\n  . = 0x80000000;\n  .text.init : { *(.text.init) }\n"
-    out += "  . = ALIGN(0x1000);\n  .tohost : { *(.tohost) }\n"
-    out += "  . = ALIGN(0x1000);\n  .text : { *(.text) }\n"
-    out += "  . = ALIGN(0x1000);\n  .data : { *(.data) }\n"
-    out += "  .data.string : { *(.data.string)}\n  .bss : { *(.bss) }\n"
-    out += "  _end = .;\n}\n"
+    out = '''OUTPUT_ARCH( "riscv" )
+ENTRY(rvtest_entry_point)
+
+SECTIONS
+{
+  . = 0x80000000;
+  .text.init : { *(.text.init) }
+  . = ALIGN(0x1000);
+  .tohost : { *(.tohost) }
+  . = ALIGN(0x1000);
+  .text : { *(.text) }
+  . = ALIGN(0x1000);
+  .data : { *(.data) }
+  .data.string : { *(.data.string)}
+  .bss : { *(.bss) }
+  _end = .;
+} 
+'''
 
     with open(target_dir+"link.ld","w") as outfile:
         outfile.write(out)
