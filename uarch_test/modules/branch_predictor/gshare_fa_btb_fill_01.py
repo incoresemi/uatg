@@ -41,11 +41,11 @@ class gshare_fa_btb_fill_01(IPlugin):
             if i <= branch_count:
                 if (i % 2) == 1:
                     asm_branch += "entry_" + str(i) + ":\n"
-                    asm_branch += "add t1,t1,t2\n\tbeq t1,t2," \
+                    asm_branch += "\tadd t1,t1,t2\n\tbeq t1,t2," \
                                   "entry_" + str(i) + "\n\n"
                 else:
                     asm_branch += "entry_" + str(i) + ":\n"
-                    asm_branch += "sub t1,t1,t2\n\tbeq t1,t2," \
+                    asm_branch += "\tsub t1,t1,t2\n\tbeq t1,t2," \
                                   "entry_" + str(i) + "\n\n"
             elif branch_count < i <= 2 * branch_count:
                 if (i % 2) == 1:
