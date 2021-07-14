@@ -56,14 +56,15 @@ class gshare_fa_ghr_zeros_01(IPlugin):
         """
            returns the covergroups for this test
         """
-
-        sv = ""
-        sv = sv + "covergroup bpu_cg @(posedge CLK);\n"
-        sv = sv + "option.per_instance=1;\n"
-        sv = sv + "///coverpoint label can be any name that relates the signal\n"
-        sv = sv + "coverpoint_label: coverpoint rg_ghr_port1__read {\n"
-        sv = sv + "\tbins cp1 = {8'b00000000};\n\tbins cp2 = {8'b11111111};\n"
-        sv = sv + "\tbins cp3 = {8'b10101010};\n\tbins cp4 = {8'b10101010};\n}\n"
-        sv = sv + "endgroup\n"
-
+        sv = '''covergroup bpu_cg @(posedge CLK); 
+option.per_instance=1;
+///coverpoint label can be any name that relates the signal
+coverpoint_label: coverpoint rg_ghr_port1__read {
+    bins cp1 = {8'b00000000};
+    bins cp2 = {8'b11111111};
+    bins cp3 = {8'b01010101};
+    bins cp4 = {8'b10101010};
+}
+endgroup
+        '''
         return (sv)
