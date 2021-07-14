@@ -17,8 +17,10 @@ File directories naming convention:
 '''
 
 
-def generate_tests(module='branch_predictor/', inp="target/dut_config.yaml", verbose='debug'):
-
+def generate_tests(module='branch_predictor/',
+                   inp="target/dut_config.yaml",
+                   work_dir='/',
+                   verbose='debug'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the asm test files in a new directory.
@@ -92,13 +94,16 @@ def generate_tests(module='branch_predictor/', inp="target/dut_config.yaml", ver
         else:
             logger.critical('Skipped {0}'.format(_test_name))
     logger.info('****** Finished Generating Tests ******')
-    
+
     logger.warn("Yaml was not created, and the tests were not validated")
-    
+
     generate_sv(module=module, inp=inp, verbose=verbose)
 
 
-def generate_sv(module='branch_predictor', inp="target/dut_config.yaml", verbose='debug'):
+def generate_sv(module='branch_predictor',
+                inp="target/dut_config.yaml",
+                work_dir='/',
+                verbose='debug'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the covergroups (System Verilog) for the test files in a new directory.
@@ -133,20 +138,27 @@ def generate_sv(module='branch_predictor', inp="target/dut_config.yaml", verbose
                 with open(
                         os.path.join(module_tests_dir, _test_name,
                                      _test_name + '.sv'), "w") as f:
-                    logger.info('Generating coverpoints SV file for {0}'.format(_test_name))
+                    logger.info('Generating coverpoints SV file for {0}'.format(
+                        _test_name))
                     f.write(_sv)
 
             except AttributeError:
-                logger.warn('Skipping coverpoint generation for {0} as there is no gen_covergroup method'.format(_test_name))
+                logger.warn(
+                    'Skipping coverpoint generation for {0} as there is no gen_covergroup method'
+                    .format(_test_name))
                 pass
 
         else:
-            logger.critical('Skipped {0} as this test is not created for the current DUT configuration'.format(_test_name))
+            logger.critical(
+                'Skipped {0} as this test is not created for the current DUT configuration'
+                .format(_test_name))
 
     logger.info('****** Finished Generating Coverpoints ******')
 
 
-def validate_tests(module='branch_predictor', inp="target/dut_config.yaml", verbose='debug'):
+def validate_tests(module='branch_predictor',
+                   inp="target/dut_config.yaml",
+                   verbose='debug'):
     logger.level(verbose)
     parent_dir = os.path.dirname(uarch_test.__file__)
     module_dir = os.path.join(parent_dir, 'modules', module)
@@ -196,12 +208,11 @@ def validate_tests(module='branch_predictor', inp="target/dut_config.yaml", verb
             _fail_ct, 100 * _fail_ct // (_tot_ct - 1)))
     else:
         logger.warn("No tests were created")
-    
+
     logger.info('****** Finished Validating Test results ******')
 
 
-def clean_dirs(verbose='debug'):
-
+def clean_dirs(work_dir='/', verbose='debug'):
     """
     This function cleans unwanted files. Presently it removes __pycache__,
     tests/ directory inside modules and yapsy plugins.

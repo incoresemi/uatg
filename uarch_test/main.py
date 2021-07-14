@@ -28,6 +28,12 @@ from uarch_test.__init__ import __version__
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the yaml file containing DUT configuration. "
                    "Needed to generate/validate tests")
+@click.option('--work_dir',
+              '-wd',
+              multiple=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the working directory where generated files will be"
+                   " stored.")
 @click.option('--gen_test',
               '-gt',
               is_flag=True,
@@ -42,11 +48,12 @@ from uarch_test.__init__ import __version__
 @click.option('--module',
               '-m',
               default='branch_predictor',
+              multiple=True,
               help="Select the module to generate tests. Use 'all' to "
                    "generate for all supported modules",
               type=click.Choice(['branch_predictor', 'all'],
                                 case_sensitive=False))
-def cli(verbose, clean, config_file, module, gen_test, val_test):
+def cli(verbose, clean, config_file, work_dir, module, gen_test, val_test):
     logger.level(verbose)
 
     if (gen_test or val_test) and config_file is None:
@@ -56,10 +63,10 @@ def cli(verbose, clean, config_file, module, gen_test, val_test):
     if gen_test:
         logger.debug('invoking gen_test')
         generate_tests(module=module, inp=config_file,
-                       verbose=verbose)
+                       work_dir=work_dir, verbose=verbose)
     if val_test:
         logger.debug('invoking val_test')
         validate_tests(module=module, inp=config_file,
-                       verbose=verbose)
+                       work_dir=work_dir, verbose=verbose)
     if clean:
-        clean_dirs(verbose)
+        clean_dirs(work_dir=work_dir, verbose=verbose)
