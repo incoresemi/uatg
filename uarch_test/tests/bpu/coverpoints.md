@@ -1,7 +1,7 @@
 ## coverpoints will be added here
 
 1. gshare_fa_btb_fill_01: Fills the BTB with different types of instructions. The number of instructions is dependent on the depth of the BTB
-   - Coverpoint : 1. reg **rg_allocate** should change from *0 to `btb_depth -1* also check if the BTB Tags become valid. **LSB of all v_reg_btb_tag_XX should change from 0 to 1** 2. the instruction type should be checked -- all 4 types are encountered atleast once (signal names will be updated)
+   - Coverpoint : 1. reg **rg_allocate** should change from *0 to `btb_depth -1* also check if the BTB Tags become valid. **LSB of all v_reg_btb_tag_XX should change from 0 to 1** 2. bits **2 and 3** of the v_reg_btb_entry_XX should contain 01,00,10 and 11 (across the 32 entries) 
 2. gshare_fa_btb_self_modifying_01, gshare_fa_btb_fence_01: Fences the core atleast twice. 
    - Coverpoint : 1. **rg_allocate** should become zero 2. **v_reg_btb_tag_XX** should become 0 (the entire 63bit reg) 3. **rg_ghr_port1__read** should become zero.s. 4. Stack will be cleared (proper signal names will be updated)
 3. gshare_fa_btb_mispredict_01: makes sure there was atleast one misprediction
