@@ -68,17 +68,21 @@ class gshare_fa_fence_01(IPlugin):
            returns the covergroups for this test
         """
 
-        sv = '''covergroup gshare_fa_fence_01;
+        sv = "covergroup gshare_fa_fence_01;
 option.per_instance=1;
 ///coverpoint -rg_initialize should toggle from 0->1
 rg_initialize_cp : coverpoint rg_initialize {
    bins rg_initialize_0to1 = (0=>1);}
 
 }
-///coverpoint -  rg_initilaize toggles friom 1->0 2. rg_allocate should become zero 3. v_reg_btb_tag_XX should become 0 (the entire 63bit reg) 4. rg_ghr_port1__read should become zeros. 5. ras_stack_top_index_port2__read should become 0\n'''
+///Coverpoint to check the LSB of v_reg_btb_tax_00 is valid
+btb_valids_cp: coverpoint btb_valids {
+        bins valid = {"+ str(self.btb_depth) + "'b11111111_11111111_11111111_11111111};
+}
+///coverpoint -  rg_initilaize toggles friom 1->0 2. rg_allocate should become zero 3. v_reg_btb_tag_XX should become 0 (the entire 63bit reg) 4. rg_ghr_port1__read should become zeros. 5. ras_stack_top_index_port2__read should become 0\n"
         for i in range(self.btb_depth):
-           sv = sv + "rg_initialize_"+str(i)+" coverpoint rg_initialize{\n
-           bins rg_initialize_"+str(i)+"1to0 = (1=>0) iff (rg_allocate == 5'b0 && v_reg_btb_tag_"+str(i)+" == 64'b0 && rg_ghr_port1_read == 8'b0 && ras_stack_top_index_port2__read == 3'b0);}"
+           sv = sv + "rg_initialize_"+str(i)+": coverpoint rg_initialize{\n
+           bins rg_initialize_"+str(i)+"1to0 = (1=>0) iff (rg_allocate == 'b0 && v_reg_btb_tag_"+str(i)+" == 'b0 && rg_ghr_port1_read == 'b0 && ras_stack_top_index_port2__read == 'b0);}"
         sv = sv + "endgroup"
 
         return (sv)
