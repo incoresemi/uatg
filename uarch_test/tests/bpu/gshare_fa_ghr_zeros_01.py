@@ -56,7 +56,7 @@ class gshare_fa_ghr_zeros_01(IPlugin):
         """
            returns the covergroups for this test
         """
-        sv = '''covergroup bpu_cg @(posedge CLK); 
+        sv = '''covergroup bpu_cg; 
 option.per_instance=1;
 ///coverpoint label can be any name that relates the signal
 coverpoint_label: coverpoint rg_ghr_port1__read {
