@@ -93,3 +93,115 @@ class gshare_fa_btb_fill_01(IPlugin):
             if str(i) not in new_arr[i]:
                 return False
         return True
+
+    def generate_covergroups(self):
+        """
+           returns the covergroups for this test
+        """
+        sv = '''covergroup gshare_fa_btb_fill_cg;
+option.per_instance=1;
+///Coverpoint : reg rg_allocate should change from 0 to `btb_depth -1
+rg_allocate_cp : coverpoint rg_allocate[4:0] {
+    bins rg_allocate_bin[32] = {[0:31]} iff (rg_initialize == 0);
+}
+///Coverpoints to check the bits 2 and 3 of the v_reg_btb_entry_XX should contain 01,00,10 and 11 (across the 32 entries)
+v_reg_btb_entry_0_cp: coverpoint v_reg_btb_entry_0[3:2]{
+    bins v_reg_btb_entry_0_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_1_cp: coverpoint v_reg_btb_entry_1[3:2]{
+    bins v_reg_btb_entry_1_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_2_cp: coverpoint v_reg_btb_entry_2[3:2]{
+    bins v_reg_btb_entry_2_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_3_cp: coverpoint v_reg_btb_entry_3[3:2]{
+    bins v_reg_btb_entry_3_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_4_cp: coverpoint v_reg_btb_entry_4[3:2]{
+    bins v_reg_btb_entry_4_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_5_cp: coverpoint v_reg_btb_entry_5[3:2]{
+    bins v_reg_btb_entry_5_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_6_cp: coverpoint v_reg_btb_entry_6[3:2]{
+    bins v_reg_btb_entry_6_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_7_cp: coverpoint v_reg_btb_entry_7[3:2]{
+    bins v_reg_btb_entry_7_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_8_cp: coverpoint v_reg_btb_entry_8[3:2]{
+    bins v_reg_btb_entry_8_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_9_cp: coverpoint v_reg_btb_entry_9[3:2]{
+    bins v_reg_btb_entry_9_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_10_cp: coverpoint v_reg_btb_entry_10[3:2]{
+    bins v_reg_btb_entry_10_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_11_cp: coverpoint v_reg_btb_entry_11[3:2]{
+    bins v_reg_btb_entry_11_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_12_cp: coverpoint v_reg_btb_entry_12[3:2]{
+    bins v_reg_btb_entry_12_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_13_cp: coverpoint v_reg_btb_entry_13[3:2]{
+    bins v_reg_btb_entry_13_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_14_cp: coverpoint v_reg_btb_entry_14[3:2]{
+    bins v_reg_btb_entry_14_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_15_cp: coverpoint v_reg_btb_entry_15[3:2]{
+    bins v_reg_btb_entry_15_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_16_cp: coverpoint v_reg_btb_entry_16[3:2]{
+    bins v_reg_btb_entry_16_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_17_cp: coverpoint v_reg_btb_entry_17[3:2]{
+    bins v_reg_btb_entry_17_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_18_cp: coverpoint v_reg_btb_entry_18[3:2]{
+    bins v_reg_btb_entry_18_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_19_cp: coverpoint v_reg_btb_entry_19[3:2]{
+    bins v_reg_btb_entry_19_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_20_cp: coverpoint v_reg_btb_entry_20[3:2]{
+    bins v_reg_btb_entry_20_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_21_cp: coverpoint v_reg_btb_entry_21[3:2]{
+    bins v_reg_btb_entry_21_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_22_cp: coverpoint v_reg_btb_entry_22[3:2]{
+    bins v_reg_btb_entry_22_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_23_cp: coverpoint v_reg_btb_entry_23[3:2]{
+    bins v_reg_btb_entry_23_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_24_cp: coverpoint v_reg_btb_entry_24[3:2]{
+    bins v_reg_btb_entry_24_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_25_cp: coverpoint v_reg_btb_entry_25[3:2]{
+    bins v_reg_btb_entry_25_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_26_cp: coverpoint v_reg_btb_entry_26[3:2]{
+    bins v_reg_btb_entry_26_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_27_cp: coverpoint v_reg_btb_entry_27[3:2]{
+    bins v_reg_btb_entry_27_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_28_cp: coverpoint v_reg_btb_entry_28[3:2]{
+    bins v_reg_btb_entry_28_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_29_cp: coverpoint v_reg_btb_entry_29[3:2]{
+    bins v_reg_btb_entry_29_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_30_cp: coverpoint v_reg_btb_entry_30[3:2]{
+    bins v_reg_btb_entry_30_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+v_reg_btb_entry_31_cp: coverpoint v_reg_btb_entry_31[3:2]{
+    bins v_reg_btb_entry_31_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);
+}
+endgroup
+        '''
+
+        return (sv)
