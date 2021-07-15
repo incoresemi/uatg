@@ -5,6 +5,30 @@ from uarch_test.log import logger
 from yapsy.PluginManager import PluginManager
 
 
+def clean_cli_params(config_file, work_dir, module, gen_test, val_test):
+    error = (False, '')
+    try:
+        module = module.replace(' ', ',')
+        module = module.replace(', ', ',')
+        module = module.replace(' ,', ',')
+        module = list(set(module.split(",")))
+        module.remove('')
+        module.sort()
+    except ValueError as e:
+        pass
+    if 'all' in module:
+        module = ['all']
+
+    if (gen_test or val_test) and config_file is None:
+        error = (True, "Can not generate/validate with config_file path "
+                       "missing")
+
+    if work_dir is None:
+        work_dir = '/'
+
+    return work_dir, module, error
+
+
 def load_yaml(foo):
     yaml = YAML(typ="rt")
     yaml.default_flow_style = False
