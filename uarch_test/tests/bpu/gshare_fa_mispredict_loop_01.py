@@ -36,7 +36,7 @@ class gshare_fa_mispredict_loop_01(IPlugin):
         # times more than the actual ghr width for the BPU to predict
         # correctly at least once. We assume 2x arbitrarily
         asm = "\n  addi t0,x0," + str(
-        loop_count) + "\n  addi t1,x0,0\n  addi t2,x0,2\n\nloop:\n"
+            loop_count) + "\n  addi t1,x0,0\n  addi t2,x0,2\n\nloop:\n"
         asm += "\taddi t1,t1,1\n" \
             + "\taddi t2,t2,10\n\tadd t2,t2,t2\n" \
             + "\taddi t2,t2,-10\n\taddi t2,t2,20\n"\
@@ -54,15 +54,15 @@ class gshare_fa_mispredict_loop_01(IPlugin):
         log_file = f.read()
         f.close()
         misprediction_result = re.findall(rf.misprediction_pattern, log_file)
-        if len(misprediction_result) <=1:
+        if len(misprediction_result) <= 1:
             return False
         else:
             return True
         return None
 
-        def generate_covergroups(self):
+    def generate_covergroups(self):
         """
-           returns the covergroups for this test
+        returns the covergroups for this test
         """
 
         sv = '''covergroup gshare_fa_mispredict_loop_cg;
@@ -72,7 +72,5 @@ ma_mispredict_g_cp : coverpoint ma_mispredict_g[7] {
     bins ma_mispredict_g_7_0to1 = (0=>1) iff (ma_mispredict_g[8] == 1);
     bins ma_mispredict_g_7_1to0 = (1=>0) iff (ma_mispredict_g[8] == 1);
 }
-endgroup
-        '''
-
+endgroup\n'''
         return (sv)

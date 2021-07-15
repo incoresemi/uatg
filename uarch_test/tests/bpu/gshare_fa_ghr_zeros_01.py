@@ -65,6 +65,5 @@ coverpoint_label: coverpoint rg_ghr_port1__read {
     bins cp3 = {8'b01010101};
     bins cp4 = {8'b10101010};
 }
-endgroup
-        '''
+endgroup\n'''
         return (sv)
