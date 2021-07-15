@@ -65,13 +65,14 @@ class gshare_fa_mispredict_loop_01(IPlugin):
            returns the covergroups for this test
         """
 
-        sv = ""
-        sv = sv + "covergroup gshare_fa_mispredict_loop_cg;\n"
-        sv = sv + "option.per_instance=1;\n"
-        sv = sv + "///Coverpoint : MSB of reg ma_mispredict_g should be 1 atleast once. When, the MSB is one, the MSB-1 bit of the register should be toggled.\n"
-        sv = sv + "ma_mispredict_g_cp : coverpoint ma_mispredict_g[7] {\n"
-        sv = sv + "\tbins ma_mispredict_g_7_0to1 = (0=>1) iff (ma_mispredict_g[8] == 1);\n"
-        sv = sv + "\tbins ma_mispredict_g_7_1to0 = (1=>0) iff (ma_mispredict_g[8] == 1);}\n"
-        sv = sv + "endgroup\n"
+        sv = '''covergroup gshare_fa_mispredict_loop_cg;
+option.per_instance=1;
+///Coverpoint : MSB of reg ma_mispredict_g should be 1 atleast once. When, the MSB is one, the MSB-1 bit of the register should be toggled.
+ma_mispredict_g_cp : coverpoint ma_mispredict_g[7] {
+    bins ma_mispredict_g_7_0to1 = (0=>1) iff (ma_mispredict_g[8] == 1);
+    bins ma_mispredict_g_7_1to0 = (1=>0) iff (ma_mispredict_g[8] == 1);
+}
+endgroup
+        '''
 
         return (sv)
