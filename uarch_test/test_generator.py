@@ -100,7 +100,7 @@ def generate_tests(modules='branch_predictor/',
 
         logger.warn("Yaml was not created, and the tests were not validated")
 
-    generate_sv(module=module, inp=inp, work_dir=work_dir, verbose=verbose)
+    generate_sv(modules=modules, inp=inp, work_dir=work_dir, verbose=verbose)
 
 
 def generate_sv(modules='branch_predictor',
