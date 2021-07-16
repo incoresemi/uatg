@@ -1,12 +1,15 @@
 import ruamel
 from ruamel.yaml import YAML
 import os
+import uarch_test
 from uarch_test.log import logger
 from yapsy.PluginManager import PluginManager
 
+global _path
+_path = os.path.dirname(uarch_test.__file__)
 
-def list_of_modules():
-    modules = os.listdir('modules/')
+def list_of_modules(): 
+    modules = os.listdir(_path + '/modules/')
     return modules + ['all']
 
 
@@ -79,7 +82,7 @@ SECTIONS
 } 
 '''
 
-    with open(target_dir + "link.ld", "w") as outfile:
+    with open(_path + '/' + target_dir + "link.ld", "w") as outfile:
         outfile.write(out)
 
 
