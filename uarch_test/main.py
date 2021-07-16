@@ -58,6 +58,12 @@ from uarch_test.utils import clean_cli_params, list_of_modules
          'framework',
 )
 @click.option(
+        '--linker_file','-lf',
+        multiple=False,
+        required=False,
+        type=click.Path(exists=True, resolve_path=True,readable=True),
+        help="Path to the linkerfile.")
+@click.option(
     '--module',
     '-m',
     default='all',
@@ -71,7 +77,7 @@ from uarch_test.utils import clean_cli_params, list_of_modules
     # TODO: find a proper way to list all modules and display them
     type=str)
 def cli(verbose, clean, config_file, work_dir, module, gen_test, val_test,
-        list_modules):
+        list_modules,linker_file):
     logger.level(verbose)
     if list_modules:
         logger.debug('Module Options: ' + str(list_of_modules()))
@@ -95,7 +101,8 @@ def cli(verbose, clean, config_file, work_dir, module, gen_test, val_test,
 
     if gen_test:
         logger.debug('invoking gen_test')
-        generate_tests(modules=module,
+        generate_tests(linker_file,
+                       modules=module,
                        inp=config_file,
                        work_dir=work_dir,
                        verbose=verbose)
