@@ -5,8 +5,14 @@ from uarch_test.log import logger
 from yapsy.PluginManager import PluginManager
 
 
+def list_of_modules():
+    modules = os.listdir('modules/')
+    return modules + ['all']
+
+
 def clean_cli_params(config_file, work_dir, module, gen_test, val_test):
     error = (False, '')
+    available_modules = list_of_modules()
     try:
         module = module.replace(' ', ',')
         module = module.replace(', ', ',')
@@ -16,6 +22,9 @@ def clean_cli_params(config_file, work_dir, module, gen_test, val_test):
         module.sort()
     except ValueError as e:
         pass
+    for i in module:
+        if i not in available_modules:
+            error = (True, 'Module {0} is not supported/unavailable.'.format(i))
     if 'all' in module:
         module = ['all']
 

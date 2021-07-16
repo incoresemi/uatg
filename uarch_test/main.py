@@ -5,7 +5,7 @@ import click
 from uarch_test.log import logger
 from uarch_test.test_generator import generate_tests, clean_dirs, validate_tests
 from uarch_test.__init__ import __version__
-from uarch_test.utils import clean_cli_params
+from uarch_test.utils import clean_cli_params, list_of_modules
 
 
 @click.command()
@@ -51,9 +51,16 @@ from uarch_test.utils import clean_cli_params
          '. Validates log files & SV cover-points',
 )
 @click.option(
+    '--list_modules',
+    '-lm',
+    is_flag=True,
+    help='displays all the modules that are presently supported by the '
+         'framework',
+)
+@click.option(
     '--module',
     '-m',
-    default='[all]',
+    default='all',
     multiple=False,
     is_flag=False,
     help="Enter a list of modules as a string in a comma separated "
@@ -63,8 +70,11 @@ from uarch_test.utils import clean_cli_params
          "modules are: branch_predictor",
     # TODO: find a proper way to list all modules and display them
     type=str)
-def cli(verbose, clean, config_file, work_dir, module, gen_test, val_test):
+def cli(verbose, clean, config_file, work_dir, module, gen_test, val_test,
+        list_modules):
     logger.level(verbose)
+    if list_modules:
+        logger.debug('Module Options: ' + str(list_of_modules()))
     work_dir, module, err = clean_cli_params(config_file=config_file,
                                              work_dir=work_dir,
                                              module=module,
@@ -75,13 +85,13 @@ def cli(verbose, clean, config_file, work_dir, module, gen_test, val_test):
         exit(0)
 
     # cleaned parameters to be logged
-    logger.debug('verbose    : {0}'.format(verbose))
-    logger.debug('config_file: {0}'.format(config_file))
-    logger.debug('work_dir   : {0}'.format(work_dir))
-    logger.debug('module     : {0}'.format(module))
-    logger.debug('gen_test   : {0}'.format(gen_test))
-    logger.debug('val_test   : {0}'.format(val_test))
-    logger.debug('clean      : {0}'.format(clean))
+    # logger.debug('verbose    : {0}'.format(verbose))
+    # logger.debug('config_file: {0}'.format(config_file))
+    # logger.debug('work_dir   : {0}'.format(work_dir))
+    # logger.debug('module     : {0}'.format(module))
+    # logger.debug('gen_test   : {0}'.format(gen_test))
+    # logger.debug('val_test   : {0}'.format(val_test))
+    # logger.debug('clean      : {0}'.format(clean))
 
     if gen_test:
         logger.debug('invoking gen_test')

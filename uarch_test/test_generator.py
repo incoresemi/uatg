@@ -20,7 +20,8 @@ def generate_tests(modules='branch_predictor/',
                    inp="target/dut_config.yaml",
                    work_dir='/',
                    verbose='debug'):
-    """specify the location where the python test files are located for a
+    """
+    specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the asm test files in a new directory.
     eg. module_class  = branch_predictor's object
@@ -73,7 +74,7 @@ def generate_tests(modules='branch_predictor/',
                                 ])  # plugins are stored in module_dir
         manager.collectPlugins()
 
-        # check if prior test files are present and remove them. create a new dir.
+        # check if prior test files are present and remove them. create new dir.
         if (os.path.isdir(module_tests_dir)
            ) and os.path.exists(module_tests_dir):
             rmtree(module_tests_dir)
