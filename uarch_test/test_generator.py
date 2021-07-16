@@ -19,7 +19,7 @@ File directories naming convention:
 def generate_tests(linker_file,
                    modules='branch_predictor/',
                    inp="target/dut_config.yaml",
-                   work_dir='/',
+                   work_dir='modules/',
                    verbose='debug'):
     """
     specify the location where the python test files are located for a
@@ -35,6 +35,7 @@ def generate_tests(linker_file,
         parent_dir = os.path.dirname(uarch_test.__file__)
         module_dir = os.path.join(parent_dir, 'modules', module)
         module_tests_dir = os.path.join(module_dir, 'tests')
+        work_tests_dir = os.path.join(work_dir, module)
 
         inp_yaml = load_yaml(inp)
         isa = inp_yaml['ISA']
@@ -77,10 +78,10 @@ def generate_tests(linker_file,
         manager.collectPlugins()
 
         # check if prior test files are present and remove them. create new dir.
-        if (os.path.isdir(module_tests_dir)
-           ) and os.path.exists(module_tests_dir):
-            rmtree(module_tests_dir)
-        os.mkdir(module_tests_dir)
+        if (os.path.isdir(work_tests_dir)) and \
+                os.path.exists(work_tests_dir):
+            rmtree(work_tests_dir)
+        os.mkdir(work_tests_dir)
 
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
@@ -91,9 +92,10 @@ def generate_tests(linker_file,
             if _check:
                 _asm_body = plugin.plugin_object.generate_asm()
                 _asm = asm_header + _asm_body + asm_footer
-                os.mkdir(os.path.join(module_tests_dir, _test_name))
+                # os.mkdir(os.path.join(module_tests_dir, _test_name))
+                os.mkdir(os.path.join(work_tests_dir, _test_name))
                 with open(
-                        os.path.join(module_tests_dir, _test_name,
+                        os.path.join(work_tests_dir, _test_name,
                                      _test_name + '.S'), "w") as f:
                     f.write(_asm)
                 logger.info('Generating test for {0}'.format(_test_name))
@@ -118,7 +120,7 @@ def generate_tests(linker_file,
 
 def generate_sv(modules='branch_predictor',
                 inp="target/dut_config.yaml",
-                work_dir='/',
+                work_dir='modules/',
                 verbose='debug'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
@@ -133,6 +135,7 @@ def generate_sv(modules='branch_predictor',
         parent_dir = os.path.dirname(uarch_test.__file__)
         module_dir = os.path.join(parent_dir, 'modules', module)
         module_tests_dir = os.path.join(module_dir, 'tests')
+        work_tests_dir = os.path.join(work_dir, module)
 
         inp_yaml = load_yaml(inp)
         module_params = inp_yaml[module]
@@ -155,7 +158,7 @@ def generate_sv(modules='branch_predictor',
                     # TODO: Check what the name of the SV file should be
                     # TODO: Include the creation of TbTop and Interface SV files
                     with open(
-                            os.path.join(module_tests_dir, _test_name,
+                            os.path.join(work_tests_dir, _test_name,
                                          _test_name + '.sv'), "w") as f:
                         logger.info(
                             'Generating coverpoints SV file for {0}'.format(
@@ -178,7 +181,7 @@ def generate_sv(modules='branch_predictor',
 
 def validate_tests(modules='branch_predictor',
                    inp="target/dut_config.yaml",
-                   work_dir='/',
+                   work_dir='modules/',
                    verbose='debug'):
 
     if modules == ['all']:
@@ -193,6 +196,7 @@ def validate_tests(modules='branch_predictor',
         parent_dir = os.path.dirname(uarch_test.__file__)
         module_dir = os.path.join(parent_dir, 'modules', module)
         module_tests_dir = os.path.join(module_dir, 'tests')
+        work_tests_dir = os.path.join(work_dir, module)
 
         inp_yaml = load_yaml(inp)
         module_params = inp_yaml[module]
@@ -210,7 +214,7 @@ def validate_tests(modules='branch_predictor',
             _check = plugin.plugin_object.execute(module_params)
             if _check:
                 _result = plugin.plugin_object.check_log(
-                    log_file_path=os.path.join(module_tests_dir, _test_name,
+                    log_file_path=os.path.join(work_tests_dir, _test_name,
                                                'log'))
                 if _result:
                     logger.info('{0}. Minimal test: {1} has passed.'.format(
