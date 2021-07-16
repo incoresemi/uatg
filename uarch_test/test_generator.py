@@ -4,7 +4,7 @@ from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
 import uarch_test
-from uarch_test.utils import load_yaml, create_plugins, create_linker
+from uarch_test.utils import load_yaml, create_plugins, create_linker, create_model_test_h
 from yapsy.PluginManager import PluginManager
 from uarch_test.log import logger
 from uarch_test.__init__ import __version__
@@ -131,6 +131,12 @@ def generate_tests(work_dir,
     else:
         create_linker(target_dir=work_dir)
         logger.debug('Creating a linker file at {0}'.format(work_dir))
+
+    if (linker_dir) and os.path.isfile(os.path.join(linker_dir,'model_test.h')):
+        logger.debug('Using user specified model_test file')
+    else:
+        create_model_test_h(target_dir=work_dir)
+        logger.debug('Creating Model_test.h file at {0}'.format(work_dir))
 
     generate_sv(modules=modules, inp=inp, work_dir=work_dir, verbose=verbose)
 
