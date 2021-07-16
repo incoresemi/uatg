@@ -122,6 +122,7 @@ def generate_tests(work_dir,
                 logger.critical('Skipped {0}'.format(_test_name))
         logger.debug('Finished Generating Assembly Tests for {0}'.format(module))
         logger.debug('Generating CoverPoints for {0}'.format(module))
+        generate_sv(module=module, module_params = module_params, work_dir=work_dir, verbose=verbose)
         logger.debug('Finished Generating Coverpoints for {0}'.format(module))
         
     logger.info('****** Finished Generating Tests and CoverPoints ******')
@@ -138,12 +139,9 @@ def generate_tests(work_dir,
         create_model_test_h(target_dir=work_dir)
         logger.debug('Creating Model_test.h file at {0}'.format(work_dir))
 
-    generate_sv(modules=modules, inp=inp, work_dir=work_dir, verbose=verbose)
-
-
-def generate_sv(modules,
-                inp,
+def generate_sv(module,
                 work_dir,
+                module_params,
                 verbose='debug'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
@@ -153,50 +151,39 @@ def generate_sv(modules,
     logger.level(verbose)
     uarch_dir = os.path.dirname(uarch_test.__file__)
     
-    inp_yaml = load_yaml(inp)
-    for module in modules:
-        module_dir = os.path.join(uarch_dir, 'modules', module)
-        module_tests_dir = os.path.join(module_dir, 'tests')
-        work_tests_dir = os.path.join(work_dir, module)
+    module_dir = os.path.join(uarch_dir, 'modules', module)
+    work_tests_dir = os.path.join(work_dir, module)
 
-        module_params = inp_yaml[module]
+    manager = PluginManager()
+    manager.setPluginPlaces([module_dir])
+    manager.collectPlugins()
 
-        manager = PluginManager()
-        manager.setPluginPlaces([module_dir])
-        manager.collectPlugins()
+    for plugin in manager.getAllPlugins():
+        _check = plugin.plugin_object.execute(module_params)
+        _name = (str(plugin.plugin_object).split(".", 1))
+        _test_name = ((_name[1].split(" ", 1))[0])
+        if _check:
+            try:
+                _sv = plugin.plugin_object.generate_covergroups()
+                # TODO: Check what the name of the SV file should be
+                # TODO: Include the creation of TbTop and Interface SV files
+                with open(
+                        os.path.join(work_tests_dir + 'coverpoints.sv'), "a") as f:
+                    logger.info(
+                        'Generating coverpoints SV file for {0}'.format(
+                            _test_name))
+                    f.write(_sv)
 
-        logger.info('****** Generating Coverpoints ******')
-
-        # Loop around and find the plugins and writes the contents from the
-        # plugins into a System Verilog file
-        for plugin in manager.getAllPlugins():
-            _check = plugin.plugin_object.execute(module_params)
-            _name = (str(plugin.plugin_object).split(".", 1))
-            _test_name = ((_name[1].split(" ", 1))[0])
-            if _check:
-                try:
-                    _sv = plugin.plugin_object.generate_covergroups()
-                    # TODO: Check what the name of the SV file should be
-                    # TODO: Include the creation of TbTop and Interface SV files
-                    with open(
-                            os.path.join(work_tests_dir + 'coverpoints.sv'), "a") as f:
-                        logger.info(
-                            'Generating coverpoints SV file for {0}'.format(
-                                _test_name))
-                        f.write(_sv)
-
-                except AttributeError:
-                    logger.warn(
-                        'Skipping coverpoint generation for {0} as there is no gen_covergroup method'
-                        .format(_test_name))
-                    pass
-
-            else:
-                logger.critical(
-                    'Skipped {0} as this test is not created for the current DUT configuration'
+            except AttributeError:
+                logger.warn(
+                    'Skipping coverpoint generation for {0} as there is no gen_covergroup method'
                     .format(_test_name))
+                pass
 
-        logger.info('****** Finished Generating Coverpoints ******')
+        else:
+            logger.critical(
+                'Skipped {0} as this test is not created for the current DUT configuration'
+                .format(_test_name))
 
 
 def validate_tests(modules,
