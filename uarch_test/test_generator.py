@@ -16,7 +16,7 @@ File directories naming convention:
 '''
 
 
-def generate_tests(linker_file,
+def generate_tests(linker_file='/target',
                    modules='branch_predictor/',
                    inp="target/dut_config.yaml",
                    work_dir='modules/',
@@ -109,10 +109,10 @@ def generate_tests(linker_file,
     # is not specified.
     # To-Do -> change the directory to work directrory instead of target
 
-    if os.path.isfile(linker_file + '/link.ld'):
+    if os.path.isfile(os.path.join(linker_file, 'link.ld')):
         logger.debug('Using user specified linker')
     else:
-        create_linker(target_dir='target/')
+        create_linker(target_dir=work_dir)
         logger.debug('Creating a linker file at target/')
 
     generate_sv(modules=modules, inp=inp, work_dir=work_dir, verbose=verbose)
