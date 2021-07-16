@@ -32,12 +32,20 @@ def generate_tests(work_dir,
     if work_dir:
         pass
     else:
-        work_dir = os.path.abspath((os.path.join(parent_dir,'../work/')))
-    
+        work_dir = os.path.abspath((os.path.join(parent_dir, '../work/')))
+
     os.makedirs(work_dir, exist_ok=True)
 
-    if modules == ['all']:
-        modules = ['branch_predictor']
+    if (modules == ['all']):
+        logger.debug('Checking {0} for modules'.format(
+            os.path.join(parent_dir, 'modules')))
+        modules = [
+            f.name
+            for f in os.scandir(os.path.join(parent_dir, 'modules'))
+            if f.is_dir()
+        ]
+    logger.critical('The modules are {0}'.format(modules))
+
     for module in modules:
         module_dir = os.path.join(parent_dir, 'modules', module)
         module_tests_dir = os.path.join(module_dir, 'tests')
