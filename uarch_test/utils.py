@@ -14,7 +14,7 @@ def list_of_modules():
     return modules + ['all']
 
 
-def clean_cli_params(config_file, work_dir, module, gen_test, val_test):
+def clean_cli_params(config_file, module, gen_test, val_test):
     error = (False, '')
     available_modules = list_of_modules()
     try:
@@ -36,10 +36,7 @@ def clean_cli_params(config_file, work_dir, module, gen_test, val_test):
         error = (True, "Can not generate/validate with config_file path "
                  "missing")
 
-    if work_dir is None:
-        work_dir = '/'
-
-    return work_dir, module, error
+    return module, error
 
 
 def load_yaml(foo):
@@ -83,7 +80,7 @@ SECTIONS
 } 
 '''
 
-    with open(_path + '/' + target_dir + "link.ld", "w") as outfile:
+    with open(target_dir + '/' + "link.ld", "w") as outfile:
         outfile.write(out)
 
 
