@@ -16,10 +16,10 @@ File directories naming convention:
 '''
 
 
-def generate_tests(linker_file='/target',
+def generate_tests(work_dir,
+                   linker_dir,
                    modules='branch_predictor/',
                    inp="target/dut_config.yaml",
-                   work_dir='modules/',
                    verbose='debug'):
     """
     specify the location where the python test files are located for a
@@ -28,11 +28,17 @@ def generate_tests(linker_file='/target',
     eg. module_class  = branch_predictor's object
     test_file_dir = bpu/
     """
+    parent_dir = os.path.dirname(uarch_test.__file__)
+    if work_dir:
+        pass
+    else:
+        work_dir = os.path.abspath((os.path.join(parent_dir,'../work/')))
+    
+    os.makedirs(work_dir, exist_ok=True)
 
     if modules == ['all']:
         modules = ['branch_predictor']
     for module in modules:
-        parent_dir = os.path.dirname(uarch_test.__file__)
         module_dir = os.path.join(parent_dir, 'modules', module)
         module_tests_dir = os.path.join(module_dir, 'tests')
         work_tests_dir = os.path.join(work_dir, module)
@@ -49,7 +55,6 @@ def generate_tests(linker_file='/target',
         logger.info('****** Generating Tests ******')
         logger.info('parent dir is {0}'.format(parent_dir))
         logger.info('module dir is {0}'.format(module_dir))
-        logger.info('module test dir is {0}'.format(module_tests_dir))
 
         logger.info('Starting plugin Creation')
 
@@ -109,11 +114,11 @@ def generate_tests(linker_file='/target',
     # is not specified.
     # To-Do -> change the directory to work directrory instead of target
 
-    if os.path.isfile(os.path.join(linker_file, 'link.ld')):
+    if (linker_dir) and os.path.isfile(os.path.join(linker_dir, 'link.ld')):
         logger.debug('Using user specified linker')
     else:
         create_linker(target_dir=work_dir)
-        logger.debug('Creating a linker file at target/')
+        logger.debug('Creating a linker file at {0}'.format(work_dir))
 
     generate_sv(modules=modules, inp=inp, work_dir=work_dir, verbose=verbose)
 
