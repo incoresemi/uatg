@@ -10,16 +10,16 @@ from uarch_test.log import logger
 from uarch_test.__init__ import __version__
 '''
 File directories naming convention:
-    parent_dir = 'modules/'                 uarch_test/modules/
-    module_dir = parent_dir + module + '/'  uarch_test/modules/branch_predictor/
+    uarch_dir = 'modules/'                 uarch_test/modules/
+    module_dir = uarch_dir + module + '/'  uarch_test/modules/branch_predictor/
     module_tests_dir = module_dir + 'tests/'uarch_test/modules/branch_predictor/tests/
 '''
 
 
 def generate_tests(work_dir,
                    linker_dir,
-                   modules='branch_predictor/',
-                   inp="target/dut_config.yaml",
+                   modules,
+                   inp,
                    verbose='debug'):
     """
     specify the location where the python test files are located for a
@@ -28,47 +28,51 @@ def generate_tests(work_dir,
     eg. module_class  = branch_predictor's object
     test_file_dir = bpu/
     """
-    parent_dir = os.path.dirname(uarch_test.__file__)
+    uarch_dir = os.path.dirname(uarch_test.__file__)
+    
     if work_dir:
         pass
     else:
-        work_dir = os.path.abspath((os.path.join(parent_dir, '../work/')))
+        work_dir = os.path.abspath((os.path.join(uarch_dir, '../work/')))
 
     os.makedirs(work_dir, exist_ok=True)
 
+    logger.level(verbose)
+    logger.info('****** Micro Architectural Tests *******')
+    logger.info('Version : {0}'.format(__version__))
+    logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
+    logger.info('All Rights Reserved.')
+    logger.info('****** Generating Tests and CoverPoints******')
+    logger.info('uArch_test dir is {0}'.format(uarch_dir))
+    logger.info('work_dir is {0}'.format(work_dir))
+
+    inp_yaml = load_yaml(inp)
+    isa = inp_yaml['ISA']
+
     if (modules == ['all']):
         logger.debug('Checking {0} for modules'.format(
-            os.path.join(parent_dir, 'modules')))
+            os.path.join(uarch_dir, 'modules')))
         modules = [
             f.name
-            for f in os.scandir(os.path.join(parent_dir, 'modules'))
+            for f in os.scandir(os.path.join(uarch_dir, 'modules'))
             if f.is_dir()
         ]
-    logger.critical('The modules are {0}'.format(modules))
+    logger.debug('The modules are {0}'.format(modules))
 
     for module in modules:
-        module_dir = os.path.join(parent_dir, 'modules', module)
+        module_dir = os.path.join(uarch_dir, 'modules', module)
         module_tests_dir = os.path.join(module_dir, 'tests')
         work_tests_dir = os.path.join(work_dir, module)
 
-        inp_yaml = load_yaml(inp)
-        isa = inp_yaml['ISA']
         module_params = inp_yaml[module]
 
-        logger.level(verbose)
-        logger.info('****** Micro Architectural Tests *******')
-        logger.info('Version : {0}'.format(__version__))
-        logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
-        logger.info('All Rights Reserved.')
-        logger.info('****** Generating Tests ******')
-        logger.info('parent dir is {0}'.format(parent_dir))
-        logger.info('module dir is {0}'.format(module_dir))
+        logger.debug('Directory for {0} is {1}'.format(module,module_dir))
 
-        logger.info('Starting plugin Creation')
+        logger.info('Starting plugin Creation for {0}'.format(module))
 
         create_plugins(plugins_path=module_dir)
 
-        logger.info('Created plugins')
+        logger.info('Created plugins for {0}'.format(module))
 
         username = getuser()
         time = ((str(datetime.now())).split("."))[0]
@@ -96,6 +100,8 @@ def generate_tests(work_dir,
             rmtree(work_tests_dir)
         os.mkdir(work_tests_dir)
 
+        logger.debug('Generating assembly tests for {0}'.format(module))
+
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
         for plugin in manager.getAllPlugins():
@@ -111,17 +117,15 @@ def generate_tests(work_dir,
                         os.path.join(work_tests_dir, _test_name,
                                      _test_name + '.S'), "w") as f:
                     f.write(_asm)
-                logger.info('Generating test for {0}'.format(_test_name))
+                logger.debug('Generating test for {0}'.format(_test_name))
             else:
                 logger.critical('Skipped {0}'.format(_test_name))
-        logger.info('****** Finished Generating Tests ******')
-
-        logger.warn("Yaml was not created, and the tests were not validated")
-
-    # create linker file in the work directory if the path to the user's linker
-    # is not specified.
-    # To-Do -> change the directory to work directrory instead of target
-
+        logger.debug('Finished Generating Assembly Tests for {0}'.format(module))
+        logger.debug('Generating CoverPoints for {0}'.format(module))
+        logger.debug('Finished Generating Coverpoints for {0}'.format(module))
+        
+    logger.info('****** Finished Generating Tests and CoverPoints ******')
+ 
     if (linker_dir) and os.path.isfile(os.path.join(linker_dir, 'link.ld')):
         logger.debug('Using user specified linker')
     else:
@@ -131,26 +135,24 @@ def generate_tests(work_dir,
     generate_sv(modules=modules, inp=inp, work_dir=work_dir, verbose=verbose)
 
 
-def generate_sv(modules='branch_predictor',
-                inp="target/dut_config.yaml",
-                work_dir='modules/',
+def generate_sv(modules,
+                inp,
+                work_dir,
                 verbose='debug'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the covergroups (System Verilog) for the test files in a new directory.
     test_file_dir = bpu/
     """
-    if modules == ['all']:
-        modules = ['branch_predictor']
-
+    logger.level(verbose)
+    uarch_dir = os.path.dirname(uarch_test.__file__)
+    
+    inp_yaml = load_yaml(inp)
     for module in modules:
-        logger.level(verbose)
-        parent_dir = os.path.dirname(uarch_test.__file__)
-        module_dir = os.path.join(parent_dir, 'modules', module)
+        module_dir = os.path.join(uarch_dir, 'modules', module)
         module_tests_dir = os.path.join(module_dir, 'tests')
         work_tests_dir = os.path.join(work_dir, module)
 
-        inp_yaml = load_yaml(inp)
         module_params = inp_yaml[module]
 
         manager = PluginManager()
@@ -206,8 +208,8 @@ def validate_tests(modules='branch_predictor',
 
     for module in modules:
         logger.level(verbose)
-        parent_dir = os.path.dirname(uarch_test.__file__)
-        module_dir = os.path.join(parent_dir, 'modules', module)
+        uarch_dir = os.path.dirname(uarch_test.__file__)
+        module_dir = os.path.join(uarch_dir, 'modules', module)
         module_tests_dir = os.path.join(module_dir, 'tests')
         work_tests_dir = os.path.join(work_dir, module)
 
@@ -264,8 +266,8 @@ def clean_dirs(work_dir='/', verbose='debug'):
     tests/ directory inside modules and yapsy plugins.
     """
     logger.level(verbose)
-    parent_dir = os.path.dirname(uarch_test.__file__)
-    module_dir = os.path.join(parent_dir, 'modules', '**')
+    uarch_dir = os.path.dirname(uarch_test.__file__)
+    module_dir = os.path.join(uarch_dir, 'modules', '**')
     module_tests_dir = os.path.join(module_dir, 'tests')
 
     logger.info('****** Cleaning ******')
@@ -274,7 +276,7 @@ def clean_dirs(work_dir='/', verbose='debug'):
 
     tf = glob.glob(module_tests_dir)
     pf = glob.glob(pycache_dir) + glob.glob(
-        os.path.join(parent_dir, '__pycache__'))
+        os.path.join(uarch_dir, '__pycache__'))
     yf = glob.glob(yapsy_dir)
     for i in tf + pf:
         rmtree(i)
