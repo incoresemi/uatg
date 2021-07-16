@@ -100,9 +100,9 @@ def cli(verbose, clean, config_file, work_dir, module, gen_test, val_test,
 
     if gen_test:
         logger.debug('invoking gen_test')
-        generate_tests(work_dir,
-                       linker_dir,
-                       modules=module,
+        generate_tests(work_dir = work_dir,
+                       linker_dir = linker_dir,
+                       modules = module,
                        inp=config_file,
                        verbose=verbose)
     if val_test:
