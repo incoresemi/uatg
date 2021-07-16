@@ -194,34 +194,51 @@ def generate_sv(modules,
         logger.info('****** Finished Generating Coverpoints ******')
 
 
-def validate_tests(modules='branch_predictor',
-                   inp="target/dut_config.yaml",
-                   work_dir='modules/',
+def validate_tests(modules,
+                   inp,
+                   work_dir,
                    verbose='debug'):
+    """
+       Parses the log returned from the DUT for finding if the tests were successful
+    """
+    
+    logger.level(verbose)
+    uarch_dir = os.path.dirname(uarch_test.__file__)
+    inp_yaml = load_yaml(inp)
+    logger.info(
+            '****** Validating Test results, Minimal log checking ******')
 
-    if modules == ['all']:
-        modules = ['branch_predictor']
+    if (modules == ['all']):
+        logger.debug('Checking {0} for modules'.format(
+            os.path.join(uarch_dir, 'modules')))
+        modules = [
+            f.name
+            for f in os.scandir(os.path.join(uarch_dir, 'modules'))
+            if f.is_dir()
+        ]
+    if work_dir:
+        pass
+    else:
+        work_dir = os.path.abspath((os.path.join(uarch_dir, '../work/')))
+
+    os.makedirs(work_dir, exist_ok=True)
 
     _pass_ct = 0
     _fail_ct = 0
     _tot_ct = 1
 
     for module in modules:
-        logger.level(verbose)
-        uarch_dir = os.path.dirname(uarch_test.__file__)
         module_dir = os.path.join(uarch_dir, 'modules', module)
         module_tests_dir = os.path.join(module_dir, 'tests')
         work_tests_dir = os.path.join(work_dir, module)
 
-        inp_yaml = load_yaml(inp)
         module_params = inp_yaml[module]
-
-        logger.info(
-            '****** Validating Test results, Minimal log checking ******')
 
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
+
+        logger.debug('Minimal Log Checking for {0}'.format(module))
 
         for plugin in manager.getAllPlugins():
             _name = (str(plugin.plugin_object).split(".", 1))
@@ -244,6 +261,7 @@ def validate_tests(modules='branch_predictor',
             else:
                 logger.warn(
                     'No asm generated for {0}. Skipping'.format(_test_name))
+        logger.debug('Minimal log Checking for {0} complete'.format(module))
 
     logger.info("Minimal Verification Results")
     logger.info("=" * 28)
