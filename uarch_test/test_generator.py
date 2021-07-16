@@ -28,7 +28,7 @@ def generate_tests(linker_file,
     eg. module_class  = branch_predictor's object
     test_file_dir = bpu/
     """
-        
+
     if modules == ['all']:
         modules = ['branch_predictor']
     for module in modules:
@@ -103,16 +103,15 @@ def generate_tests(linker_file,
 
         logger.warn("Yaml was not created, and the tests were not validated")
 
-    # create linker file in the work directory if the path to the user's linker 
+    # create linker file in the work directory if the path to the user's linker
     # is not specified.
     # To-Do -> change the directory to work directrory instead of target
 
-    if os.path.isfile(linker_file+'/link.ld'):
+    if os.path.isfile(linker_file + '/link.ld'):
         logger.debug('Using user specified linker')
     else:
         create_linker(target_dir='target/')
         logger.debug('Creating a linker file at target/')
-
 
     generate_sv(modules=modules, inp=inp, work_dir=work_dir, verbose=verbose)
 

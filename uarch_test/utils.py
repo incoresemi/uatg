@@ -8,7 +8,8 @@ from yapsy.PluginManager import PluginManager
 global _path
 _path = os.path.dirname(uarch_test.__file__)
 
-def list_of_modules(): 
+
+def list_of_modules():
     modules = os.listdir(_path + '/modules/')
     return modules + ['all']
 
@@ -33,7 +34,7 @@ def clean_cli_params(config_file, work_dir, module, gen_test, val_test):
 
     if (gen_test or val_test) and config_file is None:
         error = (True, "Can not generate/validate with config_file path "
-                       "missing")
+                 "missing")
 
     if work_dir is None:
         work_dir = '/'

@@ -22,47 +22,47 @@ from uarch_test.utils import clean_cli_params, list_of_modules
     '-cl/-no_cl',
     is_flag=True,
     help='clean flag is set if generated files needs to be cleaned.'
-         'Presently, __pycache__, tests/ folders are removed along '
-         'with yapsy-plugins',
+    'Presently, __pycache__, tests/ folders are removed along '
+    'with yapsy-plugins',
 )
 @click.option('--config_file',
               '-cf',
               multiple=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the yaml file containing DUT configuration. "
-                   "Needed to generate/validate tests")
+              "Needed to generate/validate tests")
 @click.option('--work_dir',
               '-wd',
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the working directory where generated files will be"
-                   " stored.")
+              " stored.")
 @click.option('--gen_test',
               '-gt',
               is_flag=True,
               help='gen_test flag is set if tests are to be generated. '
-                   'Generates ASM files and SV Files')
+              'Generates ASM files and SV Files')
 @click.option(
     '--val_test',
     '-vt',
     is_flag=True,
     help='val_test flag is set if generated tests are to be validated'
-         '. Validates log files & SV cover-points',
+    '. Validates log files & SV cover-points',
 )
 @click.option(
     '--list_modules',
     '-lm',
     is_flag=True,
     help='displays all the modules that are presently supported by the '
-         'framework',
+    'framework',
 )
-@click.option(
-        '--linker_file','-lf',
-        multiple=False,
-        required=False,
-        type=click.Path(exists=True, resolve_path=True,readable=True),
-        help="Path to the linkerfile.")
+@click.option('--linker_file',
+              '-lf',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the linkerfile.")
 @click.option(
     '--module',
     '-m',
@@ -70,14 +70,14 @@ from uarch_test.utils import clean_cli_params, list_of_modules
     multiple=False,
     is_flag=False,
     help="Enter a list of modules as a string in a comma separated "
-         "format.\n--module 'branch_predictor, decoder'\nHere "
-         "decoder and branch_predictor are chosen\nIf all module "
-         "are to be selected use keyword 'all'.\n Presently supported"
-         "modules are: branch_predictor",
+    "format.\n--module 'branch_predictor, decoder'\nHere "
+    "decoder and branch_predictor are chosen\nIf all module "
+    "are to be selected use keyword 'all'.\n Presently supported"
+    "modules are: branch_predictor",
     # TODO: find a proper way to list all modules and display them
     type=str)
 def cli(verbose, clean, config_file, work_dir, module, gen_test, val_test,
-        list_modules,linker_file):
+        list_modules, linker_file):
     logger.level(verbose)
     if list_modules:
         logger.debug('Module Options: ' + str(list_of_modules()))
