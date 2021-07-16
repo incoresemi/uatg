@@ -4,7 +4,7 @@ from shutil import rmtree
 from getpass import getuser
 from datetime import datetime
 import uarch_test
-from uarch_test.utils import load_yaml, create_plugins
+from uarch_test.utils import load_yaml, create_plugins, create_linker
 from yapsy.PluginManager import PluginManager
 from uarch_test.log import logger
 from uarch_test.__init__ import __version__
@@ -16,7 +16,8 @@ File directories naming convention:
 '''
 
 
-def generate_tests(modules='branch_predictor/',
+def generate_tests(linker_file,
+                   modules='branch_predictor/',
                    inp="target/dut_config.yaml",
                    work_dir='/',
                    verbose='debug'):
@@ -27,6 +28,7 @@ def generate_tests(modules='branch_predictor/',
     eg. module_class  = branch_predictor's object
     test_file_dir = bpu/
     """
+        
     if modules == ['all']:
         modules = ['branch_predictor']
     for module in modules:
@@ -100,6 +102,17 @@ def generate_tests(modules='branch_predictor/',
         logger.info('****** Finished Generating Tests ******')
 
         logger.warn("Yaml was not created, and the tests were not validated")
+
+    # create linker file in the work directory if the path to the user's linker 
+    # is not specified.
+    # To-Do -> change the directory to work directrory instead of target
+
+    if os.path.isfile(linker_file+'/link.ld'):
+        logger.debug('Using user specified linker')
+    else:
+        create_linker(target_dir='target/')
+        logger.debug('Creating a linker file at target/')
+
 
     generate_sv(modules=modules, inp=inp, work_dir=work_dir, verbose=verbose)
 
