@@ -57,8 +57,8 @@ from uarch_test.utils import clean_cli_params, list_of_modules
     help='displays all the modules that are presently supported by the '
     'framework',
 )
-@click.option('--linker_file',
-              '-lf',
+@click.option('--linker_dir',
+              '-ld',
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
@@ -77,15 +77,14 @@ from uarch_test.utils import clean_cli_params, list_of_modules
     # TODO: find a proper way to list all modules and display them
     type=str)
 def cli(verbose, clean, config_file, work_dir, module, gen_test, val_test,
-        list_modules, linker_file):
+        list_modules, linker_dir):
     logger.level(verbose)
     if list_modules:
         logger.debug('Module Options: ' + str(list_of_modules()))
-    work_dir, module, err = clean_cli_params(config_file=config_file,
-                                             work_dir=work_dir,
-                                             module=module,
-                                             gen_test=gen_test,
-                                             val_test=val_test)
+    module, err = clean_cli_params(config_file=config_file,
+                                   module=module,
+                                   gen_test=gen_test,
+                                   val_test=val_test)
     if err[0]:
         logger.error(err[1])
         exit(0)
@@ -101,10 +100,10 @@ def cli(verbose, clean, config_file, work_dir, module, gen_test, val_test,
 
     if gen_test:
         logger.debug('invoking gen_test')
-        generate_tests(linker_file,
+        generate_tests(work_dir,
+                       linker_dir,
                        modules=module,
                        inp=config_file,
-                       work_dir=work_dir,
                        verbose=verbose)
     if val_test:
         logger.debug('invoking val_test')
