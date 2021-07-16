@@ -121,6 +121,7 @@ def generate_yaml(module='branch_predictor',
         outfile.write(_data)
     return _generated_tests
 
+
 def create_linker(target_dir):
     out = '''OUTPUT_ARCH( "riscv" )
 ENTRY(rvtest_entry_point)
@@ -143,6 +144,7 @@ SECTIONS
 
     with open(target_dir + '/' + "link.ld", "w") as outfile:
         outfile.write(out)
+
 
 def create_model_test_h(target_dir):
     out = '''#ifndef _COMPLIANCE_MODEL_H
@@ -209,5 +211,5 @@ shakti_end:                                                             \
 #define RVMODEL_CLEAR_MEXT_INT
 #endif // _COMPLIANCE_MODEL_H'''
 
-    with open(target_dir + '/' + 'model_test.h','w') as outfile:
+    with open(target_dir + '/' + 'model_test.h', 'w') as outfile:
         outfile.write(out)

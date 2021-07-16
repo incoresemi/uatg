@@ -16,11 +16,7 @@ File directories naming convention:
 '''
 
 
-def generate_tests(work_dir,
-                   linker_dir,
-                   modules,
-                   inp,
-                   verbose='debug'):
+def generate_tests(work_dir, linker_dir, modules, inp, verbose='debug'):
     """
     specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
@@ -29,7 +25,7 @@ def generate_tests(work_dir,
     test_file_dir = bpu/
     """
     uarch_dir = os.path.dirname(uarch_test.__file__)
-    
+
     if work_dir:
         pass
     else:
@@ -66,7 +62,7 @@ def generate_tests(work_dir,
 
         module_params = inp_yaml[module]
 
-        logger.debug('Directory for {0} is {1}'.format(module,module_dir))
+        logger.debug('Directory for {0} is {1}'.format(module, module_dir))
 
         logger.info('Starting plugin Creation for {0}'.format(module))
 
@@ -120,29 +116,32 @@ def generate_tests(work_dir,
                 logger.debug('Generating test for {0}'.format(_test_name))
             else:
                 logger.critical('Skipped {0}'.format(_test_name))
-        logger.debug('Finished Generating Assembly Tests for {0}'.format(module))
+        logger.debug(
+            'Finished Generating Assembly Tests for {0}'.format(module))
         logger.debug('Generating CoverPoints for {0}'.format(module))
-        generate_sv(module=module, module_params = module_params, work_dir=work_dir, verbose=verbose)
+        generate_sv(module=module,
+                    module_params=module_params,
+                    work_dir=work_dir,
+                    verbose=verbose)
         logger.debug('Finished Generating Coverpoints for {0}'.format(module))
-        
+
     logger.info('****** Finished Generating Tests and CoverPoints ******')
- 
+
     if (linker_dir) and os.path.isfile(os.path.join(linker_dir, 'link.ld')):
         logger.debug('Using user specified linker')
     else:
         create_linker(target_dir=work_dir)
         logger.debug('Creating a linker file at {0}'.format(work_dir))
 
-    if (linker_dir) and os.path.isfile(os.path.join(linker_dir,'model_test.h')):
+    if (linker_dir) and os.path.isfile(os.path.join(linker_dir,
+                                                    'model_test.h')):
         logger.debug('Using user specified model_test file')
     else:
         create_model_test_h(target_dir=work_dir)
         logger.debug('Creating Model_test.h file at {0}'.format(work_dir))
 
-def generate_sv(module,
-                work_dir,
-                module_params,
-                verbose='debug'):
+
+def generate_sv(module, work_dir, module_params, verbose='debug'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the covergroups (System Verilog) for the test files in a new directory.
@@ -150,7 +149,7 @@ def generate_sv(module,
     """
     logger.level(verbose)
     uarch_dir = os.path.dirname(uarch_test.__file__)
-    
+
     module_dir = os.path.join(uarch_dir, 'modules', module)
     work_tests_dir = os.path.join(work_dir, module)
 
@@ -167,11 +166,10 @@ def generate_sv(module,
                 _sv = plugin.plugin_object.generate_covergroups()
                 # TODO: Check what the name of the SV file should be
                 # TODO: Include the creation of TbTop and Interface SV files
-                with open(
-                        os.path.join(work_tests_dir + 'coverpoints.sv'), "a") as f:
-                    logger.info(
-                        'Generating coverpoints SV file for {0}'.format(
-                            _test_name))
+                with open(os.path.join(work_tests_dir + 'coverpoints.sv'),
+                          "a") as f:
+                    logger.info('Generating coverpoints SV file for {0}'.format(
+                        _test_name))
                     f.write(_sv)
 
             except AttributeError:
@@ -186,19 +184,15 @@ def generate_sv(module,
                 .format(_test_name))
 
 
-def validate_tests(modules,
-                   inp,
-                   work_dir,
-                   verbose='debug'):
+def validate_tests(modules, inp, work_dir, verbose='debug'):
     """
        Parses the log returned from the DUT for finding if the tests were successful
     """
-    
+
     logger.level(verbose)
     uarch_dir = os.path.dirname(uarch_test.__file__)
     inp_yaml = load_yaml(inp)
-    logger.info(
-            '****** Validating Test results, Minimal log checking ******')
+    logger.info('****** Validating Test results, Minimal log checking ******')
 
     if (modules == ['all']):
         logger.debug('Checking {0} for modules'.format(
@@ -294,7 +288,8 @@ def clean_dirs(work_dir, verbose='debug'):
     for i in tf + pf:
         if (os.path.isdir(i)):
             rmtree(i)
-        else: os.remove(i)
+        else:
+            os.remove(i)
 
     for i in yf:
         os.remove(i)
