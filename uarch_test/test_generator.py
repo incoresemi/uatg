@@ -173,8 +173,7 @@ def generate_sv(modules,
                     # TODO: Check what the name of the SV file should be
                     # TODO: Include the creation of TbTop and Interface SV files
                     with open(
-                            os.path.join(work_tests_dir, _test_name,
-                                         _test_name + '.sv'), "w") as f:
+                            os.path.join(work_tests_dir + 'coverpoints.sv'), "a") as f:
                         logger.info(
                             'Generating coverpoints SV file for {0}'.format(
                                 _test_name))
@@ -220,8 +219,6 @@ def validate_tests(modules,
         pass
     else:
         work_dir = os.path.abspath((os.path.join(uarch_dir, '../work/')))
-
-    os.makedirs(work_dir, exist_ok=True)
 
     _pass_ct = 0
     _fail_ct = 0
@@ -278,26 +275,34 @@ def validate_tests(modules,
     logger.info('****** Finished Validating Test results ******')
 
 
-def clean_dirs(work_dir='/', verbose='debug'):
+def clean_dirs(work_dir, verbose='debug'):
     """
     This function cleans unwanted files. Presently it removes __pycache__,
     tests/ directory inside modules and yapsy plugins.
     """
     logger.level(verbose)
     uarch_dir = os.path.dirname(uarch_test.__file__)
-    module_dir = os.path.join(uarch_dir, 'modules', '**')
-    module_tests_dir = os.path.join(module_dir, 'tests')
+    if work_dir:
+        pass
+    else:
+        work_dir = os.path.abspath((os.path.join(uarch_dir, '../work/')))
+
+    module_dir = os.path.join(work_dir, '**')
+    #module_tests_dir = os.path.join(module_dir, 'tests')
 
     logger.info('****** Cleaning ******')
     yapsy_dir = os.path.join(module_dir, '*.yapsy-plugin')
     pycache_dir = os.path.join(module_dir, '__pycache__')
 
-    tf = glob.glob(module_tests_dir)
+    tf = glob.glob(module_dir)
     pf = glob.glob(pycache_dir) + glob.glob(
         os.path.join(uarch_dir, '__pycache__'))
     yf = glob.glob(yapsy_dir)
     for i in tf + pf:
-        rmtree(i)
+        if (os.path.isdir(i)):
+            rmtree(i)
+        else: os.remove(i)
+
     for i in yf:
         os.remove(i)
     logger.info("Generated Test files/folders removed")
