@@ -60,17 +60,19 @@ class gshare_fa_mispredict_loop_01(IPlugin):
             return True
         return None
 
-    def generate_covergroups(self):
+    def generate_covergroups(self,config_file):
         """
         returns the covergroups for this test
         """
-
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        mispredict = config['signals']['mispredict']
         sv = '''covergroup gshare_fa_mispredict_loop_cg;
 option.per_instance=1;
 ///Coverpoint : MSB of reg ma_mispredict_g should be 1 atleast once. When, the MSB is one, the MSB-1 bit of the register should be toggled.
-ma_mispredict_g_cp : coverpoint ma_mispredict_g[''' + str(self._history_len-1) + '''] {
+{0}_cp : coverpoint {0}[''' + str(self._history_len-1) + '''] {
     bins ma_mispredict_g_'''+str(self._history_len-1)+'''_0to1 = (0=>1) iff (ma_mispredict_g['''+str(self._history_len)+'''] == 1);
     bins ma_mispredict_g_'''+str(self._history_len-1)+'''_1to0 = (1=>0) iff (ma_mispredict_g['''+str(self._history_len)+'''] == 1);
 }
-endgroup\n'''
+endgroup\n'''.format(mispredict)
         return (sv)

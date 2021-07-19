@@ -94,21 +94,26 @@ class gshare_fa_btb_fill_01(IPlugin):
                 return False
         return True
 
-    def generate_covergroups(self):
+    def generate_covergroups(self,config_file):
         """
            returns the covergroups for this test
         """
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        rg_initialize = config['signals']['rg_initialize']
+        rg_allocate = config['signals']['rg_allocate']
+        btb_entry = config['signals']['btb_entry']
         sv = '''covergroup gshare_fa_btb_fill_cg;
 option.per_instance=1;
 ///Coverpoint : reg rg_allocate should change from 0 to `btb_depth -1
-rg_allocate_cp : coverpoint rg_allocate[4:0] {
-    bins rg_allocate_bin[32] = {[0:31]} iff (rg_initialize == 0);
+{0}_cp : coverpoint rg_{0}[4:0] {
+    bins {0}_bin[32] = {[0:31]} iff ({1} == 0);
 }
-///Coverpoints to check the bits 2 and 3 of the v_reg_btb_entry_XX should contain 01,00,10 and 11 (across the 32 entries)\n'''
+///Coverpoints to check the bits 2 and 3 of the v_reg_btb_entry_XX should contain 01,00,10 and 11 (across the 32 entries)\n'''.format(rg_allocate,rg_initialize)
         for i in range(self.btb_depth):
-          sv = sv + "v_reg_btb_entry_"+str(i)+"_cp: coverpoint v_reg_btb_entry_"+str(i)+"[3:2]{\n
-          bins v_reg_btb_entry_"+str(i)+"_bin = {'d0,'d1,'d2,'d3} iff (rg_initialize == 0);\n
-}"
+          sv = sv + "{0}_"+str(i)+"_cp: coverpoint {0}_"+str(i)+"[3:2]{\n
+          bins {0}_"+str(i)+"_bin = {'d0,'d1,'d2,'d3} iff ({1} == 0);\n
+}".format(btb_entry,rg_iitialize)
         sv = sv + "endgroup"
 
         return (sv)

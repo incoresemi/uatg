@@ -56,14 +56,17 @@ class gshare_fa_ghr_zeros_01(IPlugin):
         """
            returns the covergroups for this test
         """
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        port1_read = config['signals']['port1_read']
         sv = '''covergroup bpu_cg; 
 option.per_instance=1;
 ///coverpoint label can be any name that relates the signal
-coverpoint_label: coverpoint rg_ghr_port1__read {
+coverpoint_label: coverpoint {0} {
     bins cp1 = {8'b00000000};
     bins cp2 = {8'b11111111};
     bins cp3 = {8'b01010101};
     bins cp4 = {8'b10101010};
 }
-endgroup\n'''
+endgroup\n'''.format(port1_read)
         return (sv)
