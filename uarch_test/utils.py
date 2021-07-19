@@ -15,7 +15,7 @@ def list_of_modules():
     return modules + ['all']
 
 
-def clean_cli_params(config_file, module, gen_test, val_test):
+def clean_cli_params(config_file, module, gen_test, val_test, gen_cvg):
     error = (False, '')
     available_modules = list_of_modules()
     try:
@@ -36,6 +36,9 @@ def clean_cli_params(config_file, module, gen_test, val_test):
     if (gen_test or val_test) and config_file is None:
         error = (True, "Can not generate/validate with config_file path "
                  "missing")
+    if (gen_cvg) and not gen_test:
+        error = (True,
+                 'Cannot generate covergroups without generating the tests')
 
     return module, error
 
