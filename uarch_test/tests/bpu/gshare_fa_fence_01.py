@@ -72,24 +72,24 @@ class gshare_fa_fence_01(IPlugin):
         #ini_file = /Projects/incorecpu/jyothi.g/micro-arch-tests/example.ini
         config = configparser.ConfigParser()
         config.read(config_file)
-        test = config['test']['test_name']
+        #test = config['test']['test_name']
         rg_initialize = config['signals']['rg_initialize']
         rg_allocate = config['signals']['rg_allocate']
         btb_tag = config['signals']['btb_tag']
         ras_top_index_port2__read = config['signals']['ras_top_index_port2__read']
         port1_read = config['signals']['port1_read']
-        sv = "covergroup  {0};
+        sv = "covergroup  gshare_fa_fence_01;
 option.per_instance=1;
 ///coverpoint -rg_initialize should toggle from 0->1
-{1}_cp : coverpoint {1} {
-   bins {1}_0to1 = (0=>1);}
+{0}_cp : coverpoint {0} {
+   bins {0}_0to1 = (0=>1);}
 
 }
 ///Coverpoint to check the LSB of v_reg_btb_tax_00 is valid
-{2}_cp: coverpoint {2} {
+{1}_cp: coverpoint {1} {
         bins valid = {"+ str(self.btb_depth) + "'b11111111_11111111_11111111_11111111};
 }
-///coverpoint -  rg_initilaize toggles friom 1->0 2. rg_allocate should become zero 3. v_reg_btb_tag_XX should become 0 (the entire 63bit reg) 4. rg_ghr_port1__read should become zeros. 5. ras_stack_top_index_port2__read should become 0\n".format(test,valids)
+///coverpoint -  rg_initilaize toggles friom 1->0 2. rg_allocate should become zero 3. v_reg_btb_tag_XX should become 0 (the entire 63bit reg) 4. rg_ghr_port1__read should become zeros. 5. ras_stack_top_index_port2__read should become 0\n".format(rg_initialize,valids)
         for i in range(self.btb_depth):
            sv = sv + "{0}_"+str(i)+": coverpoint {0}{\n
            bins {0}_"+str(i)+"1to0 = (1=>0) iff ({1} == 'b0 && {4}_"+str(i)+" == 'b0 && {2} == 'b0 && {3}== 'b0);}".format(rg_initialize,rg_allocate,port1_read,ras_top_index_port2__read,btb_tag)
