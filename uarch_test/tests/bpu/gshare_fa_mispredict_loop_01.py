@@ -71,8 +71,8 @@ class gshare_fa_mispredict_loop_01(IPlugin):
 option.per_instance=1;
 ///Coverpoint : MSB of reg ma_mispredict_g should be 1 atleast once. When, the MSB is one, the MSB-1 bit of the register should be toggled.
 {0}_cp : coverpoint {0}[''' + str(self._history_len-1) + '''] {
-    bins ma_mispredict_g_'''+str(self._history_len-1)+'''_0to1 = (0=>1) iff (ma_mispredict_g['''+str(self._history_len)+'''] == 1);
-    bins ma_mispredict_g_'''+str(self._history_len-1)+'''_1to0 = (1=>0) iff (ma_mispredict_g['''+str(self._history_len)+'''] == 1);
+    bins {0}_'''+str(self._history_len-1)+'''_0to1 = (0=>1) iff ({0}['''+str(self._history_len)+'''] == 1);
+    bins {0}_'''+str(self._history_len-1)+'''_1to0 = (1=>0) iff ({0}['''+str(self._history_len)+'''] == 1);
 }
 endgroup\n'''.format(mispredict)
         return (sv)
