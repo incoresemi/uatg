@@ -15,6 +15,13 @@ def list_of_modules():
     return modules + ['all']
 
 
+def info(version):
+    logger.info('****** Micro Architectural Tests *******')
+    logger.info('Version : {0}'.format(version))
+    logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
+    logger.info('All Rights Reserved.')
+
+
 def clean_cli_params(config_file, module, gen_test, val_test, gen_cvg):
     error = (False, '')
     available_modules = list_of_modules()
@@ -38,7 +45,9 @@ def clean_cli_params(config_file, module, gen_test, val_test, gen_cvg):
                  "missing")
     if (gen_cvg) and not gen_test:
         error = (True,
-                 'Cannot generate covergroups without generating the tests')
+                 'Cannot generate covergroups without generating the tests\n'
+                 'If you are trying to validate tests, remove the'
+                 'generate_covergroups option and try again')
 
     return module, error
 

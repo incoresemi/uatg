@@ -5,7 +5,7 @@ import click
 from uarch_test.log import logger
 from uarch_test.test_generator import generate_tests, clean_dirs, validate_tests, generate_sv
 from uarch_test.__init__ import __version__
-from uarch_test.utils import clean_cli_params, list_of_modules
+from uarch_test.utils import clean_cli_params, list_of_modules, info
 
 
 @click.command()
@@ -89,6 +89,7 @@ from uarch_test.utils import clean_cli_params, list_of_modules
 def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
         list_modules, linker_dir, test_list, gen_cvg):
     logger.level(verbose)
+    info(__version__)
     if list_modules:
         logger.debug('Module Options: ' + str(list_of_modules()))
     modules, err = clean_cli_params(config_file=config_file,
