@@ -3,6 +3,7 @@
 # 1 jump from the includes and 32  in the program
 
 from yapsy.IPlugin import IPlugin
+from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
 
@@ -89,7 +90,28 @@ class gshare_fa_btb_fill_01(IPlugin):
         # sorting them and removing duplicates
         new_arr = list(set(new_arr))
         new_arr.sort()
+
+        f = open('gshare_fa_btb_fill_01_report.yaml', 'w')
+        yaml = YAML()
+        yaml.default_flow_style = False
+        # TODO: where to dump yaml
+        # TODO: Proper return statement usage
         for i in range(self._btb_depth):
             if str(i) not in new_arr[i]:
+                yaml.dump(
+                    {
+                        'gshare_fa_btb_fill_01_report.yaml': [{
+                            'Fill BTB with {0} entries'.format(self._btb_depth):
+                                'Fail'
+                        }]
+                    }, f)
+                f.close()
                 return False
+        yaml.dump(
+            {
+                'gshare_fa_btb_fill_01_report.yaml': [{
+                    'Fill BTB with {0} entries'.format(self._btb_depth): 'Pass'
+                }]
+            }, f)
+        f.close()
         return True
