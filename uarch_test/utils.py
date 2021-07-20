@@ -93,7 +93,8 @@ def generate_test_list(asm_dir, uarch_dir, test_list):
         test_list[base_key]['mabi'] = 'lp64'
         test_list[base_key]['cc'] = 'riscv64-unknown-elf-gcc'
         test_list[base_key][
-            'cc_args'] = ' -mcmodel=medany -static -std=gnu99 -O2 -fno-common -fno-builtin-printf -fvisibility=hidden '
+            'cc_args'] = '-mcmodel=medany -static -std=gnu99 -O2 -fno-common ' \
+                         '-fno-builtin-printf -fvisibility=hidden '
         test_list[base_key][
             'linker_args'] = '-static -nostdlib -nostartfiles -lm -lgcc -T'
         test_list[base_key]['linker_file'] = target_dir + '/' + 'link.ld'
