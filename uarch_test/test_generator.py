@@ -38,10 +38,6 @@ def generate_tests(work_dir,
     os.makedirs(work_dir, exist_ok=True)
 
     logger.level(verbose)
-    logger.info('****** Micro Architectural Tests *******')
-    logger.info('Version : {0}'.format(__version__))
-    logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
-    logger.info('All Rights Reserved.')
     logger.info('****** Generating Tests ******')
     if (test_list):
         logger.info(
