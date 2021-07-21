@@ -1,6 +1,7 @@
 # Python program to generate the self modifying assembly test program
 
 from yapsy.IPlugin import IPlugin
+from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
 
@@ -40,13 +41,38 @@ class gshare_fa_btb_selfmodifying_01(IPlugin):
           check if fence is executed properly. 
           The BTBTags should be invalidated and the rg_allocate should return 0
         """
+        test_report = {
+            "gshare_fa_btb_selfmodifying_01_report": {
+                'Doc': "ASM should have executed FENCE instructions at least "
+                       "more than once.",
+                # TODO: is it to be hardcoded @ Alen?
+                'expected_Fence_count': 'presently hard_coded to 2',
+                'executed_Fence_count': None,
+                'Execution_Status': None
+            }
+        }
 
         f = open(log_file_path, "r")
         log_file = f.read()
         f.close()
 
         fence_executed_result = re.findall(rf.fence_executed_pattern, log_file)
-        if len(fence_executed_result) <= 1:
+        ct = len(fence_executed_result)
+        res = None
+        test_report["gshare_fa_btb_selfmodifying_01_report"][
+            'executed_Fence_count'] = ct
+        if ct <= 1:
             # check for execution of more than one fence inst
-            return False
-        return True
+            res = False
+            test_report["gshare_fa_btb_selfmodifying_01_report"][
+                'Execution_Status'] = 'Fail'
+        else:
+            res = True
+            test_report["gshare_fa_btb_selfmodifying_01_report"][
+                'Execution_Status'] = 'Pass'
+        f = open('gshare_fa_btb_selfmodifying_01_report.yaml', 'w')
+        yaml = YAML()
+        yaml.default_flow_style = False
+        yaml.dump(test_report, f)
+        f.close()
+        return res
