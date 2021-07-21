@@ -88,30 +88,40 @@ class gshare_fa_btb_fill_01(IPlugin):
             new_arr.append(alloc_newind_result[i][23:])
         # selecting the pattern "Allocating new index: dd ghr: dddddddd"
         # sorting them and removing duplicates
+
         new_arr = list(set(new_arr))
         new_arr.sort()
+        test_report = {
+            "gshare_fa_btb_fill_01_report": {
+                'Doc': "ASM should have filled {0} BTB entries. This report "
+                        "verifies that.".format(self._btb_depth),
+                'BTB_Depth': self._btb_depth,
+                'No_filled': None,
+                'Execution_Status': None
+            }
+        }
+        ct = 0
+        res = None
+        # TODO: Fix the path
+        for i in range(self._btb_depth):
+            if str(i) not in new_arr[i]:
+                pass
+            else:
+                ct += 1
+        test_report["gshare_fa_btb_fill_01_report"]['No_filled'] = ct
+
+        if ct == self._btb_depth:
+            test_report["gshare_fa_btb_fill_01_report"][
+                'Execution_Status'] = 'Pass'
+            res = True
+        else:
+            test_report["gshare_fa_btb_fill_01_report"][
+                'Execution_Status'] = 'Fail'
+            res = False
 
         f = open('gshare_fa_btb_fill_01_report.yaml', 'w')
         yaml = YAML()
         yaml.default_flow_style = False
-        # TODO: where to dump yaml
-        # TODO: Proper return statement usage
-        for i in range(self._btb_depth):
-            if str(i) not in new_arr[i]:
-                yaml.dump(
-                    {
-                        'gshare_fa_btb_fill_01_report.yaml': [{
-                            'Fill BTB with {0} entries'.format(self._btb_depth):
-                                'Fail'
-                        }]
-                    }, f)
-                f.close()
-                return False
-        yaml.dump(
-            {
-                'gshare_fa_btb_fill_01_report.yaml': [{
-                    'Fill BTB with {0} entries'.format(self._btb_depth): 'Pass'
-                }]
-            }, f)
+        yaml.dump(test_report, f)
         f.close()
-        return True
+        return res
