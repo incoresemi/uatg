@@ -65,7 +65,7 @@ class gshare_fa_fence_01(IPlugin):
             return False
         return True
     
-        def generate_covergroups(self,config_file):
+    def generate_covergroups(self,config_file):
         """
            returns the covergroups for this test
         """
