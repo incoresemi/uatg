@@ -18,8 +18,8 @@ from uarch_test.utils import clean_cli_params, list_of_modules, info
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
 @click.option(
-    '--clean/--no_clean',
-    '-cl/-no_cl',
+    '--clean',
+    '-cl',
     is_flag=True,
     help='clean flag is set if generated files needs to be cleaned.'
     'Presently, __pycache__, tests/ folders are removed along '
@@ -132,5 +132,6 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
                        work_dir=work_dir,
                        verbose=verbose)
     if clean:
+        #TODO: Clear up clean_dirs!
         logger.debug('Invoking clean_dirs')
         clean_dirs(work_dir=work_dir, verbose=verbose)
