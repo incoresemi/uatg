@@ -2,7 +2,6 @@
 from yapsy.IPlugin import IPlugin
 from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
-from uarch_test.log import logger
 import re
 
 
@@ -59,7 +58,6 @@ class gshare_fa_ghr_zeros_01(IPlugin):
             'expected_GHR_pattern'] = '0' * self._history_len
         res = None
         alloc_newind_pattern_result = re.findall(rf.alloc_newind_pattern, log_file)
-        logger.debug(alloc_newind_pattern_result)
         ghr_patterns = [i[-self._history_len:] for i in alloc_newind_pattern_result]
         for i in ghr_patterns:
             if self._history_len * '0' in i:
