@@ -3,7 +3,7 @@
 from yapsy.IPlugin import IPlugin
 import regex_formats as rf
 import re
-import configparser
+from configparser import ConfigParser
 
 
 class gshare_fa_fence_01(IPlugin):
@@ -15,10 +15,12 @@ class gshare_fa_fence_01(IPlugin):
     def __init__(self):
         super().__init__()
         self.recurse_level = 5
+        self._btb_depth = 32
 
     def execute(self, _bpu_dict):
         _en_ras = _bpu_dict['ras_depth']
         _en_bpu = _bpu_dict['instantiate']
+        self._btb_depth = _bpu_dict['btb_depth']
         # TODO why  recursing in the asm test?
         if _en_ras and _en_bpu:
             return True
@@ -64,36 +66,31 @@ class gshare_fa_fence_01(IPlugin):
             # check for execution of more than one fence inst
             return False
         return True
-    
-    def generate_covergroups(self,config_file):
+
+    def generate_covergroups(self, config_file):
         """
            returns the covergroups for this test
         """
         #ini_file = /Projects/incorecpu/jyothi.g/micro-arch-tests/example.ini
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.read(config_file)
         #test = config['test']['test_name']
         rg_initialize = config['bpu']['bpu_rg_initialize']
         rg_allocate = config['bpu']['bpu_rg_allocate']
         btb_tag = config['bpu']['bpu_btb_tag']
+        btb_tag_valid = config['bpu']['bpu_btb_tag_valid']
         ras_top_index = config['bpu']['bpu_ras_top_index']
         rg_ghr = config['bpu']['bpu_rg_ghr']
-        sv = "covergroup  gshare_fa_fence_01;
-option.per_instance=1;
-///coverpoint -rg_initialize should toggle from 0->1
-{0}_cp : coverpoint {0} {
-   bins {0}_0to1 = (0=>1);}
-
-}
-///Coverpoint to check the LSB of v_reg_btb_tax_00 is valid
-{1}_cp: coverpoint {1} {
-        bins valid = {"+ str(self.btb_depth) + "'b11111111_11111111_11111111_11111111};
-}
-///coverpoint -  rg_initilaize toggles friom 1->0 2. rg_allocate should become zero 3. v_reg_btb_tag_XX should become 0 (the entire 63bit reg) 4. rg_ghr_port1__read should become zeros. 5. ras_stack_top_index_port2__read should become 0\n".format(rg_initialize,valids)
-        for i in range(self.btb_depth):
-           sv = sv + "{0}_"+str(i)+": coverpoint {0}{\n
-           bins {0}_"+str(i)+"1to0 = (1=>0) iff ({1} == 'b0 && {4}_"+str(i)+" == 'b0 && {2} == 'b0 && {3}== 'b0);}".format(rg_initialize,rg_allocate,rg_ghr,ras_top_index,btb_tag)
-        sv = sv + "endgroup"
+        sv = ("covergroup  gshare_fa_fence_01;\n"
+        "option.per_instance=1;\n"
+        "///coverpoint -rg_initialize should toggle from 0->1\n")
+        sv = sv + str(rg_initialize) + "_cp : coverpoint "+str(rg_initialize)+" {\n   bins "+str(rg_initialize)+"_0to1 = (0=>1);\n}\n"
+        sv = sv + "///Coverpoint to check the LSB of v_reg_btb_tax_00 is valid\n{0}_cp: coverpoint {0} {{\n    bins valid = {{".format(btb_tag_valid)
+        sv = sv + str(self._btb_depth) + "\'b11111111_11111111_11111111_11111111};\n}\n///coverpoint -  rg_initilaize toggles friom 1->0 2. rg_allocate should become zero 3. v_reg_btb_tag_XX should become 0 (the entire 63bit reg) 4. rg_ghr_port1__read should become zeros. 5. ras_stack_top_index_port2__read should become 0\n"
+        for i in range(self._btb_depth):
+            sv = sv + str(rg_initialize)+ "_" + str(i) + ": coverpoint "+ str(rg_initialize) + "{\n    bins "+str(rg_allocate)+"_" 
+            sv = sv + str(i) + "1to0 = (1=>0) iff ("+str(rg_allocate)+" == 'b0 && "+str(ras_top_index)+"_" 
+            sv = sv + str(i) + " == 'b0 && "+ str(rg_allocate) +"== 'b0 && "+str(rg_ghr)+"== 'b0);\n}\n"
+        sv = sv + "endgroup\n\n"
 
         return (sv)
-
