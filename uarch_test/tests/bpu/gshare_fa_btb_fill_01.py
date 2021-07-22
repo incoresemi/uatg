@@ -104,16 +104,22 @@ class gshare_fa_btb_fill_01(IPlugin):
         rg_initialize = config['bpu']['bpu_rg_initialize']
         rg_allocate = config['bpu']['bpu_rg_allocate']
         btb_entry = config['bpu']['bpu_btb_entry']
-        sv = ("covergroup gshare_fa_btb_fill_cg;\n"
-        "option.per_instance=1;\n"
-        "///Coverpoint : reg rg_allocate should change from 0 to `btb_depth -1\n")
-        sv = sv + "{0}_cp : coverpoint rg_{0}[4:0] {{\n".format(rg_allocate) 
-        sv = sv + "    bins {0}_bin[32] = {{[0:31]}} iff ({1} == 0);\n}}\n".format(rg_allocate,rg_initialize)
+        sv = (
+            "covergroup gshare_fa_btb_fill_cg;\n"
+            "option.per_instance=1;\n"
+            "///Coverpoint : reg rg_allocate should change from 0 to `btb_depth -1\n"
+        )
+        sv = sv + "{0}_cp : coverpoint rg_{0}[4:0] {{\n".format(rg_allocate)
+        sv = sv + "    bins {0}_bin[32] = {{[0:31]}} iff ({1} == 0);\n}}\n".format(
+            rg_allocate, rg_initialize)
         sv = sv + "///Coverpoints to check the bits 2 and 3 of the v_reg_btb_entry_XX should contain 01,00,10 and 11 (across the 32 entries)\n"
 
         for i in range(self._btb_depth):
-            sv = sv + str(btb_entry) + "_"+str(i)+"_cp: coverpoint "+str(btb_entry)+ "_"
-            sv = sv + str(i)+"[3:2]{\n    bins "+ str(btb_entry) + "_"+str(i)+"_bin = {'d0,'d1,'d2,'d3} iff ("+str(rg_initialize)+" == 0);\n}\n"
+            sv = sv + str(btb_entry) + "_" + str(i) + "_cp: coverpoint " + str(
+                btb_entry) + "_"
+            sv = sv + str(i) + "[3:2]{\n    bins " + str(btb_entry) + "_" + str(
+                i) + "_bin = {'d0,'d1,'d2,'d3} iff (" + str(
+                    rg_initialize) + " == 0);\n}\n"
 
         sv = sv + "endgroup\n\n"
         return (sv)

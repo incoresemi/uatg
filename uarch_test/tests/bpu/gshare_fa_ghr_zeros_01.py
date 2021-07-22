@@ -64,9 +64,11 @@ class gshare_fa_ghr_zeros_01(IPlugin):
 option.per_instance=1;
 ///coverpoint label can be any name that relates the signal
 coverpoint_label: coverpoint {0} {{\n""".format(rg_ghr)
-        sv = sv + "    bins cp1 = {"+ str(self._history_len) +"{1'b0}};\n"
-        sv = sv + "    bins cp2 = {"+ str(self._history_len) +"{1'b1}};\n"
-        sv = sv + "    bins cp3 = {"+ str(int(self._history_len/2)) +"{2'b01}};\n"
-        sv = sv + "    bins cp4 = {"+ str(int(self._history_len/2)) +"{2'b10}};\n}\nendgroup\n\n"
+        sv = sv + "    bins cp1 = {" + str(self._history_len) + "{1'b0}};\n"
+        sv = sv + "    bins cp2 = {" + str(self._history_len) + "{1'b1}};\n"
+        sv = sv + "    bins cp3 = {" + str(int(
+            self._history_len / 2)) + "{2'b01}};\n"
+        sv = sv + "    bins cp4 = {" + str(int(
+            self._history_len / 2)) + "{2'b10}};\n}\nendgroup\n\n"
 
         return (sv)
