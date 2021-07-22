@@ -73,11 +73,11 @@ class gshare_fa_fence_01(IPlugin):
         config = configparser.ConfigParser()
         config.read(config_file)
         #test = config['test']['test_name']
-        rg_initialize = config['signals']['rg_initialize']
-        rg_allocate = config['signals']['rg_allocate']
-        btb_tag = config['signals']['btb_tag']
-        ras_top_index_port2__read = config['signals']['ras_top_index_port2__read']
-        port1_read = config['signals']['port1_read']
+        rg_initialize = config['bpu']['bpu_rg_initialize']
+        rg_allocate = config['bpu']['bpu_rg_allocate']
+        btb_tag = config['bpu']['bpu_btb_tag']
+        ras_top_index = config['bpu']['bpu_ras_top_index']
+        rg_ghr = config['bpu']['bpu_rg_ghr']
         sv = "covergroup  gshare_fa_fence_01;
 option.per_instance=1;
 ///coverpoint -rg_initialize should toggle from 0->1
@@ -92,7 +92,7 @@ option.per_instance=1;
 ///coverpoint -  rg_initilaize toggles friom 1->0 2. rg_allocate should become zero 3. v_reg_btb_tag_XX should become 0 (the entire 63bit reg) 4. rg_ghr_port1__read should become zeros. 5. ras_stack_top_index_port2__read should become 0\n".format(rg_initialize,valids)
         for i in range(self.btb_depth):
            sv = sv + "{0}_"+str(i)+": coverpoint {0}{\n
-           bins {0}_"+str(i)+"1to0 = (1=>0) iff ({1} == 'b0 && {4}_"+str(i)+" == 'b0 && {2} == 'b0 && {3}== 'b0);}".format(rg_initialize,rg_allocate,port1_read,ras_top_index_port2__read,btb_tag)
+           bins {0}_"+str(i)+"1to0 = (1=>0) iff ({1} == 'b0 && {4}_"+str(i)+" == 'b0 && {2} == 'b0 && {3}== 'b0);}".format(rg_initialize,rg_allocate,rg_ghr,ras_top_index,btb_tag)
         sv = sv + "endgroup"
 
         return (sv)

@@ -100,9 +100,9 @@ class gshare_fa_btb_fill_01(IPlugin):
         """
         config = configparser.ConfigParser()
         config.read(config_file)
-        rg_initialize = config['signals']['rg_initialize']
-        rg_allocate = config['signals']['rg_allocate']
-        btb_entry = config['signals']['btb_entry']
+        rg_initialize = config['bpu']['bpu_rg_initialize']
+        rg_allocate = config['bpu']['bpu_rg_allocate']
+        btb_entry = config['bpu']['bpu_btb_entry']
         sv = '''covergroup gshare_fa_btb_fill_cg;
 option.per_instance=1;
 ///Coverpoint : reg rg_allocate should change from 0 to `btb_depth -1
@@ -113,7 +113,7 @@ option.per_instance=1;
         for i in range(self.btb_depth):
           sv = sv + "{0}_"+str(i)+"_cp: coverpoint {0}_"+str(i)+"[3:2]{\n
           bins {0}_"+str(i)+"_bin = {'d0,'d1,'d2,'d3} iff ({1} == 0);\n
-}".format(btb_entry,rg_iitialize)
+}".format(btb_entry,rg_initialize)
         sv = sv + "endgroup"
 
         return (sv)
