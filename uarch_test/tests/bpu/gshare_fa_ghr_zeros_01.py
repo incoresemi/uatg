@@ -2,6 +2,7 @@
 from yapsy.IPlugin import IPlugin
 import regex_formats as rf
 import re
+from configparser import ConfigParser
 
 
 class gshare_fa_ghr_zeros_01(IPlugin):
@@ -11,10 +12,10 @@ class gshare_fa_ghr_zeros_01(IPlugin):
         self._history_len = 8
 
     def execute(self, _bpu_dict):
-        _history_len = _bpu_dict['history_len']
-        _en_bpu = _bpu_dict['instantiate']
+        self._history_len = _bpu_dict['history_len']
+        self._en_bpu = _bpu_dict['instantiate']
 
-        if _en_bpu and _history_len:
+        if self._en_bpu and self._history_len:
             return True
         else:
             return False
@@ -52,21 +53,20 @@ class gshare_fa_ghr_zeros_01(IPlugin):
                 return False
         return True
 
-    def generate_covergroups(self,config_file):
+    def generate_covergroups(self, config_file):
         """
            returns the covergroups for this test
         """
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.read(config_file)
         rg_ghr = config['bpu']['bpu_rg_ghr']
-        sv = '''covergroup bpu_cg; 
+        sv = """covergroup bpu_rg_ghr_cg; 
 option.per_instance=1;
 ///coverpoint label can be any name that relates the signal
-coverpoint_label: coverpoint {0} {
-    bins cp1 = {8'b00000000};
-    bins cp2 = {8'b11111111};
-    bins cp3 = {8'b01010101};
-    bins cp4 = {8'b10101010};
-}
-endgroup\n'''.format(rg_ghr)
+coverpoint_label: coverpoint {0} {{\n""".format(rg_ghr)
+        sv = sv + "    bins cp1 = {"+ str(self._history_len) +"{1'b0}};\n"
+        sv = sv + "    bins cp2 = {"+ str(self._history_len) +"{1'b1}};\n"
+        sv = sv + "    bins cp3 = {"+ str(int(self._history_len/2)) +"{2'b01}};\n"
+        sv = sv + "    bins cp4 = {"+ str(int(self._history_len/2)) +"{2'b10}};\n}\nendgroup\n\n"
+
         return (sv)
