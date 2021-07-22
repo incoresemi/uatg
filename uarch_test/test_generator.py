@@ -8,7 +8,6 @@ from yapsy.PluginManager import PluginManager
 from uarch_test.log import logger
 from uarch_test.__init__ import __version__
 
-
 def load_yaml(foo):
     yaml = YAML(typ="rt")
     yaml.default_flow_style = False
@@ -186,6 +185,7 @@ def generate_sv(yaml_dict, test_file_dir="bpu/"):
 
     # Loop around and find the plugins and writes the contents from the
     # plugins into a System Verilog file
+    config_file = "aliasing.ini"
     _sv = ""
     for plugin in manager.getAllPlugins():
         _check = plugin.plugin_object.execute(yaml_dict)
@@ -194,7 +194,7 @@ def generate_sv(yaml_dict, test_file_dir="bpu/"):
         if _check:
             try:
                 #_sv += _sv
-                _sv = plugin.plugin_object.generate_covergroups()
+                _sv = plugin.plugin_object.generate_covergroups(config_file)
                 logger.warn('Generating cvg {0}'.format(_test_name))
                 with open('tests/bpu/tests/covergroup.sv', "a") as f:
                     logger.info('Generating for {0}'.format(_test_name))
@@ -203,12 +203,11 @@ def generate_sv(yaml_dict, test_file_dir="bpu/"):
                 # To-Do -> Check what the name of the SV file should be
                 # To-Do -> Include the creation of TbTop and Interface SV files
                 
-            except AttributeError:
-                logger.warn('Skipping {0}'.format(_test_name))
-                pass
+            except AttributeError as error:
+                logger.warn('Attribute Error. Skipping {0}'.format(_test_name))
 
         else:
-            logger.critical('Skipped {0}'.format(_test_name))
+            logger.critical('Skipping {0} as no test was created'.format(_test_name))
     # to do -> dump interface along with covergroups
 
 def main():
