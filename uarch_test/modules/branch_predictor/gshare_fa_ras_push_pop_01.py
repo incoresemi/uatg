@@ -1,6 +1,7 @@
 # python script to automate test 11 in micro-arch test
 
 from yapsy.IPlugin import IPlugin
+from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
 
@@ -52,11 +53,39 @@ class gshare_fa_ras_push_pop_01(IPlugin):
         log_file = f.read()
         f.close()
 
+        test_report = {
+            "gshare_fa_ras_push_pop_01_report": {
+                'Doc': "Return Address Stack should have pushed 8 times and "
+                       "popped 4 times [presently hardcoded]",
+                'expected_Push_count': 8,  # Hardcoded
+                'expected_Pop_count': 4,  # Hardcoded
+                'executed_Push_count': None,
+                'executed_Pop_count': None,
+                'Execution_Status': None
+            }
+        }
+
         pushing_to_ras_result = re.findall(rf.pushing_to_ras_pattern, log_file)
         choosing_top_ras_result = re.findall(rf.choosing_top_ras_pattern,
                                              log_file)
-        if len(pushing_to_ras_result) != 8 and \
-                len(choosing_top_ras_result) != 4:
-            return False
+        res = None
+        test_report["gshare_fa_ras_push_pop_01_report"][
+            'executed_Push_count'] = len(pushing_to_ras_result)
+        test_report["gshare_fa_ras_push_pop_01_report"][
+            'executed_Pop_count'] = len(choosing_top_ras_result)
 
-        return True
+        if len(pushing_to_ras_result) != 8 or len(choosing_top_ras_result) != 4:
+            res = False
+            test_report["gshare_fa_ras_push_pop_01_report"][
+                'Execution_Status'] = 'Fail'
+        else:
+            res = True
+            test_report["gshare_fa_ras_push_pop_01_report"][
+                'Execution_Status'] = 'Pass'
+
+        f = open('gshare_fa_ras_push_pop_01_report.yaml', 'w')
+        yaml = YAML()
+        yaml.default_flow_style = False
+        yaml.dump(test_report, f)
+        f.close()
+        return res
