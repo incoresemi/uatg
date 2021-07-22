@@ -6,7 +6,7 @@ from datetime import datetime
 import ruamel.yaml as yaml
 import uarch_test
 from uarch_test.utils import load_yaml, create_plugins, create_linker
-from uarch_test.utils import create_model_test_h, generate_test_list
+from uarch_test.utils import create_model_test_h, generate_test_list, join_yaml_reports
 from yapsy.PluginManager import PluginManager
 from uarch_test.log import logger
 from uarch_test.__init__ import __version__
@@ -295,6 +295,8 @@ def validate_tests(modules, inp, work_dir, verbose='info'):
         logger.warn("No tests were created")
 
     logger.info('****** Finished Validating Test results ******')
+    join_yaml_reports()
+    logger.info('Joined Yaml reports')
 
 
 def clean_dirs(work_dir, verbose='info'):

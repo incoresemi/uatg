@@ -199,3 +199,20 @@ shakti_end:                                                             \
 
     with open(target_dir + '/' + 'model_test.h', 'w') as outfile:
         outfile.write(out)
+
+
+def join_yaml_reports(
+        work_dir='/home/purushoth/incoresemi/micro-arch-tests/uarch_test'):
+    files = [file for file in os.listdir(work_dir) if file.endswith('_report'
+                                                                    '.yaml')]
+    yaml = YAML()
+    reports = {}
+    for file in files:
+        fp = open(file, 'r')
+        data = yaml.load(fp)
+        reports.update(dict(data))
+        fp.close()
+    f = open(os.path.join(work_dir, 'combined_reports.yaml'), 'w')
+    yaml.default_flow_style = False
+    yaml.dump(reports, f)
+    f.close()
