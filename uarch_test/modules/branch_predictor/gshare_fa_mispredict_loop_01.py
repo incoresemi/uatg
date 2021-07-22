@@ -6,6 +6,7 @@
 # assembler directives complying to the test format spec
 
 from yapsy.IPlugin import IPlugin
+from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
 
@@ -50,12 +51,37 @@ class gshare_fa_mispredict_loop_01(IPlugin):
         """
           check if there is a mispredict atleast once after a BTBHit. 
         """
+        test_report = {
+            "gshare_fa_mispredict_loop_01_report": {
+                'Doc': "Branch Predictor should have mispredicted at least "
+                       "more than once.",
+                'expected_mispredict_count': '> 1',
+                'executed_mispredict_count': None,
+                'Execution_Status': None
+            }
+        }
+
         f = open(log_file_path, "r")
         log_file = f.read()
         f.close()
+
         misprediction_result = re.findall(rf.misprediction_pattern, log_file)
-        if len(misprediction_result) <=1:
-            return False
+
+        res = None
+        test_report["gshare_fa_mispredict_loop_01_report"][
+            'executed_mispredict_count'] = len(misprediction_result)
+        if len(misprediction_result) <= 1:
+            res = False
+            test_report["gshare_fa_mispredict_loop_01_report"][
+                'Execution_Status'] = 'Fail'
         else:
-            return True
-        return None
+            res = True
+            test_report["gshare_fa_mispredict_loop_01_report"][
+                'Execution_Status'] = 'Pass'
+
+        f = open('gshare_fa_mispredict_loop_01_report.yaml', 'w')
+        yaml = YAML()
+        yaml.default_flow_style = False
+        yaml.dump(test_report, f)
+        f.close()
+        return res
