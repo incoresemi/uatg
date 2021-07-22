@@ -81,6 +81,7 @@ class gshare_fa_fence_01(IPlugin):
         btb_tag_valid = config['bpu']['bpu_btb_tag_valid']
         ras_top_index = config['bpu']['bpu_ras_top_index']
         rg_ghr = config['bpu']['bpu_rg_ghr']
+
         sv = ("covergroup  gshare_fa_fence_01;\n"
               "option.per_instance=1;\n"
               "///coverpoint -rg_initialize should toggle from 0->1\n")
@@ -100,5 +101,6 @@ class gshare_fa_fence_01(IPlugin):
             sv = sv + str(i) + " == 'b0 && " + str(
                 rg_allocate) + "== 'b0 && " + str(rg_ghr) + "== 'b0);\n}\n"
         sv = sv + "endgroup\n\n"
+
 
         return (sv)
