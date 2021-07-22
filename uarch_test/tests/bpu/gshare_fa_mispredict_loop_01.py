@@ -8,6 +8,7 @@
 from yapsy.IPlugin import IPlugin
 import regex_formats as rf
 import re
+import configparser
 
 
 class gshare_fa_mispredict_loop_01(IPlugin):
@@ -60,19 +61,21 @@ class gshare_fa_mispredict_loop_01(IPlugin):
             return True
         return None
 
-    def generate_covergroups(self,config_file):
+    def generate_covergroups(self, config_file):
         """
         returns the covergroups for this test
         """
         config = configparser.ConfigParser()
         config.read(config_file)
         mispredict_flag = config['bpu']['bpu_mispredict_flag']
-        sv = '''covergroup gshare_fa_mispredict_loop_cg;
+        sv = """covergroup gshare_fa_mispredict_loop_cg;
 option.per_instance=1;
 ///Coverpoint : MSB of reg ma_mispredict_g should be 1 atleast once. When, the MSB is one, the MSB-1 bit of the register should be toggled.
-{0}_cp : coverpoint {0}[''' + str(self._history_len-1) + '''] {
-    bins {0}_'''+str(self._history_len-1)+'''_0to1 = (0=>1) iff ({0}['''+str(self._history_len)+'''] == 1);
-    bins {0}_'''+str(self._history_len-1)+'''_1to0 = (1=>0) iff ({0}['''+str(self._history_len)+'''] == 1);
-}
-endgroup\n'''.format(mispredict_flag)
+{0}_cp : coverpoint {0}[""".format(mispredict_flag)
+        sv = sv + str(self._history_len - 1) + """] {{\n    bins {0}_""".format(mispredict_flag)
+        sv = sv + str(self._history_len - 1) + """_0to1 = (0=>1) iff ({0}[""".format(mispredict_flag)
+        sv = sv + str(self._history_len) + """] == 1);\n    bins {0}_""".format(mispredict_flag)
+        sv = sv + str(self._history_len - 1) + """_1to0 = (1=>0) iff ({0}[""".format(mispredict_flag)
+        sv = sv + str(self._history_len) + """] == 1);\n}\nendgroup\n\n"""
+
         return (sv)
