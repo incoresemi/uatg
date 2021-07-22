@@ -78,7 +78,7 @@ class gshare_fa_fence_01(IPlugin):
         btb_tag = config['bpu']['bpu_btb_tag']
         ras_top_index = config['bpu']['bpu_ras_top_index']
         rg_ghr = config['bpu']['bpu_rg_ghr']
-        sv = "covergroup  gshare_fa_fence_01;
+        sv = "covergroup  gshare_fa_fence_cg;
 option.per_instance=1;
 ///coverpoint -rg_initialize should toggle from 0->1
 {0}_cp : coverpoint {0} {

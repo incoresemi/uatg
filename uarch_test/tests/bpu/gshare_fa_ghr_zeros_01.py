@@ -59,10 +59,10 @@ class gshare_fa_ghr_zeros_01(IPlugin):
         config = configparser.ConfigParser()
         config.read(config_file)
         rg_ghr = config['bpu']['bpu_rg_ghr']
-        sv = '''covergroup bpu_cg; 
+        sv = '''covergroup gshare_fa_ghr_zeros_cg; 
 option.per_instance=1;
 ///coverpoint label can be any name that relates the signal
-coverpoint_label: coverpoint {0} {
+{0}_cp: coverpoint {0} {
     bins cp1 = {8'b00000000};
     bins cp2 = {8'b11111111};
     bins cp3 = {8'b01010101};
