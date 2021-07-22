@@ -1,6 +1,7 @@
 # python program to generate an assembly file which fills the ghr with ones
 # the ghr will have a zero entry when the loop exits
 from yapsy.IPlugin import IPlugin
+from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
 
@@ -44,8 +45,43 @@ class gshare_fa_ghr_ones_01(IPlugin):
         log_file = f.read()
         f.close()
 
+        test_report = {
+            "gshare_fa_ghr_ones_01_report": {
+                'Doc': "ASM should have generated 11111... pattern in the GHR "
+                       "Register. This report show's the "
+                       "results",
+                'expected_GHR_pattern': None,
+                'executed_GHR_pattern': None,
+                'Execution_Status': None
+            }
+        }
+
         train_existing_result = re.findall(rf.train_existing_pattern, log_file)
-        for i in train_existing_result:
+        test_report['gshare_fa_ghr_ones_01_report'][
+            'expected_GHR_pattern'] = '1' * self._history_len
+        res = None
+
+        ghr_patterns = [i[-self._history_len:] for i in train_existing_result]
+        for i in ghr_patterns:
             if self._history_len * "1" in i:
-                return True
-        return False
+                test_report['gshare_fa_ghr_ones_01_report'][
+                    'executed_GHR_pattern'] = i
+                test_report['gshare_fa_ghr_ones_01_report'][
+                    'Execution_Status'] = 'Pass'
+                res = True
+                break
+            else:
+                res = False
+        if not res:
+            test_report['gshare_fa_ghr_ones_01_report'][
+                'executed_GHR_pattern'] = ghr_patterns
+            test_report['gshare_fa_ghr_ones_01_report'][
+                'Execution_Status'] = 'Fail: expected pattern not found'
+
+        f = open('gshare_fa_ghr_ones_01_report.yaml', 'w')
+        yaml = YAML()
+        yaml.default_flow_style = False
+        yaml.dump(test_report, f)
+        f.close()
+
+        return res

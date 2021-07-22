@@ -1,6 +1,8 @@
 # This program generates a assembly code which fills the ghr with zeros
 from yapsy.IPlugin import IPlugin
+from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
+from uarch_test.log import logger
 import re
 
 
@@ -43,14 +45,45 @@ class gshare_fa_ghr_zeros_01(IPlugin):
         f = open(log_file_path, "r")
         log_file = f.read()
         f.close()
-
-        new_ghr_result = re.findall(rf.new_ghr_pattern, log_file)
-        for i in new_ghr_result:
-            if self.ghr_width * "0" in i:
-                pass
+        test_report = {
+            "gshare_fa_ghr_zeros_01_report": {
+                'Doc': "ASM should have generated 00000... pattern in the GHR "
+                       "Register. This report show's the "
+                       "results",
+                'expected_GHR_pattern': None,
+                'executed_GHR_pattern': None,
+                'Execution_Status': None
+            }
+        }
+        test_report['gshare_fa_ghr_zeros_01_report'][
+            'expected_GHR_pattern'] = '0' * self._history_len
+        res = None
+        alloc_newind_pattern_result = re.findall(rf.alloc_newind_pattern, log_file)
+        logger.debug(alloc_newind_pattern_result)
+        ghr_patterns = [i[-self._history_len:] for i in alloc_newind_pattern_result]
+        for i in ghr_patterns:
+            if self._history_len * '0' in i:
+                test_report['gshare_fa_ghr_zeros_01_report'][
+                    'executed_GHR_pattern'] = i
+                test_report['gshare_fa_ghr_zeros_01_report'][
+                    'Execution_Status'] = 'Pass'
+                res = True
+                break
             else:
-                return False
-        return True
+                res = False
+        if not res:
+            test_report['gshare_fa_ghr_zeros_01_report'][
+                'executed_GHR_pattern'] = ghr_patterns
+            test_report['gshare_fa_ghr_zeros_01_report'][
+                'Execution_Status'] = 'Fail: expected pattern not found'
+
+        f = open('gshare_fa_ghr_zeros_01_report.yaml', 'w')
+        yaml = YAML()
+        yaml.default_flow_style = False
+        yaml.dump(test_report, f)
+        f.close()
+
+        return res
 
     def generate_covergroups(self):
         """

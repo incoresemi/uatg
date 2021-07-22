@@ -1,6 +1,7 @@
 # python script to automate test 11 in micro-arch test
 # ghr repeating pattern 010101010....
 from yapsy.IPlugin import IPlugin
+from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
 
@@ -66,11 +67,22 @@ class gshare_fa_ghr_alternating_01(IPlugin):
           check if the ghr value is alternating. 
           it should be 01010101 or 10101010 before being fenced 
         """
+
+        test_report = {
+            "gshare_fa_ghr_alternating_01_report": {
+                'Doc': "ASM should have generated either 010101... or 101010..."
+                       "pattern in the GHR Register. This report show's the "
+                       "results",
+                'expected_GHR_pattern': None,
+                'executed_GHR_pattern': None,
+                'Execution_Status': None
+            }
+        }
+
         f = open(log_file_path, "r")
         log_file = f.read()
         f.close()
 
-        train_existing_result = re.findall(rf.train_existing_pattern, log_file)
         a = None
         b = None
         if self._history_len % 2:
@@ -79,7 +91,33 @@ class gshare_fa_ghr_alternating_01(IPlugin):
         else:
             a = "01" * (self._history_len // 2)
             b = "10" * (self._history_len // 2)
-        for i in train_existing_result:
+
+        train_existing_result = re.findall(rf.train_existing_pattern, log_file)
+        test_report['gshare_fa_ghr_alternating_01_report'][
+            'expected_GHR_pattern'] = '{0} or {1}'.format(a, b)
+        res = None
+        ghr_patterns = [i[-self._history_len:] for i in train_existing_result]
+        for i in ghr_patterns:
             if a in i or b in i:
-                return True
-        return False
+                test_report['gshare_fa_ghr_alternating_01_report'][
+                    'executed_GHR_pattern'] = i
+                test_report['gshare_fa_ghr_alternating_01_report'][
+                    'Execution_Status'] = 'Pass'
+                res = True
+                break
+            else:
+                res = False
+
+        if not res:
+            test_report['gshare_fa_ghr_alternating_01_report'][
+                'executed_GHR_pattern'] = ghr_patterns
+            test_report['gshare_fa_ghr_alternating_01_report'][
+                'Execution_Status'] = 'Fail: expected pattern not found'
+
+        f = open('gshare_fa_ghr_alternating_01_report.yaml', 'w')
+        yaml = YAML()
+        yaml.default_flow_style = False
+        yaml.dump(test_report, f)
+        f.close()
+
+        return res
