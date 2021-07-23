@@ -4,6 +4,7 @@ from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
 import os
+from configparser import ConfigParser
 
 
 class gshare_fa_ghr_zeros_01(IPlugin):
@@ -58,8 +59,11 @@ class gshare_fa_ghr_zeros_01(IPlugin):
         test_report['gshare_fa_ghr_zeros_01_report'][
             'expected_GHR_pattern'] = '0' * self._history_len
         res = None
-        alloc_newind_pattern_result = re.findall(rf.alloc_newind_pattern, log_file)
-        ghr_patterns = [i[-self._history_len:] for i in alloc_newind_pattern_result]
+        alloc_newind_pattern_result = re.findall(rf.alloc_newind_pattern,
+                                                 log_file)
+        ghr_patterns = [
+            i[-self._history_len:] for i in alloc_newind_pattern_result
+        ]
         for i in ghr_patterns:
             if self._history_len * '0' in i:
                 test_report['gshare_fa_ghr_zeros_01_report'][
@@ -76,7 +80,9 @@ class gshare_fa_ghr_zeros_01(IPlugin):
             test_report['gshare_fa_ghr_zeros_01_report'][
                 'Execution_Status'] = 'Fail: expected pattern not found'
 
-        f = open(os.path.join(reports_dir, 'gshare_fa_ghr_zeros_01_report.yaml'), 'w')
+        f = open(
+            os.path.join(reports_dir, 'gshare_fa_ghr_zeros_01_report.yaml'),
+            'w')
         yaml = YAML()
         yaml.default_flow_style = False
         yaml.dump(test_report, f)
@@ -84,19 +90,23 @@ class gshare_fa_ghr_zeros_01(IPlugin):
 
         return res
 
-    def generate_covergroups(self):
+    def generate_covergroups(self, config_file):
         """
            returns the covergroups for this test
         """
-        sv = '''covergroup bpu_cg @(posedge CLK); 
+        config = ConfigParser()
+        config.read(config_file)
+        rg_ghr = config['bpu']['bpu_rg_ghr']
+
+        sv = """covergroup bpu_rg_ghr_cg; 
 option.per_instance=1;
 ///coverpoint label can be any name that relates the signal
-coverpoint_label: coverpoint rg_ghr_port1__read {
-    bins cp1 = {8'b00000000};
-    bins cp2 = {8'b11111111};
-    bins cp3 = {8'b01010101};
-    bins cp4 = {8'b10101010};
-}
-endgroup
-        '''
+coverpoint_label: coverpoint {0} {{\n""".format(rg_ghr)
+        sv = sv + "    bins cp1 = {" + str(self._history_len) + "{1'b0}};\n"
+        sv = sv + "    bins cp2 = {" + str(self._history_len) + "{1'b1}};\n"
+        sv = sv + "    bins cp3 = {" + str(int(
+            self._history_len / 2)) + "{2'b01}};\n"
+        sv = sv + "    bins cp4 = {" + str(int(
+            self._history_len / 2)) + "{2'b10}};\n}\nendgroup\n\n"
+
         return (sv)
