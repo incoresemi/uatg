@@ -15,3 +15,4 @@ uarch_test/target/*
 work/
 uarch_test/temp/*
 uarch_test/work/*
+uarch_test/*.yaml
