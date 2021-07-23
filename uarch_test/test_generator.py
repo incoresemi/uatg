@@ -242,8 +242,13 @@ def validate_tests(modules, inp, work_dir, verbose='info'):
 
     for module in modules:
         module_dir = os.path.join(uarch_dir, 'modules', module)
-        module_tests_dir = os.path.join(module_dir, 'tests')
+        # module_tests_dir = os.path.join(module_dir, 'tests')
         work_tests_dir = os.path.join(work_dir, module)
+        reports_dir = os.path.join(work_dir, 'reports', module)
+        try:
+            os.makedirs(reports_dir)
+        except OSError as e:
+            logger.error(e)
 
         module_params = inp_yaml[module]
 
@@ -261,7 +266,7 @@ def validate_tests(modules, inp, work_dir, verbose='info'):
                 try:
                     _result = plugin.plugin_object.check_log(
                         log_file_path=os.path.join(work_tests_dir, _test_name,
-                                                   'log'))
+                                                   'log'), reports_dir=reports_dir)
                     if _result:
                         logger.info('{0}. Minimal test: {1} has passed.'.format(
                             _tot_ct, _test_name))
