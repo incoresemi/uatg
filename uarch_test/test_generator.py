@@ -181,16 +181,18 @@ def generate_sv(work_dir, config_file, modules, verbose='info'):
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
 
+        alias_file = os.path.join(uarch_dir,'aliasing.ini')
+
         for plugin in manager.getAllPlugins():
             _check = plugin.plugin_object.execute(module_params)
             _name = (str(plugin.plugin_object).split(".", 1))
             _test_name = ((_name[1].split(" ", 1))[0])
             if _check:
                 try:
-                    _sv = plugin.plugin_object.generate_covergroups()
+                    _sv = plugin.plugin_object.generate_covergroups(alias_file)
                     # TODO: Check what the name of the SV file should be
                     # TODO: Include the creation of TbTop and Interface SV files
-                    with open(os.path.join(work_tests_dir + 'coverpoints.sv'),
+                    with open(os.path.join(work_tests_dir, 'coverpoints.sv'),
                               "a") as f:
                         logger.info(
                             'Generating coverpoints SV file for {0}'.format(
@@ -248,7 +250,7 @@ def validate_tests(modules, inp, work_dir, verbose='info'):
         try:
             os.makedirs(reports_dir)
         except OSError as e:
-            logger.error(e)
+            logger.warn(e)
 
         module_params = inp_yaml[module]
 
