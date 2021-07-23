@@ -4,6 +4,7 @@ from yapsy.IPlugin import IPlugin
 from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
+import os
 
 
 class gshare_fa_ras_push_pop_01(IPlugin):
@@ -42,7 +43,7 @@ class gshare_fa_ras_push_pop_01(IPlugin):
         asm += 'end:\n\tnop\n'
         return asm
 
-    def check_log(self, log_file_path):
+    def check_log(self, log_file_path, reports_dir):
         """
         check for pushes and pops in this file. There should be 8 pushes and
         4 pops
@@ -83,7 +84,7 @@ class gshare_fa_ras_push_pop_01(IPlugin):
             test_report["gshare_fa_ras_push_pop_01_report"][
                 'Execution_Status'] = 'Pass'
 
-        f = open('gshare_fa_ras_push_pop_01_report.yaml', 'w')
+        f = open(os.path.join(reports_dir, 'gshare_fa_ras_push_pop_01_report.yaml'), 'w')
         yaml = YAML()
         yaml.default_flow_style = False
         yaml.dump(test_report, f)

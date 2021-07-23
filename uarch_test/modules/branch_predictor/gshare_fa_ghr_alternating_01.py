@@ -4,6 +4,7 @@ from yapsy.IPlugin import IPlugin
 from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
+import os
 
 
 class gshare_fa_ghr_alternating_01(IPlugin):
@@ -62,7 +63,7 @@ class gshare_fa_ghr_alternating_01(IPlugin):
         asm = asm + '\tbeq  t2,x0,lab0\n'
         return asm
 
-    def check_log(self, log_file_path):
+    def check_log(self, log_file_path, reports_dir):
         """
           check if the ghr value is alternating. 
           it should be 01010101 or 10101010 before being fenced 
@@ -114,7 +115,7 @@ class gshare_fa_ghr_alternating_01(IPlugin):
             test_report['gshare_fa_ghr_alternating_01_report'][
                 'Execution_Status'] = 'Fail: expected pattern not found'
 
-        f = open('gshare_fa_ghr_alternating_01_report.yaml', 'w')
+        f = open(os.path.join(reports_dir, 'gshare_fa_ghr_alternating_01_report.yaml'), 'w')
         yaml = YAML()
         yaml.default_flow_style = False
         yaml.dump(test_report, f)

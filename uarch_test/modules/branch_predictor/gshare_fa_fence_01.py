@@ -4,6 +4,7 @@ from yapsy.IPlugin import IPlugin
 from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
+import os
 
 
 class gshare_fa_fence_01(IPlugin):
@@ -48,7 +49,7 @@ class gshare_fa_fence_01(IPlugin):
 
         return asm
 
-    def check_log(self, log_file_path):
+    def check_log(self, log_file_path, reports_dir):
         """
         check if rg_allocate becomes zero after encountering fence.
         also check if the valid bits become zero
@@ -82,7 +83,7 @@ class gshare_fa_fence_01(IPlugin):
             res = True
             test_report["gshare_fa_fence_01_report"][
                 'Execution_Status'] = 'Pass'
-        f = open('gshare_fa_fence_01_report.yaml', 'w')
+        f = open(os.path.join(reports_dir, 'gshare_fa_fence_01_report.yaml'), 'w')
         yaml = YAML()
         yaml.default_flow_style = False
         yaml.dump(test_report, f)

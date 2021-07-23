@@ -3,6 +3,7 @@ from yapsy.IPlugin import IPlugin
 from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
+import os
 
 
 class gshare_fa_ghr_zeros_01(IPlugin):
@@ -37,7 +38,7 @@ class gshare_fa_ghr_zeros_01(IPlugin):
 
         return asm
 
-    def check_log(self, log_file_path):
+    def check_log(self, log_file_path, reports_dir):
         """
           check if all the ghr values are zero throughout the test
         """
@@ -75,7 +76,7 @@ class gshare_fa_ghr_zeros_01(IPlugin):
             test_report['gshare_fa_ghr_zeros_01_report'][
                 'Execution_Status'] = 'Fail: expected pattern not found'
 
-        f = open('gshare_fa_ghr_zeros_01_report.yaml', 'w')
+        f = open(os.path.join(reports_dir, 'gshare_fa_ghr_zeros_01_report.yaml'), 'w')
         yaml = YAML()
         yaml.default_flow_style = False
         yaml.dump(test_report, f)
