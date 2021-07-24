@@ -104,12 +104,16 @@ class gshare_fa_btb_fill_01(IPlugin):
         }
         ct = 0
         res = None
-        # TODO: Fix the path
+        
         for i in range(self._btb_depth):
-            if str(i) not in new_arr[i]:
+            try:
+                if str(i) not in new_arr[i]:
+                    pass     
+                else:
+                    ct += 1
+            except IndexError as err:
                 pass
-            else:
-                ct += 1
+
         test_report["gshare_fa_btb_fill_01_report"]['No_filled'] = ct
 
         if ct == self._btb_depth:

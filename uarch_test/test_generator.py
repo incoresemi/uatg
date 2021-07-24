@@ -302,7 +302,7 @@ def validate_tests(modules, inp, work_dir, verbose='info'):
         logger.warn("No tests were created")
 
     logger.info('****** Finished Validating Test results ******')
-    join_yaml_reports()
+    join_yaml_reports(work_dir)
     logger.info('Joined Yaml reports')
 
 
