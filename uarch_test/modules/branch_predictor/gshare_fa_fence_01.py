@@ -5,6 +5,7 @@ from ruamel.yaml import YAML
 import uarch_test.regex_formats as rf
 import re
 import os
+from configparser import ConfigParser
 
 
 class gshare_fa_fence_01(IPlugin):
@@ -72,8 +73,7 @@ class gshare_fa_fence_01(IPlugin):
         fence_executed_result = re.findall(rf.fence_executed_pattern, log_file)
         ct = len(fence_executed_result)
         res = None
-        test_report["gshare_fa_fence_01_report"][
-            'executed_Fence_count'] = ct
+        test_report["gshare_fa_fence_01_report"]['executed_Fence_count'] = ct
         if ct <= 1:
             # check for execution of more than one fence inst
             res = False
@@ -83,9 +83,47 @@ class gshare_fa_fence_01(IPlugin):
             res = True
             test_report["gshare_fa_fence_01_report"][
                 'Execution_Status'] = 'Pass'
-        f = open(os.path.join(reports_dir, 'gshare_fa_fence_01_report.yaml'), 'w')
+        f = open(os.path.join(reports_dir, 'gshare_fa_fence_01_report.yaml'),
+                 'w')
         yaml = YAML()
         yaml.default_flow_style = False
         yaml.dump(test_report, f)
         f.close()
         return res
+
+    def generate_covergroups(self, config_file):
+        """
+           returns the covergroups for this test
+        """
+        #ini_file = /Projects/incorecpu/jyothi.g/micro-arch-tests/example.ini
+        config = ConfigParser()
+        config.read(config_file)
+        #test = config['test']['test_name']
+        rg_initialize = config['bpu']['bpu_rg_initialize']
+        rg_allocate = config['bpu']['bpu_rg_allocate']
+        btb_tag = config['bpu']['bpu_btb_tag']
+        btb_tag_valid = config['bpu']['bpu_btb_tag_valid']
+        ras_top_index = config['bpu']['bpu_ras_top_index']
+        rg_ghr = config['bpu']['bpu_rg_ghr']
+
+        sv = ("covergroup  gshare_fa_fence_01;\n"
+              "option.per_instance=1;\n"
+              "///coverpoint -rg_initialize should toggle from 0->1\n")
+        sv = sv + str(rg_initialize) + "_cp : coverpoint " + str(
+            rg_initialize) + " {\n   bins " + str(
+                rg_initialize) + "_0to1 = (0=>1);\n}\n"
+        sv = sv + "///Coverpoint to check the LSB of v_reg_btb_tax_00 is valid\n{0}_cp: coverpoint {0} {{\n    bins valid = {{".format(
+            btb_tag_valid)
+        sv = sv + str(
+            self._btb_depth
+        ) + "\'b11111111_11111111_11111111_11111111};\n}\n///coverpoint -  rg_initilaize toggles friom 1->0 2. rg_allocate should become zero 3. v_reg_btb_tag_XX should become 0 (the entire 63bit reg) 4. rg_ghr_port1__read should become zeros. 5. ras_stack_top_index_port2__read should become 0\n"
+        for i in range(self._btb_depth):
+            sv = sv + str(rg_initialize) + "_" + str(i) + ": coverpoint " + str(
+                rg_initialize) + "{\n    bins " + str(rg_allocate) + "_"
+            sv = sv + str(i) + "1to0 = (1=>0) iff (" + str(
+                rg_allocate) + " == 'b0 && " + str(ras_top_index) + "_"
+            sv = sv + str(i) + " == 'b0 && " + str(
+                rg_allocate) + "== 'b0 && " + str(rg_ghr) + "== 'b0);\n}\n"
+        sv = sv + "endgroup\n\n"
+
+        return (sv)
