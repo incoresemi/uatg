@@ -5,8 +5,7 @@ from getpass import getuser
 from datetime import datetime
 import ruamel.yaml as yaml
 import uarch_test
-from uarch_test.utils import load_yaml, create_plugins, create_linker
-from uarch_test.utils import create_model_test_h, generate_test_list, join_yaml_reports
+from uarch_test.utils import *
 from yapsy.PluginManager import PluginManager
 from uarch_test.log import logger
 from uarch_test.__init__ import __version__
@@ -181,8 +180,14 @@ def generate_sv(work_dir, config_file, modules, verbose='info'):
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
-
+        ## To get the aliasing file as a parameter
         alias_file = os.path.join(uarch_dir, 'aliasing.ini')
+
+        ## generate the tbtop and interface files
+        gen_tbfiles(sv_dir, alias_file)
+        logger.debug("Generated tbtop and interface files")
+        gen_sv_defines(sv_dir)
+        logger.debug("Generated defines file")
 
         for plugin in manager.getAllPlugins():
             _check = plugin.plugin_object.execute(module_params)
