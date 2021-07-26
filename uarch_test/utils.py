@@ -5,6 +5,7 @@ import glob
 import uarch_test
 from uarch_test.log import logger
 from yapsy.PluginManager import PluginManager
+from configparser import ConfigParser
 
 global _path
 _path = os.path.dirname(uarch_test.__file__)
@@ -201,9 +202,12 @@ shakti_end:                                                             \
         outfile.write(out)
 
 
-def join_yaml_reports(
-        work_dir='absolute_path_here/', module='branch_predictor'):
-    files = [file for file in os.listdir(os.path.join(work_dir, 'reports', module)) if file.endswith('_report.yaml')]
+def join_yaml_reports(work_dir='absolute_path_here/',
+                      module='branch_predictor'):
+    files = [
+        file for file in os.listdir(os.path.join(work_dir, 'reports', module))
+        if file.endswith('_report.yaml')
+    ]
     yaml = YAML()
     reports = {}
     for file in files:
@@ -215,3 +219,199 @@ def join_yaml_reports(
     yaml.default_flow_style = False
     yaml.dump(reports, f)
     f.close()
+
+
+## class with methods to generate system verilog files
+class sv_components:
+
+    def __init__(self, config_file):
+        """
+        This class contains the methods which will return the tb_top and interface files
+        """
+        super().__init__()
+        self._btb_depth = 32
+        config = ConfigParser()
+        config.read(config_file)
+        self.rg_initialize = config['bpu']['bpu_rg_initialize']
+        self.rg_allocate = config['bpu']['bpu_rg_allocate']
+        self.btb_tag = config['bpu']['bpu_btb_tag']
+        self.btb_entry = config['bpu']['bpu_btb_entry']
+        self.ras_top_index = config['bpu']['bpu_ras_top_index']
+        self.rg_ghr = config['bpu']['bpu_rg_ghr']
+        self.valids = config['bpu']['bpu_btb_tag_valid']
+        self.mispredict = config['bpu']['bpu_mispredict_flag']
+        self.bpu_path = config['tb_top']['path_to_bpu']
+        self.decoder_path = config['tb_top']['path_to_decoder']
+        self.stage0_path = config['tb_top']['path_to_stage0']
+        self.fn_decompress_path = config['tb_top']['path_to_fn_decompress']
+
+    # function to generate interface file
+    def generate_interface(self):
+        """
+           returns interface file
+        """
+        intf = ("interface chromite_intf(input bit CLK,RST_N);\n"
+                "  logic " + str(self.rg_initialize) + ";\n"
+                "  logic [4:0]" + str(self.rg_allocate) + ";\n")
+        intf = intf + "\n  logic [7:0]{0};".format(self.rg_ghr)
+        intf = intf + "\n  logic {0};".format(self.ras_top_index)
+        intf = intf + "\n  logic {0};\n".format(self.mispredict)
+        for i in range(self._btb_depth):
+            intf = intf + "\n  logic [62:0] " + str(
+                self.btb_tag) + "_" + str(i) + ";"
+        for i in range(self._btb_depth):
+            intf = intf + "\n  logic [67:0] " + str(
+                self.btb_entry) + "_" + str(i) + ";"
+        intf = intf + "\nendinterface\n"
+
+        return (intf)
+
+        # function to generate tb_top file
+    def generate_tb_top(self):
+        """
+          returns tb_top file
+       """
+        tb_top = ("`include \"defines.sv\"\n"
+                  "`ifdef RV64\n"
+                  "`include \"interface.sv\"\n"
+                  "module tb_top(input CLK,RST_N);\n"
+                  "  chromite_intf intf(CLK,RST_N);\n"
+                  "  mkTbSoc mktbsoc(.CLK(intf.CLK),.RST_N(intf.RST_N));\n"
+                  "  always @(posedge CLK)\n"
+                  "  begin\n")
+        tb_top = tb_top + "    if(!RST_N) begin\n      intf.{0} = {1}.{0}\n      intf.{2} = {1}.{2}\n      intf.{3} = {1}.{3}\n      intf.{4} = {1}.{4}\n      intf.{5} = {1}.{5}".format(
+            self.rg_initialize, self.bpu_path, self.rg_allocate,
+            self.ras_top_index, self.rg_ghr, self.mispredict)
+        for i in range(self._btb_depth):
+            tb_top = tb_top + "\n      intf." + str(
+                self.btb_tag) + "_" + str(i) + " = " + str(
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + ";"
+        for i in range(self._btb_depth):
+            tb_top = tb_top + "\n      intf." + str(
+                self.btb_entry) + "_" + str(i) + " = " + str(
+                    self.bpu_path) + "." + str(
+                        self.btb_entry) + "_" + str(i) + ";"
+        for i in range(self._btb_depth):
+            tb_top = tb_top + "\n      intf." + str(self.valids) + "_[" + str(
+                i) + "] = " + (self.bpu_path) + "." + str(
+                    self.btb_tag) + "_" + str(i) + "[0];"
+        tb_top = tb_top + ("\n    end\n" "    else\n")
+        tb_top = tb_top + "      intf.{0} = {1}.{0}\n      intf.{2} = {1}.{2}\n      intf.{3} = {1}.{3}\n      intf.{4} = {1}.{4}\n      intf.{5} = {1}.{5}".format(
+            self.rg_initialize, self.bpu_path, self.rg_allocate,
+            self.ras_top_index, self.rg_ghr, self.mispredict)
+        for i in range(self._btb_depth):
+            tb_top = tb_top + "\n      intf." + str(
+                self.btb_tag) + "_" + str(i) + " = " + str(
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + ";"
+        for i in range(self._btb_depth):
+            tb_top = tb_top + "\n      intf." + str(
+                self.btb_entry) + "_" + str(i) + " = " + str(
+                    self.bpu_path) + "." + str(
+                        self.btb_entry) + "_" + str(i) + ";"
+        for i in range(self._btb_depth):
+            tb_top = tb_top + "\n      intf." + str(
+                self.valids) + "_[" + str(i) + "] = " + str(
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + "[0];"
+        tb_top = tb_top + """\n    end
+end
+initial
+begin
+  if(`TEST == gshare_fa_btb_fill_01)
+  begin
+    gshare_fa_btb_fill_cg fill_cg = new()
+    fill_cg.sample()
+  end
+  if(`TEST == gshare_fa_fence_01 || `TEST == gshare_fa_selfmodifying_01)
+  begin
+    gshare_fa_fence_cg fence_cg = new()
+    fence_cg.sample()
+  end
+  if(`TEST == gshare_fa_ghr_zeros_01 || `TEST == gshare_fa_ghr_ones_01 || `TEST == gshare_fa_ghr_alternating_01)
+  begin
+    bpu_rg_ghr_cg ghr_cg = new()
+    ghr_cg.sample()
+  end
+  if(`TEST == gshare_fa_mispredict_loop_01)
+  begin
+    gshare_fa_mispredict_loop_cg mispredict_cg = new()
+    mispredict_cg.sample()
+  end
+  if(`TEST == regression)
+  begin
+    gshare_fa_mispredict_loop_cg mispredict_cg = new()
+    bpu_rg_ghr_cg ghr_cg = new()
+    gshare_fa_fence_cg fence_cg = new()
+    gshare_fa_btb_fill_cg fill_cg = new()
+    mispredict_cg.sample()
+    ghr_cg.sample()
+    fence_cg.sample()
+    fill_cg.sample()
+  end
+end
+
+`ifdef TRN
+initial
+begin
+  //$recordfile(\"tb_top.trn\");
+  //$recordvars();
+end
+`endif
+
+`ifdef VCS
+initial
+begin
+  //$dumpfile(\"vsim.vcd\");
+  //$dumpvars(0,tb_top);
+end
+`endif
+
+endmodule
+`endif\n"""
+
+        return (tb_top)
+
+
+def gen_tbfiles(sv_dir, alias_file):
+    """
+    invokes the methods within the sv_components class and creates the sv files
+    """
+    sv_obj = sv_components(alias_file)
+    tb_top = sv_obj.generate_tb_top()
+    interface = sv_obj.generate_interface()
+
+    with open(sv_dir + "/tb_top.sv", "w") as tb_top_file:
+        tb_top_file.write(tb_top)
+
+    with open(sv_dir + "/interface.sv", "w") as interface_file:
+        interface_file.write(interface)
+
+
+def gen_sv_defines(sv_dir):
+    """
+    creates the defines.sv file
+    """
+    out = """/// All compile time macros will be defined here
+
+// Macro to indicate the ISA 
+`define RV64
+
+//Macro to reset 
+`define BSV_RESET_NAME RST_N
+
+//Macro to indicate compressed or decompressed
+`define COMPRESSED 
+
+//Macro to indicate the waveform dump
+  //for questa 
+    `define VCS
+  //for cadence 
+    `define TRN
+
+//Macro to indicate the test_case
+`define TEST <Test_case_name>"""
+
+    with open(sv_dir + "/defines.sv", "w") as defines_file:
+        defines_file.write(out)
