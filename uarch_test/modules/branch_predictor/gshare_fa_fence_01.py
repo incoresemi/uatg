@@ -106,7 +106,7 @@ class gshare_fa_fence_01(IPlugin):
         ras_top_index = config['bpu']['bpu_ras_top_index']
         rg_ghr = config['bpu']['bpu_rg_ghr']
 
-        sv = ("covergroup  gshare_fa_fence_01;\n"
+        sv = ("covergroup  gshare_fa_fence_cg;\n"
               "option.per_instance=1;\n"
               "///coverpoint -rg_initialize should toggle from 0->1\n")
         sv = sv + str(rg_initialize) + "_cp : coverpoint " + str(

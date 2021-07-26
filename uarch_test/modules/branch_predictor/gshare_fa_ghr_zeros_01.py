@@ -10,14 +10,13 @@ from configparser import ConfigParser
 class gshare_fa_ghr_zeros_01(IPlugin):
 
     def __init__(self):
-        self.ghr_width = 8
         self._history_len = 8
 
     def execute(self, _bpu_dict):
-        _history_len = _bpu_dict['history_len']
+        self._history_len = _bpu_dict['history_len']
         _en_bpu = _bpu_dict['instantiate']
 
-        if _en_bpu and _history_len:
+        if _en_bpu and self._history_len:
             return True
         else:
             return False
@@ -102,11 +101,16 @@ class gshare_fa_ghr_zeros_01(IPlugin):
 option.per_instance=1;
 ///coverpoint label can be any name that relates the signal
 coverpoint_label: coverpoint {0} {{\n""".format(rg_ghr)
-        sv = sv + "    bins cp1 = {" + str(self._history_len) + "{1'b0}};\n"
-        sv = sv + "    bins cp2 = {" + str(self._history_len) + "{1'b1}};\n"
-        sv = sv + "    bins cp3 = {" + str(int(
-            self._history_len / 2)) + "{2'b01}};\n"
-        sv = sv + "    bins cp4 = {" + str(int(
-            self._history_len / 2)) + "{2'b10}};\n}\nendgroup\n\n"
+        #sv = sv + "    bins cp1 = {" + str(self._history_len) + "{1'b0}};\n"
+        #sv = sv + "    bins cp2 = {" + str(self._history_len) + "{1'b1}};\n"
+        #sv = sv + "    bins cp3 = {" + str(int(
+        #    self._history_len / 2)) + "{2'b01}};\n"
+        #sv = sv + "    bins cp4 = {" + str(int(
+        #    self._history_len / 2)) + "{2'b10}};\n}\nendgroup\n\n"
+
+        sv = sv + "    bins cp1 = {'b00000000};\n"
+        sv = sv + "    bins cp2 = {'b11111111};\n"
+        sv = sv + "    bins cp3 = {'b10101010};\n"
+        sv = sv + "    bins cp4 = {'b01010101};\n}\nendgroup\n\n"
 
         return (sv)
