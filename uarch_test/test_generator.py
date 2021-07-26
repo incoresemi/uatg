@@ -174,14 +174,15 @@ def generate_sv(work_dir, config_file, modules, verbose='info'):
         logger.debug('Generating CoverPoints for {0}'.format(module))
 
         module_dir = os.path.join(uarch_dir, 'modules', module)
-        work_tests_dir = os.path.join(work_dir, module)
+        sv_dir = os.path.join(work_dir, 'sv_top')
         module_params = inp_yaml[module]
+        os.makedirs(sv_dir, exist_ok=True)
 
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
 
-        alias_file = os.path.join(uarch_dir,'aliasing.ini')
+        alias_file = os.path.join(uarch_dir, 'aliasing.ini')
 
         for plugin in manager.getAllPlugins():
             _check = plugin.plugin_object.execute(module_params)
@@ -192,8 +193,7 @@ def generate_sv(work_dir, config_file, modules, verbose='info'):
                     _sv = plugin.plugin_object.generate_covergroups(alias_file)
                     # TODO: Check what the name of the SV file should be
                     # TODO: Include the creation of TbTop and Interface SV files
-                    with open(os.path.join(work_tests_dir, 'coverpoints.sv'),
-                              "a") as f:
+                    with open(os.path.join(sv_dir, 'coverpoints.sv'), "a") as f:
                         logger.info(
                             'Generating coverpoints SV file for {0}'.format(
                                 _test_name))
@@ -265,7 +265,8 @@ def validate_tests(modules, inp, work_dir, verbose='info'):
                 try:
                     _result = plugin.plugin_object.check_log(
                         log_file_path=os.path.join(work_tests_dir, _test_name,
-                                                   'log'), reports_dir=reports_dir)
+                                                   'log'),
+                        reports_dir=reports_dir)
                     if _result:
                         logger.info('{0}. Minimal test: {1} has passed.'.format(
                             _tot_ct, _test_name))
