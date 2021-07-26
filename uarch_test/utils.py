@@ -202,13 +202,12 @@ shakti_end:                                                             \
 
 
 def join_yaml_reports(
-        work_dir='/home/purushoth/incoresemi/micro-arch-tests/uarch_test'):
-    files = [file for file in os.listdir(work_dir) if file.endswith('_report'
-                                                                    '.yaml')]
+        work_dir='absolute_path_here/', module='branch_predictor'):
+    files = [file for file in os.listdir(os.path.join(work_dir, 'reports', module)) if file.endswith('_report.yaml')]
     yaml = YAML()
     reports = {}
     for file in files:
-        fp = open(file, 'r')
+        fp = open(os.path.join(work_dir, 'reports', module, file), 'r')
         data = yaml.load(fp)
         reports.update(dict(data))
         fp.close()

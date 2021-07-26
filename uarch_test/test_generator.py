@@ -247,10 +247,7 @@ def validate_tests(modules, inp, work_dir, verbose='info'):
         # module_tests_dir = os.path.join(module_dir, 'tests')
         work_tests_dir = os.path.join(work_dir, module)
         reports_dir = os.path.join(work_dir, 'reports', module)
-        try:
-            os.makedirs(reports_dir)
-        except OSError as e:
-            logger.warn(e)
+        os.makedirs(reports_dir, exist_ok=True)
 
         module_params = inp_yaml[module]
 
