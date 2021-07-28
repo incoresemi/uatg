@@ -251,17 +251,55 @@ class sv_components:
         """
         intf = ("interface chromite_intf(input bit CLK,RST_N);\n"
                 "  logic " + str(self.rg_initialize) + ";\n"
-                                                       "  logic [4:0]" + str(
+                "  logic [4:0]" + str(
             self.rg_allocate) + ";\n")
         intf += "\n  logic [7:0]{0};".format(self.rg_ghr)
+        intf += "\nlogic ["+str(self._btb_depth-1)+":0]{0};".format(self.valids)
         intf += "\n  logic {0};".format(self.ras_top_index)
-        intf += "\n  logic {0};\n".format(self.mispredict)
+        intf += "\n  logic [8:0]{0};\n".format(self.mispredict)
         for i in range(self._btb_depth):
             intf += "\n  logic [62:0] " + str(
                 self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             intf += "\n  logic [67:0] " + str(
                 self.btb_entry) + "_" + str(i) + ";"
+        intf += ("\n `include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/coverpoints.sv\"
+                  \n  string test = `cnvstr(`TEST);
+                  \n\n initial
+begin
+if(test == \"gshare_fa_mispredict_loop_01\")
+  begin
+     gshare_fa_mispredict_loop_cg mispredict_cg;
+     mispredict_cg=new();
+  end
+if(test == \"gshare_fa_ghr_zeros_01\" || test == \"gshare_fa_ghr_ones_01\" || test == \"gshare_fa_ghr_alternating_01\")
+  begin
+     bpu_rg_ghr_cg ghr_cg;
+     ghr_cg=new();
+  end
+if(test == \"gshare_fa_fence_01\" || test == \"gshare_fa_selfmodifying_01\")
+  begin
+    gshare_fa_fence_cg fence_cg;
+    fence_cg=new();
+  end
+if(test == \"gshare_fa_btb_fill_01\")
+  begin
+    gshare_fa_btb_fill_cg fill_cg;
+    fill_cg=new();
+  end
+if(test == \"regression\")
+  begin
+   gshare_fa_mispredict_loop_cg mispredict_cg;
+   bpu_rg_ghr_cg ghr_cg;
+   gshare_fa_fence_cg fence_cg;
+   gshare_fa_btb_fill_cg fill_cg;
+   mispredict_cg=new();
+   ghr_cg=new();
+   fill_cg=new();
+   fence_cg=new();
+  end
+end
+\n") 
         intf += "\nendinterface\n"
 
         return intf
@@ -272,17 +310,17 @@ class sv_components:
         """
           returns tb_top file
        """
-        tb_top = ("`include \"defines.sv\"\n"
+        tb_top = ("`include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/defines.sv\"\n"
+                  "`include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/interface.sv\"\n"
                   "`ifdef RV64\n"
-                  "`include \"interface.sv\"\n"
                   "module tb_top(input CLK,RST_N);\n"
                   "  chromite_intf intf(CLK,RST_N);\n"
                   "  mkTbSoc mktbsoc(.CLK(intf.CLK),.RST_N(intf.RST_N));\n"
                   "  always @(posedge CLK)\n"
                   "  begin\n")
-        tb_top = tb_top + "\tif(!RST_N) begin\n\tintf.{0} = {1}.{0}\n\tintf.{" \
-                          "2} = {1}.{2}\n\tintf.{3} = {1}.{3}\n\tintf.{4} = {" \
-                          "1}.{4}\n\tintf.{5} = {1}.{5}".format(
+        tb_top = tb_top + "\tif(!RST_N) begin\n\tintf.{0} = {1}.{0};\n\tintf.{" \
+                          "2} = {1}.{2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {" \
+                          "1}.{4};\n\tintf.{5} = {1}.{5};".format(
             self.rg_initialize, self.bpu_path, self.rg_allocate,
             self.ras_top_index, self.rg_ghr, self.mispredict)
         for i in range(self._btb_depth):
@@ -299,10 +337,10 @@ class sv_components:
             tb_top = tb_top + "\n\tintf." + str(self.valids) + "_[" + str(
                 i) + "] = " + (self.bpu_path) + "." + str(
                 self.btb_tag) + "_" + str(i) + "[0];"
-        tb_top += ("\n\tend\n" "\telse\n")
-        tb_top += "\tintf.{0} = {1}.{0}\n\tintf.{2} = {1}.{" \
-                  "2}\n\tintf.{3} = {1}.{3}\n\tintf.{4} = {1}.{" \
-                  "4}\n\tintf.{5} = {1}.{5}".format(
+        tb_top += ("\n\tend\n" "\telse\n\tbegin\n")
+        tb_top += "\tintf.{0} = {1}.{0};\n\tintf.{2} = {1}.{" \
+                  "2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {1}.{" \
+                  "4};\n\tintf.{5} = {1}.{5};".format(
             self.rg_initialize, self.bpu_path, self.rg_allocate,
             self.ras_top_index, self.rg_ghr, self.mispredict)
         for i in range(self._btb_depth):
@@ -317,44 +355,10 @@ class sv_components:
                 self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
-                self.valids) + "_[" + str(i) + "] = " + str(
+                self.valids) + "[" + str(i) + "] = " + str(
                 self.bpu_path) + "." + str(
                 self.btb_tag) + "_" + str(i) + "[0];"
         tb_top = tb_top + """\n\tend
-end
-initial
-begin
-  if(`TEST == gshare_fa_btb_fill_01)
-  begin
-    gshare_fa_btb_fill_cg fill_cg = new()
-    fill_cg.sample()
-  end
-  if(`TEST == gshare_fa_fence_01 || `TEST == gshare_fa_selfmodifying_01)
-  begin
-    gshare_fa_fence_cg fence_cg = new()
-    fence_cg.sample()
-  end
-  if(`TEST == gshare_fa_ghr_zeros_01 || `TEST == gshare_fa_ghr_ones_01 || `TEST == gshare_fa_ghr_alternating_01)
-  begin
-    bpu_rg_ghr_cg ghr_cg = new()
-    ghr_cg.sample()
-  end
-  if(`TEST == gshare_fa_mispredict_loop_01)
-  begin
-    gshare_fa_mispredict_loop_cg mispredict_cg = new()
-    mispredict_cg.sample()
-  end
-  if(`TEST == regression)
-  begin
-    gshare_fa_mispredict_loop_cg mispredict_cg = new()
-    bpu_rg_ghr_cg ghr_cg = new()
-    gshare_fa_fence_cg fence_cg = new()
-    gshare_fa_btb_fill_cg fill_cg = new()
-    mispredict_cg.sample()
-    ghr_cg.sample()
-    fence_cg.sample()
-    fill_cg.sample()
-  end
 end
 
 `ifdef TRN
@@ -416,7 +420,8 @@ def gen_sv_defines(sv_dir):
     `define TRN
 
 //Macro to indicate the test_case
-`define TEST <Test_case_name>"""
+`define cnvstr(x) `\"x`\"
+`define TEST regression"""
 
     with open(sv_dir + "/defines.sv", "w") as defines_file:
         defines_file.write(out)
