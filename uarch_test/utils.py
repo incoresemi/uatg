@@ -263,7 +263,7 @@ class sv_components:
         for i in range(self._btb_depth):
             intf += "\n  logic [67:0] " + str(
                 self.btb_entry) + "_" + str(i) + ";"
-        intf += ("\n `include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/coverpoints.sv\"
+        intf += ("""\n `include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/coverpoints.sv\"
                   \n  string test = `cnvstr(`TEST);
                   \n\n initial
 begin
@@ -299,7 +299,7 @@ if(test == \"regression\")
    fence_cg=new();
   end
 end
-\n") 
+\n""") 
         intf += "\nendinterface\n"
 
         return intf
