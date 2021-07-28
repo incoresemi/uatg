@@ -17,9 +17,9 @@ class gshare_fa_fence_01(IPlugin):
     def __init__(self):
         super().__init__()
         self.recurse_level = 5
-        self._btb_depth = 8
+        self._btb_depth = 32
     def execute(self, _bpu_dict):
-        self._btb_depth = _bpu_dict['ras_depth']
+        self._btb_depth = _bpu_dict['btb_depth']
         _en_bpu = _bpu_dict['instantiate']
         # TODO why  recursing in the asm test?
         if self._btb_depth and _en_bpu:
@@ -119,11 +119,11 @@ class gshare_fa_fence_01(IPlugin):
         ) + "\'b11111111_11111111_11111111_11111111};\n}\n///coverpoint -  rg_initilaize toggles friom 1->0 2. rg_allocate should become zero 3. v_reg_btb_tag_XX should become 0 (the entire 63bit reg) 4. rg_ghr_port1__read should become zeros. 5. ras_stack_top_index_port2__read should become 0\n"
         for i in range(self._btb_depth):
             sv = sv + str(rg_initialize) + "_" + str(i) + ": coverpoint " + str(
-                rg_initialize) + "{\n    bins " + str(rg_allocate) + "_"
+                rg_initialize) + "{\n    bins " + str(rg_initialize) + "_"
             sv = sv + str(i) + "1to0 = (1=>0) iff (" + str(
-                rg_allocate) + " == 'b0 && " + str(ras_top_index) + "_"
+                rg_allocate) + " == 'b0 && " + str(btb_tag) + "_"
             sv = sv + str(i) + " == 'b0 && " + str(
-                rg_allocate) + "== 'b0 && " + str(rg_ghr) + "== 'b0);\n}\n"
+                ras_top_index) + "== 'b0 && " + str(rg_ghr) + "== 'b0);\n}\n"
         sv = sv + "endgroup\n\n"
 
         return (sv)
