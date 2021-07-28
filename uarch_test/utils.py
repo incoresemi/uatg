@@ -43,8 +43,8 @@ def clean_cli_params(config_file, module, gen_test, val_test, gen_cvg):
 
     if (gen_test or val_test) and config_file is None:
         error = (True, "Can not generate/validate with config_file path "
-                 "missing")
-    if (gen_cvg) and not gen_test:
+                       "missing")
+    if gen_cvg and not gen_test:
         error = (True,
                  'Cannot generate covergroups without generating the tests\n'
                  'If you are trying to validate tests, remove the'
@@ -221,9 +221,8 @@ def join_yaml_reports(work_dir='absolute_path_here/',
     f.close()
 
 
-## class with methods to generate system verilog files
 class sv_components:
-
+    # class with methods to generate system verilog files
     def __init__(self, config_file):
         """
         This class contains the methods which will return the tb_top and interface files
@@ -252,21 +251,23 @@ class sv_components:
         """
         intf = ("interface chromite_intf(input bit CLK,RST_N);\n"
                 "  logic " + str(self.rg_initialize) + ";\n"
-                "  logic [4:0]" + str(self.rg_allocate) + ";\n")
-        intf = intf + "\n  logic [7:0]{0};".format(self.rg_ghr)
-        intf = intf + "\n  logic {0};".format(self.ras_top_index)
-        intf = intf + "\n  logic {0};\n".format(self.mispredict)
+                                                       "  logic [4:0]" + str(
+            self.rg_allocate) + ";\n")
+        intf += "\n  logic [7:0]{0};".format(self.rg_ghr)
+        intf += "\n  logic {0};".format(self.ras_top_index)
+        intf += "\n  logic {0};\n".format(self.mispredict)
         for i in range(self._btb_depth):
-            intf = intf + "\n  logic [62:0] " + str(
+            intf += "\n  logic [62:0] " + str(
                 self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
-            intf = intf + "\n  logic [67:0] " + str(
+            intf += "\n  logic [67:0] " + str(
                 self.btb_entry) + "_" + str(i) + ";"
-        intf = intf + "\nendinterface\n"
+        intf += "\nendinterface\n"
 
-        return (intf)
+        return intf
 
         # function to generate tb_top file
+
     def generate_tb_top(self):
         """
           returns tb_top file
@@ -279,43 +280,47 @@ class sv_components:
                   "  mkTbSoc mktbsoc(.CLK(intf.CLK),.RST_N(intf.RST_N));\n"
                   "  always @(posedge CLK)\n"
                   "  begin\n")
-        tb_top = tb_top + "    if(!RST_N) begin\n      intf.{0} = {1}.{0}\n      intf.{2} = {1}.{2}\n      intf.{3} = {1}.{3}\n      intf.{4} = {1}.{4}\n      intf.{5} = {1}.{5}".format(
+        tb_top = tb_top + "\tif(!RST_N) begin\n\tintf.{0} = {1}.{0}\n\tintf.{" \
+                          "2} = {1}.{2}\n\tintf.{3} = {1}.{3}\n\tintf.{4} = {" \
+                          "1}.{4}\n\tintf.{5} = {1}.{5}".format(
             self.rg_initialize, self.bpu_path, self.rg_allocate,
             self.ras_top_index, self.rg_ghr, self.mispredict)
         for i in range(self._btb_depth):
-            tb_top = tb_top + "\n      intf." + str(
+            tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_tag) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
-            tb_top = tb_top + "\n      intf." + str(
+            tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_entry) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
-            tb_top = tb_top + "\n      intf." + str(self.valids) + "_[" + str(
+            tb_top = tb_top + "\n\tintf." + str(self.valids) + "_[" + str(
                 i) + "] = " + (self.bpu_path) + "." + str(
-                    self.btb_tag) + "_" + str(i) + "[0];"
-        tb_top = tb_top + ("\n    end\n" "    else\n")
-        tb_top = tb_top + "      intf.{0} = {1}.{0}\n      intf.{2} = {1}.{2}\n      intf.{3} = {1}.{3}\n      intf.{4} = {1}.{4}\n      intf.{5} = {1}.{5}".format(
+                self.btb_tag) + "_" + str(i) + "[0];"
+        tb_top += ("\n\tend\n" "\telse\n")
+        tb_top += "\tintf.{0} = {1}.{0}\n\tintf.{2} = {1}.{" \
+                  "2}\n\tintf.{3} = {1}.{3}\n\tintf.{4} = {1}.{" \
+                  "4}\n\tintf.{5} = {1}.{5}".format(
             self.rg_initialize, self.bpu_path, self.rg_allocate,
             self.ras_top_index, self.rg_ghr, self.mispredict)
         for i in range(self._btb_depth):
-            tb_top = tb_top + "\n      intf." + str(
+            tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_tag) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
-            tb_top = tb_top + "\n      intf." + str(
+            tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_entry) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
-            tb_top = tb_top + "\n      intf." + str(
+            tb_top = tb_top + "\n\tintf." + str(
                 self.valids) + "_[" + str(i) + "] = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_tag) + "_" + str(i) + "[0];"
-        tb_top = tb_top + """\n    end
+                self.bpu_path) + "." + str(
+                self.btb_tag) + "_" + str(i) + "[0];"
+        tb_top = tb_top + """\n\tend
 end
 initial
 begin
@@ -371,7 +376,7 @@ end
 endmodule
 `endif\n"""
 
-        return (tb_top)
+        return tb_top
 
 
 def gen_tbfiles(sv_dir, alias_file):
