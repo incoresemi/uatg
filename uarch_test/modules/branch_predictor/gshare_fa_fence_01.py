@@ -17,12 +17,12 @@ class gshare_fa_fence_01(IPlugin):
     def __init__(self):
         super().__init__()
         self.recurse_level = 5
-
+        self._btb_depth = 8
     def execute(self, _bpu_dict):
-        _en_ras = _bpu_dict['ras_depth']
+        self._btb_depth = _bpu_dict['ras_depth']
         _en_bpu = _bpu_dict['instantiate']
         # TODO why  recursing in the asm test?
-        if _en_ras and _en_bpu:
+        if self._btb_depth and _en_bpu:
             return True
         else:
             return False
