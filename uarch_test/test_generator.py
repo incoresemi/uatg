@@ -188,6 +188,11 @@ def generate_sv(work_dir, config_file, modules, verbose='info'):
         logger.debug("Generated tbtop and interface files")
         gen_sv_defines(sv_dir)
         logger.debug("Generated defines file")
+        sv_file = os.path.join(sv_dir, 'coverpoints.sv')
+
+        if (os.path.isfile(sv_file)):
+            logger.debug("Removing Existing coverpoints SV file")
+            os.remove(sv_file)
 
         for plugin in manager.getAllPlugins():
             _check = plugin.plugin_object.execute(module_params)
@@ -198,7 +203,7 @@ def generate_sv(work_dir, config_file, modules, verbose='info'):
                     _sv = plugin.plugin_object.generate_covergroups(alias_file)
                     # TODO: Check what the name of the SV file should be
                     # TODO: Include the creation of TbTop and Interface SV files
-                    with open(os.path.join(sv_dir, 'coverpoints.sv'), "a") as f:
+                    with open(sv_file, "a") as f:
                         logger.info(
                             'Generating coverpoints SV file for {0}'.format(
                                 _test_name))
