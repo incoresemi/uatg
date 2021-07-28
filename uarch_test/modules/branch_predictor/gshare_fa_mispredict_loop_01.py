@@ -97,7 +97,7 @@ class gshare_fa_mispredict_loop_01(IPlugin):
         config = ConfigParser()
         config.read(config_file)
         mispredict_flag = config['bpu']['bpu_mispredict_flag']
-        sv = """covergroup gshare_fa_mispredict_loop_cg;
+        sv = """covergroup gshare_fa_mispredict_loop_cg @(posedge CLK);
 option.per_instance=1;
 ///Coverpoint : MSB of reg ma_mispredict_g should be 1 atleast once. When, the MSB is one, the MSB-1 bit of the register should be toggled.
 {0}_cp : coverpoint {0}[""".format(mispredict_flag)

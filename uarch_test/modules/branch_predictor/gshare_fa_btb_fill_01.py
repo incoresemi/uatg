@@ -143,7 +143,7 @@ class gshare_fa_btb_fill_01(IPlugin):
         rg_allocate = config['bpu']['bpu_rg_allocate']
         btb_entry = config['bpu']['bpu_btb_entry']
         sv = (
-            "covergroup gshare_fa_btb_fill_cg;\n"
+            "covergroup gshare_fa_btb_fill_cg @(posedge CLK);\n"
             "option.per_instance=1;\n"
             "///Coverpoint : reg rg_allocate should change from 0 to `btb_depth -1\n"
         )

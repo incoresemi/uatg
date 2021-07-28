@@ -97,7 +97,7 @@ class gshare_fa_ghr_zeros_01(IPlugin):
         config.read(config_file)
         rg_ghr = config['bpu']['bpu_rg_ghr']
 
-        sv = """covergroup bpu_rg_ghr_cg; 
+        sv = """covergroup bpu_rg_ghr_cg @(posedge CLK); 
 option.per_instance=1;
 ///coverpoint label can be any name that relates the signal
 coverpoint_label: coverpoint {0} {{\n""".format(rg_ghr)
@@ -108,9 +108,9 @@ coverpoint_label: coverpoint {0} {{\n""".format(rg_ghr)
         #sv = sv + "    bins cp4 = {" + str(int(
         #    self._history_len / 2)) + "{2'b10}};\n}\nendgroup\n\n"
 
-        sv = sv + "    bins cp1 = {'b00000000};\n"
-        sv = sv + "    bins cp2 = {'b11111111};\n"
-        sv = sv + "    bins cp3 = {'b10101010};\n"
-        sv = sv + "    bins cp4 = {'b01010101};\n}\nendgroup\n\n"
+        sv = sv + "    bins bin_allzeros = {'b00000000};\n"
+        sv = sv + "    bins bin_allones = {'b11111111};\n"
+        sv = sv + "    bins bin_altr_10 = {'b10101010};\n"
+        sv = sv + "    bins bin_altr_01 = {'b01010101};\n}\nendgroup\n\n"
 
         return (sv)
