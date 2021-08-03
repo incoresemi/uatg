@@ -228,7 +228,7 @@ def validate_tests(modules, inp, work_dir, modules_dir, verbose='info'):
 
     if modules == ['all']:
         logger.debug('Checking {0} for modules'.format(modules_dir))
-        modules = [f.name for f in os.scandir(module_dir) if f.is_dir()]
+        modules = [f.name for f in os.scandir(modules_dir) if f.is_dir()]
     if work_dir:
         pass
     else:
