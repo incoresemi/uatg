@@ -260,7 +260,7 @@ class sv_components:
         for i in range(self._btb_depth):
             intf += "\n  logic [67:0] " + str(
                 self.btb_entry) + "_" + str(i) + ";"
-        intf += """\n `include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/coverpoints.sv\"
+        intf += """\n `include \"coverpoints.sv\"
                   \n  string test = `cnvstr(`TEST);
                   \n\n initial
 begin
@@ -307,15 +307,14 @@ end
         """
           returns tb_top file
        """
-        tb_top = (
-            "`include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/defines.sv\"\n"
-            "`include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/interface.sv\"\n"
-            "`ifdef RV64\n"
-            "module tb_top(input CLK,RST_N);\n"
-            "  chromite_intf intf(CLK,RST_N);\n"
-            "  mkTbSoc mktbsoc(.CLK(intf.CLK),.RST_N(intf.RST_N));\n"
-            "  always @(posedge CLK)\n"
-            "  begin\n")
+        tb_top = ("`include \"defines.sv\"\n"
+                  "`include \"interface.sv\"\n"
+                  "`ifdef RV64\n"
+                  "module tb_top(input CLK,RST_N);\n"
+                  "  chromite_intf intf(CLK,RST_N);\n"
+                  "  mkTbSoc mktbsoc(.CLK(intf.CLK),.RST_N(intf.RST_N));\n"
+                  "  always @(posedge CLK)\n"
+                  "  begin\n")
         tb_top = tb_top + "\tif(!RST_N) begin\n\tintf.{0} = {1}.{0};\n\tintf.{" \
                           "2} = {1}.{2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {" \
                           "1}.{4};\n\tintf.{5} = {1}.{5};".format(
