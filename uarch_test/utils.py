@@ -267,7 +267,7 @@ class sv_components:
         self.decoder_path = config['tb_top']['path_to_decoder']
         self.stage0_path = config['tb_top']['path_to_stage0']
         self.fn_decompress_path = config['tb_top']['path_to_fn_decompress']
-
+        self.test = config['test_case']['test']
     # function to generate interface file
     def generate_interface(self):
         """
@@ -444,7 +444,7 @@ def gen_sv_defines(sv_dir):
 
 //Macro to indicate the test_case
 `define cnvstr(x) `\"x`\"
-`define TEST regression"""
+`define TEST """ + str(self.test)
 
     with open(sv_dir + "/defines.sv", "w") as defines_file:
         defines_file.write(out)

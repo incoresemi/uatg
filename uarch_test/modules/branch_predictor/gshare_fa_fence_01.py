@@ -125,5 +125,11 @@ class gshare_fa_fence_01(IPlugin):
             sv = sv + str(i) + " == 'b0 && " + str(
                 ras_top_index) + "== 'b0 && " + str(rg_ghr) + "== 'b0);\n}\n"
         sv = sv + "endgroup\n\n"
+        sv = sv + """property rg_initialize_prop;
 
+@(negedge CLK) ($fell(rg_initialize)) |=> (rg_allocate == 'b0 && v_reg_btb_tag_0 == 'b0 && v_reg_btb_tag_1 == 'b0 && v_reg_btb_tag_2 == 'b0 && v_reg_btb_tag_3 == 'b0 && v_reg_btb_tag_4 == 'b0 && v_reg_btb_tag_5 == 'b0 && v_reg_btb_tag_6 == 'b0 && v_reg_btb_tag_7 == 'b0 && v_reg_btb_tag_8 == 'b0 && v_reg_btb_tag_9 == 'b0 && v_reg_btb_tag_10 == 'b0 && v_reg_btb_tag_11 == 'b0 && v_reg_btb_tag_12 == 'b0 && v_reg_btb_tag_13 == 'b0 && v_reg_btb_tag_14 == 'b0 && v_reg_btb_tag_15 == 'b0 && v_reg_btb_tag_16 == 'b0 && v_reg_btb_tag_17 == 'b0 && v_reg_btb_tag_18 == 'b0 && v_reg_btb_tag_19 == 'b0 && v_reg_btb_tag_20 == 'b0 && v_reg_btb_tag_21 == 'b0 && v_reg_btb_tag_22 == 'b0 && v_reg_btb_tag_23 == 'b0 && v_reg_btb_tag_24 == 'b0 && v_reg_btb_tag_25 == 'b0 && v_reg_btb_tag_26 == 'b0 && v_reg_btb_tag_27 == 'b0 && v_reg_btb_tag_28 == 'b0 && v_reg_btb_tag_29 == 'b0 && v_reg_btb_tag_30 == 'b0 && v_reg_btb_tag_31 == 'b0 && ras_stack_top_index_port2__read== 'b0 && rg_ghr_port1__read== 'b0);
+endproperty
+
+always @(negedge CLK)
+rg_initialize_assert: assert property (rg_initialize_prop);"""
         return (sv)
