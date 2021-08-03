@@ -101,13 +101,14 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
     info(__version__)
 
     if list_modules:
-        logger.debug('Module Options: ' + str(list_of_modules()))
+        logger.debug('Module Options: ' + str(list_of_modules(module_dir)))
     modules, err = clean_cli_params(config_file=config_file,
                                     module=modules,
                                     gen_test=gen_test,
                                     val_test=val_test,
                                     module_dir=module_dir,
-                                    gen_cvg=gen_cvg)
+                                    gen_cvg=gen_cvg,
+                                    clean=clean)
     if err[0]:
         logger.error(err[1])
         exit(0)
