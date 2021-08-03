@@ -21,6 +21,7 @@ def generate_tests(work_dir,
                    modules,
                    config_file,
                    test_list,
+                   modules_dir,
                    verbose='info'):
     """
     specify the location where the python test files are located for a
@@ -52,19 +53,14 @@ def generate_tests(work_dir,
     isa = inp_yaml['ISA']
 
     if modules == ['all']:
-        logger.debug('Checking {0} for modules'.format(
-            os.path.join(uarch_dir, 'modules')))
-        modules = [
-            f.name
-            for f in os.scandir(os.path.join(uarch_dir, 'modules'))
-            if f.is_dir()
-        ]
+        logger.debug('Checking {0} for modules'.format(modules_dir))
+        modules = [f.name for f in os.scandir(modules_dir) if f.is_dir()]
     logger.debug('The modules are {0}'.format(modules))
 
     test_list_dict = {}
 
     for module in modules:
-        module_dir = os.path.join(uarch_dir, 'modules', module)
+        module_dir = os.path.join(modules_dir, module)
         work_tests_dir = os.path.join(work_dir, module)
 
         module_params = inp_yaml[module]
@@ -144,7 +140,7 @@ def generate_tests(work_dir,
             yaml.dump(test_list_dict, outfile)
 
 
-def generate_sv(work_dir, config_file, modules, verbose='info'):
+def generate_sv(work_dir, config_file, modules, modules_dir, verbose='info'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the covergroups (System Verilog) for the test files in a new directory.
@@ -158,13 +154,8 @@ def generate_sv(work_dir, config_file, modules, verbose='info'):
         work_dir = os.path.abspath((os.path.join(uarch_dir, '../work/')))
 
     if modules == ['all']:
-        logger.debug('Checking {0} for modules'.format(
-            os.path.join(uarch_dir, 'modules')))
-        modules = [
-            f.name
-            for f in os.scandir(os.path.join(uarch_dir, 'modules'))
-            if f.is_dir()
-        ]
+        logger.debug('Checking {0} for modules'.format(modules_dir))
+        modules = [f.name for f in os.scandir(modules_dir) if f.is_dir()]
 
     inp_yaml = load_yaml(config_file)
     logger.info('****** Generating Covergroups ******')
@@ -172,7 +163,7 @@ def generate_sv(work_dir, config_file, modules, verbose='info'):
     for module in modules:
         logger.debug('Generating CoverPoints for {0}'.format(module))
 
-        module_dir = os.path.join(uarch_dir, 'modules', module)
+        module_dir = os.path.join(modules_dir, module)
         sv_dir = os.path.join(work_dir, 'sv_top')
         module_params = inp_yaml[module]
         os.makedirs(sv_dir, exist_ok=True)
@@ -224,7 +215,7 @@ def generate_sv(work_dir, config_file, modules, verbose='info'):
     logger.info('****** Finished Generating Covergroups ******')
 
 
-def validate_tests(modules, inp, work_dir, verbose='info'):
+def validate_tests(modules, inp, work_dir, modules_dir, verbose='info'):
     """
        Parses the log returned from the DUT for finding if the tests
        were successful
@@ -236,13 +227,8 @@ def validate_tests(modules, inp, work_dir, verbose='info'):
     logger.info('****** Validating Test results, Minimal log checking ******')
 
     if modules == ['all']:
-        logger.debug('Checking {0} for modules'.format(
-            os.path.join(uarch_dir, 'modules')))
-        modules = [
-            f.name
-            for f in os.scandir(os.path.join(uarch_dir, 'modules'))
-            if f.is_dir()
-        ]
+        logger.debug('Checking {0} for modules'.format(modules_dir))
+        modules = [f.name for f in os.scandir(module_dir) if f.is_dir()]
     if work_dir:
         pass
     else:
@@ -253,7 +239,7 @@ def validate_tests(modules, inp, work_dir, verbose='info'):
     _tot_ct = 1
 
     for module in modules:
-        module_dir = os.path.join(uarch_dir, 'modules', module)
+        module_dir = os.path.join(modules_dir, module)
         # module_tests_dir = os.path.join(module_dir, 'tests')
         work_tests_dir = os.path.join(work_dir, module)
         reports_dir = os.path.join(work_dir, 'reports', module)
