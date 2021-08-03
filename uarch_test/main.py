@@ -28,14 +28,14 @@ from uarch_test.utils import clean_cli_params, list_of_modules, info
 @click.option('--config_file',
               '-cf',
               multiple=False,
-              required=True,
+              required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the yaml file containing DUT configuration. "
               "Needed to generate/validate tests")
 @click.option('--module_dir',
               '-md',
               multiple=False,
-              required=True,
+              required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the directory containing the python files"
               " which generate the assembly tests. "
@@ -102,8 +102,11 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
 
     if list_modules:
         logger.debug('Module Options: ' + str(list_of_modules()))
-    modules, err = clean_cli_params(module=modules,
+    modules, err = clean_cli_params(config_file=config_file,
+                                    module=modules,
                                     gen_test=gen_test,
+                                    val_test=val_test,
+                                    module_dir=module_dir,
                                     gen_cvg=gen_cvg)
     if err[0]:
         logger.error(err[1])

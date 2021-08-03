@@ -23,7 +23,8 @@ def info(version):
     logger.info('All Rights Reserved.')
 
 
-def clean_cli_params(module, gen_test, gen_cvg):
+def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
+                     gen_cvg):
     error = (False, '')
     available_modules = list_of_modules()
     try:
@@ -38,6 +39,23 @@ def clean_cli_params(module, gen_test, gen_cvg):
     for i in module:
         if i not in available_modules:
             error = (True, 'Module {0} is not supported/unavailable.'.format(i))
+
+    if (gen_test or val_test):
+        try:
+            with open(config_file) as f:
+                pass
+        except IOError as e:
+            error = (True, "Either the --config_file/-cf option is missing, or"
+                     " the specified config file does not exist.\n"
+                     "Exiting uarch_test. Fix the issue and Retry.")
+
+    if (gen_test or val_test):
+        if (module_dir is None) or not os.path.isdir(module_dir):
+            error = (True, "Either the --module_dir/-md option is missing, or"
+                     " the specified module directory does not exist.\n"
+                     "Exiting uarch_test. Fix the issue and Retry.")
+        else:
+            pass
 
     if 'all' in module:
         module = ['all']
