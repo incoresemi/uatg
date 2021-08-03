@@ -23,7 +23,7 @@ def info(version):
     logger.info('All Rights Reserved.')
 
 
-def clean_cli_params(config_file, module, gen_test, val_test, gen_cvg):
+def clean_cli_params(module, gen_test, gen_cvg):
     error = (False, '')
     available_modules = list_of_modules()
     try:
@@ -38,12 +38,10 @@ def clean_cli_params(config_file, module, gen_test, val_test, gen_cvg):
     for i in module:
         if i not in available_modules:
             error = (True, 'Module {0} is not supported/unavailable.'.format(i))
+
     if 'all' in module:
         module = ['all']
 
-    if (gen_test or val_test) and config_file is None:
-        error = (True, "Can not generate/validate with config_file path "
-                       "missing")
     if gen_cvg and not gen_test:
         error = (True,
                  'Cannot generate covergroups without generating the tests\n'
@@ -251,15 +249,14 @@ class sv_components:
         """
         intf = ("interface chromite_intf(input bit CLK,RST_N);\n"
                 "  logic " + str(self.rg_initialize) + ";\n"
-                "  logic [4:0]" + str(
-            self.rg_allocate) + ";\n")
+                "  logic [4:0]" + str(self.rg_allocate) + ";\n")
         intf += "\n  logic [7:0]{0};".format(self.rg_ghr)
-        intf += "\nlogic ["+str(self._btb_depth-1)+":0]{0};".format(self.valids)
+        intf += "\nlogic [" + str(self._btb_depth - 1) + ":0]{0};".format(
+            self.valids)
         intf += "\n  logic {0};".format(self.ras_top_index)
         intf += "\n  logic [8:0]{0};\n".format(self.mispredict)
         for i in range(self._btb_depth):
-            intf += "\n  logic [62:0] " + str(
-                self.btb_tag) + "_" + str(i) + ";"
+            intf += "\n  logic [62:0] " + str(self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             intf += "\n  logic [67:0] " + str(
                 self.btb_entry) + "_" + str(i) + ";"
@@ -310,14 +307,15 @@ end
         """
           returns tb_top file
        """
-        tb_top = ("`include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/defines.sv\"\n"
-                  "`include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/interface.sv\"\n"
-                  "`ifdef RV64\n"
-                  "module tb_top(input CLK,RST_N);\n"
-                  "  chromite_intf intf(CLK,RST_N);\n"
-                  "  mkTbSoc mktbsoc(.CLK(intf.CLK),.RST_N(intf.RST_N));\n"
-                  "  always @(posedge CLK)\n"
-                  "  begin\n")
+        tb_top = (
+            "`include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/defines.sv\"\n"
+            "`include \"/Projects/incorecpu/jyothi.g/micro-arch-tests/work/sv_top/interface.sv\"\n"
+            "`ifdef RV64\n"
+            "module tb_top(input CLK,RST_N);\n"
+            "  chromite_intf intf(CLK,RST_N);\n"
+            "  mkTbSoc mktbsoc(.CLK(intf.CLK),.RST_N(intf.RST_N));\n"
+            "  always @(posedge CLK)\n"
+            "  begin\n")
         tb_top = tb_top + "\tif(!RST_N) begin\n\tintf.{0} = {1}.{0};\n\tintf.{" \
                           "2} = {1}.{2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {" \
                           "1}.{4};\n\tintf.{5} = {1}.{5};".format(
@@ -326,17 +324,17 @@ end
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_tag) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_entry) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(self.valids) + "[" + str(
                 i) + "] = " + (self.bpu_path) + "." + str(
-                self.btb_tag) + "_" + str(i) + "[0];"
+                    self.btb_tag) + "_" + str(i) + "[0];"
         tb_top += ("\n\tend\n" "\telse\n\tbegin\n")
         tb_top += "\tintf.{0} = {1}.{0};\n\tintf.{2} = {1}.{" \
                   "2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {1}.{" \
@@ -346,18 +344,18 @@ end
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_tag) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_entry) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.valids) + "[" + str(i) + "] = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_tag) + "_" + str(i) + "[0];"
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + "[0];"
         tb_top = tb_top + """\n\tend
 end
 
