@@ -28,9 +28,18 @@ from uarch_test.utils import clean_cli_params, list_of_modules, info
 @click.option('--config_file',
               '-cf',
               multiple=False,
+              required=True,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the yaml file containing DUT configuration. "
               "Needed to generate/validate tests")
+@click.option('--module_dir',
+              '-md',
+              multiple=False,
+              required=True,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the directory containing the python files"
+              " which generate the assembly tests. "
+              "Required Parameter")
 @click.option('--work_dir',
               '-wd',
               multiple=False,
@@ -87,15 +96,14 @@ from uarch_test.utils import clean_cli_params, list_of_modules, info
     # TODO: find a proper way to list all modules and display them
     type=str)
 def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
-        list_modules, linker_dir, test_list, gen_cvg):
+        list_modules, linker_dir, test_list, gen_cvg, module_dir):
     logger.level(verbose)
     info(__version__)
+
     if list_modules:
         logger.debug('Module Options: ' + str(list_of_modules()))
-    modules, err = clean_cli_params(config_file=config_file,
-                                    module=modules,
+    modules, err = clean_cli_params(module=modules,
                                     gen_test=gen_test,
-                                    val_test=val_test,
                                     gen_cvg=gen_cvg)
     if err[0]:
         logger.error(err[1])
@@ -117,12 +125,14 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
                        modules=modules,
                        config_file=config_file,
                        test_list=test_list,
+                       modules_dir=module_dir,
                        verbose=verbose)
     if gen_cvg:
         logger.debug("Invoking SV generation")
         generate_sv(work_dir=work_dir,
                     config_file=config_file,
                     modules=modules,
+                    modules_dir=module_dir,
                     verbose=verbose)
 
     if val_test:
@@ -130,6 +140,7 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
         validate_tests(modules=modules,
                        inp=config_file,
                        work_dir=work_dir,
+                       modules_dir=module_dir,
                        verbose=verbose)
     if clean:
         #TODO: Clear up clean_dirs!
