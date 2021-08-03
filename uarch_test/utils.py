@@ -7,12 +7,9 @@ from uarch_test.log import logger
 from yapsy.PluginManager import PluginManager
 from configparser import ConfigParser
 
-global _path
-_path = os.path.dirname(uarch_test.__file__)
 
-
-def list_of_modules():
-    modules = os.listdir(_path + '/modules/')
+def list_of_modules(module_dir):
+    modules = os.listdir(module_dir + '/')
     return modules + ['all']
 
 
@@ -24,9 +21,43 @@ def info(version):
 
 
 def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
-                     gen_cvg):
+                     gen_cvg, clean):
     error = (False, '')
-    available_modules = list_of_modules()
+    temp_list = []
+
+    if (gen_test or val_test) and config_file is None:
+        error = (True, 'The --config_file/-cf option is missing.\n'
+                 'Exiting uarch_test. Fix the issue and Retry.')
+        return temp_list, error
+
+    if config_file is not None:
+        try:
+            with open(config_file) as f:
+                pass
+        except IOError as e:
+            error = (True, 'The specified config file does not exist.\n'
+                     'Exiting uarch_test. Fix the issue and Retry.')
+            return temp_list, error
+
+    if (gen_test or val_test or clean) and (module_dir is None):
+        error = (True, 'The --module_dir/-md option is missing.\n'
+                 'Exiting uarch_test. Fix the issue and Retry.')
+        return temp_list, error
+
+    if (module_dir is not None) and not os.path.isdir(module_dir):
+        error = (True, 'The specified module directory does not exist.\n'
+                 'Exiting uarch_test. Fix the issue and Retry.')
+        return temp_list, error
+
+    if gen_cvg and not gen_test:
+        error = (True,
+                 'Cannot generate covergroups without generating the tests\n'
+                 'If you are trying to validate tests, remove the'
+                 'generate_covergroups as well as generate_tests option'
+                 'and try again')
+
+    available_modules = list_of_modules(module_dir)
+
     try:
         module = module.replace(' ', ',')
         module = module.replace(', ', ',')
@@ -40,31 +71,8 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
         if i not in available_modules:
             error = (True, 'Module {0} is not supported/unavailable.'.format(i))
 
-    if (gen_test or val_test):
-        try:
-            with open(config_file) as f:
-                pass
-        except IOError as e:
-            error = (True, "Either the --config_file/-cf option is missing, or"
-                     " the specified config file does not exist.\n"
-                     "Exiting uarch_test. Fix the issue and Retry.")
-
-    if (gen_test or val_test):
-        if (module_dir is None) or not os.path.isdir(module_dir):
-            error = (True, "Either the --module_dir/-md option is missing, or"
-                     " the specified module directory does not exist.\n"
-                     "Exiting uarch_test. Fix the issue and Retry.")
-        else:
-            pass
-
     if 'all' in module:
         module = ['all']
-
-    if gen_cvg and not gen_test:
-        error = (True,
-                 'Cannot generate covergroups without generating the tests\n'
-                 'If you are trying to validate tests, remove the'
-                 'generate_covergroups option and try again')
 
     return module, error
 
