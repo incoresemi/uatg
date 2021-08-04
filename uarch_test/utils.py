@@ -268,6 +268,7 @@ class sv_components:
         self.stage0_path = config['tb_top']['path_to_stage0']
         self.fn_decompress_path = config['tb_top']['path_to_fn_decompress']
         self.test = config['test_case']['test']
+
     # function to generate interface file
     def generate_interface(self):
         """
@@ -405,27 +406,11 @@ endmodule
 
         return tb_top
 
-
-def gen_tbfiles(sv_dir, alias_file):
-    """
-    invokes the methods within the sv_components class and creates the sv files
-    """
-    sv_obj = sv_components(alias_file)
-    tb_top = sv_obj.generate_tb_top()
-    interface = sv_obj.generate_interface()
-
-    with open(sv_dir + "/tb_top.sv", "w") as tb_top_file:
-        tb_top_file.write(tb_top)
-
-    with open(sv_dir + "/interface.sv", "w") as interface_file:
-        interface_file.write(interface)
-
-
-def gen_sv_defines(sv_dir):
-    """
-    creates the defines.sv file
-    """
-    out = """/// All compile time macros will be defined here
+    def generate_defines(self):
+        """
+        creates the defines.sv file
+        """
+        defines = """/// All compile time macros will be defined here
 
 // Macro to indicate the ISA 
 `define RV64
@@ -446,5 +431,23 @@ def gen_sv_defines(sv_dir):
 `define cnvstr(x) `\"x`\"
 `define TEST """ + str(self.test)
 
+        return defines
+
+
+def generate_sv_components(sv_dir, alias_file):
+    """
+    invokes the methods within the sv_components class and creates the sv files
+    """
+    sv_obj = sv_components(alias_file)
+    tb_top = sv_obj.generate_tb_top()
+    interface = sv_obj.generate_interface()
+    defines = sv_obj.generate_defines()
+
+    with open(sv_dir + "/tb_top.sv", "w") as tb_top_file:
+        tb_top_file.write(tb_top)
+
+    with open(sv_dir + "/interface.sv", "w") as interface_file:
+        interface_file.write(interface)
+
     with open(sv_dir + "/defines.sv", "w") as defines_file:
-        defines_file.write(out)
+        defines_file.write(defines)
