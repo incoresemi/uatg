@@ -175,10 +175,8 @@ def generate_sv(work_dir, config_file, modules, modules_dir, verbose='info'):
         alias_file = os.path.join(uarch_dir, 'aliasing.ini')
 
         ## generate the tbtop and interface files
-        gen_tbfiles(sv_dir, alias_file)
-        logger.debug("Generated tbtop and interface files")
-        gen_sv_defines(sv_dir)
-        logger.debug("Generated defines file")
+        generate_sv_components(sv_dir, alias_file)
+        logger.debug("Generated tbtop, defines and interface files")
         sv_file = os.path.join(sv_dir, 'coverpoints.sv')
 
         if (os.path.isfile(sv_file)):
