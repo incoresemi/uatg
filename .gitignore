@@ -1,18 +1,27 @@
-uarch_test/asm_tests/
+# Pycache stuff
 uarch_test/modules/__pycache__/
 uarch_test/modules/branch_predictor/__pycache__/
 uarch_test/modules/branch_predictor/tests/
 **.pyc
 **.pyo
+
+# Modules Directory
+uarch_test/modules/*
+
+# Build Directory
+work/
+uarch_test/temp/*
+uarch_test/work/*
+
+# Assembly, Plugins
 **.S
 **.yapsy-plugin
+
+# IDE Settings
 .idea/*
-uarch_test/path.txt
+
 .*
 *.egg-info
 docs/build/
 uarch_test/target/*
-work/
-uarch_test/temp/*
-uarch_test/work/*
 uarch_test/*.yaml
