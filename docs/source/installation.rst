@@ -8,9 +8,8 @@
 Quickstart
 ==========
 
-This section is meant to serve as a quick-guide to setup UArchTest and perform a sample validation check
-between ``spike`` (DUT in this case) and ``SAIL-RISCV`` (Reference model in this case). This guide
-will help you setup all the required tooling for running uarch_test on your system.
+This section is meant to serve as a quick-guide to setup UArchTest. This guide
+will help you setup all the required tooling for running UArchTest on your system.
 
 
 Install Python
@@ -114,6 +113,26 @@ Install UArchTest
 
 .. tabs:: 
 
+   .. tab:: for Dev
+
+     The sources for UArchTest can be downloaded from the `GitLab repo`_.
+     
+     You can clone the repository:
+     
+     .. code-block:: console
+     
+         $ git clone https://gitlab.com/incoresemi/micro-arch-tests.git
+     
+     
+     Once you have a copy of the source, you can install it with:
+     
+     .. code-block:: console
+         
+         $ cd uarch_test
+         $ pip3 install --editable .
+     
+     .. _Gitlab repo: https://gitlab.com/incoresemi/micro-arch-tests
+
    .. tab:: via Git
 
      To install UArchTest, run this command in your terminal:
@@ -151,25 +170,6 @@ Install UArchTest
      
        $ pip3 install uarch_test==1.x.x
 
-   .. tab:: for Dev
-
-     The sources for UArchTest can be downloaded from the `GitLab repo`_.
-     
-     You can clone the repository:
-     
-     .. code-block:: console
-     
-         $ git clone https://gitlab.com/incoresemi/micro-arch-tests.git
-     
-     
-     Once you have a copy of the source, you can install it with:
-     
-     .. code-block:: console
-         
-         $ cd uarch_test
-         $ pip3 install --editable .
-     
-     .. _Gitlab repo: https://gitlab.com/incoresemi/micro-arch-tests
 
 Test UArchTest
 ==============
@@ -178,91 +178,48 @@ Once you have installed UArchTest you can execute ``uarch_test --help`` to print
 
 .. code-block:: bash
 
-   usage: uarch_test [-h] [--version] [--verbose]
-                 {coverage,gendb,setup,validateyaml,run,testlist} ...
-   
-   UArchTest is a framework used to run the Architectural Tests on a DUT and check
-   compatibility with the RISC-V ISA
-   
-   optional arguments:
-     --verbose             [Default=info]
-     --version, -v         Print version of UArchTest being used
-     -h, --help            show this help message and exit
-   
-   Action:
-     The action to be performed by uarch_test.
-   
-     {coverage,gendb,setup,validateyaml,run,testlist}
-                           List of actions supported by uarch_test.
-       coverage            Generate Coverage Report for the given YAML spec.
-       gendb               Generate Database for the standard suite.
-       setup               Initiate setup for uarch_test.
-       validateyaml        Validate the Input YAMLs using riscv-config.
-       run                 Run the tests on DUT and reference and compare
-                           signatures.
-       testlist            Generate the test list for the given DUT and suite.
-   Action 'coverage'
-   
-   	usage: uarch_test coverage [-h] [--config PATH] [--cgf PATH] [--suite PATH]
-   	                       [--work-dir PATH] [--no-browser]
-   	
-   	optional arguments:
-   	  --cgf PATH       The Path to the cgf file(s). Multiple allowed
-   	  --config PATH    The Path to the config file. [Default=./config.ini]
-   	  --no-browser     Do not open the browser for showing the test report.
-   	  --suite PATH     The Path to the custom suite directory.
-   	  --work-dir PATH  The Path to the work-dir.
-   	  -h, --help       show this help message and exit
-   	
-   Action 'gendb'
-   
-   	usage: uarch_test gendb [-h] [--suite PATH] [--work-dir PATH]
-   	
-   	optional arguments:
-   	  --suite PATH     The Path to the custom suite directory.
-   	  --work-dir PATH  The Path to the work-dir.
-   	  -h, --help       show this help message and exit
-   	
-   Action 'setup'
-   
-   	usage: uarch_test setup [-h] [--dutname NAME] [--refname NAME] [--work-dir PATH]
-   	
-   	optional arguments:
-   	  --dutname NAME   Name of DUT plugin. [Default=spike]
-   	  --refname NAME   Name of Reference plugin. [Default=sail_cSim]
-   	  --work-dir PATH  The Path to the work-dir.
-   	  -h, --help       show this help message and exit
-   	
-   Action 'validateyaml'
-   
-   	usage: uarch_test validateyaml [-h] [--config PATH] [--work-dir PATH]
-   	
-   	optional arguments:
-   	  --config PATH    The Path to the config file. [Default=./config.ini]
-   	  --work-dir PATH  The Path to the work-dir.
-   	  -h, --help       show this help message and exit
-   	
-   Action 'run'
-   
-   	usage: uarch_test run [-h] [--config PATH] [--suite PATH] [--no-browser]
-   	                  [--work-dir PATH]
-   	
-   	optional arguments:
-   	  --config PATH    The Path to the config file. [Default=./config.ini]
-   	  --no-browser     Do not open the browser for showing the test report.
-   	  --suite PATH     The Path to the custom suite directory.
-   	  --work-dir PATH  The Path to the work-dir.
-   	  -h, --help       show this help message and exit
-   	
-   Action 'testlist'
-   
-   	usage: uarch_test testlist [-h] [--work-dir PATH] [--config PATH] [--suite PATH]
-   	
-   	optional arguments:
-   	  --config PATH    The Path to the config file. [Default=./config.ini]
-   	  --suite PATH     The Path to the custom suite directory.
-   	  --work-dir PATH  The Path to the work-dir.
-   	  -h, --help       show this help message and exit
+  
+  Usage: uarch_test [OPTIONS]
+
+  Options:
+    --version                       Show the version and exit.
+    -v, --verbose [info|error|debug]
+                                    Set verbose level for debugging
+    -cl, --clean                    clean flag is set if generated files needs
+                                    to be cleaned.Presently, __pycache__, tests/
+                                    folders are removed along with yapsy-plugins
+    -cf, --config_file PATH         Path to the yaml file containing DUT
+                                    configuration. Needed to generate/validate
+                                    tests
+    -md, --module_dir PATH          Path to the directory containing the python
+                                    files which generate the assembly tests.
+                                    Required Parameter
+    -wd, --work_dir PATH            Path to the working directory where
+                                    generated files will be stored.
+    -gt, --gen_test                 gen_test flag is set if tests are to be
+                                    generated. Generates ASM files and SV Files
+    -vt, --val_test                 val_test flag is set if generated tests are
+                                    to be validated. Validates log files & SV
+                                    cover-points
+    -lm, --list_modules             displays all the modules that are presently
+                                    supported by the framework
+    -ld, --linker_dir PATH          Path to the linkerfile.
+    -t, --test_list                 Set this flag if a test-list.yaml is to be
+                                    generated by uarch_testuarch_test does not
+                                    generate the test_list by default.
+    -gc, --gen_cvg                  Set this flag to generate the Covergroups
+    -m, --modules TEXT              Enter a list of modules as a string in a
+                                    comma separated format.
+                                    --module
+                                    'branch_predictor, decoder'
+                                    Here decoder and
+                                    branch_predictor are chosen
+                                    If all module
+                                    are to be selected use keyword 'all'.
+                                    Presently supportedmodules are:
+                                    branch_predictor
+    --help                          Show this message and exit.
+
 
 Install RISCV-GNU Toolchain
 ===========================
