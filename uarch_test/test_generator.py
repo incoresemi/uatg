@@ -316,7 +316,7 @@ def clean_dirs(work_dir, modules_dir, verbose='info'):
     logger.info('****** Cleaning ******')
     logger.debug('work_dir is {0}'.format(module_dir))
     yapsy_dir = os.path.join(modules_dir, '**/*.yapsy-plugin')
-    pycache_dir = os.path.join(modules_dir, '__pycache__')
+    pycache_dir = os.path.join(modules_dir, '**/__pycache__')
     logger.debug('yapsy_dir is {0}'.format(yapsy_dir))
     logger.debug('pycache_dir is {0}'.format(pycache_dir))
     tf = glob.glob(module_dir)
