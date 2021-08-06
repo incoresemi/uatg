@@ -2,107 +2,6 @@
 Micro-Arch-Test Framework
 =========================
 
-Framework Structure
--------------------
-
-The framework is structured in the following manner.
-
--  New folders are to be created for each block that needs to be tested
-   (e.g. ``bpu/``).
--  Within each block's folder, a ``tests/`` folder is created to store
-   the generated assembly codes. In addition, the python scripts to
-   automate the assembly file generation are stored in the block's
-   folder.
--  For automating the test generating process, we are using ``yapsy``
-   module which needs a plugin file (e.g. ``test_no_1.yapsy-plugin``)
-   created for each python script. To avoid hassle, we have automated
-   the process of creating the plugin files too. The plugin files are
-   created when ``test_generator.py`` is called. The plugin files are
-   ignored by git.
--  The ``test-generator.py`` script parses through all the tests defined
-   in the block folder and chooses specific tests based on their
-   applicability (more about this in the ``Adding new tests`` section).
--  For each chosen test case, the script creates new folders with the
-   test name inside the ``tests/`` folder and writes assembly files into
-   each of the respective folders.
-
-.. code:: shell
-
-    framework/
-    ├── bpu
-    │    ├── test_01.py
-    │    ├── *test_01.yapsy-plugin
-    │    ├── test_02.py
-    │    ├── *test_02.yapsy-plugin
-    │    ├── ...
-    │    ├── ...
-    │    ├── test_n.py
-    │    ├── *test_n.yapsy-plugin
-    │    └── tests
-    │        ├── test_01
-    │        │    ├── test_01.S
-    │        │    ├── log
-    │        │    └── ...
-    │        ├── test_02
-    │        │    ├── test_02.S
-    │        │    ├── log
-    │        │    └── ...
-    │        │    ...
-    │        │    ...
-    │        └── test_m
-    │             ├── test_m.S
-    │             ├── log
-    │             └── ...
-    ├── ...
-    ├── README.md
-    ├── regex_formats.py
-    └── test_generator.py
-
-Generating and Executing tests on `RiVer Core <https://github.com/incoresemi/river_core>`__
--------------------------------------------------------------------------------------------
-
-Install the required python packages. This can be done by running the
-command
-
-.. code:: shell
-
-    pip3 install -r ../requirements.txt
-
-If required, the user can replace the ``dut_config.yaml`` file with the
-configuration file of their DUT in the ``micro-arch-test/target/``
-directory. The test generator looks for a ``dut_config.yaml`` in the
-directory.
-
-Now, To run the tests on RiVer Core, it is necessary that the user
-creates a ``path.txt`` file in this directory
-(``micro-arch-tests/framework``).
-
-The first line of the ``path.txt`` file should be the path to the
-working directory of RiVer Core. This directory would have been created
-by the user while setting up RiVerCore. This directory contains the
-``river_core.ini`` file and the the ``mywork`` directory. More
-information of how to set up RiVer Core can be found
-`here <https://river-core.readthedocs.io/en/stable/installation.html>`__
-
-Once the ``path.txt`` file is updated with the correct path to the
-working directory of RiVer Core, the tests can be generated and executed
-on RiVer Core using the command
-
-.. code:: shell
-
-    python test_generator.py
-
-This will generate the Assembly programs, invoke RiVer Core, run the
-tests on the preferred DUT, compare the results with the reference, and
-finally generate a report stating if the tests passed or not.
-
-In addition to RiVer Core, we also parse the log generated from the DUT
-using regular expressions to check if the log contains a minimal
-expression which should be present if the test was executed properly. It
-is necessary that the RiVer core's DUT plugin is suitably modified to
-dump the log. (By default no log is dumped by RiVer core)
-
-This result from parsing the log is also displayed.
 
 Adding new tests
 ----------------
@@ -218,3 +117,61 @@ suite their needs.
                return False  # Return False if test has failed.
              return True  # Return True if test has passed.
         return None # To denote that test-case was not implemented/tested
+
+
+Framework Structure
+-------------------
+
+The framework is structured in the following manner.
+
+-  New folders are to be created for each block that needs to be tested
+   (e.g. ``bpu/``).
+-  Within each block's folder, a ``tests/`` folder is created to store
+   the generated assembly codes. In addition, the python scripts to
+   automate the assembly file generation are stored in the block's
+   folder.
+-  For automating the test generating process, we are using ``yapsy``
+   module which needs a plugin file (e.g. ``test_no_1.yapsy-plugin``)
+   created for each python script. To avoid hassle, we have automated
+   the process of creating the plugin files too. The plugin files are
+   created when ``test_generator.py`` is called. The plugin files are
+   ignored by git.
+-  The ``test-generator.py`` script parses through all the tests defined
+   in the block folder and chooses specific tests based on their
+   applicability (more about this in the ``Adding new tests`` section).
+-  For each chosen test case, the script creates new folders with the
+   test name inside the ``tests/`` folder and writes assembly files into
+   each of the respective folders.
+
+.. code:: shell
+
+    framework/
+    ├── bpu
+    │    ├── test_01.py
+    │    ├── *test_01.yapsy-plugin
+    │    ├── test_02.py
+    │    ├── *test_02.yapsy-plugin
+    │    ├── ...
+    │    ├── ...
+    │    ├── test_n.py
+    │    ├── *test_n.yapsy-plugin
+    │    └── tests
+    │        ├── test_01
+    │        │    ├── test_01.S
+    │        │    ├── log
+    │        │    └── ...
+    │        ├── test_02
+    │        │    ├── test_02.S
+    │        │    ├── log
+    │        │    └── ...
+    │        │    ...
+    │        │    ...
+    │        └── test_m
+    │             ├── test_m.S
+    │             ├── log
+    │             └── ...
+    ├── ...
+    ├── README.md
+    ├── regex_formats.py
+    └── test_generator.py
+
