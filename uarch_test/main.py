@@ -149,4 +149,4 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
     if clean:
         #TODO: Clear up clean_dirs!
         logger.debug('Invoking clean_dirs')
-        clean_dirs(work_dir=work_dir, verbose=verbose)
+        clean_dirs(work_dir=work_dir, modules_dir=module_dir, verbose=verbose)
