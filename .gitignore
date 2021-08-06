@@ -5,8 +5,9 @@ uarch_test/modules/branch_predictor/tests/
 **.pyc
 **.pyo
 
-# Modules Directory
-uarch_test/modules/*
+# Modules Directory and Repo
+uarch_test/modules
+uarch_test/uarch_modules
 
 # Build Directory
 work/
