@@ -298,7 +298,7 @@ def validate_tests(modules, inp, work_dir, modules_dir, verbose='info'):
     logger.info('Joined Yaml reports')
 
 
-def clean_dirs(work_dir, verbose='info'):
+def clean_dirs(work_dir, modules_dir, verbose='info'):
     """
     This function cleans unwanted files. Presently it removes __pycache__,
     tests/ directory inside modules and yapsy plugins.
@@ -314,13 +314,16 @@ def clean_dirs(work_dir, verbose='info'):
     # module_tests_dir = os.path.join(module_dir, 'tests')
 
     logger.info('****** Cleaning ******')
-    yapsy_dir = os.path.join(module_dir, '*.yapsy-plugin')
-    pycache_dir = os.path.join(module_dir, '__pycache__')
-
+    logger.debug('work_dir is {0}'.format(module_dir))
+    yapsy_dir = os.path.join(modules_dir, '**/*.yapsy-plugin')
+    pycache_dir = os.path.join(modules_dir, '__pycache__')
+    logger.debug('yapsy_dir is {0}'.format(yapsy_dir))
+    logger.debug('pycache_dir is {0}'.format(pycache_dir))
     tf = glob.glob(module_dir)
     pf = glob.glob(pycache_dir) + glob.glob(
         os.path.join(uarch_dir, '__pycache__'))
-    yf = glob.glob(yapsy_dir)
+    yf = glob.glob(yapsy_dir, recursive=True)
+    logger.debug('removing {0}, {1} and {2}'.format(tf, pf, yf))
     for i in tf + pf:
         if os.path.isdir(i):
             rmtree(i)
