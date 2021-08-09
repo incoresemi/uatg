@@ -15,9 +15,7 @@ Test_Generator
 Tests
 ^^^^^
 
-.. automodule:: uarch_test.tests
-   :members: 
-   :special-members:
-   :private-members:
+The tests are a part of another repository. Hence, refer to creating_tests \
+section of this document or check the uarch_modules repository.
 
 
