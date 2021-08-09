@@ -290,7 +290,7 @@ Running UArchTest
 Once you have installed UArch-test. 
 
 Command to **generate** ASM tests 
-=================================
+---------------------------------
 
 .. code-block:: bash
 
@@ -332,12 +332,12 @@ Here,
 - `-v` indicates the level of the logging the user requires.
 
 
-**Once you have created the tests, and have succesfully run it on RiVEr Core. You can use the minimal check logs feature present in the framework.**
+**Once you have created the tests, and have succesfully run it on RiVer Core. You can use the minimal check logs feature present in the framework.**
 
 .. note:: it is necessary that the user enables log dumping in the river_core_dut_plugin. Details about that will be covered in the documentation of river_core.
 
 command to **validate** the generated logs
-==========================================
+------------------------------------------
 
 .. code-block:: bash
 
@@ -349,7 +349,7 @@ Here,
 
 
 command to **list modules**
-===========================
+---------------------------
 
 .. code-block:: bash
 
@@ -358,7 +358,7 @@ command to **list modules**
 - This command lists all the hardware modules for which test generation is possible by looking at the directory names within the *modules* directory
 
 command to **clean**
-====================
+--------------------
 
 .. code-block:: bash
 
