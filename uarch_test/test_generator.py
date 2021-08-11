@@ -62,9 +62,11 @@ def generate_tests(work_dir,
     for module in modules:
         module_dir = os.path.join(modules_dir, module)
         work_tests_dir = os.path.join(work_dir, module)
-
-        module_params = inp_yaml[module]
-
+        try:
+            module_params = inp_yaml[module]
+        except KeyError as e:
+            #logger.critical("The {0} module is not in the dut config_file",format(module))
+            module_params = {}
         logger.debug('Directory for {0} is {1}'.format(module, module_dir))
         logger.info('Starting plugin Creation for {0}'.format(module))
         create_plugins(plugins_path=module_dir)
@@ -165,7 +167,12 @@ def generate_sv(work_dir, config_file, modules, modules_dir, verbose='info'):
 
         module_dir = os.path.join(modules_dir, module)
         sv_dir = os.path.join(work_dir, 'sv_top')
-        module_params = inp_yaml[module]
+        try:
+            module_params = inp_yaml[module]
+        except KeyError as e:
+            #logger.critical("The {0} module is not in the dut config_file",format(module))
+            module_params = {}
+
         os.makedirs(sv_dir, exist_ok=True)
 
         manager = PluginManager()
@@ -243,7 +250,11 @@ def validate_tests(modules, inp, work_dir, modules_dir, verbose='info'):
         reports_dir = os.path.join(work_dir, 'reports', module)
         os.makedirs(reports_dir, exist_ok=True)
 
-        module_params = inp_yaml[module]
+        try:
+            module_params = inp_yaml[module]
+        except KeyError as e:
+            #logger.critical("The {0} module is not in the dut config_file",format(module))
+            module_params = {}
 
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
