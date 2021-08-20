@@ -65,7 +65,8 @@ def generate_tests(work_dir,
         try:
             module_params = inp_yaml[module]
         except KeyError as e:
-            #logger.critical("The {0} module is not in the dut config_file",format(module))
+            # logger.critical("The {0} module is not in the dut config_file",
+            # format(module))
             module_params = {}
         logger.debug('Directory for {0} is {1}'.format(module, module_dir))
         logger.info('Starting plugin Creation for {0}'.format(module))
@@ -145,7 +146,8 @@ def generate_tests(work_dir,
 def generate_sv(work_dir, config_file, modules, modules_dir, verbose='info'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
-    the plugin directory and create the covergroups (System Verilog) for the test files in a new directory.
+    the plugin directory and create the covergroups (System Verilog) for the
+    test files in a new directory.
     """
     logger.level(verbose)
     uarch_dir = os.path.dirname(uarch_test.__file__)
@@ -170,7 +172,8 @@ def generate_sv(work_dir, config_file, modules, modules_dir, verbose='info'):
         try:
             module_params = inp_yaml[module]
         except KeyError as e:
-            #logger.critical("The {0} module is not in the dut config_file",format(module))
+            # logger.critical("The {0} module is n"
+            #                 "ot in the dut config_file",format(module))
             module_params = {}
 
         os.makedirs(sv_dir, exist_ok=True)
@@ -178,15 +181,15 @@ def generate_sv(work_dir, config_file, modules, modules_dir, verbose='info'):
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
-        ## To get the aliasing file as a parameter
+        # To get the aliasing file as a parameter
         alias_file = os.path.join(uarch_dir, 'aliasing.ini')
 
-        ## generate the tbtop and interface files
+        # generate the tbtop and interface files
         generate_sv_components(sv_dir, alias_file)
         logger.debug("Generated tbtop, defines and interface files")
         sv_file = os.path.join(sv_dir, 'coverpoints.sv')
 
-        if (os.path.isfile(sv_file)):
+        if os.path.isfile(sv_file):
             logger.debug("Removing Existing coverpoints SV file")
             os.remove(sv_file)
 
@@ -253,7 +256,8 @@ def validate_tests(modules, inp, work_dir, modules_dir, verbose='info'):
         try:
             module_params = inp_yaml[module]
         except KeyError as e:
-            #logger.critical("The {0} module is not in the dut config_file",format(module))
+            # logger.critical("The {0} module is not "
+            #                 "in the dut config_file",format(module))
             module_params = {}
 
         manager = PluginManager()
