@@ -27,7 +27,7 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
 
     if (gen_test or val_test) and config_file is None:
         error = (True, 'The --config_file/-cf option is missing.\n'
-                 'Exiting uarch_test. Fix the issue and Retry.')
+                       'Exiting uarch_test. Fix the issue and Retry.')
         return temp_list, error
 
     if config_file is not None:
@@ -36,17 +36,17 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                 pass
         except IOError as e:
             error = (True, 'The specified config file does not exist.\n'
-                     'Exiting uarch_test. Fix the issue and Retry.')
+                           'Exiting uarch_test. Fix the issue and Retry.')
             return temp_list, error
 
     if (gen_test or val_test or clean) and (module_dir is None):
         error = (True, 'The --module_dir/-md option is missing.\n'
-                 'Exiting uarch_test. Fix the issue and Retry.')
+                       'Exiting uarch_test. Fix the issue and Retry.')
         return temp_list, error
 
     if (module_dir is not None) and not os.path.isdir(module_dir):
         error = (True, 'The specified module directory does not exist.\n'
-                 'Exiting uarch_test. Fix the issue and Retry.')
+                       'Exiting uarch_test. Fix the issue and Retry.')
         return temp_list, error
 
     if gen_cvg and not gen_test:
@@ -65,8 +65,8 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
         module = list(set(module.split(",")))
         module.remove('')
         module.sort()
-    except ValueError as e:
-        pass
+    except ValueError:
+        error = (True, 'Check --module flag. Enter comma separated values')
     for i in module:
         if i not in available_modules:
             error = (True, 'Module {0} is not supported/unavailable.'.format(i))
@@ -249,7 +249,8 @@ class sv_components:
     # class with methods to generate system verilog files
     def __init__(self, config_file):
         """
-        This class contains the methods which will return the tb_top and interface files
+        This class contains the methods which will return the tb_top and
+        interface files
         """
         super().__init__()
         self._btb_depth = 32
@@ -276,7 +277,8 @@ class sv_components:
         """
         intf = ("interface chromite_intf(input bit CLK,RST_N);\n"
                 "  logic " + str(self.rg_initialize) + ";\n"
-                "  logic [4:0]" + str(self.rg_allocate) + ";\n")
+                                                       "  logic [4:0]" +
+                str(self.rg_allocate) + ";\n")
         intf += "\n  logic [7:0]{0};".format(self.rg_ghr)
         intf += "\nlogic [" + str(self._btb_depth - 1) + ":0]{0};".format(
             self.valids)
@@ -342,46 +344,60 @@ end
                   "  mkTbSoc mktbsoc(.CLK(intf.CLK),.RST_N(intf.RST_N));\n"
                   "  always @(posedge CLK)\n"
                   "  begin\n")
-        tb_top = tb_top + "\tif(!RST_N) begin\n\tintf.{0} = {1}.{0};\n\tintf.{" \
-                          "2} = {1}.{2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {" \
-                          "1}.{4};\n\tintf.{5} = {1}.{5};".format(
-            self.rg_initialize, self.bpu_path, self.rg_allocate,
-            self.ras_top_index, self.rg_ghr, self.mispredict)
+        # tb_top = tb_top + "\tif(!RST_N) begin\n\tintf.{0} = {1}.{
+        # 0};\n\tintf.{2} = {1}.{2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {
+        # 1}.{4};\n\tintf.{5} = {1}.{5};".format(self.rg_initialize,
+        # self.bpu_path, self.rg_allocate,self.ras_top_index, self.rg_ghr,
+        # self.mispredict)
+        tb_top += f"\tif(!RST_N) begin\n\tintf.{self.rg_initialize} = " \
+                  f"{self.bpu_path}.{self.rg_initialize};\n\tintf." \
+                  f"{self.rg_allocate} = {self.bpu_path}.{self.rg_allocate};" \
+                  f"\n\tintf.{self.ras_top_index} = {self.bpu_path}." \
+                  f"{self.ras_top_index};\n\tintf.{self.rg_ghr} = " \
+                  f"{self.bpu_path}.{self.rg_ghr};\n\tintf.{self.mispredict}" \
+                  f" = {self.bpu_path}.{self.mispredict}; "
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_tag) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_entry) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(self.valids) + "[" + str(
-                i) + "] = " + (self.bpu_path) + "." + str(
-                    self.btb_tag) + "_" + str(i) + "[0];"
-        tb_top += ("\n\tend\n" "\telse\n\tbegin\n")
-        tb_top += "\tintf.{0} = {1}.{0};\n\tintf.{2} = {1}.{" \
-                  "2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {1}.{" \
-                  "4};\n\tintf.{5} = {1}.{5};".format(
-            self.rg_initialize, self.bpu_path, self.rg_allocate,
-            self.ras_top_index, self.rg_ghr, self.mispredict)
+                i) + "] = " + self.bpu_path + "." + str(
+                self.btb_tag) + "_" + str(i) + "[0];"
+        tb_top += "\n\tend\n\telse\n\tbegin\n"
+        # tb_top += "\tintf.{0} = {1}.{0};\n\tintf.{2} = {1}.{" \
+        #           "2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {1}.{" \
+        #           "4};\n\tintf.{5} = {1}.{5};".format(
+        #     self.rg_initialize, self.bpu_path, self.rg_allocate,
+        #     self.ras_top_index, self.rg_ghr, self.mispredict)
+        tb_top += f"\tintf.{self.rg_initialize} = {self.bpu_path}" \
+                  f".{self.rg_initialize};\n\tintf.{self.rg_allocate} = " \
+                  f"{self.bpu_path}.{self.rg_allocate};\n\tintf." \
+                  f"{self.ras_top_index} = {self.bpu_path}" \
+                  f".{self.ras_top_index};\n\tintf.{self.rg_ghr} = " \
+                  f"{self.bpu_path}.{self.rg_ghr};\n\tintf.{self.mispredict}" \
+                  f" = {self.bpu_path}.{self.mispredict}; "
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_tag) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_entry) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.valids) + "[" + str(i) + "] = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_tag) + "_" + str(i) + "[0];"
+                self.bpu_path) + "." + str(
+                self.btb_tag) + "_" + str(i) + "[0];"
         tb_top = tb_top + """\n\tend
 end
 
@@ -401,7 +417,7 @@ begin
 end
 `endif
 
-endmodule
+endmoduleNeeded to generate/validate tests
 `endif\n"""
 
         return tb_top

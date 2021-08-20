@@ -47,6 +47,13 @@ from uarch_test.utils import clean_cli_params, list_of_modules, info
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the working directory where generated files will be"
               " stored.")
+@click.option('--alias_file',
+              '-af',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the aliasing file containing containing BSV alias "
+              "names.")
 @click.option('--gen_test',
               '-gt',
               is_flag=True,
