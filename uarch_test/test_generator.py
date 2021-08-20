@@ -142,7 +142,7 @@ def generate_tests(work_dir,
             yaml.dump(test_list_dict, outfile)
 
 
-def generate_sv(work_dir, config_file, modules, modules_dir, verbose='info'):
+def generate_sv(work_dir, config_file, modules, modules_dir, alias_file, verbose='info'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
     the plugin directory and create the covergroups (System Verilog) for the test files in a new directory.
@@ -178,8 +178,6 @@ def generate_sv(work_dir, config_file, modules, modules_dir, verbose='info'):
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
-        ## To get the aliasing file as a parameter
-        alias_file = os.path.join(uarch_dir, 'aliasing.ini')
 
         ## generate the tbtop and interface files
         generate_sv_components(sv_dir, alias_file)
