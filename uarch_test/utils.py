@@ -66,7 +66,7 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
         module.remove('')
         module.sort()
     except ValueError:
-        error = (True, 'Check --module flag. Enter comma separated values')
+        pass
     for i in module:
         if i not in available_modules:
             error = (True, 'Module {0} is not supported/unavailable.'.format(i))
