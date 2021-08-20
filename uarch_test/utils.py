@@ -9,7 +9,7 @@ from configparser import ConfigParser
 
 
 def list_of_modules(module_dir):
-    modules = os.listdir(module_dir + '/')
+    modules = [f.name for f in os.scandir(module_dir) if f.is_dir()]
     return modules + ['all']
 
 

@@ -289,6 +289,8 @@ Running UArchTest
 
 Once you have installed UArch-test. 
 
+.. note:: please clone `uarch_modules <https://gitlab.com/incoresemi/uarch_modules.git>`_ within the uarch_test directory. once cloned, checkout the dev-0.0.1 branch of uarch_modules. This module contains all the tests written for the submodules in Chromite.
+
 Command to **generate** ASM tests 
 ---------------------------------
 
