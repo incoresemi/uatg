@@ -103,7 +103,7 @@ from uarch_test.utils import clean_cli_params, list_of_modules, info
     # TODO: find a proper way to list all modules and display them
     type=str)
 def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
-        list_modules, linker_dir, test_list, gen_cvg, module_dir):
+        list_modules, linker_dir, test_list, gen_cvg, module_dir, alias_file):
     logger.level(verbose)
     info(__version__)
 
@@ -144,7 +144,8 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
                     config_file=config_file,
                     modules=modules,
                     modules_dir=module_dir,
-                    verbose=verbose)
+                    verbose=verbose,
+                    alias_file=alias_file)
 
     if val_test:
         logger.debug('Invoking val_test')
@@ -154,6 +155,5 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
                        modules_dir=module_dir,
                        verbose=verbose)
     if clean:
-        #TODO: Clear up clean_dirs!
         logger.debug('Invoking clean_dirs')
         clean_dirs(work_dir=work_dir, modules_dir=module_dir, verbose=verbose)
