@@ -2,6 +2,7 @@
 """Console script for uarch_tests."""
 
 import click
+from configparser import ConfigParser
 from uarch_test.log import logger
 from uarch_test.test_generator import generate_tests, clean_dirs, validate_tests, generate_sv
 from uarch_test.__init__ import __version__
@@ -25,8 +26,18 @@ from uarch_test.utils import clean_cli_params, list_of_modules, info
     'Presently, __pycache__, tests/ folders are removed along '
     'with yapsy-plugins',
 )
-@click.option('--config_file',
-              '-cf',
+@click.option('--run_config',
+              '-rc',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Provide a config.ini file's path. This runs utg based upon "
+                   "the parameters stored in the file. If not specified "
+                   "individual args/flags are to be passed through cli. In the"
+                   "case of conflict between cli and config.ini values, config"
+                   ".ini values will be chosen")
+@click.option('--dut_config',
+              '-dc',
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
@@ -102,14 +113,33 @@ from uarch_test.utils import clean_cli_params, list_of_modules, info
     "modules are: branch_predictor",
     # TODO: find a proper way to list all modules and display them
     type=str)
-def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
+def cli(verbose, clean, run_config, dut_config, work_dir, modules, gen_test, val_test,
         list_modules, linker_dir, gen_test_list, gen_cvg, module_dir, alias_file):
     logger.level(verbose)
     info(__version__)
 
+    if run_config:
+        config = ConfigParser()
+        config.read(run_config)
+        verbose = config['utg']['verbose']
+        clean = config['utg']['clean']
+        modules = config['utg']['modules']
+
+        module_dir = config['utg']['module_dir']
+        work_dir = config['utg']['work_dir']
+        linker_dir = config['utg']['linker_dir']
+
+        dut_config = config['utg']['dut_config']
+        alias_file = config['utg']['alias_file']
+
+        gen_test_list = config['utg']['gen_test_list']
+        gen_test = config['utg']['gen_test']
+        val_test = config['utg']['val_test']
+        gen_cvg = config['utg']['gen_cvg']
+
     if list_modules:
         logger.info('Module Options: ' + str(list_of_modules(module_dir)))
-    modules, err = clean_cli_params(config_file=config_file,
+    modules, err = clean_cli_params(config_file=dut_config,
                                     module=modules,
                                     gen_test=gen_test,
                                     val_test=val_test,
@@ -122,7 +152,7 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
 
     # cleaned parameters to be logged
     # logger.debug('verbose    : {0}'.format(verbose))
-    # logger.debug('config_file: {0}'.format(config_file))
+    # logger.debug('dut_config_file: {0}'.format(dut_config))
     # logger.debug('work_dir   : {0}'.format(work_dir))
     # logger.debug('modules    : {0}'.format(module))
     # logger.debug('gen_test   : {0}'.format(gen_test))
@@ -134,14 +164,14 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
         generate_tests(work_dir=work_dir,
                        linker_dir=linker_dir,
                        modules=modules,
-                       config_file=config_file,
+                       config_file=dut_config,
                        test_list=gen_test_list,
                        modules_dir=module_dir,
                        verbose=verbose)
     if gen_cvg:
         logger.debug("Invoking SV generation")
         generate_sv(work_dir=work_dir,
-                    config_file=config_file,
+                    config_file=dut_config,
                     modules=modules,
                     modules_dir=module_dir,
                     verbose=verbose,
@@ -150,7 +180,7 @@ def cli(verbose, clean, config_file, work_dir, modules, gen_test, val_test,
     if val_test:
         logger.debug('Invoking val_test')
         validate_tests(modules=modules,
-                       inp=config_file,
+                       inp=dut_config,
                        work_dir=work_dir,
                        modules_dir=module_dir,
                        verbose=verbose)

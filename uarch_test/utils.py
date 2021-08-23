@@ -35,8 +35,9 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
             with open(config_file) as f:
                 pass
         except IOError as e:
-            error = (True, 'The specified config file does not exist.\n'
-                           'Exiting uarch_test. Fix the issue and Retry.')
+            error = (True, f'The specified config file {config_file} does not '
+                           f'exist.\nExiting uarch_test. '
+                           f'Fix the issue and Retry.')
             return temp_list, error
 
     if (gen_test or val_test or clean) and (module_dir is None):
