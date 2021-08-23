@@ -326,7 +326,8 @@ The complete command required to **generate ASM tests and covergroups** with con
 .. code-block:: bash
 
   $ uarch_test -dc /path/to/dut_config.yaml -md /path/to/modules/directory -wd /path/to/working/directory/ \
-    -ld /path/to/directory/containing/linker/files -m <modules_for_which_tests_are_to_generated> -gt -gc  \
+    -ld /path/to/directory/containing/linker/files -m <modules_for_which_tests_are_to_generated> \
+    -af /path/to/aliasing.yaml/file -gt -gc  \
     -v <log level>
 
 Here,
@@ -338,6 +339,7 @@ Here,
 - The `-wd` is optional. It specifies the work directory in which the tests are to be created.
 - The directory passed with `-ld` option should contain both the `model_test.h` as well as the `link.ld` files within it. If not, those files will be created in the work directory.
 - The `-m` option should be a string listing all the modules for which the tests are to be generated. By default, when unsepcified, the framework assumes it to be *'all'*.
+- the `-af` option should list the path to an `aliasing.yaml` file which will be used for BSV signal aliasing. This is a required parameter if you wish to generate covergroups. 
 - `-gt` generates tests, `-gc` generates covergroups.
 - `-v` indicates the level of the logging the user requires.
 
