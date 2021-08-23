@@ -5,7 +5,7 @@ import glob
 import uarch_test
 from uarch_test.log import logger
 from yapsy.PluginManager import PluginManager
-from configparser import ConfigParser
+#from configparser import ConfigParser
 
 
 def list_of_modules(module_dir):
@@ -255,16 +255,16 @@ class sv_components:
         """
         super().__init__()
         self._btb_depth = 32
-        config = ConfigParser()
-        config.read(config_file)
-        self.rg_initialize = config['bpu']['bpu_rg_initialize']
-        self.rg_allocate = config['bpu']['bpu_rg_allocate']
-        self.btb_tag = config['bpu']['bpu_btb_tag']
-        self.btb_entry = config['bpu']['bpu_btb_entry']
-        self.ras_top_index = config['bpu']['bpu_ras_top_index']
-        self.rg_ghr = config['bpu']['bpu_rg_ghr']
-        self.valids = config['bpu']['bpu_btb_tag_valid']
-        self.mispredict = config['bpu']['bpu_mispredict_flag']
+        #config = ConfigParser()
+        config = load_yaml(config_file)
+        self.rg_initialize = config['bpu']['reg']['bpu_rg_initialize']
+        self.rg_allocate = config['bpu']['reg']['bpu_rg_allocate']
+        self.btb_tag = config['bpu']['wire']['bpu_btb_tag']
+        self.btb_entry = config['bpu']['wire']['bpu_btb_entry']
+        self.ras_top_index = config['bpu']['wire']['bpu_ras_top_index']
+        self.rg_ghr = config['bpu']['reg']['bpu_rg_ghr']
+        self.valids = config['bpu']['wire']['bpu_btb_tag_valid']
+        self.mispredict = config['bpu']['wire']['bpu_mispredict_flag']
         self.bpu_path = config['tb_top']['path_to_bpu']
         self.decoder_path = config['tb_top']['path_to_decoder']
         self.stage0_path = config['tb_top']['path_to_stage0']
