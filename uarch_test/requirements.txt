@@ -1,4 +1,5 @@
 yapsy>=1.12.2
 ruamel.yaml>=0.17.9
 click==7.0.0
-git+https://github.com/incoresemi/cocotb-coverage.git@incore\-dev
+cocotb-coverage@git+https://github.com/incoresemi/cocotb-coverage.git@incore-dev
+
