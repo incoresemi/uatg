@@ -7,7 +7,7 @@ Code Documentation
 Test_Generator
 ^^^^^^^^^^^^^^
 
-.. automodule:: uarch_test.test_generator
+.. automodule:: utg.test_generator
    :members: 
    :special-members:
    :private-members:
