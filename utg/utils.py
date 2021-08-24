@@ -2,8 +2,8 @@ import ruamel
 from ruamel.yaml import YAML
 import os
 import glob
-import uarch_test
-from uarch_test.log import logger
+import utg
+from utg.log import logger
 from yapsy.PluginManager import PluginManager
 #from configparser import ConfigParser
 
@@ -27,7 +27,7 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
 
     if (gen_test or val_test) and config_file is None:
         error = (True, 'The --config_file/-cf option is missing.\n'
-                       'Exiting uarch_test. Fix the issue and Retry.')
+                       'Exiting utg. Fix the issue and Retry.')
         return temp_list, error
 
     if config_file is not None:
@@ -36,18 +36,18 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                 pass
         except IOError as e:
             error = (True, f'The specified config file {config_file} does not '
-                           f'exist.\nExiting uarch_test. '
+                           f'exist.\nExiting utg. '
                            f'Fix the issue and Retry.')
             return temp_list, error
 
     if (gen_test or val_test or clean) and (module_dir is None):
         error = (True, 'The --module_dir/-md option is missing.\n'
-                       'Exiting uarch_test. Fix the issue and Retry.')
+                       'Exiting utg. Fix the issue and Retry.')
         return temp_list, error
 
     if (module_dir is not None) and not os.path.isdir(module_dir):
         error = (True, 'The specified module directory does not exist.\n'
-                       'Exiting uarch_test. Fix the issue and Retry.')
+                       'Exiting utg. Fix the issue and Retry.')
         return temp_list, error
 
     if gen_cvg and not gen_test:
@@ -112,7 +112,7 @@ def generate_test_list(asm_dir, uarch_dir, test_list):
         logger.debug("Current test is {0}".format(test))
         base_key = os.path.basename(test)[:-2]
         test_list[base_key] = {}
-        test_list[base_key]['generator'] = 'uarch_test'
+        test_list[base_key]['generator'] = 'utg'
         test_list[base_key]['work_dir'] = asm_dir + '/' + base_key
         test_list[base_key]['isa'] = 'rv64imafdc'
         test_list[base_key]['march'] = 'rv64imafdc'
