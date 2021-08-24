@@ -1,9 +1,9 @@
 include LICENSE.incore
 include README.md
-include uarch_test/requirements.txt
+include utg/requirements.txt
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 recursive-exclude * *.S
 recursive-exclude * *.yapsy-plugin
-recursive-exclude uarch_test/modules/ *
+recursive-exclude utg/modules/ *
