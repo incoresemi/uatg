@@ -1,18 +1,18 @@
 # Pycache stuff
-uarch_test/modules/__pycache__/
-uarch_test/modules/branch_predictor/__pycache__/
-uarch_test/modules/branch_predictor/tests/
+utg/modules/__pycache__/
+utg/modules/branch_predictor/__pycache__/
+utg/modules/branch_predictor/tests/
 **.pyc
 **.pyo
 
 # Modules Directory and Repo
-uarch_test/modules
-uarch_test/uarch_modules
+utg/modules
+utg/uarch_modules
 
 # Build Directory
 work/
-uarch_test/temp/*
-uarch_test/work/*
+utg/temp/*
+utg/work/*
 
 # Assembly, Plugins
 **.S
@@ -24,5 +24,5 @@ uarch_test/work/*
 .*
 *.egg-info
 docs/build/
-uarch_test/target/*
-uarch_test/*.yaml
+utg/target/*
+utg/*.yaml
