@@ -25,8 +25,8 @@ def get_version():
 sys.path.insert(0, os.path.abspath('../..'))
 sys.setrecursionlimit(1500)
 
-project = u'UArchTest'
-copyright = '2019 InCore Semiconductors, IIT Madras'
+project = u'UTG'
+copyright = '2021 InCore Semiconductors Pvt. Ltd.'
 author = 'InCore Semiconductors Pvt. Ltd.'
 
 # The short X.Y version
@@ -164,7 +164,7 @@ html_show_license = True
 
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'UArchTestsdoc'
+htmlhelp_basename = 'UTGdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -375,7 +375,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'UArchTests.tex', 'InCore Micro-Architectural Test Framework Documentation',
+    (master_doc, 'UTG.tex', 'InCore Micro-Architectural Test Framework Documentation',
      'InCore Semiconductors Pvt. Ltd.', 'manual'),
 ]
 
@@ -399,8 +399,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'UArchTests', 'InCore Micro-Architectural Test Framework Documentation',
-     author, 'UArchTests', 'One line description of project.',
+    (master_doc, 'UTG', 'InCore Micro-Architectural Test Framework Documentation',
+     author, 'UTG', 'One line description of project.',
      'Miscellaneous'),
 ]
 
