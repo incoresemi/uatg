@@ -8,7 +8,7 @@
 Quickstart
 ==========
 
-This section is meant to serve as a quick-guide to setup UArchTest (utg). This guide
+This section is meant to serve as a quick-guide to setup UTG(Uarch Test Generator). This guide
 will help you setup all the required tooling for running utg on your system.
 
 
@@ -17,36 +17,17 @@ Install Python
 
 .. tabs::
 
-   .. tab:: Ubuntu
+   .. tab:: Ubuntu 20.04
 
-
-      Ubuntu 17.10 and 18.04 by default come with python-3.6.9 which is sufficient for using riscv-config.
-      
-      If you are are Ubuntu 16.10 and 17.04 you can directly install python3.6 using the Universe
-      repository
-      
-      .. code-block:: shell-session
-
-        $ sudo apt-get install python3.6
-        $ pip3 install --upgrade pip
-      
-      If you are using Ubuntu 14.04 or 16.04 you need to get python3.6 from a Personal Package Archive 
-      (PPA)
-      
-      .. code-block:: shell-session
-
-        $ sudo add-apt-repository ppa:deadsnakes/ppa
-        $ sudo apt-get update
-        $ sudo apt-get install python3.6 -y 
-        $ pip3 install --upgrade pip
-      
-      You should now have 2 binaries: ``python3`` and ``pip3`` available in your $PATH. 
+      Ubuntu 20.04, by default, comes with python-3.8 which is expected to be compatible with UTG.
+            
+      You should have 2 binaries: ``python3`` and ``pip3`` available in your $PATH. 
       You can check the versions as below
       
       .. code-block:: shell-session
 
         $ python3 --version
-        Python 3.6.9
+        Python 3.8.2
         $ pip3 --version
         pip 20.1 from <user-path>.local/lib/python3.6/site-packages/pip (python 3.6)
 
@@ -79,32 +60,35 @@ Install Python
         $ python3 --version
         Python 3.6.8
         $ pip --version
-        pip 20.1 from <user-path>.local/lib/python3.6/site-packages/pip (python 3.6)
+        pip 20.1 from <user-path>.local/lib/python3.7/site-packages/pip (python 3.7)
 
-Using Virtualenv for Python 
+Using CONDA Virtualenv for Python 
 ---------------------------
+
+UTG officially requires python-3.7, even though it might be compatible with the other versions. Hence we would recommend using python-3.7.
 
 Many a times users face issues in installing and managing multiple python versions. This is actually 
 a major issue as many gui elements in Linux use the default python versions, in which case installing
-python3.6 using the above methods might break other software. We thus advise the use of **pyenv** to
-install python3.6.
+python3.6 using the above methods might break other software. We thus advise the use of **conda** to
+install python3.7.0
 
-For Ubuntu and CentosOS, please follow the steps here: https://github.com/pyenv/pyenv#basic-github-checkout
+For Ubuntu and CentosOS, please follow the steps here: https://conda.io/projects/conda/en/latest/user-guide/install/linux.html
 
-RHEL users can find more detailed guides for virtual-env here: https://developers.redhat.com/blog/2018/08/13/install-python3-rhel/#create-env
+Fedora users can use the ``sudo dnf install conda`` command to install conda. On installation, close and restart your terminal.
 
-Once you have pyenv installed do the following to install python 3.6.0::
+Once you have conda installed do the following to install python 3.7.0::
 
-  $ pyenv install 3.6.0
-  $ pip3 install --upgrade pip
-  $ pyenv shell 3.6.0
+  $ conda init bash
+  $ conda create --name <env-name> --python=3.7 --yes
+  $ conda set --activate-base false
+  $ conda activate <env-name>
   
 You can check the version in the **same shell**::
 
   $ python --version
-  Python 3.6.0
+  Python 3.7.0
   $ pip --version
-  pip 20.1 from <user-path>.local/lib/python3.6/site-packages/pip (python 3.6)
+  pip 20.1 from <user-path>.local/lib/python3.7/site-packages/pip (python 3.7)
 
 .. _install_utg:
 
@@ -115,7 +99,7 @@ Install UArchTest
 
    .. tab:: for Dev
 
-     The sources for UArchTest can be downloaded from the `GitLab repo`_.
+     The sources for UTG can be downloaded from the `GitLab repo`_.
      
      You can clone the repository:
      
@@ -141,7 +125,7 @@ Install UArchTest
      
          $ pip3 install git+https://gitlab.com/incoresemi/micro-arch-tests.git
      
-     This is the preferred method to install UArchTest, as it will always install the most recent stable release.
+     This is the preferred method to install UTG, as it will always install the most recent stable release.
      
      If you don't have `pip`_ installed, this `Python installation guide`_ can guide
      you through the process.
@@ -158,13 +142,13 @@ Install UArchTest
      
        $ pip3 install utg
      
-     To update an already installed version of UArchTest to the latest version:
+     To update an already installed version of UTG to the latest version:
      
      .. code-block:: bash
      
        $ pip3 install -U utg
      
-     To checkout a specific version of UArchTest:
+     To checkout a specific version of UTG:
      
      .. code-block:: bash
      
@@ -288,16 +272,18 @@ With this you should now have all the following available as command line argume
 Change Neccesary Target Env Files
 =================================
 
-TODO 
+- The environment files required for the framework are present within the ``utg/env/`` directory.
+- The additional files like the linker will be generated automatically along with the tests, if the user does not choose to use a linker of his own.
+- In addition to that, the framework requires an additional dut_config.yaml file, which should summarize the configuration of the DUT under test. The values obtained from this YAML will be used to customize the tests for the DUT.
 
 Running UArchTest
 =================
 
-.. note:: utg is interchangeably denoted as framework in this documentation.
+.. note:: utg is interchangeably denoted as 'framework' in this documentation.
 
-Once you have installed UArch-test. 
+Once you have installed UTG. 
 
-.. note:: please clone `uarch_modules <https://gitlab.com/incoresemi/uarch_modules.git>`_ within the utg directory. once cloned, checkout the dev-0.0.1 branch of uarch_modules. This module contains all the tests written for the submodules in Chromite.
+.. note:: please clone `chromite_uarch_tests <https://gitlab.com/incoresemi/chromite_uarch_tests.git>`_ within the utg directory. Once cloned, checkout the dev-0.0.1 branch. This module contains all the tests written for the submodules in Chromite.
 
 Command to **generate** ASM tests 
 ---------------------------------
@@ -309,7 +295,7 @@ Command to **generate** ASM tests
 
 - This command will create a `work` directory within the micro-arch-tests directory and create the test files within this directory. It will also create a `model_test.h` and `link.ld` file in the same directory by default.
 - The generated ASM files can be located within the work directory follwing this path -> `work_dir/modules_name/test_name/test_name.S`
-- This command does not generate the SV covergroup and TB files. It is required to pass the `-gc` flag to be specified in addition to `-gt`
+- This command does not generate the SV covergroup and TB files. It is required to pass the `-gc` flag along with the alias file (`-af`) to be specified in addition to `-gt`
 - The log level can be chosen between `info, error` and `debug`
 - `-dc` and `-md` are required parameters. 
 - `-gc` and `-v` are not.
