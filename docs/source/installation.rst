@@ -276,7 +276,7 @@ Change Neccesary Target Env Files
 - The additional files like the linker will be generated automatically along with the tests, if the user does not choose to use a linker of his own.
 - In addition to that, the framework requires an additional dut_config.yaml file, which should summarize the configuration of the DUT under test. The values obtained from this YAML will be used to customize the tests for the DUT.
 
-Running UArchTest
+Running UTG
 =================
 
 .. note:: utg is interchangeably denoted as 'framework' in this documentation.
