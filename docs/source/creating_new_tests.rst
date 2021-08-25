@@ -1,9 +1,9 @@
 
 .. _creating_new_tests: 
 
-=========================
-Micro-Arch-Test Framework
-=========================
+==========================
+Tests in the UTG Framework
+==========================
 
 
 Adding new tests
@@ -169,62 +169,4 @@ suite their needs.
         f.close()
 
         return res
-
-
-
-Framework Structure
--------------------
-
-The framework is structured in the following manner.
-
--  New folders are to be created for each block that needs to be tested
-   (e.g. ``bpu/``).
--  Within each block's folder, a ``tests/`` folder is created to store
-   the generated assembly codes. In addition, the python scripts to
-   automate the assembly file generation are stored in the block's
-   folder.
--  For automating the test generating process, we are using ``yapsy``
-   module which needs a plugin file (e.g. ``test_no_1.yapsy-plugin``)
-   created for each python script. To avoid hassle, we have automated
-   the process of creating the plugin files too. The plugin files are
-   created when ``test_generator.py`` is called. The plugin files are
-   ignored by git.
--  The ``test-generator.py`` script parses through all the tests defined
-   in the block folder and chooses specific tests based on their
-   applicability (more about this in the ``Adding new tests`` section).
--  For each chosen test case, the script creates new folders with the
-   test name inside the ``tests/`` folder and writes assembly files into
-   each of the respective folders.
-
-.. code:: shell
-
-    framework/
-    ├── bpu
-    │    ├── test_01.py
-    │    ├── *test_01.yapsy-plugin
-    │    ├── test_02.py
-    │    ├── *test_02.yapsy-plugin
-    │    ├── ...
-    │    ├── ...
-    │    ├── test_n.py
-    │    ├── *test_n.yapsy-plugin
-    │    └── tests
-    │        ├── test_01
-    │        │    ├── test_01.S
-    │        │    ├── log
-    │        │    └── ...
-    │        ├── test_02
-    │        │    ├── test_02.S
-    │        │    ├── log
-    │        │    └── ...
-    │        │    ...
-    │        │    ...
-    │        └── test_m
-    │             ├── test_m.S
-    │             ├── log
-    │             └── ...
-    ├── ...
-    ├── README.md
-    ├── regex_formats.py
-    └── test_generator.py
 
