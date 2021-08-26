@@ -32,7 +32,7 @@ def load_yaml(foo):
 
 
 def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
-                     gen_cvg, clean, alias_file):
+                     gen_cvg, clean, alias_file, list_modules):
     error = (False, '')
     temp_list = []
 
@@ -58,14 +58,17 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                  ' and try again')
         return temp_list, error
 
-    if (gen_test or val_test or clean) and (module_dir is None):
+    if (gen_test or val_test or clean or list_modules) and (module_dir is None):
+        
         error = (True, 'The --module_dir/-md option is missing.\n'
                        'Exiting utg. Fix the issue and Retry.')
         return temp_list, error
 
     if (module_dir is not None) and not os.path.isdir(module_dir):
+
         error = (True, 'The specified module directory does not exist.\n'
                        'Exiting utg. Fix the issue and Retry.')
+        
         return temp_list, error
 
     if gen_cvg and not gen_test:
@@ -74,6 +77,7 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                  'If you are trying to validate tests, remove the'
                  'generate_covergroups as well as generate_tests option'
                  'and try again')
+        return temp_list, error
         
     available_modules = list_of_modules(module_dir)
 

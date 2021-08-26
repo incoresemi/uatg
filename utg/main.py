@@ -144,7 +144,8 @@ def cli(verbose, clean, run_config, dut_config, work_dir, modules, gen_test, val
                                     module_dir=module_dir,
                                     gen_cvg=gen_cvg,
                                     clean=clean,
-                                    alias_file=alias_file)
+                                    alias_file=alias_file,
+                                    list_modules=list_modules)
     if err[0]:
         logger.error(err[1])
         exit(0)
