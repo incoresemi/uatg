@@ -38,7 +38,7 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
 
     if (gen_test or val_test) and config_file is None:
         error = (True, 'The --config_file/-cf option is missing.\n'
-                       'Exiting utg. Fix the issue and Retry.')
+                 'Exiting utg. Fix the issue and Retry.')
         return temp_list, error
 
     if config_file is not None:
@@ -47,28 +47,27 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                 pass
         except IOError as e:
             error = (True, f'The specified config file {config_file} does not '
-                           f'exist.\nExiting utg. '
-                           f'Fix the issue and Retry.')
+                     f'exist.\nExiting utg. '
+                     f'Fix the issue and Retry.')
             return temp_list, error
-    
+
     if gen_cvg and not alias_file:
-        error = (True,
-                 'Cannot generate covergroups without the alias file\n'
+        error = (True, 'Cannot generate covergroups without the alias file\n'
                  'Please provide the alias file with the -af flag'
                  ' and try again')
         return temp_list, error
 
     if (gen_test or val_test or clean or list_modules) and (module_dir is None):
-        
+
         error = (True, 'The --module_dir/-md option is missing.\n'
-                       'Exiting utg. Fix the issue and Retry.')
+                 'Exiting utg. Fix the issue and Retry.')
         return temp_list, error
 
     if (module_dir is not None) and not os.path.isdir(module_dir):
 
         error = (True, 'The specified module directory does not exist.\n'
-                       'Exiting utg. Fix the issue and Retry.')
-        
+                 'Exiting utg. Fix the issue and Retry.')
+
         return temp_list, error
 
     if gen_cvg and not gen_test:
@@ -78,7 +77,7 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                  'generate_covergroups as well as generate_tests option'
                  'and try again')
         return temp_list, error
-        
+
     available_modules = list_of_modules(module_dir)
 
     try:
@@ -289,8 +288,7 @@ class sv_components:
         """
         intf = ("interface chromite_intf(input bit CLK,RST_N);\n"
                 "  logic " + str(self.rg_initialize) + ";\n"
-                                                       "  logic [4:0]" +
-                str(self.rg_allocate) + ";\n")
+                "  logic [4:0]" + str(self.rg_allocate) + ";\n")
         intf += "\n  logic [7:0]{0};".format(self.rg_ghr)
         intf += "\nlogic [" + str(self._btb_depth - 1) + ":0]{0};".format(
             self.valids)
@@ -371,17 +369,17 @@ end
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_tag) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_entry) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(self.valids) + "[" + str(
                 i) + "] = " + self.bpu_path + "." + str(
-                self.btb_tag) + "_" + str(i) + "[0];"
+                    self.btb_tag) + "_" + str(i) + "[0];"
         tb_top += "\n\tend\n\telse\n\tbegin\n"
         # tb_top += "\tintf.{0} = {1}.{0};\n\tintf.{2} = {1}.{" \
         #           "2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {1}.{" \
@@ -398,18 +396,18 @@ end
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_tag) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_entry) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.valids) + "[" + str(i) + "] = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_tag) + "_" + str(i) + "[0];"
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + "[0];"
         tb_top = tb_top + """\n\tend
 end
 
