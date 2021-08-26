@@ -8,6 +8,7 @@ import utg
 from utg.utils import load_yaml, create_plugins, generate_test_list
 from utg.utils import create_linker, create_model_test_h
 from utg.utils import join_yaml_reports, generate_sv_components
+from utg.utils import list_of_modules
 from yapsy.PluginManager import PluginManager
 from utg.log import logger
 from utg.__init__ import __version__
@@ -56,7 +57,8 @@ def generate_tests(work_dir,
 
     if modules == ['all']:
         logger.debug('Checking {0} for modules'.format(modules_dir))
-        modules = [f.name for f in os.scandir(modules_dir) if f.is_dir()]
+        modules = list_of_modules(modules_dir)
+        del modules[-1]
     logger.debug('The modules are {0}'.format(modules))
 
     test_list_dict = {}
@@ -161,7 +163,8 @@ def generate_sv(work_dir, config_file, modules, modules_dir, alias_file, verbose
 
     if modules == ['all']:
         logger.debug('Checking {0} for modules'.format(modules_dir))
-        modules = [f.name for f in os.scandir(modules_dir) if f.is_dir()]
+        modules = list_of_modules(modules_dir)
+        del modules[-1]
 
     inp_yaml = load_yaml(config_file)
     logger.info('****** Generating Covergroups ******')
@@ -236,7 +239,8 @@ def validate_tests(modules, inp, work_dir, modules_dir, verbose='info'):
 
     if modules == ['all']:
         logger.debug('Checking {0} for modules'.format(modules_dir))
-        modules = [f.name for f in os.scandir(modules_dir) if f.is_dir()]
+        modules = list_of_modules(modules_dir)
+        del modules[-1]
     if work_dir:
         pass
     else:
