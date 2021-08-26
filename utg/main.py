@@ -32,10 +32,10 @@ from utg.utils import clean_cli_params, list_of_modules, info
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Provide a config.ini file's path. This runs utg based upon "
-                   "the parameters stored in the file. If not specified "
-                   "individual args/flags are to be passed through cli. In the"
-                   "case of conflict between cli and config.ini values, config"
-                   ".ini values will be chosen")
+              "the parameters stored in the file. If not specified "
+              "individual args/flags are to be passed through cli. In the"
+              "case of conflict between cli and config.ini values, config"
+              ".ini values will be chosen")
 @click.option('--dut_config',
               '-dc',
               multiple=False,
@@ -113,8 +113,9 @@ from utg.utils import clean_cli_params, list_of_modules, info
     "modules are: branch_predictor",
     # TODO: find a proper way to list all modules and display them
     type=str)
-def cli(verbose, clean, run_config, dut_config, work_dir, modules, gen_test, val_test,
-        list_modules, linker_dir, gen_test_list, gen_cvg, module_dir, alias_file):
+def cli(verbose, clean, run_config, dut_config, work_dir, modules, gen_test,
+        val_test, list_modules, linker_dir, gen_test_list, gen_cvg, module_dir,
+        alias_file):
     logger.level(verbose)
     info(__version__)
 
@@ -137,19 +138,21 @@ def cli(verbose, clean, run_config, dut_config, work_dir, modules, gen_test, val
         val_test = config['utg']['val_test']
         gen_cvg = config['utg']['gen_cvg']
 
-    if list_modules:
-        logger.info('Module Options: ' + str(list_of_modules(module_dir)))
     modules, err = clean_cli_params(config_file=dut_config,
                                     module=modules,
                                     gen_test=gen_test,
                                     val_test=val_test,
                                     module_dir=module_dir,
                                     gen_cvg=gen_cvg,
-                                    clean=clean)
+                                    clean=clean,
+                                    alias_file=alias_file,
+                                    list_modules=list_modules)
     if err[0]:
         logger.error(err[1])
         exit(0)
 
+    if list_modules:
+        logger.info('Module Options: ' + str(list_of_modules(module_dir)))
     # cleaned parameters to be logged
     # logger.debug('verbose    : {0}'.format(verbose))
     # logger.debug('dut_config_file: {0}'.format(dut_config))
