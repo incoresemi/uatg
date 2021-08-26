@@ -10,6 +10,9 @@ from yapsy.PluginManager import PluginManager
 
 def list_of_modules(module_dir):
     modules = [f.name for f in os.scandir(module_dir) if f.is_dir()]
+    for i in modules:
+        if not (i[0].isalpha()):
+            modules.remove(i)
     return modules + ['all']
 
 
