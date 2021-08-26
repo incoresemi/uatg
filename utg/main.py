@@ -137,19 +137,20 @@ def cli(verbose, clean, run_config, dut_config, work_dir, modules, gen_test, val
         val_test = config['utg']['val_test']
         gen_cvg = config['utg']['gen_cvg']
 
-    if list_modules:
-        logger.info('Module Options: ' + str(list_of_modules(module_dir)))
     modules, err = clean_cli_params(config_file=dut_config,
                                     module=modules,
                                     gen_test=gen_test,
                                     val_test=val_test,
                                     module_dir=module_dir,
                                     gen_cvg=gen_cvg,
-                                    clean=clean)
+                                    clean=clean,
+                                    alias_file=alias_file)
     if err[0]:
         logger.error(err[1])
         exit(0)
-
+    
+    if list_modules:
+        logger.info('Module Options: ' + str(list_of_modules(module_dir)))
     # cleaned parameters to be logged
     # logger.debug('verbose    : {0}'.format(verbose))
     # logger.debug('dut_config_file: {0}'.format(dut_config))

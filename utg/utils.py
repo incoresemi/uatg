@@ -20,8 +20,19 @@ def info(version):
     logger.info('All Rights Reserved.')
 
 
+def load_yaml(foo):
+    yaml = YAML(typ="rt")
+    yaml.default_flow_style = False
+    yaml.allow_unicode = True
+    try:
+        with open(foo, "r") as file:
+            return yaml.load(file)
+    except ruamel.yaml.constructor.DuplicateKeyError as msg:
+        logger.error('error: {0}'.format(msg))
+
+
 def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
-                     gen_cvg, clean):
+                     gen_cvg, clean, alias_file):
     error = (False, '')
     temp_list = []
 
@@ -39,6 +50,13 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                            f'exist.\nExiting utg. '
                            f'Fix the issue and Retry.')
             return temp_list, error
+    
+    if gen_cvg and not alias_file:
+        error = (True,
+                 'Cannot generate covergroups without the alias file\n'
+                 'Please provide the alias file with the -af flag'
+                 ' and try again')
+        return temp_list, error
 
     if (gen_test or val_test or clean) and (module_dir is None):
         error = (True, 'The --module_dir/-md option is missing.\n'
@@ -56,7 +74,7 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                  'If you are trying to validate tests, remove the'
                  'generate_covergroups as well as generate_tests option'
                  'and try again')
-
+        
     available_modules = list_of_modules(module_dir)
 
     try:
@@ -76,17 +94,6 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
         module = ['all']
 
     return module, error
-
-
-def load_yaml(foo):
-    yaml = YAML(typ="rt")
-    yaml.default_flow_style = False
-    yaml.allow_unicode = True
-    try:
-        with open(foo, "r") as file:
-            return yaml.load(file)
-    except ruamel.yaml.constructor.DuplicateKeyError as msg:
-        logger.error('error: {0}'.format(msg))
 
 
 def create_plugins(plugins_path):
