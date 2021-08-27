@@ -63,7 +63,7 @@ Install Python
         pip 20.1 from <user-path>.local/lib/python3.7/site-packages/pip (python 3.7)
 
 Using CONDA Virtualenv for Python 
----------------------------
+---------------------------------
 
 UTG officially requires python-3.7, even though it might be compatible with the other versions. Hence we would recommend using python-3.7.
 
@@ -92,8 +92,8 @@ You can check the version in the **same shell**::
 
 .. _install_utg:
 
-Install UArchTest
-=================
+Install UTG
+===========
 
 .. tabs:: 
 
@@ -155,8 +155,8 @@ Install UArchTest
        $ pip3 install utg==1.x.x
 
 
-Test UArchTest
-==============
+Test UTG
+========
 
 Once you have installed UArchTest you can execute ``utg --help`` to print the help routine:
 
@@ -277,7 +277,7 @@ Change Neccesary Target Env Files
 - In addition to that, the framework requires an additional dut_config.yaml file, which should summarize the configuration of the DUT under test. The values obtained from this YAML will be used to customize the tests for the DUT.
 
 Running UTG
-=================
+===========
 
 .. note:: utg is interchangeably denoted as 'framework' in this documentation.
 
