@@ -5,7 +5,7 @@
 Overview
 ========
 
-``UTG`` is a framework built at InCore to generate RISC-V Assembly tests for functionally verfiying the cores designed in house. ``UTG`` generates the Assembly files by invoking several python scripts containing the Assembly syntax for the specific tests. 
+Architectural Test Generator - ``UTG`` is a framework built at InCore to generate RISC-V Assembly tests for functional verification of the cores designed in house. ``UTG`` generates the Assembly files by invoking several python scripts containing the Assembly syntax for the specific tests.
 
 Micro-arch-tests also supports the generation of SV Coverpoints for the test using the syntax specified in the python scripts generating the test. 
 
