@@ -291,7 +291,7 @@ class sv_components:
         super().__init__()
         self._btb_depth = 32
         #config = ConfigParser()
-        config = load_yaml(config_file)
+        config = config_file
         self.rg_initialize = config['bpu']['reg']['bpu_rg_initialize']
         self.rg_allocate = config['bpu']['reg']['bpu_rg_allocate']
         self.btb_tag = config['bpu']['wire']['bpu_btb_tag']
