@@ -42,6 +42,12 @@ def cli():
                                 case_sensitive=False))
 @cli.command()
 def clean(module_dir, work_dir, verbose):
+    """
+    Removes ASM, SV and other generated files from the work directory, and
+    removes .yapsy plugins from module directory.\n
+    Requires: -wd, --work_dir\n
+    Optional: -md, --module_dir; -v, --verbose
+    """
     logger.level(verbose)
     info(__version__)
     logger.debug('Invoking clean_dirs')
@@ -121,6 +127,16 @@ def clean(module_dir, work_dir, verbose):
 @cli.command()
 def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
              gen_test_list, work_dir, modules, verbose):
+    """
+    Generates tests, cover-groups for a list of modules corresponding to the DUT
+    defined in dut_config inside the work_dir. Can also generate the test_list
+    needed to execute them on RiverCore.\n
+    Requires: -dc, --dut_config, -md, --module_dir; -wd, --work_dir\n
+    Depends : (-gc, --gen_cvg -> -af, --alias_file)\n
+    Optional: -gc, --gen_cvg; -t, --gen_test_list; -ld, --linker_dir;\n
+              -m, --modules; -v, --verbose
+    """
+
     logger.level(verbose)
     info(__version__)
 
@@ -154,6 +170,10 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
                    "Required Parameter")
 @cli.command()
 def list_modules(module_dir):
+    """
+    Provides the list of modules supported from the module_dir\n
+    Requires: -md, --module_dir
+    """
     print(f'Supported Modules : {list_of_modules(module_dir=module_dir)}')
 
 
@@ -172,7 +192,7 @@ def list_modules(module_dir):
                    "case of conflict between cli and config.ini values, config"
                    ".ini values will be chosen")
 @cli.command()
-def run_from_config(run_config):
+def from_config(run_config):
     """Provide a config.ini file's path. This runs utg based upon the
     parameters stored in the file. If not specified individual args/flags are
     to be passed through cli. In the case of conflict between cli and
