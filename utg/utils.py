@@ -5,7 +5,6 @@ import glob
 import utg
 from utg.log import logger
 from yapsy.PluginManager import PluginManager
-#from configparser import ConfigParser
 
 
 def list_of_modules(module_dir):
