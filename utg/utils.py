@@ -9,10 +9,11 @@ from yapsy.PluginManager import PluginManager
 
 def list_of_modules(module_dir):
     modules = [f.name for f in os.scandir(module_dir) if f.is_dir()]
+    modules_str = ''
     for i in modules:
-        if not (i[0].isalpha()):
-            modules.remove(i)
-    return modules + ['all']
+        if i[0].isalpha():
+            modules_str += i + ', '
+    return modules_str + 'all'
 
 
 def info(version):
@@ -23,42 +24,43 @@ def info(version):
 
 
 def load_yaml(foo):
-    yaml = YAML(typ="safe")
-    yaml.default_flow_style = False
-    yaml.allow_unicode = True
-    try:
-        with open(foo, "r") as file:
-            return yaml.load(file)
-    except ruamel.yaml.constructor.DuplicateKeyError as msg:
-        logger.error('error: {0}'.format(msg))
+    if foo.endswith('.yaml') or foo.endswith('.yml'):
+        yaml = YAML(typ="safe")
+        yaml.default_flow_style = False
+        yaml.allow_unicode = True
+        try:
+            with open(foo, "r") as file:
+                return yaml.load(file)
+        except ruamel.yaml.constructor.DuplicateKeyError as msg:
+            logger.error(f'error: {msg}')
+    else:
+        logger.error(f'error: {foo} is not a valid yaml file')
+        exit('INVALID_FILE')
 
 
 def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                      gen_cvg, clean, alias_file, list_modules):
     error = (False, '')
-    temp_list = []
     yaml = YAML(typ="safe")
-    temp_yaml = yaml.load("""a: \n""")
-
+    dut_yaml = load_yaml(config_file)
     if (gen_test or val_test) and config_file is None:
         error = (True, 'The --config_file/-cf option is missing.\n'
                  'Exiting utg. Fix the issue and Retry.')
-        return temp_list, error, temp_yaml, temp_yaml
+        return error
 
     if config_file is not None:
-        if config_file[-5:] == '.yaml' or config_file[-5:] == '.yml':
-            try:
-                dut_yaml = load_yaml(config_file)
-            except Exception as e:
-                error = (True,
-                         f'The specified config file {config_file} does not '
-                         f'exist or is not in the YAML format.\nExiting utg. '
-                         f'Fix the issue and Retry.')
-                return temp_list, error, temp_yaml, temp_yaml
+        try:
+            dut_yaml = load_yaml(config_file)
+        except Exception as e:
+            error = (True,
+                     f'The specified config file {config_file} does not '
+                     f'exist or is not in the YAML format.\nExiting utg. '
+                     f'Fix the issue and Retry.')
+            return error
         else:
             error = (True, 'The specified dut_config file does not have a .yaml'
                      ' extension. Please choose a YAML file')
-            return temp_list, error, temp_yaml, temp_yaml
+            return error
 
     if alias_file is not None:
         if alias_file[-5:] == '.yaml' or alias_file[-5:] == '.yml':
@@ -69,30 +71,30 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                          f'The specified alias file {alias_file} does not '
                          f'exist or is not in the YAML format.\nExiting utg. '
                          f'Fix the issue and Retry.')
-                return temp_list, error, temp_yaml, temp_yaml
+                return error
         else:
             error = (True,
                      'The specified alias_config file does not have a .yaml'
                      ' extension. Please choose a YAML file')
-            return temp_list, error, temp_yaml, temp_yaml
+            return error
     if gen_cvg and not alias_file:
         error = (True, 'Cannot generate covergroups without the alias file\n'
                  'Please provide the alias file with the -af flag'
                  ' and try again')
-        return temp_list, error, temp_yaml, temp_yaml
+        return error
 
     if (gen_test or val_test or clean or list_modules) and (module_dir is None):
 
         error = (True, 'The --module_dir/-md option is missing.\n'
                  'Exiting utg. Fix the issue and Retry.')
-        return temp_list, error, temp_yaml, temp_yaml
+        return error
 
     if (module_dir is not None) and not os.path.isdir(module_dir):
 
         error = (True, 'The specified module directory does not exist.\n'
                  'Exiting utg. Fix the issue and Retry.')
 
-        return temp_list, error, temp_yaml, temp_yaml
+        return error
 
     if gen_cvg and not gen_test:
         error = (True,
@@ -100,7 +102,7 @@ def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
                  'If you are trying to validate tests, remove the'
                  'generate_covergroups as well as generate_tests option'
                  'and try again')
-        return temp_list, error, temp_yaml, temp_yaml
+        return error
 
     available_modules = list_of_modules(module_dir)
 
