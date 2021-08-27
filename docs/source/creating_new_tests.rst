@@ -118,8 +118,9 @@ The step-by-step functioning of check log is explained as follows
    patterns, frame the regex pattern and store it in the file with
    suitable naming.
 
-Example Test
-------------
+==================
+Example Test Class
+==================
 
 A generic test ``test_name.py`` is written in this manner. This test
 uses the parameters from the Chromite's default configuration. We write
