@@ -138,15 +138,16 @@ def cli(verbose, clean, run_config, dut_config, work_dir, modules, gen_test,
         val_test = config['utg']['val_test']
         gen_cvg = config['utg']['gen_cvg']
 
-    modules, err = clean_cli_params(config_file=dut_config,
-                                    module=modules,
-                                    gen_test=gen_test,
-                                    val_test=val_test,
-                                    module_dir=module_dir,
-                                    gen_cvg=gen_cvg,
-                                    clean=clean,
-                                    alias_file=alias_file,
-                                    list_modules=list_modules)
+    modules, err, dut_yaml, alias_yaml = clean_cli_params(
+        config_file=dut_config,
+        module=modules,
+        gen_test=gen_test,
+        val_test=val_test,
+        module_dir=module_dir,
+        gen_cvg=gen_cvg,
+        clean=clean,
+        alias_file=alias_file,
+        list_modules=list_modules)
     if err[0]:
         logger.error(err[1])
         exit(0)
@@ -167,23 +168,23 @@ def cli(verbose, clean, run_config, dut_config, work_dir, modules, gen_test,
         generate_tests(work_dir=work_dir,
                        linker_dir=linker_dir,
                        modules=modules,
-                       config_file=dut_config,
+                       config_file=dut_yaml,
                        test_list=gen_test_list,
                        modules_dir=module_dir,
                        verbose=verbose)
     if gen_cvg:
         logger.debug("Invoking SV generation")
         generate_sv(work_dir=work_dir,
-                    config_file=dut_config,
+                    config_file=dut_yaml,
                     modules=modules,
                     modules_dir=module_dir,
                     verbose=verbose,
-                    alias_file=alias_file)
+                    alias_file=alias_yaml)
 
     if val_test:
         logger.debug('Invoking val_test')
         validate_tests(modules=modules,
-                       inp=dut_config,
+                       config_file=dut_yaml,
                        work_dir=work_dir,
                        modules_dir=module_dir,
                        verbose=verbose)
