@@ -4,102 +4,102 @@
 import click
 from configparser import ConfigParser
 from utg.log import logger
-from utg.test_generator import generate_tests, clean_dirs, validate_tests, generate_sv
+from utg.test_generator import generate_tests, clean_dirs, validate_tests, \
+    generate_sv
 from utg.__init__ import __version__
-from utg.utils import clean_cli_params, list_of_modules, info
+from utg.utils import list_of_modules, info, load_yaml
 
 
-@click.command()
-@click.version_option(prog_name="RISC-V Micro-Architectural Test Generator",
-                      version=__version__)
-@click.option('--verbose',
-              '-v',
-              default='info',
-              help='Set verbose level for debugging',
-              type=click.Choice(['info', 'error', 'debug'],
-                                case_sensitive=False))
-@click.option(
-    '--clean',
-    '-cl',
-    is_flag=True,
-    help='clean flag is set if generated files needs to be cleaned.'
-    'Presently, __pycache__, tests/ folders are removed along '
-    'with yapsy-plugins',
-)
-@click.option('--run_config',
-              '-rc',
-              multiple=False,
-              required=False,
-              type=click.Path(exists=True, resolve_path=True, readable=True),
-              help="Provide a config.ini file's path. This runs utg based upon "
-              "the parameters stored in the file. If not specified "
-              "individual args/flags are to be passed through cli. In the"
-              "case of conflict between cli and config.ini values, config"
-              ".ini values will be chosen")
-@click.option('--dut_config',
-              '-dc',
-              multiple=False,
-              required=False,
-              type=click.Path(exists=True, resolve_path=True, readable=True),
-              help="Path to the yaml file containing DUT configuration. "
-              "Needed to generate/validate tests")
+@click.group()
+@click.version_option(version=__version__)
+def cli():
+    """RISC-V Micro-Architectural Test Generator"""
+
+# -----------------
+
+
+@click.version_option(version=__version__)
 @click.option('--module_dir',
               '-md',
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Absolute Path to the directory containing the python files"
-              " which generate the assembly tests. "
-              "Required Parameter")
+                   " which generate the assembly tests. "
+                   "Required Parameter")
 @click.option('--work_dir',
               '-wd',
               multiple=False,
-              required=False,
+              required=True,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the working directory where generated files will be"
-              " stored.")
+                   " stored.")
+@click.option('--verbose',
+              '-v',
+              default='info',
+              help='Set verbose level for debugging',
+              type=click.Choice(['info', 'error', 'debug'],
+                                case_sensitive=False))
+@cli.command()
+def clean(module_dir, work_dir, verbose):
+    logger.level(verbose)
+    info(__version__)
+    logger.debug('Invoking clean_dirs')
+    clean_dirs(work_dir=work_dir, modules_dir=module_dir, verbose=verbose)
+
+
+# -------------------------
+
+
+@click.version_option(version=__version__)
 @click.option('--alias_file',
               '-af',
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the aliasing file containing containing BSV alias "
-              "names.")
-@click.option('--gen_test',
-              '-gt',
+                   "names.")
+@click.option('--dut_config',
+              '-dc',
+              multiple=False,
+              required=True,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the yaml file containing DUT configuration. "
+                   "Needed to generate/validate tests")
+@click.option('--module_dir',
+              '-md',
+              multiple=False,
+              required=True,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Absolute Path to the directory containing the python files"
+                   " which generate the assembly tests. "
+                   "Required Parameter")
+@click.option('--gen_cvg',
+              '-gc',
               is_flag=True,
-              help='gen_test flag is set if tests are to be generated. '
-              'Generates ASM files and SV Files')
+              required=False,
+              help='Set this flag to generate the Covergroups')
 @click.option(
-    '--val_test',
-    '-vt',
+    '--gen_test_list',
+    '-t',
     is_flag=True,
-    help='val_test flag is set if generated tests are to be validated'
-    '. Validates log files & SV cover-points',
-)
-@click.option(
-    '--list_modules',
-    '-lm',
-    is_flag=True,
-    help='displays all the modules that are presently supported by the '
-    'framework',
-)
+    required=False,
+    help='Set this flag if a test-list.yaml is to be generated by utg. '
+         'utg does not generate the test_list by default.')
 @click.option('--linker_dir',
               '-ld',
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
-              help="Path to the linkerfile.")
-@click.option(
-    '--gen_test_list',
-    '-t',
-    is_flag=True,
-    help='Set this flag if a test-list.yaml is to be generated by utg. '
-    'utg does not generate the test_list by default.')
-@click.option('--gen_cvg',
-              '-gc',
-              is_flag=True,
-              help='Set this flag to generate the Covergroups')
+              help="Path to the working directory where generated files will be"
+                   " stored.")
+@click.option('--work_dir',
+              '-wd',
+              multiple=False,
+              required=True,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the working directory where generated files will be"
+                   " stored.")
 @click.option(
     '--modules',
     '-m',
@@ -107,87 +107,146 @@ from utg.utils import clean_cli_params, list_of_modules, info
     multiple=False,
     is_flag=False,
     help="Enter a list of modules as a string in a comma separated "
-    "format.\n--module 'branch_predictor, decoder'\nHere "
-    "decoder and branch_predictor are chosen\nIf all module "
-    "are to be selected use keyword 'all'.\n Presently supported"
-    "modules are: branch_predictor",
+         "format.\n--module 'branch_predictor, decoder'\nHere "
+         "decoder and branch_predictor are chosen\nIf all module "
+         "are to be selected use keyword 'all'.\n Presently supported"
+         "modules are: branch_predictor",
     # TODO: find a proper way to list all modules and display them
     type=str)
-def cli(verbose, clean, run_config, dut_config, work_dir, modules, gen_test,
-        val_test, list_modules, linker_dir, gen_test_list, gen_cvg, module_dir,
-        alias_file):
+@click.option('--verbose',
+              '-v',
+              default='info', help='Set verbose level for debugging',
+              type=click.Choice(['info', 'error', 'debug'],
+                                case_sensitive=False))
+@cli.command()
+def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
+             gen_test_list, work_dir, modules, verbose):
     logger.level(verbose)
     info(__version__)
 
-    if run_config:
-        config = ConfigParser()
-        config.read(run_config)
-        verbose = config['utg']['verbose']
-        clean = config['utg']['clean']
-        modules = config['utg']['modules']
+    if gen_cvg is None and alias_file:
+        logger.error('Cant generate cover-groups without alias_file')
+        exit('GEN_CVG without ALIAS_FILE')
 
-        module_dir = config['utg']['module_dir']
-        work_dir = config['utg']['work_dir']
-        linker_dir = config['utg']['linker_dir']
-
-        dut_config = config['utg']['dut_config']
-        alias_file = config['utg']['alias_file']
-
-        gen_test_list = config['utg']['gen_test_list']
-        gen_test = config['utg']['gen_test']
-        val_test = config['utg']['val_test']
-        gen_cvg = config['utg']['gen_cvg']
-
-    modules, err, dut_yaml, alias_yaml = clean_cli_params(
-        config_file=dut_config,
-        module=modules,
-        gen_test=gen_test,
-        val_test=val_test,
-        module_dir=module_dir,
-        gen_cvg=gen_cvg,
-        clean=clean,
-        alias_file=alias_file,
-        list_modules=list_modules)
-    if err[0]:
-        logger.error(err[1])
-        exit(0)
-
-    if list_modules:
-        logger.info('Module Options: ' + str(list_of_modules(module_dir)))
-    # cleaned parameters to be logged
-    # logger.debug('verbose    : {0}'.format(verbose))
-    # logger.debug('dut_config_file: {0}'.format(dut_config))
-    # logger.debug('work_dir   : {0}'.format(work_dir))
-    # logger.debug('modules    : {0}'.format(module))
-    # logger.debug('gen_test   : {0}'.format(gen_test))
-    # logger.debug('val_test   : {0}'.format(val_test))
-    # logger.debug('clean      : {0}'.format(clean))
-
-    if gen_test:
-        logger.debug('Invoking gen_test')
-        generate_tests(work_dir=work_dir,
-                       linker_dir=linker_dir,
-                       modules=modules,
-                       config_file=dut_yaml,
-                       test_list=gen_test_list,
-                       modules_dir=module_dir,
-                       verbose=verbose)
+    dut_yaml = load_yaml(dut_config)
+    alias_yaml = load_yaml(alias_file)
+    # TODO: Change config_file, alias_file parameter-names
+    generate_tests(work_dir=work_dir, linker_dir=linker_dir, modules=modules,
+                   config_file=dut_yaml, test_list=gen_test_list,
+                   modules_dir=module_dir, verbose=verbose)
     if gen_cvg:
-        logger.debug("Invoking SV generation")
-        generate_sv(work_dir=work_dir,
-                    config_file=dut_yaml,
-                    modules=modules,
-                    modules_dir=module_dir,
-                    verbose=verbose,
+        generate_sv(work_dir=work_dir, config_file=dut_yaml, modules=modules,
+                    modules_dir=module_dir, verbose=verbose,
                     alias_file=alias_yaml)
 
-    if val_test:
-        logger.debug('Invoking val_test')
-        validate_tests(modules=modules,
-                       config_file=dut_yaml,
-                       work_dir=work_dir,
-                       modules_dir=module_dir,
-                       verbose=verbose)
-    if clean:
-        logger.debug('Invoking clean_dirs')
-        clean_dirs(work_dir=work_dir, modules_dir=module_dir, verbose=verbose)
+
+# -------------------------
+
+
+@click.version_option(version=__version__)
+@click.option('--module_dir',
+              '-md',
+              multiple=False,
+              required=True,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Absolute Path to the directory containing the python files"
+                   " which generate the assembly tests. "
+                   "Required Parameter")
+@cli.command()
+def list_modules(module_dir):
+    print(f'Supported Modules : {list_of_modules(module_dir=module_dir)}')
+
+
+# -------------------------
+
+
+@click.version_option(version=__version__)
+@click.option('--run_config',
+              '-rc',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Provide a config.ini file's path. This runs utg based upon "
+                   "the parameters stored in the file. If not specified "
+                   "individual args/flags are to be passed through cli. In the"
+                   "case of conflict between cli and config.ini values, config"
+                   ".ini values will be chosen")
+@cli.command()
+def run_from_config(run_config):
+    """Provide a config.ini file's path. This runs utg based upon the
+    parameters stored in the file. If not specified individual args/flags are
+    to be passed through cli. In the case of conflict between cli and
+    config.ini values, config .ini values will be chosen """
+
+    config = ConfigParser()
+    config.read(run_config)
+    verbose = config['utg']['verbose']
+    clean = config['utg']['clean']
+    modules = config['utg']['modules']
+
+    module_dir = config['utg']['module_dir']
+    work_dir = config['utg']['work_dir']
+    linker_dir = config['utg']['linker_dir']
+
+    dut_config = config['utg']['dut_config']
+    alias_file = config['utg']['alias_file']
+
+    gen_test_list = config['utg']['gen_test_list']
+    gen_test = config['utg']['gen_test']
+    val_test = config['utg']['val_test']
+    gen_cvg = config['utg']['gen_cvg']
+
+
+# -------------------------
+
+
+@click.version_option(version=__version__)
+@click.option('--dut_config',
+              '-dc',
+              multiple=False,
+              required=False,
+              type=click.Path(resolve_path=True, readable=True),
+              help="Path to the yaml file containing DUT configuration. "
+                   "Needed to generate/validate tests")
+@click.option('--module_dir',
+              '-md',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Absolute Path to the directory containing the python files"
+                   " which generate the assembly tests. "
+                   "Required Parameter")
+@click.option('--work_dir',
+              '-wd',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the working directory where generated files will be"
+                   " stored.")
+@click.option(
+    '--modules',
+    '-m',
+    default='all',
+    multiple=False,
+    is_flag=False,
+    help="Enter a list of modules as a string in a comma separated "
+         "format.\n--module 'branch_predictor, decoder'\nHere "
+         "decoder and branch_predictor are chosen\nIf all module "
+         "are to be selected use keyword 'all'.\n Presently supported"
+         "modules are: branch_predictor",
+    # TODO: find a proper way to list all modules and display them
+    type=str)
+@click.option('--verbose',
+              '-v',
+              default='info',
+              help='Set verbose level for debugging',
+              type=click.Choice(['info', 'error', 'debug'],
+                                case_sensitive=False))
+@cli.command()
+def validate(dut_config, module_dir, work_dir, modules, verbose):
+    logger.level(verbose)
+    info(__version__)
+    dut_yaml = load_yaml(dut_config)
+    validate_tests(modules=modules, work_dir=work_dir, config_file=dut_yaml,
+                   modules_dir=module_dir, verbose=verbose)
+
