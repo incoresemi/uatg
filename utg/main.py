@@ -140,15 +140,37 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
     info(__version__)
 
     dut_dict = load_yaml(dut_config)
+
+    available_modules = list_of_modules(module_dir, verbose)
+
+    if 'all' in modules:
+        print("over here")
+        module = ['all']
+        print(module)
+    else:
+        try:
+            modules = modules.replace(' ', ',')
+            modules = modules.replace(', ', ',')
+            modules = modules.replace(' ,', ',')
+            module = list(set(modules.split(",")))
+            module.remove('')
+            module.sort()
+            print(module)
+        except ValueError:
+            pass
+        for i in module:
+            if i not in available_modules:
+                exit(f'Module {i} is not supported/unavailable.')
+
     generate_tests(work_dir=work_dir, linker_dir=linker_dir,
-                   modules_dir=module_dir, modules=modules,
+                   modules_dir=module_dir, modules=module,
                    config_dict=dut_dict, test_list=gen_test_list,
                    verbose=verbose)
     if gen_cvg:
         if alias_file is not None:
             alias_dict = load_yaml(alias_file)
             generate_sv(work_dir=work_dir, config_dict=dut_dict,
-                        modules_dir=module_dir, modules=modules,
+                        modules_dir=module_dir, modules=module,
                         alias_dict=alias_dict,
                         verbose=verbose)
         else:
