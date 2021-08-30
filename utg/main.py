@@ -117,7 +117,6 @@ def clean(module_dir, work_dir, verbose):
          "decoder and branch_predictor are chosen\nIf all module "
          "are to be selected use keyword 'all'.\n Presently supported"
          "modules are: branch_predictor",
-    # TODO: find a proper way to list all modules and display them
     type=str)
 @click.option('--verbose',
               '-v',
@@ -140,20 +139,21 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
     logger.level(verbose)
     info(__version__)
 
-    if gen_cvg is None and alias_file:
-        logger.error('Cant generate cover-groups without alias_file')
-        exit('GEN_CVG without ALIAS_FILE')
-
-    dut_yaml = load_yaml(dut_config)
-    alias_yaml = load_yaml(alias_file)
-    # TODO: Change config_file, alias_file parameter-names
-    generate_tests(work_dir=work_dir, linker_dir=linker_dir, modules=modules,
-                   config_file=dut_yaml, test_list=gen_test_list,
-                   modules_dir=module_dir, verbose=verbose)
+    dut_dict = load_yaml(dut_config)
+    generate_tests(work_dir=work_dir, linker_dir=linker_dir,
+                   modules_dir=module_dir, modules=modules,
+                   config_dict=dut_dict, test_list=gen_test_list,
+                   verbose=verbose)
     if gen_cvg:
-        generate_sv(work_dir=work_dir, config_file=dut_yaml, modules=modules,
-                    modules_dir=module_dir, verbose=verbose,
-                    alias_file=alias_yaml)
+        if alias_file is not None:
+            alias_dict = load_yaml(alias_file)
+            generate_sv(work_dir=work_dir, config_dict=dut_dict,
+                        modules_dir=module_dir, modules=modules,
+                        alias_dict=alias_dict,
+                        verbose=verbose)
+        else:
+            logger.error('Can not generate covergroups without alias_file.')
+            exit('GEN_CVG WITHOUT ALIAS_FILE')
 
 
 # -------------------------
@@ -174,15 +174,14 @@ def list_modules(module_dir):
     Provides the list of modules supported from the module_dir\n
     Requires: -md, --module_dir
     """
-    print(f'Supported Modules : {list_of_modules(module_dir=module_dir)}')
+    print(f'{list_of_modules(module_dir=module_dir)}')
 
 
 # -------------------------
 
 
-@click.version_option(version=__version__)
-@click.option('--run_config',
-              '-rc',
+@click.option('--config_file',
+              '-cf',
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
@@ -193,32 +192,60 @@ def list_modules(module_dir):
                    ".ini values will be chosen")
 @cli.command()
 def from_config(run_config):
-    """Provide a config.ini file's path. This runs utg based upon the
-    parameters stored in the file. If not specified individual args/flags are
-    to be passed through cli. In the case of conflict between cli and
-    config.ini values, config .ini values will be chosen """
+    """
+    This subcommand reads parameters from config.ini and runs utg based on the
+    values.\n
+    Optional: -cf, --config_file
+    """
 
     config = ConfigParser()
     config.read(run_config)
-    verbose = config['utg']['verbose']
-    clean = config['utg']['clean']
-    modules = config['utg']['modules']
 
-    module_dir = config['utg']['module_dir']
-    work_dir = config['utg']['work_dir']
-    linker_dir = config['utg']['linker_dir']
+    logger.level(config['utg']['verbose'])
 
-    dut_config = config['utg']['dut_config']
-    alias_file = config['utg']['alias_file']
-
-    gen_test_list = config['utg']['gen_test_list']
-    gen_test = config['utg']['gen_test']
-    val_test = config['utg']['val_test']
-    gen_cvg = config['utg']['gen_cvg']
-
+    if config['utg']['clean']:
+        logger.debug('Invoking clean_dirs')
+        clean_dirs(work_dir=config['utg']['work_dir'],
+                   modules_dir=config['utg']['module_dir'],
+                   verbose=config['utg']['verbose'])
+    if config['utg']['gen_test']:
+        dut_dict = load_yaml(config['utg']['dut_config'])
+        generate_tests(work_dir=config['utg']['work_dir'],
+                       linker_dir=config['utg']['linker_dir'],
+                       modules_dir=config['utg']['module_dir'],
+                       modules=config['utg']['modules'],
+                       config_dict=dut_dict,
+                       test_list=config['utg']['gen_test_list'],
+                       verbose=config['utg']['verbose'])
+    if config['utg']['gen_cvg']:
+        dut_dict = load_yaml(config['utg']['dut_config'])
+        alias_dict = load_yaml(config['utg']['alias_file'])
+        generate_sv(work_dir=config['utg']['work_dir'],
+                    modules=config['utg']['modules'],
+                    modules_dir=config['utg']['module_dir'],
+                    config_dict=dut_dict,
+                    alias_dict=alias_dict,
+                    verbose=config['utg']['verbose'])
+    if config['utg']['val_test']:
+        dut_dict = load_yaml(config['utg']['dut_config'])
+        validate_tests(modules=config['utg']['modules'],
+                       work_dir=config['utg']['work_dir'],
+                       config_dict=dut_dict,
+                       modules_dir=config['utg']['module_dir'],
+                       verbose=config['utg']['verbose'])
 
 # -------------------------
 
+
+@cli.command()
+def setup():
+    """
+    Setups template files for config.ini, dut_config.yaml and aliasing.yaml\n
+    """
+    print(f'Files created')
+
+
+# -------------------------
 
 @click.version_option(version=__version__)
 @click.option('--dut_config',
@@ -254,7 +281,6 @@ def from_config(run_config):
          "decoder and branch_predictor are chosen\nIf all module "
          "are to be selected use keyword 'all'.\n Presently supported"
          "modules are: branch_predictor",
-    # TODO: find a proper way to list all modules and display them
     type=str)
 @click.option('--verbose',
               '-v',
@@ -267,6 +293,5 @@ def validate(dut_config, module_dir, work_dir, modules, verbose):
     logger.level(verbose)
     info(__version__)
     dut_yaml = load_yaml(dut_config)
-    validate_tests(modules=modules, work_dir=work_dir, config_file=dut_yaml,
+    validate_tests(modules=modules, work_dir=work_dir, config_dict=dut_yaml,
                    modules_dir=module_dir, verbose=verbose)
-
