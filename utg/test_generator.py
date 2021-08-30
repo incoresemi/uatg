@@ -14,7 +14,6 @@ from utg.log import logger
 
 # from utg.__init__ import __version__
 # from utg.utils import load_yaml
-
 '''
 File directories naming convention:
     uarch_dir = 'modules/'                 utg/modules/
@@ -45,8 +44,7 @@ def generate_tests(work_dir,
     os.makedirs(work_dir, exist_ok=True)
 
     logger.level(verbose)
-    
-    
+
     logger.info('utg dir is {0}'.format(uarch_dir))
     logger.info('work_dir is {0}'.format(work_dir))
 
@@ -169,11 +167,11 @@ def generate_sv(work_dir,
 
     if modules == ['all']:
         logger.debug('Checking {0} for modules'.format(modules_dir))
-        modules = list_of_modules(modules_dir, verbose)   
+        modules = list_of_modules(modules_dir, verbose)
 
     inp_yaml = config_dict
     logger.info('****** Generating Covergroups ******')
-    
+
     sv_dir = os.path.join(work_dir, 'sv_top')
     os.makedirs(sv_dir, exist_ok=True)
 
@@ -190,7 +188,7 @@ def generate_sv(work_dir,
         logger.debug('Generating CoverPoints for {0}'.format(module))
 
         module_dir = os.path.join(modules_dir, module)
-        
+
         try:
             module_params = inp_yaml[module]
         except KeyError:
@@ -198,7 +196,6 @@ def generate_sv(work_dir,
             #                 "ot in the dut config_file",format(module))
             module_params = {}
 
-        
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
