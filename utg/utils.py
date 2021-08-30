@@ -2,18 +2,24 @@ import ruamel
 from ruamel.yaml import YAML
 import os
 import glob
-import utg
 from utg.log import logger
-from yapsy.PluginManager import PluginManager
+
+
+# import utg
+# from yapsy.PluginManager import PluginManager
 
 
 def list_of_modules(module_dir):
-    modules = [f.name for f in os.scandir(module_dir) if f.is_dir()]
-    modules_str = ''
-    for i in modules:
-        if i[0].isalpha():
-            modules_str += i + ', '
-    return modules_str + 'all'
+    if os.path.exists(os.path.join(module_dir, 'index.yaml')):
+        modules = load_yaml(os.path.join(module_dir, 'index.yaml'))
+        module_str = "Supported modules:\n"
+        for key, value in modules.items():
+            if value is not None:
+                module_str += '\t' + key + '\n'
+        return module_str
+    else:
+        logger.error(f"index.yaml not found in {module_dir}")
+        exit("FILE_NOT_FOUND")
 
 
 def info(version):
@@ -38,91 +44,89 @@ def load_yaml(foo):
         exit('INVALID_FILE')
 
 
-def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
-                     gen_cvg, clean, alias_file, list_modules):
-    error = (False, '')
-    yaml = YAML(typ="safe")
-    dut_yaml = load_yaml(config_file)
-    if (gen_test or val_test) and config_file is None:
-        error = (True, 'The --config_file/-cf option is missing.\n'
-                 'Exiting utg. Fix the issue and Retry.')
-        return error
-
-    if config_file is not None:
-        try:
-            dut_yaml = load_yaml(config_file)
-        except Exception as e:
-            error = (True,
-                     f'The specified config file {config_file} does not '
-                     f'exist or is not in the YAML format.\nExiting utg. '
-                     f'Fix the issue and Retry.')
-            return error
-        else:
-            error = (True, 'The specified dut_config file does not have a .yaml'
-                     ' extension. Please choose a YAML file')
-            return error
-
-    if alias_file is not None:
-        if alias_file[-5:] == '.yaml' or alias_file[-5:] == '.yml':
-            try:
-                alias_yaml = load_yaml(alias_file)
-            except Exception as e:
-                error = (True,
-                         f'The specified alias file {alias_file} does not '
-                         f'exist or is not in the YAML format.\nExiting utg. '
-                         f'Fix the issue and Retry.')
-                return error
-        else:
-            error = (True,
-                     'The specified alias_config file does not have a .yaml'
-                     ' extension. Please choose a YAML file')
-            return error
-    if gen_cvg and not alias_file:
-        error = (True, 'Cannot generate covergroups without the alias file\n'
-                 'Please provide the alias file with the -af flag'
-                 ' and try again')
-        return error
-
-    if (gen_test or val_test or clean or list_modules) and (module_dir is None):
-
-        error = (True, 'The --module_dir/-md option is missing.\n'
-                 'Exiting utg. Fix the issue and Retry.')
-        return error
-
-    if (module_dir is not None) and not os.path.isdir(module_dir):
-
-        error = (True, 'The specified module directory does not exist.\n'
-                 'Exiting utg. Fix the issue and Retry.')
-
-        return error
-
-    if gen_cvg and not gen_test:
-        error = (True,
-                 'Cannot generate covergroups without generating the tests\n'
-                 'If you are trying to validate tests, remove the'
-                 'generate_covergroups as well as generate_tests option'
-                 'and try again')
-        return error
-
-    available_modules = list_of_modules(module_dir)
-
-    try:
-        module = module.replace(' ', ',')
-        module = module.replace(', ', ',')
-        module = module.replace(' ,', ',')
-        module = list(set(module.split(",")))
-        module.remove('')
-        module.sort()
-    except ValueError:
-        pass
-    for i in module:
-        if i not in available_modules:
-            error = (True, 'Module {0} is not supported/unavailable.'.format(i))
-
-    if 'all' in module:
-        module = ['all']
-
-    return module, error, dut_yaml, alias_yaml
+# def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
+#                      gen_cvg, clean, alias_file, list_modules):
+#     error = (False, '')
+#     dut_yaml = load_yaml(config_file)
+#     if (gen_test or val_test) and config_file is None:
+#         error = (True, 'The --config_file/-cf option is missing.\n'
+#                        'Exiting utg. Fix the issue and Retry.')
+#         return error
+#
+#     if config_file is not None:
+#         try:
+#             dut_yaml = load_yaml(config_file)
+#         except Exception:
+#             error = (True,
+#                      f'The specified config file {config_file} does not '
+#                      f'exist or is not in the YAML format.\nExiting utg. '
+#                      f'Fix the issue and Retry.')
+#             return error
+#         else:
+#             error = (True, 'The specified dut_config file does not have a '
+#                            '.yaml extension. Please choose a YAML file')
+#             return error
+#
+#     if alias_file is not None:
+#         if alias_file[-5:] == '.yaml' or alias_file[-5:] == '.yml':
+#             try:
+#                 alias_yaml = load_yaml(alias_file)
+#             except Exception as e:
+#                 error = (True,
+#                          f'The specified alias file {alias_file} does not '
+#                          f'exist or is not in the YAML format.\nExiting utg. '
+#                          f'Fix the issue and Retry.')
+#                 return error
+#         else:
+#             error = (True,
+#                      'The specified alias_config file does not have a .yaml'
+#                      ' extension. Please choose a YAML file')
+#             return error
+#     if gen_cvg and not alias_file:
+#         error = (True, 'Cannot generate covergroups without the alias file\n'
+#                        'Please provide the alias file with the -af flag'
+#                        ' and try again')
+#         return error
+#
+#     if (gen_test or val_test or clean or list_modules) and
+#     (module_dir is None):
+#         error = (True, 'The --module_dir/-md option is missing.\n'
+#                        'Exiting utg. Fix the issue and Retry.')
+#         return error
+#
+#     if (module_dir is not None) and not os.path.isdir(module_dir):
+#         error = (True, 'The specified module directory does not exist.\n'
+#                        'Exiting utg. Fix the issue and Retry.')
+#
+#         return error
+#
+#     if gen_cvg and not gen_test:
+#         error = (True,
+#                  'Cannot generate covergroups without generating the tests\n'
+#                  'If you are trying to validate tests, remove the'
+#                  'generate_covergroups as well as generate_tests option'
+#                  'and try again')
+#         return error
+#
+#     available_modules = list_of_modules(module_dir)
+#
+#     try:
+#         module = module.replace(' ', ',')
+#         module = module.replace(', ', ',')
+#         module = module.replace(' ,', ',')
+#         module = list(set(module.split(",")))
+#         module.remove('')
+#         module.sort()
+#     except ValueError:
+#         pass
+#     for i in module:
+#         if i not in available_modules:
+#             error = (True, f'Module {i} is not supported/unavailable.')
+#
+#     if 'all' in module:
+#         module = ['all']
+#
+#     return module, error, dut_yaml, alias_yaml
 
 
 def create_plugins(plugins_path):
@@ -161,7 +165,7 @@ def generate_test_list(asm_dir, uarch_dir, test_list):
             'linker_args'] = '-static -nostdlib -nostartfiles -lm -lgcc -T'
         test_list[base_key]['linker_file'] = target_dir + '/' + 'link.ld'
         test_list[base_key][
-            'asm_file'] = asm_dir + '/' + base_key + '/' + base_key + '.S'
+            'asm_file'] = os.path.join(asm_dir, base_key, base_key + '.S')
         test_list[base_key]['include'] = [env_dir, target_dir]
         test_list[base_key]['compile_macros'] = ['XLEN=64']
         test_list[base_key]['extra_compile'] = []
@@ -291,7 +295,7 @@ class sv_components:
         """
         super().__init__()
         self._btb_depth = 32
-        #config = ConfigParser()
+        # config = ConfigParser()
         config = config_file
         self.rg_initialize = config['bpu']['reg']['bpu_rg_initialize']
         self.rg_allocate = config['bpu']['reg']['bpu_rg_allocate']
@@ -312,20 +316,22 @@ class sv_components:
         """
            returns interface file
         """
-        intf = ("interface chromite_intf(input bit CLK,RST_N);\n"
-                "  logic " + str(self.rg_initialize) + ";\n"
-                "  logic [4:0]" + str(self.rg_allocate) + ";\n")
-        intf += "\n  logic [7:0]{0};".format(self.rg_ghr)
-        intf += "\nlogic [" + str(self._btb_depth - 1) + ":0]{0};".format(
+        interface = ("interface chromite_intf(input bit CLK,RST_N);\n"
+                     "  logic " + str(self.rg_initialize) + ";\n"
+                                                            "  logic [4:0]" +
+                     str(self.rg_allocate) + ";\n")
+        interface += "\n  logic [7:0]{0};".format(self.rg_ghr)
+        interface += "\nlogic [" + str(self._btb_depth - 1) + ":0]{0};".format(
             self.valids)
-        intf += "\n  logic {0};".format(self.ras_top_index)
-        intf += "\n  logic [8:0]{0};\n".format(self.mispredict)
+        interface += "\n  logic {0};".format(self.ras_top_index)
+        interface += "\n  logic [8:0]{0};\n".format(self.mispredict)
         for i in range(self._btb_depth):
-            intf += "\n  logic [62:0] " + str(self.btb_tag) + "_" + str(i) + ";"
+            interface += "\n  logic [62:0] " + str(self.btb_tag) + "_" + str(
+                i) + ";"
         for i in range(self._btb_depth):
-            intf += "\n  logic [67:0] " + str(
+            interface += "\n  logic [67:0] " + str(
                 self.btb_entry) + "_" + str(i) + ";"
-        intf += """\n `include \"coverpoints.sv\"
+        interface += """\n `include \"coverpoints.sv\"
                   \n  string test = `cnvstr(`TEST);
                   \n\n initial
 begin
@@ -362,9 +368,9 @@ if(test == \"regression\")
   end
 end
 \n"""
-        intf += "\nendinterface\n"
+        interface += "\nendinterface\n"
 
-        return intf
+        return interface
 
         # function to generate tb_top file
 
@@ -395,23 +401,17 @@ end
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_tag) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_entry) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
-            tb_top = tb_top + "\n\tintf." + str(self.valids) + "[" + str(
-                i) + "] = " + self.bpu_path + "." + str(
-                    self.btb_tag) + "_" + str(i) + "[0];"
+            tb_top = tb_top + f"\n\tintf.{self.valids}[{i}] = {self.bpu_path}" \
+                              f".{self.btb_tag}_{i}[0];"
         tb_top += "\n\tend\n\telse\n\tbegin\n"
-        # tb_top += "\tintf.{0} = {1}.{0};\n\tintf.{2} = {1}.{" \
-        #           "2};\n\tintf.{3} = {1}.{3};\n\tintf.{4} = {1}.{" \
-        #           "4};\n\tintf.{5} = {1}.{5};".format(
-        #     self.rg_initialize, self.bpu_path, self.rg_allocate,
-        #     self.ras_top_index, self.rg_ghr, self.mispredict)
         tb_top += f"\tintf.{self.rg_initialize} = {self.bpu_path}" \
                   f".{self.rg_initialize};\n\tintf.{self.rg_allocate} = " \
                   f"{self.bpu_path}.{self.rg_allocate};\n\tintf." \
@@ -422,18 +422,18 @@ end
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_tag) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_entry) + "_" + str(i) + ";"
+                self.bpu_path) + "." + str(
+                self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.valids) + "[" + str(i) + "] = " + str(
-                    self.bpu_path) + "." + str(
-                        self.btb_tag) + "_" + str(i) + "[0];"
+                self.bpu_path) + "." + str(
+                self.btb_tag) + "_" + str(i) + "[0];"
         tb_top = tb_top + """\n\tend
 end
 
