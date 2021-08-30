@@ -6,8 +6,7 @@ utg/modules/branch_predictor/tests/
 **.pyo
 
 # Modules Directory and Repo
-utg/modules
-utg/uarch_modules
+config.ini
 
 # Build Directory
 work/
