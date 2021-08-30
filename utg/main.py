@@ -323,7 +323,9 @@ def validate(dut_config, module_dir, work_dir, modules, verbose):
     logger.level(verbose)
     info(__version__)
     dut_yaml = load_yaml(dut_config)
-    validate_tests(modules=modules,
+
+    module = clean_modules(module_dir, modules, verbose)
+    validate_tests(modules=module,
                    work_dir=work_dir,
                    config_dict=dut_yaml,
                    modules_dir=module_dir,
