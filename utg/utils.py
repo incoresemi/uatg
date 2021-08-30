@@ -9,7 +9,8 @@ from utg.log import logger
 # from yapsy.PluginManager import PluginManager
 
 
-def list_of_modules(module_dir):
+def list_of_modules(module_dir, verbose='error'):
+    logger.level(verbose)
     if os.path.exists(os.path.join(module_dir, 'index.yaml')):
         modules = load_yaml(os.path.join(module_dir, 'index.yaml'))
         module_str = "Supported modules:\n"

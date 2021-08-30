@@ -160,6 +160,12 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
 
 
 @click.version_option(version=__version__)
+@click.option('--verbose',
+              '-v',
+              default='info', help='Set verbose level for debugging',
+              type=click.Choice(['info', 'error', 'debug'],
+                                case_sensitive=False))
+
 @click.option('--module_dir',
               '-md',
               multiple=False,
@@ -169,7 +175,7 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
                    " which generate the assembly tests. "
                    "Required Parameter")
 @cli.command()
-def list_modules(module_dir):
+def list_modules(module_dir, verbose):
     """
     Provides the list of modules supported from the module_dir\n
     Requires: -md, --module_dir
