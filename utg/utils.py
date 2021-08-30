@@ -11,13 +11,15 @@ from utg.log import logger
 
 def list_of_modules(module_dir, verbose='error'):
     logger.level(verbose)
+    module_list = []
     if os.path.exists(os.path.join(module_dir, 'index.yaml')):
         modules = load_yaml(os.path.join(module_dir, 'index.yaml'))
         module_str = "Supported modules:\n"
         for key, value in modules.items():
             if value is not None:
                 module_str += '\t' + key + '\n'
-        return module_str
+                module_list.append(key)
+        return module_list
     else:
         logger.error(f"index.yaml not found in {module_dir}")
         exit("FILE_NOT_FOUND")
