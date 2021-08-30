@@ -4,7 +4,6 @@ import os
 import glob
 from utg.log import logger
 
-
 # import utg
 # from yapsy.PluginManager import PluginManager
 
@@ -14,10 +13,8 @@ def list_of_modules(module_dir, verbose='error'):
     module_list = []
     if os.path.exists(os.path.join(module_dir, 'index.yaml')):
         modules = load_yaml(os.path.join(module_dir, 'index.yaml'))
-        module_str = "Supported modules:\n"
         for key, value in modules.items():
             if value is not None:
-                module_str += '\t' + key + '\n'
                 module_list.append(key)
         return module_list
     else:
@@ -45,6 +42,32 @@ def load_yaml(foo):
     else:
         logger.error(f'error: {foo} is not a valid yaml file')
         exit('INVALID_FILE')
+
+
+def clean_modules(module_dir, modules, verbose):
+
+    available_modules = list_of_modules(module_dir, verbose)
+
+    if 'all' in modules:
+
+        module = ['all']
+
+    else:
+        try:
+            modules = modules.replace(' ', ',')
+            modules = modules.replace(', ', ',')
+            modules = modules.replace(' ,', ',')
+            module = list(set(modules.split(",")))
+            module.remove('')
+            module.sort()
+
+        except ValueError:
+            pass
+        for i in module:
+            if i not in available_modules:
+                exit(f'Module {i} is not supported/unavailable.')
+
+    return module
 
 
 # def clean_cli_params(config_file, module, gen_test, val_test, module_dir,
@@ -167,8 +190,8 @@ def generate_test_list(asm_dir, uarch_dir, test_list):
         test_list[base_key][
             'linker_args'] = '-static -nostdlib -nostartfiles -lm -lgcc -T'
         test_list[base_key]['linker_file'] = target_dir + '/' + 'link.ld'
-        test_list[base_key][
-            'asm_file'] = os.path.join(asm_dir, base_key, base_key + '.S')
+        test_list[base_key]['asm_file'] = os.path.join(asm_dir, base_key,
+                                                       base_key + '.S')
         test_list[base_key]['include'] = [env_dir, target_dir]
         test_list[base_key]['compile_macros'] = ['XLEN=64']
         test_list[base_key]['extra_compile'] = []
@@ -321,16 +344,15 @@ class sv_components:
         """
         interface = ("interface chromite_intf(input bit CLK,RST_N);\n"
                      "  logic " + str(self.rg_initialize) + ";\n"
-                                                            "  logic [4:0]" +
-                     str(self.rg_allocate) + ";\n")
+                     "  logic [4:0]" + str(self.rg_allocate) + ";\n")
         interface += "\n  logic [7:0]{0};".format(self.rg_ghr)
         interface += "\nlogic [" + str(self._btb_depth - 1) + ":0]{0};".format(
             self.valids)
         interface += "\n  logic {0};".format(self.ras_top_index)
         interface += "\n  logic [8:0]{0};\n".format(self.mispredict)
         for i in range(self._btb_depth):
-            interface += "\n  logic [62:0] " + str(self.btb_tag) + "_" + str(
-                i) + ";"
+            interface += "\n  logic [62:0] " + str(
+                self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             interface += "\n  logic [67:0] " + str(
                 self.btb_entry) + "_" + str(i) + ";"
@@ -404,13 +426,13 @@ end
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_tag) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_entry) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + f"\n\tintf.{self.valids}[{i}] = {self.bpu_path}" \
                               f".{self.btb_tag}_{i}[0];"
@@ -425,18 +447,18 @@ end
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_tag) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_tag) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.btb_entry) + "_" + str(i) + " = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_entry) + "_" + str(i) + ";"
+                    self.bpu_path) + "." + str(
+                        self.btb_entry) + "_" + str(i) + ";"
         for i in range(self._btb_depth):
             tb_top = tb_top + "\n\tintf." + str(
                 self.valids) + "[" + str(i) + "] = " + str(
-                self.bpu_path) + "." + str(
-                self.btb_tag) + "_" + str(i) + "[0];"
+                    self.bpu_path) + "." + str(
+                        self.btb_tag) + "_" + str(i) + "[0];"
         tb_top = tb_top + """\n\tend
 end
 
