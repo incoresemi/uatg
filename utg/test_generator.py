@@ -5,13 +5,16 @@ from getpass import getuser
 from datetime import datetime
 import ruamel.yaml as yaml
 import utg
-from utg.utils import load_yaml, create_plugins, generate_test_list
+from utg.utils import create_plugins, generate_test_list
 from utg.utils import create_linker, create_model_test_h
 from utg.utils import join_yaml_reports, generate_sv_components
 from utg.utils import list_of_modules
 from yapsy.PluginManager import PluginManager
 from utg.log import logger
-from utg.__init__ import __version__
+
+# from utg.__init__ import __version__
+# from utg.utils import load_yaml
+
 '''
 File directories naming convention:
     uarch_dir = 'modules/'                 utg/modules/
@@ -22,7 +25,7 @@ File directories naming convention:
 def generate_tests(work_dir,
                    linker_dir,
                    modules,
-                   config_file,
+                   config_dict,
                    test_list,
                    modules_dir,
                    verbose='info'):
@@ -51,7 +54,7 @@ def generate_tests(work_dir,
     logger.info('utg dir is {0}'.format(uarch_dir))
     logger.info('work_dir is {0}'.format(work_dir))
 
-    inp_yaml = config_file
+    inp_yaml = config_dict
     isa = inp_yaml['ISA']
 
     if modules == ['all']:
@@ -66,15 +69,15 @@ def generate_tests(work_dir,
         module_dir = os.path.join(modules_dir, module)
         work_tests_dir = os.path.join(work_dir, module)
         try:
-            module_params = config_file[module]
-        except KeyError as e:
+            module_params = config_dict[module]
+        except KeyError:
             # logger.critical("The {0} module is not in the dut config_file",
             # format(module))
             module_params = {}
-        logger.debug('Directory for {0} is {1}'.format(module, module_dir))
-        logger.info('Starting plugin Creation for {0}'.format(module))
+        logger.debug(f'Directory for {module} is {module_dir}')
+        logger.info(f'Starting plugin Creation for {module}')
         create_plugins(plugins_path=module_dir)
-        logger.info('Created plugins for {0}'.format(module))
+        logger.info(f'Created plugins for {module}')
         username = getuser()
         time = ((str(datetime.now())).split("."))[0]
 
@@ -91,8 +94,8 @@ def generate_tests(work_dir,
                      '\nRVMODEL_DATA_END\n '
 
         manager = PluginManager()
-        manager.setPluginPlaces([module_dir
-                                ])  # plugins are stored in module_dir
+        manager.setPluginPlaces([module_dir])
+        # plugins are stored in module_dir
         manager.collectPlugins()
 
         # check if prior test files are present and remove them. create new dir.
@@ -147,10 +150,10 @@ def generate_tests(work_dir,
 
 
 def generate_sv(work_dir,
-                config_file,
+                config_dict,
                 modules,
                 modules_dir,
-                alias_file,
+                alias_dict,
                 verbose='info'):
     """specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
@@ -170,7 +173,7 @@ def generate_sv(work_dir,
         modules = list_of_modules(modules_dir)
         del modules[-1]
 
-    inp_yaml = config_file
+    inp_yaml = config_dict
     logger.info('****** Generating Covergroups ******')
 
     for module in modules:
@@ -180,7 +183,7 @@ def generate_sv(work_dir,
         sv_dir = os.path.join(work_dir, 'sv_top')
         try:
             module_params = inp_yaml[module]
-        except KeyError as e:
+        except KeyError:
             # logger.critical("The {0} module is n"
             #                 "ot in the dut config_file",format(module))
             module_params = {}
@@ -192,7 +195,7 @@ def generate_sv(work_dir,
         manager.collectPlugins()
 
         # generate the tbtop and interface files
-        generate_sv_components(sv_dir, alias_file)
+        generate_sv_components(sv_dir, alias_dict)
         logger.debug("Generated tbtop, defines and interface files")
         sv_file = os.path.join(sv_dir, 'coverpoints.sv')
 
@@ -206,7 +209,7 @@ def generate_sv(work_dir,
             _test_name = ((_name[1].split(" ", 1))[0])
             if _check:
                 try:
-                    _sv = plugin.plugin_object.generate_covergroups(alias_file)
+                    _sv = plugin.plugin_object.generate_covergroups(alias_dict)
                     # TODO: Check what the name of the SV file should be
                     # TODO: Include the creation of TbTop and Interface SV files
                     with open(sv_file, "a") as f:
@@ -230,7 +233,7 @@ def generate_sv(work_dir,
     logger.info('****** Finished Generating Covergroups ******')
 
 
-def validate_tests(modules, config_file, work_dir, modules_dir, verbose='info'):
+def validate_tests(modules, config_dict, work_dir, modules_dir, verbose='info'):
     """
        Parses the log returned from the DUT for finding if the tests
        were successful
@@ -238,14 +241,15 @@ def validate_tests(modules, config_file, work_dir, modules_dir, verbose='info'):
 
     logger.level(verbose)
     uarch_dir = os.path.dirname(utg.__file__)
-    inp_yaml = config_file
+    inp_yaml = config_dict
 
     logger.info('****** Validating Test results, Minimal log checking ******')
 
     if modules == ['all']:
         logger.debug('Checking {0} for modules'.format(modules_dir))
         modules = list_of_modules(modules_dir)
-        del modules[-1]
+        # del modules[-1]
+        # Needed if list_of_modules returns 'all' along with other modules
     if work_dir:
         pass
     else:
@@ -264,7 +268,7 @@ def validate_tests(modules, config_file, work_dir, modules_dir, verbose='info'):
 
         try:
             module_params = inp_yaml[module]
-        except KeyError as e:
+        except KeyError:
             # logger.critical("The {0} module is not "
             #                 "in the dut config_file",format(module))
             module_params = {}
