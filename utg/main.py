@@ -9,6 +9,7 @@ from utg.test_generator import generate_tests, clean_dirs, validate_tests, \
 from utg.__init__ import __version__
 from utg.utils import list_of_modules, info, load_yaml, clean_modules
 
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -231,7 +232,7 @@ def from_config(config_file, verbosity):
     module = clean_modules(module_dir, modules, verbose=verbosity)
     logger.level(verbose)
 
-    if config['utg']['gen_test']:
+    if config['utg']['gen_test'].lower() == 'true':
         dut_dict = load_yaml(config['utg']['dut_config'])
         generate_tests(work_dir=config['utg']['work_dir'],
                        linker_dir=config['utg']['linker_dir'],
@@ -240,7 +241,7 @@ def from_config(config_file, verbosity):
                        config_dict=dut_dict,
                        test_list=config['utg']['gen_test_list'],
                        verbose=verbose)
-    if config['utg']['gen_cvg']:
+    if config['utg']['gen_cvg'].lower() == 'true':
         dut_dict = load_yaml(config['utg']['dut_config'])
         alias_dict = load_yaml(config['utg']['alias_file'])
         generate_sv(work_dir=config['utg']['work_dir'],
@@ -249,7 +250,7 @@ def from_config(config_file, verbosity):
                     config_dict=dut_dict,
                     alias_dict=alias_dict,
                     verbose=verbose)
-    if config['utg']['val_test']:
+    if config['utg']['val_test'].lower() == 'true':
         dut_dict = load_yaml(config['utg']['dut_config'])
         validate_tests(modules=module,
                        work_dir=config['utg']['work_dir'],
@@ -272,6 +273,10 @@ def setup():
     """
     Setups template files for config.ini, dut_config.yaml and aliasing.yaml\n
     """
+    default_alias_path = ''
+    default_config_path = ''
+    default_dut_config_path = ''
+
     print(f'Files created')
 
 
