@@ -9,6 +9,7 @@ Welcome to UArchTest
    
    overview
    installation
+   configuration_files
    creating_new_tests
    code-doc
    changelog
