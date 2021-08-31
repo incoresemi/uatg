@@ -401,6 +401,37 @@ def create_alias_file(alias_path):
         f.write(alias)
 
 
+def create_dut_config(dut_config_path):
+    dut = 'ISA: RV64IMAFDCSU\niepoch_size: 2\ndepoch_size: 1\ndtvec_base: ' \
+          '256\ns_extension:\n\tmode: sv39\n\titlb_size: 4\n\tdtlb_size: ' \
+          '4\n\tasid_width: 9\npmp:\n\tenable: true\n\tentries: ' \
+          '4\n\tgranularity: 8\nm_extension:\n\tmul_stages: 1\n\tdiv_stages: ' \
+          '32\nbranch_predictor:\n\tinstantiate: True\n\tpredictor: ' \
+          'gshare\n\ton_reset: enable\n\tbtb_depth: 32\n\tbht_depth: ' \
+          '512\n\thistory_len: 8\n\thistory_bits: 5\n\tras_depth: ' \
+          '8\nicache_configuration:\n\tinstantiate: true\n\ton_reset: ' \
+          'enable\n\tsets: 64\n\tword_size: 4\n\tblock_size: 16\n\tways: ' \
+          '4\n\tfb_size: 4\n\treplacement: RR\n\tecc_enable: false\n\t' \
+          'one_hot_select: false\ndcache_configuration:\n\t' \
+          'instantiate: true\n\ton_reset: enable\n\tsets: 64\n\tword_size: 8' \
+          '\n\tblock_size: 8\n\tways: 4\n\tfb_size: 8\n\tsb_size: 2\n\t' \
+          'replacement: RR\n\tecc_enable: false\n\tone_hot_select: false\n\t' \
+          'rwports: 1\nreset_pc: 4096\nphysical_addr_size: 32\nbus_protocol: ' \
+          'AXI4\nfpu_trap: false\ndebugger_support: false\nno_of_triggers: 0 ' \
+          '\ncsr_configuration:\n\tstructure: daisy\n\tcounters_in_grp4: 7\n' \
+          '\tcounters_in_grp5: 7\n\tcounters_in_grp6: 7\n\tcounters_in_grp7: ' \
+          '8\nbsc_compile_options:\n\ttest_memory_size: 33554432\n\t' \
+          'assertions: true\n\ttrace_dump: true\n\tcompile_target: \'sim\'\n' \
+          '\tsuppress_warnings: ["all"]\n\tverilog_dir: build/hw/verilog\n\t' \
+          'build_dir: build/hw/intermediate\n\ttop_module: mkTbSoc\n\t' \
+          'top_file: TbSoc.bsv\n\ttop_dir: test_soc\n\topen_ocd: ' \
+          'False\nverilator_configuration:\n\tcoverage: none\n\ttrace: ' \
+          'false\n\tthreads: 1\n\tverbosity: true\n\tsim_speed: ' \
+          'fast\n\tout_dir: bin'
+    with open(os.path.join(dut_config_path, 'dut_config.yaml'), 'w') as f:
+        f.write(dut)
+
+
 def create_data_sec():
     pass
 
