@@ -8,6 +8,7 @@ from utg.test_generator import generate_tests, clean_dirs, validate_tests, \
     generate_sv
 from utg.__init__ import __version__
 from utg.utils import list_of_modules, info, load_yaml, clean_modules
+from utg.utils import create_dut_config, create_config_file, create_alias_file
 
 @click.group()
 @click.version_option(version=__version__)
@@ -231,7 +232,7 @@ def from_config(config_file, verbosity):
     module = clean_modules(module_dir, modules, verbose=verbosity)
     logger.level(verbose)
 
-    if config['utg']['gen_test']:
+    if config['utg']['gen_test'].lower() == 'true':
         dut_dict = load_yaml(config['utg']['dut_config'])
         generate_tests(work_dir=config['utg']['work_dir'],
                        linker_dir=config['utg']['linker_dir'],
@@ -240,7 +241,7 @@ def from_config(config_file, verbosity):
                        config_dict=dut_dict,
                        test_list=config['utg']['gen_test_list'],
                        verbose=verbose)
-    if config['utg']['gen_cvg']:
+    if config['utg']['gen_cvg'].lower() == 'true':
         dut_dict = load_yaml(config['utg']['dut_config'])
         alias_dict = load_yaml(config['utg']['alias_file'])
         generate_sv(work_dir=config['utg']['work_dir'],
@@ -249,7 +250,7 @@ def from_config(config_file, verbosity):
                     config_dict=dut_dict,
                     alias_dict=alias_dict,
                     verbose=verbose)
-    if config['utg']['val_test']:
+    if config['utg']['val_test'].lower() == 'true':
         dut_dict = load_yaml(config['utg']['dut_config'])
         validate_tests(modules=module,
                        work_dir=config['utg']['work_dir'],
@@ -266,12 +267,43 @@ def from_config(config_file, verbosity):
 
 # -------------------------
 
-
+@click.option('--config_path',
+              '-cp',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Directory to store the config.ini file")
+@click.option('--alias_path',
+              '-ap',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Directory to store the aliasing.yaml file")
+@click.option('--dut_path',
+              '-dp',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Directory to store the dut_config.yaml file")
 @cli.command()
-def setup():
+def setup(config_path, alias_path, dut_path):
     """
-    Setups template files for config.ini, dut_config.yaml and aliasing.yaml\n
+        Setups template files for config.ini, dut_config.yaml and aliasing.yaml.
+        Optionally you can provide the path's for each of them. If not specified
+        files will be written to default paths.\n
+        Optional: -dp, --dut_path;  -ap, --alias_path; -cp, --config_path
     """
+    if config_path is None:
+        config_path = 'utg/'
+    if alias_path is None:
+        alias_path = 'chromite_uarch_tests/'
+    if dut_path is None:
+        dut_path = 'utg/target/'
+
+    create_config_file(config_path=config_path)
+    create_dut_config(dut_config_path=dut_path)
+    create_alias_file(alias_path=alias_path)
+
     print(f'Files created')
 
 
