@@ -12,6 +12,21 @@ Test_Generator
    :special-members:
    :private-members:
 
+Utils
+^^^^^
+
+.. automodule:: utg.utils
+   :members:
+   :special-members:
+   :private-members:
+
+Main - CLI
+^^^^^^^^^^
+.. automodule:: utg.main
+   :members:
+   :private-members:
+   :special-members:
+
 Tests
 ^^^^^
 
