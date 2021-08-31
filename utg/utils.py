@@ -1,8 +1,9 @@
-import ruamel
-from ruamel.yaml import YAML
 import os
 import glob
+import random as rnd
 from utg.log import logger
+import ruamel
+from ruamel.yaml import YAML
 
 # import utg
 # from yapsy.PluginManager import PluginManager
@@ -348,12 +349,12 @@ def create_config_file(config_path):
     cfg = '[utg]\n\n# [info, error, debug] set verbosity level to view ' \
           'different levels of messages.\nverbose = info\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
-          'and cleans directories\nclean = False\n\n# Enter the modules whose ' \
-          'tests are to be generated/validated in comma separated format.\n# ' \
+          'and cleans directories\nclean = False\n\n# Enter the modules whose' \
+          ' tests are to be generated/validated in comma separated format.\n# '\
           'Run \'utg --list-modules\' to find all the modules that are ' \
-          'supported.\n# Use \'all\' to generate/validate all modules\nmodules ' \
-          '= all\n\n# Absolute path of the uarch_modules/modules ' \
-          'Directory\nmodule_dir = uarch_modules/modules\n# Directory to dump ' \
+          'supported.\n# Use \'all\' to generate/validate all modules\n' \
+          'modules = all\n\n# Absolute path of the uarch_modules/modules ' \
+          'Directory\nmodule_dir = uarch_modules/modules\n# Directory to dump '\
           'assembly files and reports\nwork_dir = work\n# location to store ' \
           'the link.ld linker file. By default it\'s same as ' \
           'work_dir\nlinker_dir = work\n\n# Path of the yaml file containing ' \
@@ -432,8 +433,18 @@ def create_dut_config(dut_config_path):
         f.write(dut)
 
 
-def create_data_sec():
-    pass
+def data_section(bit_width=32, random=True, signed=False, align=4):
+    data = f'RVTEST_DATA_BEGIN\n.align {align}\n'
+    if signed:
+        max_val = 2 ** (bit_width - 1) - 1
+        min_val = -2 ** (bit_width - 1)
+    else:
+        max_val = 2 ** bit_width - 1
+        min_val = 0
+    data += f'MAX_VAL32: .word {max_val}\nMIN_VAL32: .word {min_val}\n'
+    if bit_width > 32:
+        data += f'MAX_VAL64: .dword {max_val}\nMIN_VAL64: .dword {min_val}\n'
+    return data
 
 
 # UTG Functions
@@ -528,4 +539,3 @@ def list_of_modules(module_dir, verbose='error'):
     else:
         logger.error(f"index.yaml not found in {module_dir}")
         exit("FILE_NOT_FOUND")
-
