@@ -19,14 +19,18 @@ When specified, UTG also generates a ``test_list.yaml`` file along with the test
 
 In this document, we try to explain the need to have these files as well throw 
 some light on the format of these documents, so that the user can write/edit the
-configuration file, as necessary.
+configuration file, as necessary. 
+
+In order to provide a headstart, the ``utg setup`` command will generate 
+template ``config.ini``, ``dut_config.yaml`` and ``aliasing.yaml`` files.
 
 ============================
 ``config.ini`` Specification
 ============================
 
 The ``config.ini`` file is used to specify the arguments required by UTG to 
-generate tests. 
+generate tests. The user may choose to use the subcommands to manually perform 
+the same tasks and decide to not use a ``config.ini`` file.
 
 Configuration Options
 ---------------------
@@ -116,6 +120,155 @@ Sample ``config.ini``
 =================================
 ``dut_config.yaml`` Specification
 =================================
+
+The ``dut_config.yaml`` file is the configuration file used to configure the DUT.
+This file should contain information about the hardware units present in the DUT
+as well as provide information about the ISA and off-core components like cache
+supported/present in the unit.
+
+Usually such a yaml file is used to generate a core of required configuration 
+from an existing, highly parameterizable base design. In the case of ``Chromite``
+, we have such configuration ``yaml`` file which we use to selectively 
+generate tests based on the hardware units present in the DUT.
+
+This ``dut_config.yaml`` will be used by the test classes as well as the test 
+generator to identify tests that can suitably exercise functional coverpoints 
+in the design as well as parameterize the test to exploit the hardware features 
+to the fullest.
+
+Sample ``dut_config.yaml``
+--------------------------
+
+.. code-block:: yaml
+
+    ISA: RV64IMAFDCSU
+    iepoch_size: 2
+    depoch_size: 1
+    dtvec_base: 256
+    s_extension:
+      mode: sv39
+      itlb_size: 4
+      dtlb_size: 4
+      asid_width: 9
+    pmp: 
+      enable: true
+      entries: 4
+      granularity: 8
+    m_extension:
+      mul_stages: 1
+      div_stages: 32
+    branch_predictor:
+      instantiate: True
+      predictor: gshare
+      on_reset: enable
+      btb_depth: 64
+      bht_depth: 512
+      history_len: 8
+      history_bits: 5
+      ras_depth: 8
+    icache_configuration:
+      instantiate: true
+      on_reset: enable
+      sets: 64
+      word_size: 4
+      block_size: 16
+      ways: 4
+      fb_size: 4
+      replacement: RR
+      ecc_enable: false
+      one_hot_select: false
+    dcache_configuration:
+      instantiate: true
+      on_reset: enable
+      sets: 64
+      word_size: 8
+      block_size: 8
+      ways: 4
+      fb_size: 8
+      sb_size: 2
+      replacement: RR
+      ecc_enable: false
+      one_hot_select: false
+      rwports: 1
+    reset_pc: 4096
+    physical_addr_size: 32
+    bus_protocol: AXI4
+    fpu_trap: false
+    debugger_support: false
+    no_of_triggers: 0
+    csr_configuration:
+      structure: daisy
+      counters_in_grp4: 7
+      counters_in_grp5: 7
+      counters_in_grp6: 7
+      counters_in_grp7: 8
+
+The text shown above is in the yaml format. These key-value pairs are used to 
+configure the *chromite* core.
+
+If you notice, the yaml file contains everything from the ISA chosen, cache
+configuration to the number of CSRs. To explain, let us consider the 
+``branch_predictor`` key of the yaml file.
+
+.. tabularcolumns:: |l|L|
+
+.. table:: General Configuration Options
+
+  =================== =========================================================
+  Parameter           Description
+  =================== =========================================================
+  instantiate         indicates if the branch predictor (BPU) is present in the 
+                      core
+  predictor           denotes the type of predictor implemented
+  on_reset            denotes if the BPU will be enabled after resetting the core
+  btb_depth           depth of the Branch target Buffer(BTB) in the gshare BPU
+  bht_depth           depth of the Branch History Table(BHT) in the gshare BPU 
+  history_len         width of the Global History Register(GHR).
+  history_bits        bits of the Global History Register which is actually used
+                      for predicting based on history.
+  ras_depth           depth of the Return Address Stack used for storing return
+                      address of Call statements
+  =================== =========================================================
+
+Similar to this, you can find the configuration of other similar units present 
+in the core from the ``dut_config.yaml`` file. The paramters obtained from the
+section like branch predictor will be particularly useful when tests are to be 
+targeted.
+
+The following snippet shows how the parameters of the branch predictor from the 
+config file will be used to create a targeted test for exercising the BPU.
+
+.. code-block:: python
+
+    def execute(self, _dut_dict):
+        _en_bpu = _bpu_dict['instantiate']
+        self._btb_depth = _bpu_dict['btb_depth']
+        if _en_bpu and self._btb_depth:
+            return True
+        else:
+            return False
+
+The snippet above is from the test class which tries to fill the entire Branch
+Target Buffer (BTB) of a branch predictor unit (G-Share Fully Associative) with
+jump, call, return and conditional branch instructions.
+
+.. note:: The _dut_dict argument shown here contains only the values associated
+   with the ``branch_predictor`` key from the yaml file shown earlier. The
+   UTG-test_generator will send only the values present in the key which matches 
+   the module for which said test was written for.
+
+Here, the *execute()* method reads the value of ``instantiate`` in the bpu 
+section of the ``dut_config.yaml`` into the ``_en_bpu`` variable. It also stores 
+the depth of the ``BTB`` in the variable ``_btb_depth``. As this test is meant
+to exercise the BPU, there is no point to generate the test if the BPU is not 
+instantiated. Likewise, it is necessary that the *btb_depth* is greater than one.
+Hence, we use these conditions to decide if the test which we have in the test_class
+would prove worthwhile when run on our DUT.
+
+Therefore, it is necessary that the user creates a similiar yaml file as shown 
+earlier and update it with their DUT's configuration to make targeted test 
+generation easier.
+
 
 ===============================
 ``aliasing.yaml`` Specification
