@@ -31,37 +31,7 @@ Install Python
         $ pip3 --version
         pip 20.1 from <user-path>.local/lib/python3.6/site-packages/pip (python 3.6)
 
-   .. tab:: CentOS7
-
-      The CentOS 7 Linux distribution includes Python 2 by default. However, as of CentOS 7.7, Python 3 
-      is available in the base package repository which can be installed using the following commands
-      
-      .. code-block:: shell-session
-
-        $ sudo yum update -y
-        $ sudo yum install -y python3
-        $ pip3 install --upgrade pip
-      
-      For versions prior to 7.7 you can install python3.6 using third-party repositories, such as the 
-      IUS repository
-      
-      .. code-block:: shell-session
-
-        $ sudo yum update -y
-        $ sudo yum install yum-utils
-        $ sudo yum install https://centos7.iuscommunity.org/ius-release.rpm
-        $ sudo yum install python36u
-        $ pip3 install --upgrade pip
-      
-      You can check the versions
-      
-      .. code-block:: shell-session
-
-        $ python3 --version
-        Python 3.6.8
-        $ pip --version
-        pip 20.1 from <user-path>.local/lib/python3.7/site-packages/pip (python 3.7)
-
+ 
 Using CONDA Virtualenv for Python 
 ---------------------------------
 
@@ -138,19 +108,19 @@ Install UTG
      .. note:: If you are using `pyenv` as mentioned above, make sure to enable that environment before
       performing the following steps.
      
-     .. code-block:: bash
+     .. code-block:: shell-session
      
        $ pip3 install utg
      
      To update an already installed version of UTG to the latest version:
      
-     .. code-block:: bash
+     .. code-block:: shell-session
      
        $ pip3 install -U utg
      
      To checkout a specific version of UTG:
      
-     .. code-block:: bash
+     .. code-block:: shell-session
      
        $ pip3 install utg==1.x.x
 
@@ -160,7 +130,7 @@ Test UTG
 
 Once you have installed UArchTest you can execute ``utg --help`` to print the help routine:
 
-.. code-block:: bash
+.. code-block:: shell-session
 
   
   Usage: utg [OPTIONS]
@@ -226,7 +196,7 @@ If you already have the 64-bit gnu-toolchain available, you can skip to the next
 .. tabs::
    .. tab:: Ubuntu
 
-     .. code-block:: bash
+     .. code-block:: shell-session
        
        $ sudo apt-get install autoconf automake autotools-dev curl python3 libmpc-dev \
              libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool \
@@ -237,18 +207,6 @@ If you already have the 64-bit gnu-toolchain available, you can skip to the next
        $ ./configure --prefix=/path/to/install --with-arch=rv64gc --with-abi=ilp64d --with-cmodel=medany # for 64-bit toolchain
        $ [sudo] make # sudo is required depending on the path chosen in the previous setup
      
-   .. tab:: CentosOS/RHEL
-     
-     .. code-block:: bash
-     
-       $ sudo yum install autoconf automake python3 libmpc-devel mpfr-devel gmp-devel \
-             gawk  bison flex texinfo patchutils gcc gcc-c++ zlib-devel expat-devel
-       $ git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
-       $ git clone --recursive https://github.com/riscv/riscv-opcodes.git
-       $ cd riscv-gnu-toolchain
-       $ ./configure --prefix=/path/to/install --with-arch=rv64gc --with-abi=ilp64d --with-cmodel=medany # for 64-bit toolchain
-       $ [sudo] make # sudo is required depending on the path chosen in the previous setup
-
 Make sure to add the path ``/path/to/install`` to your `$PATH` in the .bashrc/cshrc
 With this you should now have all the following available as command line arguments::
 
@@ -288,7 +246,7 @@ Once you have installed UTG.
 Command to **generate** ASM tests 
 ---------------------------------
 
-.. code-block:: bash
+.. code-block:: shell-session
 
   $ utg -dc /path/to/dut_config.yaml/file -md /path/to/the/modules/directory -gt -v <loglevel>
 
@@ -303,13 +261,13 @@ Command to **generate** ASM tests
 
 The command previously shown is minimal and uses the default work directory, default linker files among several others. All options can be found by executing the command
 
-.. code-block:: bash
+.. code-block:: shell-session
 
   $ utg --help
 
 The complete command required to **generate ASM tests and covergroups** with control over several parameters is shown as follows
 
-.. code-block:: bash
+.. code-block:: shell-session
 
   $ utg -dc /path/to/dut_config.yaml -md /path/to/modules/directory -wd /path/to/working/directory/ \
     -ld /path/to/directory/containing/linker/files -m <modules_for_which_tests_are_to_generated> \
@@ -337,7 +295,7 @@ Here,
 command to **validate** the generated logs
 ------------------------------------------
 
-.. code-block:: bash
+.. code-block:: shell-session
 
   $ utg -dc /path/to/dut_config.yaml -md /path/to/modules/directory -vt -v <log level>
 
@@ -349,7 +307,7 @@ Here,
 command to **list modules**
 ---------------------------
 
-.. code-block:: bash
+.. code-block:: shell-session
 
   $ utg -dc path/to/dut_config -md /path/to/modules/directory -lm 
 
@@ -358,7 +316,7 @@ command to **list modules**
 command to **clean**
 --------------------
 
-.. code-block:: bash
+.. code-block:: shell-session
 
   $ utg -md /path/to/modules/directory -dc /path/to/dut_config.yaml -cl
 
