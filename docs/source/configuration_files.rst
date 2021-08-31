@@ -124,3 +124,38 @@ Sample ``config.ini``
 ================================
 ``test_list.yaml`` Specification
 ================================
+
+When gen_test_list is true in the ``config.ini`` or when ``-t`` is passed 
+with the ``utg generate`` command, UTG, apart from generating just the
+test artifacts, must also generate a test list YAML. The test list has the
+following syntax:
+
+.. code-block:: yaml
+
+   <test-name>:
+    asm_file: <path to assembly/C/test file generated>
+    cc: <optional compile command to be used to compile the tests>
+    ccargs: <optional compile arguments to be used>
+    extra_compile: [<list of supplementary files to be compiled. Provided as absolute paths>]
+    include: [<list of directories containing any required header file>]
+    isa: <the isa string for which this test was generated for>
+    linker_args: <arguments to be provided to the linker command>
+    linker_file: <absolute path of the linker file to be used>
+    result: <set to Unvailable during generation. Will change to Pass or Fail based on the simulation runs>
+    generator: <name of the generator plugin used to generate this test>
+    march: <the march argument to be supplied to the compiler>
+    mabi: <the mabi argument to be supplied to the compiler>
+    compile_macros: <list of strings indicating compile time macros that need to be enabled>
+
+.. note:: While we capture the ISA, it may seem redundant to capture the march
+   and mabi. However, the tests can be generated to check a subset features like
+   - no compressed instructions in targets which do support compressed
+   instructions. Hence the redundancy. 
+
+.. note:: cc and ccargs are optional here because typically the target/DUT will
+   have its own compiler and toolchain setup and may ignore these fields. Also
+   most of the test generators are independent of the choice of toolchain and
+   may leave these fields blank.
+
+.. warning:: All the files contain an *absolute* path.
+
