@@ -45,10 +45,10 @@ class sv_components:
         interface += f"\nlogic [{self._btb_depth - 1}:0]{self.valids};"
         interface += "\n  logic {0};".format(self.ras_top_index)
         interface += f"\n  logic [8:0]{self.mispredict};\n"
-        for i in range(self._btb_depth):
-            interface += f"\n  logic [62:0] {self.btb_tag}_{i};"
-        for i in range(self._btb_depth):
-            interface += f"\n  logic [67:0] {self.btb_entry}_{i};"
+        for loop_var in range(self._btb_depth):
+            interface += f"\n  logic [62:0] {self.btb_tag}_{loop_var};"
+        for loop_var in range(self._btb_depth):
+            interface += f"\n  logic [67:0] {self.btb_entry}_{loop_var};"
         interface += """\n `include \"coverpoints.sv\"
                   \n  string test = `cnvstr(`TEST);
                   \n\n initial
@@ -111,15 +111,15 @@ end
                   f"{self.ras_top_index};\n\tintf.{self.rg_ghr} = " \
                   f"{self.bpu_path}.{self.rg_ghr};\n\tintf.{self.mispredict}" \
                   f" = {self.bpu_path}.{self.mispredict}; "
-        for i in range(self._btb_depth):
-            tb_top = tb_top + f"\n\tintf.{self.btb_tag}_{i} = {self.bpu_path}" \
-                              f".self.btb_tag_{i};"
-        for i in range(self._btb_depth):
-            tb_top = tb_top + f"\n\tintf.{self.btb_entry}_{i} = " \
-                              f"{self.bpu_path}.{self.btb_entry}_{i};"
-        for i in range(self._btb_depth):
-            tb_top = tb_top + f"\n\tintf.{self.valids}[{i}] = {self.bpu_path}" \
-                              f".{self.btb_tag}_{i}[0];"
+        for loop_var in range(self._btb_depth):
+            tb_top = tb_top + f"\n\tintf.{self.btb_tag}_{loop_var} = {self.bpu_path}" \
+                              f".self.btb_tag_{loop_var};"
+        for loop_var in range(self._btb_depth):
+            tb_top = tb_top + f"\n\tintf.{self.btb_entry}_{loop_var} = " \
+                              f"{self.bpu_path}.{self.btb_entry}_{loop_var};"
+        for loop_var in range(self._btb_depth):
+            tb_top = tb_top + f"\n\tintf.{self.valids}[{loop_var}] = {self.bpu_path}" \
+                              f".{self.btb_tag}_{loop_var}[0];"
         tb_top += "\n\tend\n\telse\n\tbegin\n"
         tb_top += f"\tintf.{self.rg_initialize} = {self.bpu_path}" \
                   f".{self.rg_initialize};\n\tintf.{self.rg_allocate} = " \
@@ -128,14 +128,14 @@ end
                   f".{self.ras_top_index};\n\tintf.{self.rg_ghr} = " \
                   f"{self.bpu_path}.{self.rg_ghr};\n\tintf.{self.mispredict}" \
                   f" = {self.bpu_path}.{self.mispredict}; "
-        for i in range(self._btb_depth):
+        for loop_var in range(self._btb_depth):
             tb_top = tb_top + f"\n\tintf.{self.btb_tag}_ = {self.bpu_path}" \
-                              f".{self.btb_tag}_{i};"
-        for i in range(self._btb_depth):
-            tb_top = tb_top + f"\n\tintf.{self.btb_entry}_{i} = " \
-                              f"{self.bpu_path}.{self.btb_entry}_{i};"
-        for i in range(self._btb_depth):
-            tb_top = tb_top + f"\n\tintf.{self.valids}[{i}] = {self.bpu_path}" \
+                              f".{self.btb_tag}_{loop_var};"
+        for loop_var in range(self._btb_depth):
+            tb_top = tb_top + f"\n\tintf.{self.btb_entry}_{loop_var} = " \
+                              f"{self.bpu_path}.{self.btb_entry}_{loop_var};"
+        for loop_var in range(self._btb_depth):
+            tb_top = tb_top + f"\n\tintf.{self.valids}[{loop_var}] = {self.bpu_path}" \
                               f".{self.btb_tag}_{i}[0];"
         tb_top = tb_top + """\n\tend
 end
@@ -333,9 +333,9 @@ shakti_end:                                                             \
 
 def create_plugins(plugins_path):
     files = os.listdir(plugins_path)
-    for i in files:
-        if ('.py' in i) and (not i.startswith('.')):
-            module_name = i[0:-3]
+    for file in files:
+        if ('.py' in file) and (not file.startswith('.')):
+            module_name = file[0:-3]
             f = open(plugins_path + '/' + module_name + '.yapsy-plugin', "w")
             f.write("[Core]\nName=" + module_name + "\nModule=" + module_name)
             f.close()
@@ -467,9 +467,9 @@ def clean_modules(module_dir, modules, verbose):
 
         except ValueError:
             pass
-        for i in module:
-            if i not in available_modules:
-                exit(f'Module {i} is not supported/unavailable.')
+        for element in module:
+            if element not in available_modules:
+                exit(f'Module {element} is not supported/unavailable.')
 
     return module
 

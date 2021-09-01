@@ -331,12 +331,12 @@ def clean_dirs(work_dir, modules_dir, verbose='info'):
         os.path.join(uarch_dir, '__pycache__'))
     yf = glob.glob(yapsy_dir, recursive=True)
     logger.debug(f'removing {tf}, {yf} and {pf}')
-    for i in tf + pf:
-        if os.path.isdir(i):
-            rmtree(i)
+    for element in tf + pf:
+        if os.path.isdir(element):
+            rmtree(element)
         else:
-            os.remove(i)
+            os.remove(element)
 
-    for i in yf:
-        os.remove(i)
+    for element in yf:
+        os.remove(element)
     logger.info("Generated Test files/folders removed")

@@ -1,4 +1,4 @@
-base_reg_file = ['x' + str(s) for s in range(32)]
+base_reg_file = ['x' + str(reg_no) for reg_no in range(32)]
 
 arithmetic_instructions = {
     'add-sub-reg':  ['add', 'addw', 'sub', 'subw'],
@@ -59,7 +59,7 @@ def bit_walker(bit_width=8, n_ones=1, invert=False):
     else:
         walked = []
         temp = (1 << n_ones) - 1
-        for i in range(bit_width):
+        for loop_var in range(bit_width):
             if temp <= (1 << bit_width) - 1:
                 # binary = format(temp, f'0{bit_width}x')
                 if not invert:
