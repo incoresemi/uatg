@@ -14,17 +14,18 @@ class sv_components:
         This class contains the methods which will return the tb_top and
         interface files
     """
+
     def __init__(self, config_file):
         super().__init__()
         self._btb_depth = 32
         # config = ConfigParser()
         config = config_file
-        self.rg_initialize = config['bpu']['reg']['bpu_rg_initialize']
-        self.rg_allocate = config['bpu']['reg']['bpu_rg_allocate']
+        self.rg_initialize = config['bpu']['register']['bpu_rg_initialize']
+        self.rg_allocate = config['bpu']['register']['bpu_rg_allocate']
         self.btb_tag = config['bpu']['wire']['bpu_btb_tag']
         self.btb_entry = config['bpu']['wire']['bpu_btb_entry']
         self.ras_top_index = config['bpu']['wire']['bpu_ras_top_index']
-        self.rg_ghr = config['bpu']['reg']['bpu_rg_ghr']
+        self.rg_ghr = config['bpu']['register']['bpu_rg_ghr']
         self.valids = config['bpu']['wire']['bpu_btb_tag_valid']
         self.mispredict = config['bpu']['wire']['bpu_mispredict_flag']
         self.bpu_path = config['tb_top']['path_to_bpu']
@@ -136,7 +137,7 @@ end
                               f"{self.bpu_path}.{self.btb_entry}_{loop_var};"
         for loop_var in range(self._btb_depth):
             tb_top = tb_top + f"\n\tintf.{self.valids}[{loop_var}] = {self.bpu_path}" \
-                              f".{self.btb_tag}_{i}[0];"
+                              f".{self.btb_tag}_{loop_var}[0];"
         tb_top = tb_top + """\n\tend
 end
 
@@ -436,10 +437,10 @@ def create_dut_config(dut_config_path):
 def data_section(bit_width=32, random=True, signed=False, align=4):
     data = f'RVTEST_DATA_BEGIN\n.align {align}\n'
     if signed:
-        max_val = 2 ** (bit_width - 1) - 1
-        min_val = -2 ** (bit_width - 1)
+        max_val = 2**(bit_width - 1) - 1
+        min_val = -2**(bit_width - 1)
     else:
-        max_val = 2 ** bit_width - 1
+        max_val = 2**bit_width - 1
         min_val = 0
     data += f'MAX_VAL32: .word {max_val}\nMIN_VAL32: .word {min_val}\n'
     if bit_width > 32:
