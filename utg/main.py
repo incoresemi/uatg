@@ -10,6 +10,7 @@ from utg.__init__ import __version__
 from utg.utils import list_of_modules, info, load_yaml, clean_modules
 from utg.utils import create_dut_config, create_config_file, create_alias_file
 
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -228,7 +229,7 @@ def from_config(config_file, verbosity):
     module_dir = config['utg']['module_dir']
     modules = config['utg']['modules']
     verbose = config['utg']['verbose']
- 
+
     module = clean_modules(module_dir, modules, verbose=verbosity)
     logger.level(verbose)
 
@@ -266,6 +267,7 @@ def from_config(config_file, verbosity):
 
 
 # -------------------------
+
 
 @click.option('--config_path',
               '-cp',

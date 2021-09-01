@@ -16,8 +16,13 @@ from utg.log import logger
 # from utg.utils import load_yaml
 
 
-def generate_tests(work_dir, linker_dir, modules, config_dict,
-                   test_list, modules_dir, verbose='info'):
+def generate_tests(work_dir,
+                   linker_dir,
+                   modules,
+                   config_dict,
+                   test_list,
+                   modules_dir,
+                   verbose='info'):
     """
     specify the location where the python test files are located for a
     particular module with the folder following / , Then load the plugins from
@@ -284,8 +289,7 @@ def validate_tests(modules, config_dict, work_dir, modules_dir, verbose='info'):
                                  f'test on DUT and generate log or check '
                                  f'the path.')
             else:
-                logger.warn(
-                    f'No asm generated for {_test_name}. Skipping')
+                logger.warn(f'No asm generated for {_test_name}. Skipping')
         logger.debug(f'Minimal log Checking for {module} complete')
 
     logger.info("Minimal Verification Results")
