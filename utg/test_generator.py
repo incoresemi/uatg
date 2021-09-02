@@ -268,12 +268,11 @@ def validate_tests(modules, config_dict, work_dir, modules_dir, verbose='info'):
             _name = (str(plugin.plugin_object).split(".", 1))
             _test_name = ((_name[1].split(" ", 1))[0])
             _check = plugin.plugin_object.execute(module_params)
+            _log_file_path = os.path.join(work_tests_dir, _test_name, 'log')
             if _check:
                 try:
                     _result = plugin.plugin_object.check_log(
-                        log_file_path=os.path.join(work_tests_dir, _test_name,
-                                                   'log'),
-                        reports_dir=reports_dir)
+                        _log_file_path, reports_dir)
                     if _result:
                         logger.info(f'{_tot_ct}. Minimal test: {_test_name} '
                                     f'has passed.')
