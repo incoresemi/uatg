@@ -27,7 +27,7 @@ def cli():
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Absolute Path to the directory containing the python files"
-              " which generate the assembly tests. "
+              " which generates the assembly tests. "
               "Required Parameter")
 @click.option('--work_dir',
               '-wd',
@@ -80,7 +80,7 @@ def clean(module_dir, work_dir, verbose):
               required=True,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Absolute Path to the directory containing the python files"
-              " which generate the assembly tests. "
+              " which generates the assembly tests. "
               "Required Parameter")
 @click.option('--gen_cvg',
               '-gc',
@@ -99,8 +99,8 @@ def clean(module_dir, work_dir, verbose):
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
-              help="Path to the working directory where generated files will be"
-              " stored.")
+              help="Path to the directory containing the linker file."
+              "Work Directory is Chosen for linker if this argument is empty")
 @click.option('--work_dir',
               '-wd',
               multiple=False,
@@ -114,10 +114,7 @@ def clean(module_dir, work_dir, verbose):
               multiple=False,
               is_flag=False,
               help="Enter a list of modules as a string in a comma separated "
-              "format.\n--module 'branch_predictor, decoder'\nHere "
-              "decoder and branch_predictor are chosen\nIf all module "
-              "are to be selected use keyword 'all'.\n Presently supported"
-              "modules are: branch_predictor",
+              "format.\ndefault-all",
               type=str)
 @click.option('--verbose',
               '-v',
@@ -182,7 +179,7 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
               required=True,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Absolute Path to the directory containing the python files"
-              " which generate the assembly tests. "
+              " which generates the assembly tests. "
               "Required Parameter")
 @cli.command()
 def list_modules(module_dir, verbose):
@@ -209,14 +206,14 @@ def list_modules(module_dir, verbose):
               "individual args/flags are to be passed through cli. In the"
               "case of conflict between cli and config.ini values, config"
               ".ini values will be chosen")
-@click.option('--verbosity',
+@click.option('--verbose',
               '-v',
               default='info',
               help='Set verbose level for debugging',
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
 @cli.command()
-def from_config(config_file, verbosity):
+def from_config(config_file, verbose):
     """
     This subcommand reads parameters from config.ini and runs utg based on the
     values.\n
@@ -228,10 +225,10 @@ def from_config(config_file, verbosity):
 
     module_dir = config['utg']['module_dir']
     modules = config['utg']['modules']
-    verbose = config['utg']['verbose']
+    verbosity = config['utg']['verbose']
 
-    module = clean_modules(module_dir, modules, verbose=verbosity)
-    logger.level(verbose)
+    module = clean_modules(module_dir, modules, verbose=verbose)
+    logger.level(verbosity)
 
     if config['utg']['gen_test'].lower() == 'true':
         dut_dict = load_yaml(config['utg']['dut_config'])
@@ -296,11 +293,11 @@ def setup(config_path, alias_path, dut_path):
         Optional: -dp, --dut_path;  -ap, --alias_path; -cp, --config_path
     """
     if config_path is None:
-        config_path = 'utg/'
+        config_path = './'
     if alias_path is None:
-        alias_path = 'chromite_uarch_tests/'
+        alias_path = './'
     if dut_path is None:
-        dut_path = 'utg/target/'
+        dut_path = './'
 
     create_config_file(config_path=config_path)
     create_dut_config(dut_config_path=dut_path)
@@ -341,10 +338,7 @@ def setup(config_path, alias_path, dut_path):
               multiple=False,
               is_flag=False,
               help="Enter a list of modules as a string in a comma separated "
-              "format.\n--module 'branch_predictor, decoder'\nHere "
-              "decoder and branch_predictor are chosen\nIf all module "
-              "are to be selected use keyword 'all'.\n Presently supported"
-              "modules are: branch_predictor",
+              "format.\ndefault-all",
               type=str)
 @click.option('--verbose',
               '-v',

@@ -5,7 +5,6 @@ from utg.log import logger
 import ruamel
 from ruamel.yaml import YAML
 
-
 # import utg
 # from yapsy.PluginManager import PluginManager
 
@@ -115,13 +114,15 @@ end
                   f"{self.bpu_path}.{self.rg_ghr};\n\tintf.{self.mispredict}" \
                   f" = {self.bpu_path}.{self.mispredict}; "
         for loop_var in range(self._btb_depth):
-            tb_top = tb_top + f"\n\tintf.{self.btb_tag}_{loop_var} = {self.bpu_path}" \
+            tb_top = tb_top + f"\n\tintf.{self.btb_tag}_{loop_var} " \
+                              f"= {self.bpu_path}" \
                               f".self.btb_tag_{loop_var};"
         for loop_var in range(self._btb_depth):
             tb_top = tb_top + f"\n\tintf.{self.btb_entry}_{loop_var} = " \
                               f"{self.bpu_path}.{self.btb_entry}_{loop_var};"
         for loop_var in range(self._btb_depth):
-            tb_top = tb_top + f"\n\tintf.{self.valids}[{loop_var}] = {self.bpu_path}" \
+            tb_top = tb_top + f"\n\tintf.{self.valids}[{loop_var}] " \
+                              f"= {self.bpu_path}" \
                               f".{self.btb_tag}_{loop_var}[0];"
         tb_top += "\n\tend\n\telse\n\tbegin\n"
         tb_top += f"\tintf.{self.rg_initialize} = {self.bpu_path}" \
@@ -138,7 +139,8 @@ end
             tb_top = tb_top + f"\n\tintf.{self.btb_entry}_{loop_var} = " \
                               f"{self.bpu_path}.{self.btb_entry}_{loop_var};"
         for loop_var in range(self._btb_depth):
-            tb_top = tb_top + f"\n\tintf.{self.valids}[{loop_var}] = {self.bpu_path}" \
+            tb_top = tb_top + f"\n\tintf.{self.valids}[{loop_var}] " \
+                              f"= {self.bpu_path}" \
                               f".{self.btb_tag}_{loop_var}[0];"
         tb_top = tb_top + """\n\tend
 end
@@ -224,7 +226,8 @@ def load_yaml(file):
 def join_yaml_reports(work_dir='abs_path_here/', module='branch_predictor'):
     """
         Function that combines all the verification report yaml files into one.
-        This function is used as a part of the Check_logs option present in tests
+        This function is used as a part of the Check_logs option present in
+        tests
     """
     files = [
         file for file in os.listdir(os.path.join(work_dir, 'reports', module))
@@ -365,11 +368,11 @@ def create_config_file(config_path):
           'different levels of messages.\nverbose = info\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
-          ' tests are to be generated/validated in comma separated format.\n# ' \
+          ' tests are to be generated/validated in comma separated format.\n# '\
           'Run \'utg --list-modules\' to find all the modules that are ' \
           'supported.\n# Use \'all\' to generate/validate all modules\n' \
           'modules = all\n\n# Absolute path of the uarch_modules/modules ' \
-          'Directory\nmodule_dir = uarch_modules/modules\n# Directory to dump ' \
+          'Directory\nmodule_dir = uarch_modules/modules\n# Directory to dump '\
           'assembly files and reports\nwork_dir = work\n# location to store ' \
           'the link.ld linker file. By default it\'s same as ' \
           'work_dir\nlinker_dir = work\n\n# Path of the yaml file containing ' \
@@ -419,8 +422,8 @@ def create_alias_file(alias_path):
 
 def create_dut_config(dut_config_path):
     """
-    Creates a template dut_config.yaml (based on Chromite's default configuration
-    at the dut_config_path. 
+    Creates a template dut_config.yaml (based on Chromite's default
+    configuration at the dut_config_path.
     Invoked by running the utg setup command
     """
     dut = 'ISA: RV64IMAFDCSU\niepoch_size: 2\ndepoch_size: 1\ndtvec_base: ' \

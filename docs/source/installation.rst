@@ -27,9 +27,9 @@ Install Python
       .. code-block:: shell-session
 
         $ python3 --version
-        Python 3.8.2
+        Python 3.8.10
         $ pip3 --version
-        pip 20.1 from <user-path>.local/lib/python3.6/site-packages/pip (python 3.6)
+        pip 20.0.2 from /usr/lib/python3/dist-packages/pip (python 3.8)
 
  
 Using CONDA Virtualenv for Python 
@@ -89,7 +89,7 @@ Install UTG
 
    .. tab:: via Git
 
-     To install UArchTest, run this command in your terminal:
+     To install UTG, run this command in your terminal:
      
      .. code-block:: console
      
@@ -203,87 +203,4 @@ Change Neccesary Target Env Files
 Running UTG
 ===========
 
-.. note:: utg is interchangeably denoted as 'framework' in this documentation.
 
-Once you have installed UTG. 
-
-.. note:: please clone `chromite_uarch_tests <https://gitlab.com/incoresemi/chromite_uarch_tests.git>`_ within the utg directory. Once cloned, checkout the dev-0.0.1 branch. This module contains all the tests written for the submodules in Chromite.
-
-Command to **generate** ASM tests 
----------------------------------
-
-.. code-block:: shell-session
-
-  $ utg -dc /path/to/dut_config.yaml/file -md /path/to/the/modules/directory -gt -v <loglevel>
-
-
-- This command will create a `work` directory within the micro-arch-tests directory and create the test files within this directory. It will also create a `model_test.h` and `link.ld` file in the same directory by default.
-- The generated ASM files can be located within the work directory follwing this path -> `work_dir/modules_name/test_name/test_name.S`
-- This command does not generate the SV covergroup and TB files. It is required to pass the `-gc` flag along with the alias file (`-af`) to be specified in addition to `-gt`
-- The log level can be chosen between `info, error` and `debug`
-- `-dc` and `-md` are required parameters. 
-- `-gc` and `-v` are not.
-
-
-The command previously shown is minimal and uses the default work directory, default linker files among several others. All options can be found by executing the command
-
-.. code-block:: shell-session
-
-  $ utg --help
-
-The complete command required to **generate ASM tests and covergroups** with control over several parameters is shown as follows
-
-.. code-block:: shell-session
-
-  $ utg -dc /path/to/dut_config.yaml -md /path/to/modules/directory -wd /path/to/working/directory/ \
-    -ld /path/to/directory/containing/linker/files -m <modules_for_which_tests_are_to_generated> \
-    -af /path/to/aliasing.yaml/file -gt -gc  \
-    -v <log level>
-
-Here,
-
-- The `-dc` and `-md` are paths to the *dut_config.yaml* and the *modules* directory respectively. These are required for all *utg* commands
-
-  - The *modules* directory contains the python files which will be invoked by the framework while genrating the tests. 
-
-- The `-wd` is optional. It specifies the work directory in which the tests are to be created.
-- The directory passed with `-ld` option should contain both the `model_test.h` as well as the `link.ld` files within it. If not, those files will be created in the work directory.
-- The `-m` option should be a string listing all the modules for which the tests are to be generated. By default, when unsepcified, the framework assumes it to be *'all'*.
-- the `-af` option should list the path to an `aliasing.yaml` file which will be used for BSV signal aliasing. This is a required parameter if you wish to generate covergroups. 
-- `-gt` generates tests, `-gc` generates covergroups.
-- `-v` indicates the level of the logging the user requires.
-
-
-**Once you have created the tests, and have succesfully run it on RiVer Core. You can use the minimal check logs feature present in the framework.**
-
-.. note:: it is necessary that the user enables log dumping in the river_core_dut_plugin. Details about that will be covered in the documentation of river_core.
-
-command to **validate** the generated logs
-------------------------------------------
-
-.. code-block:: shell-session
-
-  $ utg -dc /path/to/dut_config.yaml -md /path/to/modules/directory -vt -v <log level>
-
-Here, 
-- `-dc` and `-md` are required parameters. `-v` is optional
-- `-vt` indicates that the framework is required to parse the logs and check it against the known cases which should have been exploited by the test.
-
-
-command to **list modules**
----------------------------
-
-.. code-block:: shell-session
-
-  $ utg -dc path/to/dut_config -md /path/to/modules/directory -lm 
-
-- This command lists all the hardware modules for which test generation is possible by looking at the directory names within the *modules* directory
-
-command to **clean**
---------------------
-
-.. code-block:: shell-session
-
-  $ utg -md /path/to/modules/directory -dc /path/to/dut_config.yaml -cl
-
-- `-cl` cleans the work directory as well as removes all the `__pycache__` and `.yapsy_plugin` files present within the modules directory.
