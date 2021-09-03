@@ -95,7 +95,7 @@ def generate_tests(work_dir,
         if (os.path.isdir(work_tests_dir)) and \
                 os.path.exists(work_tests_dir):
             rmtree(work_tests_dir)
-        print("making work tests dir")
+
         os.mkdir(work_tests_dir)
 
         logger.debug(f'Generating assembly tests for {module}')
