@@ -212,7 +212,7 @@ configuration to the number of CSRs. To explain, let us consider the
 
 .. tabularcolumns:: |l|L|
 
-.. table:: General Configuration Options
+.. table:: Parameters in Branch Predictor 
 
   =================== =========================================================
   Parameter           Description
