@@ -397,20 +397,20 @@ def create_alias_file(alias_path):
         Creates a template aliasing.yaml file at the alias_path directory.
         Invoked by running utg setup
     """
-    alias = 'tb_top:\n\tpath_to_bpu: ' \
-            'mktbsoc.soc.ccore.riscv.stage0.bpu\n\tpath_to_decoder: ' \
+    alias = 'tb_top:\n path_to_bpu: ' \
+            'mktbsoc.soc.ccore.riscv.stage0.bpu\n path_to_decoder: ' \
             'mktbsoc.soc.ccore.riscv.stage2.instance_decoder_func_32_2\n' \
-            '\tpath_to_stage0: mktbsoc.soc.ccore.riscv.stage0\n\t' \
+            ' path_to_stage0: mktbsoc.soc.ccore.riscv.stage0\n ' \
             'path_to_fn_decompress: ' \
             'mktbsoc.soc.ccore.riscv.stage1.instance_fn_decompress_0\n\ntest_' \
-            'case:\n\ttest: regression\n\nbpu:\n\tinput:\n\toutput:\n\treg:' \
-            '\n\t\tbpu_rg_ghr: rg_ghr_port1__read\n\t\tbpu_rg_initialize: ' \
-            'rg_initialize\n\t\tbpu_rg_allocate: ' \
-            'rg_allocate\n\twire:\n\t\tbpu_mispredict_flag: ' \
-            'ma_mispredict_g\n\t\tbpu_btb_tag: ' \
-            'v_reg_btb_tag\n\t\tbpu_btb_entry: ' \
-            'v_reg_btb_entry\n\t\tbpu_ras_top_index: ' \
-            'ras_stack_top_index_port2__read\n\t\tbpu_btb_tag_valid: ' \
+            'case:\n test: regression\n\nbpu:\n input:\n output:\n reg:' \
+            '\n  bpu_rg_ghr: rg_ghr_port1__read\n  bpu_rg_initialize: ' \
+            'rg_initialize\n  bpu_rg_allocate: ' \
+            'rg_allocate\n wire:\n  bpu_mispredict_flag: ' \
+            'ma_mispredict_g\n  bpu_btb_tag: ' \
+            'v_reg_btb_tag\n  bpu_btb_entry: ' \
+            'v_reg_btb_entry\n  bpu_ras_top_index: ' \
+            'ras_stack_top_index_port2__read\n  bpu_btb_tag_valid: ' \
             'btb_valids\n '
 
     with open(os.path.join(alias_path, 'aliasing.yaml'), 'w') as f:
@@ -424,31 +424,31 @@ def create_dut_config(dut_config_path):
     Invoked by running the utg setup command
     """
     dut = 'ISA: RV64IMAFDCSU\niepoch_size: 2\ndepoch_size: 1\ndtvec_base: ' \
-          '256\ns_extension:\n\tmode: sv39\n\titlb_size: 4\n\tdtlb_size: ' \
-          '4\n\tasid_width: 9\npmp:\n\tenable: true\n\tentries: ' \
-          '4\n\tgranularity: 8\nm_extension:\n\tmul_stages: 1\n\tdiv_stages: ' \
-          '32\nbranch_predictor:\n\tinstantiate: True\n\tpredictor: ' \
-          'gshare\n\ton_reset: enable\n\tbtb_depth: 32\n\tbht_depth: ' \
-          '512\n\thistory_len: 8\n\thistory_bits: 5\n\tras_depth: ' \
-          '8\nicache_configuration:\n\tinstantiate: true\n\ton_reset: ' \
-          'enable\n\tsets: 64\n\tword_size: 4\n\tblock_size: 16\n\tways: ' \
-          '4\n\tfb_size: 4\n\treplacement: RR\n\tecc_enable: false\n\t' \
-          'one_hot_select: false\ndcache_configuration:\n\t' \
-          'instantiate: true\n\ton_reset: enable\n\tsets: 64\n\tword_size: 8' \
-          '\n\tblock_size: 8\n\tways: 4\n\tfb_size: 8\n\tsb_size: 2\n\t' \
-          'replacement: RR\n\tecc_enable: false\n\tone_hot_select: false\n\t' \
+          '256\ns_extension:\n mode: sv39\n itlb_size: 4\n dtlb_size: ' \
+          '4\n asid_width: 9\npmp:\n enable: true\n entries: ' \
+          '4\n granularity: 8\nm_extension:\n mul_stages: 1\n div_stages: ' \
+          '32\nbranch_predictor:\n instantiate: True\n predictor: ' \
+          'gshare\n on_reset: enable\n btb_depth: 32\n bht_depth: ' \
+          '512\n history_len: 8\n history_bits: 5\n ras_depth: ' \
+          '8\nicache_configuration:\n instantiate: true\n on_reset: ' \
+          'enable\n sets: 64\n word_size: 4\n block_size: 16\n ways: ' \
+          '4\n fb_size: 4\n replacement: RR\n ecc_enable: false\n ' \
+          'one_hot_select: false\ndcache_configuration:\n ' \
+          'instantiate: true\n on_reset: enable\n sets: 64\n word_size: 8' \
+          '\n block_size: 8\n ways: 4\n fb_size: 8\n sb_size: 2\n ' \
+          'replacement: RR\n ecc_enable: false\n one_hot_select: false\n ' \
           'rwports: 1\nreset_pc: 4096\nphysical_addr_size: 32\nbus_protocol: ' \
           'AXI4\nfpu_trap: false\ndebugger_support: false\nno_of_triggers: 0 ' \
-          '\ncsr_configuration:\n\tstructure: daisy\n\tcounters_in_grp4: 7\n' \
-          '\tcounters_in_grp5: 7\n\tcounters_in_grp6: 7\n\tcounters_in_grp7: ' \
-          '8\nbsc_compile_options:\n\ttest_memory_size: 33554432\n\t' \
-          'assertions: true\n\ttrace_dump: true\n\tcompile_target: \'sim\'\n' \
-          '\tsuppress_warnings: ["all"]\n\tverilog_dir: build/hw/verilog\n\t' \
-          'build_dir: build/hw/intermediate\n\ttop_module: mkTbSoc\n\t' \
-          'top_file: TbSoc.bsv\n\ttop_dir: test_soc\n\topen_ocd: ' \
-          'False\nverilator_configuration:\n\tcoverage: none\n\ttrace: ' \
-          'false\n\tthreads: 1\n\tverbosity: true\n\tsim_speed: ' \
-          'fast\n\tout_dir: bin'
+          '\ncsr_configuration:\n structure: daisy\n counters_in_grp4: 7\n' \
+          ' counters_in_grp5: 7\n counters_in_grp6: 7\n counters_in_grp7: ' \
+          '8\nbsc_compile_options:\n test_memory_size: 33554432\n ' \
+          'assertions: true\n trace_dump: true\n compile_target: \'sim\'\n' \
+          ' suppress_warnings: ["all"]\n verilog_dir: build/hw/verilog\n ' \
+          'build_dir: build/hw/intermediate\n top_module: mkTbSoc\n ' \
+          'top_file: TbSoc.bsv\n top_dir: test_soc\n open_ocd: ' \
+          'False\nverilator_configuration:\n coverage: none\n trace: ' \
+          'false\n threads: 1\n verbosity: true\n sim_speed: ' \
+          'fast\n out_dir: bin'
     with open(os.path.join(dut_config_path, 'dut_config.yaml'), 'w') as f:
         f.write(dut)
 
@@ -473,7 +473,12 @@ def data_section(bit_width=32, random=True, signed=False, align=4):
     data += 'RAND_VAL:\n'
     if random:
         for i in range(20):
-            data += f'\t.{size}\t{hex(rnd.randint(min_signed, max_signed))}\n'
+            if signed:
+                data += f'\t.{size}\t' \
+                        f'{hex(rnd.randint(min_signed, max_signed))}\n'
+            else:
+                data += f'\t.{size}\t' \
+                        f'{hex(rnd.randint(min_unsigned, max_unsigned))}\n'
     return data
 
 
