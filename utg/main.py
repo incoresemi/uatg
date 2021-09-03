@@ -226,9 +226,11 @@ def from_config(config_file, verbose):
     module_dir = config['utg']['module_dir']
     modules = config['utg']['modules']
     verbosity = config['utg']['verbose']
-
+    
     module = clean_modules(module_dir, modules, verbose=verbose)
     logger.level(verbosity)
+
+    info(__version__)
 
     if config['utg']['gen_test'].lower() == 'true':
         dut_dict = load_yaml(config['utg']['dut_config'])
