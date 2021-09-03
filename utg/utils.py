@@ -5,6 +5,7 @@ from utg.log import logger
 import ruamel
 from ruamel.yaml import YAML
 
+
 # import utg
 # from yapsy.PluginManager import PluginManager
 
@@ -271,7 +272,6 @@ SECTIONS
 
 
 def create_model_test_h(target_dir):
-
     """
     Creates a model_test.h file in the target directory specified by the user.
     """
@@ -365,11 +365,11 @@ def create_config_file(config_path):
           'different levels of messages.\nverbose = info\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
-          ' tests are to be generated/validated in comma separated format.\n# '\
+          ' tests are to be generated/validated in comma separated format.\n# ' \
           'Run \'utg --list-modules\' to find all the modules that are ' \
           'supported.\n# Use \'all\' to generate/validate all modules\n' \
           'modules = all\n\n# Absolute path of the uarch_modules/modules ' \
-          'Directory\nmodule_dir = uarch_modules/modules\n# Directory to dump '\
+          'Directory\nmodule_dir = uarch_modules/modules\n# Directory to dump ' \
           'assembly files and reports\nwork_dir = work\n# location to store ' \
           'the link.ld linker file. By default it\'s same as ' \
           'work_dir\nlinker_dir = work\n\n# Path of the yaml file containing ' \
@@ -460,15 +460,20 @@ def data_section(bit_width=32, random=True, signed=False, align=4):
     DUT memory.
     """
     data = f'RVTEST_DATA_BEGIN\n.align {align}\n'
-    if signed:
-        max_val = 2**(bit_width - 1) - 1
-        min_val = -2**(bit_width - 1)
-    else:
-        max_val = 2**bit_width - 1
-        min_val = 0
-    data += f'MAX_VAL32: .word {max_val}\nMIN_VAL32: .word {min_val}\n'
-    if bit_width > 32:
-        data += f'MAX_VAL64: .dword {max_val}\nMIN_VAL64: .dword {min_val}\n'
+
+    max_signed = 2 ** (bit_width - 1) - 1
+    min_signed = -2 ** (bit_width - 1)
+    max_unsigned = 2 ** bit_width - 1
+    min_unsigned = 0
+    size = 'word' if (bit_width == 32) else 'dword'
+    data += f'MAX_U:\t.{size} {hex(max_unsigned)}\nMIN_U:\t' \
+            f'.word {hex(min_unsigned)}\n'
+    data += f'MAX_S:\t.{size} {hex(max_signed)}\nMIN_S:\t' \
+            f'.word {hex(min_signed)}\n'
+    data += 'RAND_VAL:\n'
+    if random:
+        for i in range(20):
+            data += f'\t.{size}\t{hex(rnd.randint(min_signed, max_signed))}\n'
     return data
 
 
