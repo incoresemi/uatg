@@ -368,26 +368,24 @@ def create_config_file(config_path):
           ' tests are to be generated/validated in comma separated format.\n# '\
           'Run \'utg --list-modules\' to find all the modules that are ' \
           'supported.\n# Use \'all\' to generate/validate all modules\n' \
-          'modules = all\n\n# Absolute path of the uarch_modules/modules ' \
-          'Directory\nmodule_dir = uarch_modules/modules\n# Directory to dump '\
-          'assembly files and reports\nwork_dir = work\n# location to store ' \
+          'modules = all\n\n# Absolute path to chromite_uarch_tests/modules ' \
+          'Directory\nmodule_dir = \n\n# Directory to dump '\
+          'assembly files and reports\nwork_dir = \n\n# location to store ' \
           'the link.ld linker file. By default it\'s same as ' \
-          'work_dir\nlinker_dir = work\n\n# Path of the yaml file containing ' \
-          'DUT Configuration.\n# By default the configuration is ' \
-          '"utg/target/dut_config.yaml"\ndut_config = ' \
-          'target/dut_config.yaml\n# Absolute Path of the yaml file contain' \
+          'work_dir\nlinker_dir = \n\n# Path of the yaml file containing ' \
+          'DUT Configuration.\ndut_config = \n\n# Absolute Path to yaml contain' \
           'ing the signal aliases of the DUT\n# presently it is stored ' \
-          'in \'uarch_modules/aliasing.yaml\'\nalias_file = ' \
-          'uarch_modules/aliasing.yaml\n\n# [True, False] If the gen_test_' \
+          'in \'chromite_uarch_tests/aliasing.yaml\'\nalias_file = ' \
+          '\n\n# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
-          'river_core are generated automatically.\n# Until you want to ' \
+          'river_core are generated automatically.\n# Unless you want to ' \
           'validate individual tests in river_core set the flag to True\n' \
           'gen_test_list = True\n# [True, False] If the gen_test flag is True' \
-          ', assembly files are generated/overwritten\ngen_test = False\n# ' \
-          '[True, False] If the val_test flag is True, assembly files are ' \
-          'executed and the modules are validated\nval_test = False\n# [True' \
+          ', assembly files are generated/overwritten\ngen_test = True\n# ' \
+          '[True, False] If the val_test flag is True, DUT log files are ' \
+          'are parsed and modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = False\n\n# list_modules = False'
+          'are generated\ngen_cvg = True\n\n# list_modules = False'
     with open(os.path.join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
 
@@ -403,7 +401,7 @@ def create_alias_file(alias_path):
             '\tpath_to_stage0: mktbsoc.soc.ccore.riscv.stage0\n\t' \
             'path_to_fn_decompress: ' \
             'mktbsoc.soc.ccore.riscv.stage1.instance_fn_decompress_0\n\ntest_' \
-            'case:\n\ttest: regression\n\nbpu:\n\tinput:\n\toutput:\n\treg:' \
+            'case:\n\ttest: regression\n\nbpu:\n\tinput:\n\toutput:\n\tregister:' \
             '\n\t\tbpu_rg_ghr: rg_ghr_port1__read\n\t\tbpu_rg_initialize: ' \
             'rg_initialize\n\t\tbpu_rg_allocate: ' \
             'rg_allocate\n\twire:\n\t\tbpu_mispredict_flag: ' \
