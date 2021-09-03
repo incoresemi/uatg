@@ -369,26 +369,32 @@ def create_config_file(config_path):
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
           ' tests are to be generated/validated in comma separated format.\n# '\
-          'Run \'utg --list-modules\' to find all the modules that are ' \
-          'supported.\n# Use \'all\' to generate/validate all modules\n' \
+          'Run \'utg --list-modules -md <path> \' to find all the modules that'\
+          ' are supported.\n# Use \'all\' to generate/validate all modules\n' \
           'modules = all\n\n# Absolute path to chromite_uarch_tests/modules ' \
-          'Directory\nmodule_dir = \n\n# Directory to dump '\
-          'assembly files and reports\nwork_dir = \n\n# location to store ' \
-          'the link.ld linker file. By default it\'s same as ' \
-          'work_dir\nlinker_dir = \n\n# Path of the yaml file containing ' \
-          'DUT Configuration.\ndut_config = ' \
+          'Directory\n'\
+          'module_dir = /home/user/myquickstart/chromite_uarch_tests/modules/'\
+          '\n\n# Directory to dump assembly files and reports\n'\
+          'work_dir = /home/user/myquickstart/work/' \
+          '\n\n# location to store the link.ld linker file. By default it\'s '\
+          'same as work_dir\n'\
+          'linker_dir = /home/user/myquickstart/work/' \
+          '\n\n# Path of the yaml file containing DUT Configuration.\n' \
+          'dut_config = /home/user/myquickstart/dut_config.yaml' \
           '\n\n# Absolute Path of the yaml file contain' \
           'ing the signal aliases of the DUT ' \
-          '\nalias_file = \n\n# [True, False] If the gen_test_' \
+          '\nalias_file = /home/user/myquickstart/aliasing.yaml' \
+          '\n\n# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
-          'river_core are generated automatically.\n# Until you want to ' \
-          'validate individual tests in river_core set the flag to True\n' \
+          'river_core are generated automatically.\n# Unless you want to ' \
+          'run individual tests in river_core, set the flag to True\n' \
           'gen_test_list = True\n# [True, False] If the gen_test flag is True' \
-          ', assembly files are generated/overwritten\ngen_test = False\n# ' \
-          '[True, False] If the val_test flag is True, assembly files are ' \
-          'executed and the modules are validated\nval_test = False\n# [True' \
+          ', assembly files are generated/overwritten\ngen_test = True\n# ' \
+          '[True, False] If the val_test flag is True, Log from DUT are ' \
+          'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = False\n\n# list_modules = False'
+          'are generated\ngen_cvg = True'
+
     with open(os.path.join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
 
