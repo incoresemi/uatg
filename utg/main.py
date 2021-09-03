@@ -206,14 +206,14 @@ def list_modules(module_dir, verbose):
               "individual args/flags are to be passed through cli. In the"
               "case of conflict between cli and config.ini values, config"
               ".ini values will be chosen")
-@click.option('--verbosity',
+@click.option('--verbose',
               '-v',
               default='info',
               help='Set verbose level for debugging',
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
 @cli.command()
-def from_config(config_file, verbosity):
+def from_config(config_file, verbose):
     """
     This subcommand reads parameters from config.ini and runs utg based on the
     values.\n
@@ -225,10 +225,10 @@ def from_config(config_file, verbosity):
 
     module_dir = config['utg']['module_dir']
     modules = config['utg']['modules']
-    verbose = config['utg']['verbose']
+    verbosity = config['utg']['verbose']
 
-    module = clean_modules(module_dir, modules, verbose=verbosity)
-    logger.level(verbose)
+    module = clean_modules(module_dir, modules, verbose=verbose)
+    logger.level(verbosity)
 
     if config['utg']['gen_test'].lower() == 'true':
         dut_dict = load_yaml(config['utg']['dut_config'])
