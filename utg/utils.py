@@ -371,17 +371,15 @@ def create_config_file(config_path):
           ' tests are to be generated/validated in comma separated format.\n# '\
           'Run \'utg --list-modules\' to find all the modules that are ' \
           'supported.\n# Use \'all\' to generate/validate all modules\n' \
-          'modules = all\n\n# Absolute path of the uarch_modules/modules ' \
-          'Directory\nmodule_dir = uarch_modules/modules\n# Directory to dump '\
-          'assembly files and reports\nwork_dir = work\n# location to store ' \
+          'modules = all\n\n# Absolute path to chromite_uarch_tests/modules ' \
+          'Directory\nmodule_dir = \n\n# Directory to dump '\
+          'assembly files and reports\nwork_dir = \n\n# location to store ' \
           'the link.ld linker file. By default it\'s same as ' \
-          'work_dir\nlinker_dir = work\n\n# Path of the yaml file containing ' \
-          'DUT Configuration.\n# By default the configuration is ' \
-          '"utg/target/dut_config.yaml"\ndut_config = ' \
-          'target/dut_config.yaml\n# Absolute Path of the yaml file contain' \
-          'ing the signal aliases of the DUT\n# presently it is stored ' \
-          'in \'uarch_modules/aliasing.yaml\'\nalias_file = ' \
-          'uarch_modules/aliasing.yaml\n\n# [True, False] If the gen_test_' \
+          'work_dir\nlinker_dir = \n\n# Path of the yaml file containing ' \
+          'DUT Configuration.\ndut_config = ' \
+          '\n\n# Absolute Path of the yaml file contain' \
+          'ing the signal aliases of the DUT ' \
+          '\nalias_file = \n\n# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Until you want to ' \
           'validate individual tests in river_core set the flag to True\n' \
