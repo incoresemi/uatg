@@ -293,11 +293,11 @@ def setup(config_path, alias_path, dut_path):
         Optional: -dp, --dut_path;  -ap, --alias_path; -cp, --config_path
     """
     if config_path is None:
-        config_path = 'utg/'
+        config_path = './'
     if alias_path is None:
-        alias_path = 'chromite_uarch_tests/'
+        alias_path = './'
     if dut_path is None:
-        dut_path = 'utg/target/'
+        dut_path = './'
 
     create_config_file(config_path=config_path)
     create_dut_config(dut_config_path=dut_path)
