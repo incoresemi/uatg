@@ -196,11 +196,237 @@ With this you should now have all the following available as command line argume
 Change Neccesary Target Env Files
 =================================
 
-- The environment files required for the framework are present within the ``utg/env/`` directory.
-- The additional files like the linker will be generated automatically along with the tests, if the user does not choose to use a linker of his own.
-- In addition to that, the framework requires an additional dut_config.yaml file, which should summarize the configuration of the DUT under test. The values obtained from this YAML will be used to customize the tests for the DUT.
+- The additional files like the linker will be generated automatically along 
+  with the tests, if the user does not choose to use a linker of his own.
+- In addition to that, the framework requires an additional dut_config.yaml 
+  file, which should summarize the configuration of the DUT under test. The 
+  values obtained from this YAML will be used to customize the tests for the 
+  DUT.
 
 Running UTG
 ===========
 
+To start using UTG, let us create a directory called ``myquickstart``. For 
+demonstration, we are creating the quickstart directory within the 
+``/home/<user>/`` or ``~`` directory. 
 
+.. code-block:: console
+
+   $ mkdir ~/myquickstart
+
+You can install the chromite_uarch_tests with several tests from the 
+`Repo <https://gitlab.com/incoresemi/chromite_uarch_tests.git>`_
+
+.. code-block:: console
+
+    $ cd ~/myquickstart
+    $ git clone https://gitlab.com/incoresemi/chromite_uarch_tests.git
+
+It is necessary to create a work directory for UTG. The work directory is where 
+UTG will be store the ASM test files as well as test reports and logs.
+
+.. code-block:: console
+
+   $ cd ~/myquickstart
+   $ mkdir work
+
+We will next create the ``config.ini``, ``dut_config.yaml`` and the 
+``aliasing.yaml`` files under the ``myquickstart`` directory. You
+can use the setup to create this file:
+
+.. code-block:: console
+
+   $ cd ~/myquickstart
+   $ utg setup
+
+The above should create a ``config.ini`` file with the following contents.
+It should also create the ``aliasing.yaml`` and ``dut_config.yaml`` files.
+Details and further specification of the config file syntax is available at 
+:ref:`Configuration files Spec<configuration_files>`.
+
+.. note:: You will need to change ``user`` to your username in the below file.
+
+.. code-block:: ini
+   :linenos:
+    
+    [utg]
+
+    # [info, error, debug] set verbosity level to view different levels of messages.
+    verbose = info
+    # [True, False] the clean flag removes unnecessary files from the previous runs and cleans directories
+    clean = False
+
+    # Enter the modules whose tests are to be generated/validated in comma separated format.
+    # Run 'utg --list-modules -md <path> ' to find all the modules that are supported.
+    # Use 'all' to generate/validate all modules
+    modules = all
+
+    # Absolute path to chromite_uarch_tests/modules Directory
+    module_dir = /home/user/myquickstart/chromite_uarch_tests/modules/
+
+    # Directory to dump assembly files and reports
+    work_dir = /home/user/myquickstart/work/
+
+    # location to store the link.ld linker file. By default it's same as work_dir
+    linker_dir = /home/user/myquickstart/work/
+
+    # Path of the yaml file containing DUT Configuration.
+    dut_config = /home/user/myquickstart/dut_config.yaml
+
+    # Absolute Path of the yaml file containing the signal aliases of the DUT 
+    alias_file = /home/user/myquickstart/aliasing.yaml
+
+    # [True, False] If the gen_test_list flag is True, the test_list.yaml needed for running tests in river_core are generated automatically.
+    # Unless you want to run individual tests in river_core, set the flag to True
+    gen_test_list = True
+    # [True, False] If the gen_test flag is True, assembly files are generated/overwritten
+    gen_test = True
+    # [True, False] If the val_test flag is True, Log from DUT are parsed and the modules are validated
+    val_test = False
+    # [True, False] If the gen_cvg flag is True, System Verilog cover-groups are generated
+    gen_cvg = True
+
+Once you have changed the user field in the paths, save the file. 
+You can run UTG using the ``from-config`` subcommand.
+
+.. code-block:: console
+
+   $ cd ~/myquickstart
+   $ utg from-config -c config.ini -v debug
+
+You should see the following log on your screen
+
+.. code-block:: console
+
+      info  | ****** Micro Architectural Tests *******
+      info  | Version : dev-0.0.1
+      info  | Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.
+      info  | All Rights Reserved.
+      info  | utg dir is /home/akrish/work/InCore/micro-arch-tests/utg
+      info  | work_dir is /home/akrish/quickstart/work/
+     debug  | Checking /home/akrish/quickstart/chromite_uarch_tests/modules/ for modules
+     debug  | The modules are ['branch_predictor', 'decoder', 'decompressor']
+      info  | ****** Generating Tests ******
+     debug  | Directory for branch_predictor is /home/akrish/quickstart/chromite_uarch_tests/modules/branch_predictor
+      info  | Starting plugin Creation for branch_predictor
+      info  | Created plugins for branch_predictor
+     debug  | Generating assembly tests for branch_predictor
+     debug  | Generating test for utg_gshare_fa_btb_fill_01
+     debug  | Generating test for utg_gshare_fa_mispredict_loop_01
+     debug  | Generating test for utg_gshare_fa_ghr_alternating_01
+     debug  | Generating test for utg_gshare_fa_btb_selfmodifying_01
+     debug  | Generating test for utg_gshare_fa_fence_01
+     debug  | Generating test for utg_gshare_fa_ghr_ones_01
+     debug  | Generating test for utg_gshare_fa_ghr_zeros_01
+     debug  | Generating test for utg_gshare_fa_ras_push_pop_01
+     debug  | Finished Generating Assembly Tests for branch_predictor
+      info  | Creating test_list for the branch_predictor
+     debug  | Current test is /home/akrish/quickstart/work/branch_predictor/utg_gshare_fa_btb_fill_01/utg_gshare_fa_btb_fill_01.S
+     debug  | Current test is /home/akrish/quickstart/work/branch_predictor/utg_gshare_fa_mispredict_loop_01/utg_gshare_fa_mispredict_loop_01.S
+     debug  | Current test is /home/akrish/quickstart/work/branch_predictor/utg_gshare_fa_ghr_alternating_01/utg_gshare_fa_ghr_alternating_01.S
+     debug  | Current test is /home/akrish/quickstart/work/branch_predictor/utg_gshare_fa_btb_selfmodifying_01/utg_gshare_fa_btb_selfmodifying_01.S
+     debug  | Current test is /home/akrish/quickstart/work/branch_predictor/utg_gshare_fa_fence_01/utg_gshare_fa_fence_01.S
+     debug  | Current test is /home/akrish/quickstart/work/branch_predictor/utg_gshare_fa_ghr_ones_01/utg_gshare_fa_ghr_ones_01.S
+     debug  | Current test is /home/akrish/quickstart/work/branch_predictor/utg_gshare_fa_ghr_zeros_01/utg_gshare_fa_ghr_zeros_01.S
+     debug  | Current test is /home/akrish/quickstart/work/branch_predictor/utg_gshare_fa_ras_push_pop_01/utg_gshare_fa_ras_push_pop_01.S
+     debug  | Directory for decoder is /home/akrish/quickstart/chromite_uarch_tests/modules/decoder
+      info  | Starting plugin Creation for decoder
+      info  | Created plugins for decoder
+     debug  | Generating assembly tests for decoder
+     debug  | Generating test for utg_decoder_i_ext_r_type
+     debug  | Finished Generating Assembly Tests for decoder
+      info  | Creating test_list for the decoder
+     debug  | Current test is /home/akrish/quickstart/work/decoder/utg_decoder_i_ext_r_type/utg_decoder_i_ext_r_type.S
+     debug  | Directory for decompressor is /home/akrish/quickstart/chromite_uarch_tests/modules/decompressor
+      info  | Starting plugin Creation for decompressor
+      info  | Created plugins for decompressor
+     debug  | Generating assembly tests for decompressor
+     debug  | Generating test for utg_decompressor
+     debug  | Finished Generating Assembly Tests for decompressor
+      info  | Creating test_list for the decompressor
+     debug  | Current test is /home/akrish/quickstart/work/decompressor/utg_decompressor/utg_decompressor.S
+      info  | ****** Finished Generating Tests ******
+     debug  | Using user specified linker
+     debug  | Using user specified model_test file
+      info  | Test List was generated by utg. You can find it in the work dir 
+     debug  | Checking /home/akrish/quickstart/chromite_uarch_tests/modules/ for modules
+      info  | ****** Generating Covergroups ******
+     debug  | Generated tbtop, defines and interface files
+     debug  | Removing Existing coverpoints SV file
+     debug  | Generating CoverPoints for branch_predictor
+   warning  | Skipping coverpoint generation for utg_gshare_fa_ras_push_pop_01 as there is no gen_covergroup method 
+   warning  | Skipping coverpoint generation for utg_gshare_fa_ghr_alternating_01 as there is no gen_covergroup method 
+      info  | Generating coverpoints SV file for utg_gshare_fa_fence_01
+      info  | Generating coverpoints SV file for utg_gshare_fa_ghr_zeros_01
+   warning  | Skipping coverpoint generation for utg_gshare_fa_ghr_ones_01 as there is no gen_covergroup method 
+      info  | Generating coverpoints SV file for utg_gshare_fa_mispredict_loop_01
+      info  | Generating coverpoints SV file for utg_gshare_fa_btb_fill_01
+   warning  | Skipping coverpoint generation for utg_gshare_fa_btb_selfmodifying_01 as there is no gen_covergroup method 
+     debug  | Finished Generating Coverpoints for branch_predictor
+     debug  | Generating CoverPoints for decoder
+      info  | Generating coverpoints SV file for utg_decoder_i_ext_r_type
+     debug  | Finished Generating Coverpoints for decoder
+     debug  | Generating CoverPoints for decompressor
+   warning  | Skipping coverpoint generation for utg_decompressor as there is no gen_covergroup method 
+     debug  | Finished Generating Coverpoints for decompressor
+      info  | ****** Finished Generating Covergroups ******
+
+
+Now. you will find the generated files within the work directory. The directory
+structure is as follows.
+
+.. code-block:: bash
+  
+    work/
+    ├── branch_predictor
+    │   ├── utg_gshare_fa_btb_fill_01
+    │   │   └── utg_gshare_fa_btb_fill_01.S
+    │   ├── utg_gshare_fa_btb_selfmodifying_01
+    │   │   └── utg_gshare_fa_btb_selfmodifying_01.S
+    │   ├── utg_gshare_fa_fence_01
+    │   │   └── utg_gshare_fa_fence_01.S
+    │   ├── utg_gshare_fa_ghr_alternating_01
+    │   │   └── utg_gshare_fa_ghr_alternating_01.S
+    │   ├── utg_gshare_fa_ghr_ones_01
+    │   │   └── utg_gshare_fa_ghr_ones_01.S
+    │   ├── utg_gshare_fa_ghr_zeros_01
+    │   │   └── utg_gshare_fa_ghr_zeros_01.S
+    │   ├── utg_gshare_fa_mispredict_loop_01
+    │   │   └── utg_gshare_fa_mispredict_loop_01.S
+    │   └── utg_gshare_fa_ras_push_pop_01
+    │       └── utg_gshare_fa_ras_push_pop_01.S
+    ├── decoder
+    │   └── utg_decoder_i_ext_r_type
+    │       └── utg_decoder_i_ext_r_type.S
+    ├── decompressor
+    │   └── utg_decompressor
+    │       └── utg_decompressor.S
+    ├── link.ld
+    ├── model_test.h
+    ├── sv_top
+    │   ├── coverpoints.sv
+    │   ├── defines.sv
+    │   ├── interface.sv
+    │   └── tb_top.sv
+    └── test_list.yaml
+
+The tests have been generated for decompressor, decoder and branch_predictor 
+right now. The number of modules may differ for you if some more tests were 
+added to the chromite_uarch_tests repository. 
+
+The ``link.ld`` and ``model_test.h`` files are DUT specific files. It is 
+generated assuming that the DUT is Chromite. The user should be providing the
+path to his own linker files in the *config.ini* file if he is testing his own
+design.
+
+The ``sv_top`` directory contains the system verilog coverpoints generated 
+using UTG.
+
+Finally, the ``test_list.yaml`` is used to make list of all the tests generated.
+Details about the test_list can be found here,  
+:ref:`Configuration files Spec<configuration_files>`.
+
+Congratulations, you have successfully run UTG. 
+
+.. note:: For a detailed tutorial about using UTG to generate tests, check the 
+   tutorial section of this documentation.
