@@ -27,7 +27,7 @@ def cli():
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Absolute Path to the directory containing the python files"
-              " which generate the assembly tests. "
+              " which generates the assembly tests. "
               "Required Parameter")
 @click.option('--work_dir',
               '-wd',
@@ -80,7 +80,7 @@ def clean(module_dir, work_dir, verbose):
               required=True,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Absolute Path to the directory containing the python files"
-              " which generate the assembly tests. "
+              " which generates the assembly tests. "
               "Required Parameter")
 @click.option('--gen_cvg',
               '-gc',
@@ -99,8 +99,8 @@ def clean(module_dir, work_dir, verbose):
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
-              help="Path to the working directory where generated files will be"
-              " stored.")
+              help="Path to the directory containing the linker file."
+              "Work Directory is Chosen for linker if this argument is empty")
 @click.option('--work_dir',
               '-wd',
               multiple=False,
@@ -114,10 +114,7 @@ def clean(module_dir, work_dir, verbose):
               multiple=False,
               is_flag=False,
               help="Enter a list of modules as a string in a comma separated "
-              "format.\n--module 'branch_predictor, decoder'\nHere "
-              "decoder and branch_predictor are chosen\nIf all module "
-              "are to be selected use keyword 'all'.\n Presently supported"
-              "modules are: branch_predictor",
+              "format.\ndefault-all",
               type=str)
 @click.option('--verbose',
               '-v',
@@ -182,7 +179,7 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
               required=True,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Absolute Path to the directory containing the python files"
-              " which generate the assembly tests. "
+              " which generates the assembly tests. "
               "Required Parameter")
 @cli.command()
 def list_modules(module_dir, verbose):
@@ -341,10 +338,7 @@ def setup(config_path, alias_path, dut_path):
               multiple=False,
               is_flag=False,
               help="Enter a list of modules as a string in a comma separated "
-              "format.\n--module 'branch_predictor, decoder'\nHere "
-              "decoder and branch_predictor are chosen\nIf all module "
-              "are to be selected use keyword 'all'.\n Presently supported"
-              "modules are: branch_predictor",
+              "format.\ndefault-all",
               type=str)
 @click.option('--verbose',
               '-v',
