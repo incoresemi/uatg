@@ -256,7 +256,7 @@ def from_config(config_file, verbose):
                        modules_dir=module_dir,
                        verbose=verbose)
 
-    if config['utg']['clean']:
+    if config['utg']['clean'].lower() == 'true':
         logger.debug('Invoking clean_dirs')
         clean_dirs(work_dir=config['utg']['work_dir'],
                    modules_dir=module_dir,
