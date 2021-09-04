@@ -9,6 +9,7 @@ Welcome to UArchTest
    
    overview
    installation
+   tutorial
    utg_cli
    configuration_files
    creating_new_tests
