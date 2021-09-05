@@ -62,7 +62,7 @@ flags in this section.
        
 Now, let's start by generating the tests.
 
-.. note:: All paths are absolute.
+.. warning:: All paths are absolute.
 
 =======================
 **Generate** ASM tests 

@@ -38,6 +38,8 @@ Configuration Options
 .. note:: Information about the ``dut_config.yaml``, ``aliasing.yaml`` and 
    ``test_list.yaml`` are provided in the following sections.
 
+.. warning:: All paths are absolute.
+
 .. tabularcolumns:: |l|L|
 
 .. table:: General Configuration Options
@@ -79,6 +81,7 @@ Sample ``config.ini``
 ---------------------
 
 .. code-block:: ini
+   :linenos:
 
     [utg]
 
@@ -93,18 +96,18 @@ Sample ``config.ini``
     modules = all
 
     # Absolute path of the uarch_modules/modules Directory
-    module_dir = /home/akrish/work/InCore/chromite_uarch_tests/modules/
+    module_dir = /home/user/work/InCore/chromite_uarch_tests/modules/
     # Directory to dump assembly files and reports
-    work_dir = /home/akrish/work/InCore/micro-arch-tests/work
+    work_dir = /home/user/work/InCore/micro-arch-tests/work
     # location to store the link.ld linker file. By default it's same as work_dir
-    linker_dir = /home/akrish/work/InCore/micro-arch-tests/work
+    linker_dir = /home/user/work/InCore/micro-arch-tests/work
 
     # Path of the yaml file containing DUT Configuration.
     # By default the configuration is "utg/target/dut_config.yaml"
-    dut_config = /home/akrish/work/InCore/micro-arch-tests/utg/target/dut_config.yaml
+    dut_config = /home/user/work/InCore/micro-arch-tests/utg/target/dut_config.yaml
     # Absolute Path of the yaml file containing the signal aliases of the DUT
     # presently it is stored in 'uarch_modules/aliasing.yaml'
-    alias_file = /home/akrish/work/InCore/chromite_uarch_tests/aliasing.yaml
+    alias_file = /home/user/work/InCore/chromite_uarch_tests/aliasing.yaml
 
     # [True, False] If the gen_test_list flag is True, the test_list.yaml needed for running tests in river_core are generated automatically.
     # Until you want to validate individual tests in river_core set the flag to True
@@ -140,6 +143,8 @@ Sample ``dut_config.yaml``
 --------------------------
 
 .. code-block:: yaml
+    :linenos:
+
 
     ISA: RV64IMAFDCSU
     iepoch_size: 2
@@ -239,6 +244,7 @@ The following snippet shows how the parameters of the branch predictor from the
 config file will be used to create a targeted test for exercising the BPU.
 
 .. code-block:: python
+    :linenos:
 
     def execute(self, _dut_dict):
         _en_bpu = _bpu_dict['instantiate']
@@ -285,7 +291,8 @@ process of defining the ``generate_covergroups()`` method easier as well as make
 the method readable for other people who do not know the actual BSV signal names.
 
 .. code-block:: yaml
-  
+   :linenos:
+
    tb_top:
      path_to_bpu: mktbsoc.soc.ccore.riscv.stage0.bpu
      path_to_decoder: mktbsoc.soc.ccore.riscv.stage2.instance_decoder_func_32_2
@@ -332,6 +339,7 @@ test artifacts, must also generate a test list YAML. The test list has the
 following syntax:
 
 .. code-block:: yaml
+   :linenos:
 
    <test-name>:
     asm_file: <path to assembly/C/test file generated>
