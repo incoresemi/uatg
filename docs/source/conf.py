@@ -35,7 +35,7 @@ version = get_version()
 release = version
 
 def setup(app):
-    #app.add_stylesheet("custom.css")
+    app.add_stylesheet("custom.css")
     app.add_css_file("_static/custom.css")
 
 # -- General configuration ---------------------------------------------------
