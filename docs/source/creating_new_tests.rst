@@ -1,8 +1,8 @@
 .. _creating_new_tests: 
 
-##########################
-Tests in the UTG Framework
-##########################
+###############################
+Writing Tests for UTG Framework
+###############################
 
 ================
 Adding new tests
