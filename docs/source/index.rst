@@ -13,5 +13,6 @@ Welcome to UArchTest
    utg_cli
    configuration_files
    creating_new_tests
+   coding_style
    code-doc
    changelog
