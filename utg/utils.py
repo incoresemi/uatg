@@ -466,6 +466,16 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
     DUT memory. The user will specify the data he wants in this section of the 
     DUT memory.
     """
+    size = {
+        8: 'byte',
+        16: 'half',
+        32: 'word',
+        64: 'dword',
+        128: 'quad',
+    }
+    if bit_width not in size.keys():
+        logger.error('bit_width not compatible with byte, half, word or dword')
+        exit('BITWIDTH NOT_IN 8,16,32,64')
 
     data = f'RVTEST_DATA_BEGIN\n.align {align}\n'
     if bit_width != 0:
@@ -473,19 +483,18 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
         min_signed = -2 ** (bit_width - 1)
         max_unsigned = 2 ** bit_width - 1
         min_unsigned = 0
-        size = 'word' if (bit_width == 32) else 'dword'
-        data += f'MAX_U:\t.{size} {hex(max_unsigned)}\nMIN_U:\t' \
-                f'.word {hex(min_unsigned)}\n'
-        data += f'MAX_S:\t.{size} {hex(max_signed)}\nMIN_S:\t' \
-                f'.word {hex(min_signed)}\n'
+        # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
+        #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
+        # data += f'MAX_S:\t.{size[bit_width]} {hex(max_signed)}\nMIN_S:\t' \
+        #         f'.{size[bit_width]} {hex(min_signed)}\n'
         data += 'RAND_VAL:\n'
         if random:
             for i in range(num_vals):
                 if signed:
-                    data += f'\t.{size}\t' \
+                    data += f'\t.{size[bit_width]}\t' \
                             f'{hex(rnd.randint(min_signed, max_signed))}\n'
                 else:
-                    data += f'\t.{size}\t' \
+                    data += f'\t.{size[bit_width]}\t' \
                             f'{hex(rnd.randint(min_unsigned, max_unsigned))}\n'
     data += '\nsample_data:\n.word\t0xbabecafe\n\nRVTEST_DATA_END\n\n'
     return data
