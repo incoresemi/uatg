@@ -1,5 +1,3 @@
-# See LICENSE.incore for license details
-
 import os
 import glob
 import random as rnd
@@ -363,7 +361,8 @@ def create_config_file(config_path):
         Creates a template config.ini file at the config_path directory.
         Invoked by running utg setup
     """
-    cfg = '[utg]\n\n# [info, error, debug] set verbosity level to view ' \
+    cfg = '# See LICENSE.incore for license details\n\n' \
+          '[utg]\n\n# [info, error, debug] set verbosity level to view ' \
           'different levels of messages.\nverbose = info\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
