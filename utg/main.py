@@ -1,4 +1,4 @@
-# See LICENSE.incore for details
+# See LICENSE.incore for license details
 """Console script for utg."""
 
 import click

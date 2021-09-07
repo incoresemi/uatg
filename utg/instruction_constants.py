@@ -1,3 +1,5 @@
+# See LICENSE.incore for license details
+
 base_reg_file = ['x' + str(reg_no) for reg_no in range(32)]
 
 arithmetic_instructions = {

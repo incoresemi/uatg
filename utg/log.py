@@ -1,4 +1,4 @@
-# See LICENSE.incore for details
+# See LICENSE.incore for license details
 
 import logging
 import colorlog

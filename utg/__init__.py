@@ -1,4 +1,4 @@
-# See LICENSE.incore for details
+# See LICENSE.incore for license details
 
 """Top-level package for RISC-V Micro Architecture Test Generator."""
 

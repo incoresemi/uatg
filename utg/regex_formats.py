@@ -1,3 +1,5 @@
+# See LICENSE.incore for license details
+
 # [      8000] [ 0]BPU : Match:00000000
 bpu_match_pattern = "\[\s*[0-9]*\]\s\[\s*[0-9]*\]BPU\s\:\sMatch\:\d{8}"
 

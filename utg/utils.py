@@ -1,3 +1,5 @@
+# See LICENSE.incore for license details
+
 import os
 import glob
 import random as rnd
