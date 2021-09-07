@@ -488,3 +488,39 @@ chromite's configuration file.
 
 .. hint:: User can make use of the `YAPF <https://github.com/google/yapf>`_ 
    formatter to format their test files.
+
+
+Using the rvtest_data function
+------------------------------
+[UNDER DEVELOPMENT]
+
+The rvtest_data function in utg.utils assists in writing automated assembly file by populating the RVTEST_DATA section with either random values or algorithmically computed values.
+The function has the following parameters.
+
+.. code:: python
+
+    rvtest_data(bit_width=32, num_vals=20, random=True, signed=False, align=4)
+
+``bit_width`` is the width of data values that needs to be stored in the data section. The permitted values for bit_width are 8, 16, 32, 64 and 128. For any other values the function raises exception and quits.
+
+``num_vals`` is the number of data values that needs to be written in the data section. Any number more than 1 is valid.
+
+``random`` is a boolean flag that denotes whether to populate random values or values computed algorithmically [UNDER DEVELOPMENT].
+
+``signed`` is a boolean flag to determine whether to generate signed or unsigned values.
+
+``align`` is the byte boundary that the values should be aligned to.
+The function returns a string that contains the RVTEST_DATA section populated with values.
+
+.. code-block:: python
+
+    print(rvtest_data(16, 2, True, False, 4))
+    # The above line generates the following output
+    # RVTEST_DATA_BEGIN
+    # .align 4
+    # RAND_VAL:
+    #     .half	0xdb9b
+    #     .half	0x5571
+    # sample_data:
+    #     .word	0xbabecafe
+    # RVTEST_DATA_END
