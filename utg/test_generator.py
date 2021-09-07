@@ -1,3 +1,5 @@
+# See LICENSE.incore for license details
+
 import os
 import glob
 from shutil import rmtree
@@ -11,9 +13,6 @@ from utg.utils import join_yaml_reports, generate_sv_components
 from utg.utils import list_of_modules
 from yapsy.PluginManager import PluginManager
 from utg.log import logger
-
-# from utg.__init__ import __version__
-# from utg.utils import load_yaml
 
 
 def generate_tests(work_dir,
@@ -81,9 +80,8 @@ def generate_tests(work_dir,
                      f'test.h\"\nRVTEST_ISA(\"{isa}\")\n\n.section .text.' \
                      f'init\n.globl rvtest_entry_point\nrvtest_entry_point:' \
                      f'\nRVMODEL_BOOT\nRVTEST_CODE_BEGIN\n\n'
-        asm_footer = '\nRVTEST_CODE_END\nRVMODEL_HALT\n\nRVTEST_DATA_BEGIN\n' \
-                     '.align 4\nrvtest_data:\n.word ' \
-                     '0xbabecafe\nRVTEST_DATA_END\n\nRVMODEL_DATA_BEGIN' \
+        asm_footer = '\nRVTEST_CODE_END\nRVMODEL_HALT\n' \
+                     '\n\nRVMODEL_DATA_BEGIN' \
                      '\nRVMODEL_DATA_END\n '
 
         manager = PluginManager()

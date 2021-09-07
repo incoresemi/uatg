@@ -1,12 +1,11 @@
+# See LICENSE.incore for license details
+
 import os
 import glob
 import random as rnd
 from utg.log import logger
 import ruamel
 from ruamel.yaml import YAML
-
-# import utg
-# from yapsy.PluginManager import PluginManager
 
 
 class sv_components:
@@ -460,32 +459,34 @@ def create_dut_config(dut_config_path):
         f.write(dut)
 
 
-def data_section(bit_width=32, random=True, signed=False, align=4):
+def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
     """
     Used to specify the data to be loaded into the test_data section of the
     DUT memory. The user will specify the data he wants in this section of the 
     DUT memory.
     """
-    data = f'RVTEST_DATA_BEGIN\n.align {align}\n'
 
-    max_signed = 2 ** (bit_width - 1) - 1
-    min_signed = -2 ** (bit_width - 1)
-    max_unsigned = 2 ** bit_width - 1
-    min_unsigned = 0
-    size = 'word' if (bit_width == 32) else 'dword'
-    data += f'MAX_U:\t.{size} {hex(max_unsigned)}\nMIN_U:\t' \
-            f'.word {hex(min_unsigned)}\n'
-    data += f'MAX_S:\t.{size} {hex(max_signed)}\nMIN_S:\t' \
-            f'.word {hex(min_signed)}\n'
-    data += 'RAND_VAL:\n'
-    if random:
-        for i in range(20):
-            if signed:
-                data += f'\t.{size}\t' \
-                        f'{hex(rnd.randint(min_signed, max_signed))}\n'
-            else:
-                data += f'\t.{size}\t' \
-                        f'{hex(rnd.randint(min_unsigned, max_unsigned))}\n'
+    data = f'RVTEST_DATA_BEGIN\n.align {align}\n'
+    if bit_width != 0:
+        max_signed = 2 ** (bit_width - 1) - 1
+        min_signed = -2 ** (bit_width - 1)
+        max_unsigned = 2 ** bit_width - 1
+        min_unsigned = 0
+        size = 'word' if (bit_width == 32) else 'dword'
+        data += f'MAX_U:\t.{size} {hex(max_unsigned)}\nMIN_U:\t' \
+                f'.word {hex(min_unsigned)}\n'
+        data += f'MAX_S:\t.{size} {hex(max_signed)}\nMIN_S:\t' \
+                f'.word {hex(min_signed)}\n'
+        data += 'RAND_VAL:\n'
+        if random:
+            for i in range(num_vals):
+                if signed:
+                    data += f'\t.{size}\t' \
+                            f'{hex(rnd.randint(min_signed, max_signed))}\n'
+                else:
+                    data += f'\t.{size}\t' \
+                            f'{hex(rnd.randint(min_unsigned, max_unsigned))}\n'
+    data += '\nsample_data:\n.word\t0xbabecafe\n\nRVTEST_DATA_END\n\n'
     return data
 
 
