@@ -50,7 +50,13 @@ def generate_tests(work_dir,
     logger.info(f'work_dir is {work_dir}')
 
     inp_yaml = config_dict
-    isa = inp_yaml['ISA']
+    try:
+        isa = inp_yaml['ISA']
+    except Exception as e:
+        logger.error(e)
+        logger.error('Exiting UTG')
+        exit(0)
+
     if modules == ['all']:
         logger.debug(f'Checking {modules_dir} for modules')
         modules = list_of_modules(modules_dir, verbose)
