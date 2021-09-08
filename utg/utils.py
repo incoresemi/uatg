@@ -42,9 +42,9 @@ class sv_components:
         interface = f"interface chromite_intf(input bit CLK,RST_N);\n\t" \
                     f"logic {self.rg_initialize};\n\tlogic [4:0" \
                     f"]{self.rg_allocate};\n"
-        interface += "\n  logic [7:0]{0};".format(self.rg_ghr)
+        interface += f"\n  logic [7:0]{self.rg_ghr};"
         interface += f"\nlogic [{self._btb_depth - 1}:0]{self.valids};"
-        interface += "\n  logic {0};".format(self.ras_top_index)
+        interface += f"\n  logic {self.ras_top_index};"
         interface += f"\n  logic [8:0]{self.mispredict};\n"
         for loop_var in range(self._btb_depth):
             interface += f"\n  logic [62:0] {self.btb_tag}_{loop_var};"
@@ -196,7 +196,7 @@ endmoduleNeeded to generate/validate tests
 # Utility Functions
 def info(version):
     logger.info('****** Micro Architectural Tests *******')
-    logger.info('Version : {0}'.format(version))
+    logger.info(f'Version : {version}')
     logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
     logger.info('All Rights Reserved.')
 
@@ -204,7 +204,7 @@ def info(version):
 def load_yaml(file):
     """
         Common function to load YAML Files.
-        The function checks if the file is of YAML format and exits if it is not.
+        The function checks if the file is of YAML format else exits.
         If the file is in YAML, it reads the file and returns the data from the 
         file as a dictionary.
     """
@@ -547,7 +547,7 @@ def generate_test_list(asm_dir, uarch_dir, test_list):
     target_dir = asm_dir + '/../'
 
     for test in asm_test_list:
-        logger.debug("Current test is {0}".format(test))
+        logger.debug(f"Current test is {test}")
         base_key = os.path.basename(test)[:-2]
         test_list[base_key] = {}
         test_list[base_key]['generator'] = 'utg'
