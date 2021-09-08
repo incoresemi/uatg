@@ -46,21 +46,23 @@ Important Rules
        x = ('This is a very very very long long '
             'long long long long long long string')
 
--  Use Python3's
-   `f-strings <https://www.python.org/dev/peps/pep-0498/>`__ wherever
+-  Use Python3's `f-strings <https://www.python.org/dev/peps/pep-0498/>`__ wherever
    possible and avoid ``.format`` and string concatenations.
-   \`\`\`python first\_name = 'John' last\_name = 'Doe'
 
-Avoid This!
-===========
+    .. code-block:: python
 
-print('Full Name: {0} {1}'.format(first\_name, last\_name)) print('Full
-Name: ' + first\_name + ' ' + last\_name)
+        first_name = 'John'
+        last_name = 'Doe'
 
-Instead Use F-strings
-=====================
+        # Avoid This!
+        print('Full Name: {0} {1}'.format(first\_name, last\_name))
+        print('Full Name: ' + first\_name + ' ' + last\_name)
 
-print(f'Full Name: {first\_name} {last\_name}') \`\`\` ### Indendation
+        # Instead Use F-strings
+        print(f'Full Name: {first\_name} {last\_name}') \`\`\`
+
+Indendation
+-----------
 \* Never use tabs and spaces together. \* Use **Tabs for indentation**.
 And each tab corresponds to 4 spaces. \* In the case of line
 continuation, align the new line's wrapping vertically.
