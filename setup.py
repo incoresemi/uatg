@@ -30,14 +30,14 @@ test_requirements = []
 setup(
     name='utg',
     version='dev-0.0.1',
-    description="RISC-V micro-architectural tests generator",
+    description="UTG - Micro-Architectural Tests Generator",
     long_description=readme + '\n\n',
     classifiers=[
         "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: BSD License",
         "Development Status :: 2 - Pre-Alpha"
     ],
-    url='https://gitlab.com/incoresemi/micro-arch-tests/-/tree/dev-0.0.1',
+    url='https://github.com/incoresemi/utg',
     author="InCore Semiconductors Pvt. Ltd.",
     author_email='incorebot@gmail.com',
     license="BSD-3-Clause",

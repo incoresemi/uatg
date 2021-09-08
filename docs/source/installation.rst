@@ -75,7 +75,7 @@ Install UTG
      
      .. code-block:: console
      
-         $ git clone https://gitlab.com/incoresemi/micro-arch-tests.git
+         $ git clone https://github.com/incoresemi/utg.git
      
      
      Once you have a copy of the source, you can install it with:
@@ -85,7 +85,7 @@ Install UTG
          $ cd utg
          $ pip3 install --editable .
      
-     .. _Gitlab repo: https://gitlab.com/incoresemi/micro-arch-tests
+     .. _Gitlab repo: https://github.com/incoresemi/utg
 
    .. tab:: via Git
 
@@ -93,7 +93,7 @@ Install UTG
      
      .. code-block:: console
      
-         $ pip3 install git+https://gitlab.com/incoresemi/micro-arch-tests.git
+         $ pip3 install git+https://github.com/incoresemi/utg.git
      
      This is the preferred method to install UTG, as it will always install the most recent stable release.
      
@@ -172,12 +172,12 @@ demonstration, we are creating the quickstart directory within the
    $ mkdir ~/myquickstart
 
 You can install the chromite_uarch_tests with several tests from the 
-`Repo <https://gitlab.com/incoresemi/chromite_uarch_tests.git>`_
+`Repo <https://github.com/incoresemi/chromite_uarch_tests.git>`_
 
 .. code-block:: console
 
     $ cd ~/myquickstart
-    $ git clone https://gitlab.com/incoresemi/chromite_uarch_tests.git
+    $ git clone https://github.com/incoresemi/chromite_uarch_tests.git
 
 It is necessary to create a work directory for UTG. The work directory is where 
 UTG will be store the ASM test files as well as test reports and logs.

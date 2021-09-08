@@ -91,7 +91,8 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output -------------------------------------------------
 
-gitlab_url = 'https://gitlab.com/incoresemi/micro-arch-tests'
+#gitlab_url = 'https://gitlab.com/incoresemi/micro-arch-tests'
+github_url = 'https://github.com/incoresemi/utg'
 html_show_sourcelink = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
