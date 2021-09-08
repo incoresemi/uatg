@@ -462,11 +462,13 @@ def create_dut_config(dut_config_path):
 
 def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
     """
+    
     Used to specify the data to be loaded into the test_data section of the
     DUT memory. The user will specify the data he wants in this section of the 
     DUT memory.
     """
     size = {
+        0: 'word',
         8: 'byte',
         16: 'half',
         32: 'word',
@@ -477,8 +479,10 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
         logger.error('bit_width not compatible with byte, half, word or dword')
         exit('BITWIDTH NOT_IN 8,16,32,64')
 
-    data = f'RVTEST_DATA_BEGIN\n.align {align}\n'
-    if bit_width != 0:
+    data = f'.align {align}\n'
+    if bit_width == 0:
+        pass
+    else:
         max_signed = 2 ** (bit_width - 1) - 1
         min_signed = -2 ** (bit_width - 1)
         max_unsigned = 2 ** bit_width - 1
@@ -496,7 +500,7 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
                 else:
                     data += f'\t.{size[bit_width]}\t' \
                             f'{hex(rnd.randint(min_unsigned, max_unsigned))}\n'
-    data += '\nsample_data:\n.word\t0xbabecafe\n\nRVTEST_DATA_END\n\n'
+    data += '\nsample_data:\n.word\t0xbabecafe\n'
     return data
 
 
