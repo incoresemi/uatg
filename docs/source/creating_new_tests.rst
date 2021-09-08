@@ -4,6 +4,155 @@
 Writing Tests for UTG Framework
 ###############################
 
+The test classes as well the directories containing the classes should 
+atricly adhere to certain guidelines for UTG to pick them up during test 
+generation. These guidelines are being presented here.
+
+======================
+Directory Organization
+======================
+
+The tests being writen by the user should be placed withing directories which
+stritly follow certain guidelines.
+
+The directory tree of the ``chromite_uarch_tests`` is as follows.
+
+.. code-block:: console
+
+  modules/
+  ├── branch_predictor
+  │   ├── issues.rst
+  │   ├── utg_gshare_fa_btb_fill_01.py
+  │   ├── utg_gshare_fa_btb_selfmodifying_01.py
+  │   ├── utg_gshare_fa_fence_01.py
+  │   ├── utg_gshare_fa_ghr_alternating_01.py
+  │   ├── utg_gshare_fa_ghr_ones_01.py
+  │   ├── utg_gshare_fa_ghr_zeros_01.py
+  │   ├── utg_gshare_fa_mispredict_loop_01.py
+  │   └── utg_gshare_fa_ras_push_pop_01.py
+  ├── decoder
+  │   └── utg_decoder_i_ext_r_type.py
+  ├── decompressor
+  │   └── utg_decompressor.py
+  └── index.yaml
+   
+Irrespective of the name, every directory purposed to host tests for UTG should
+have a similiar structure.
+
+Other than that, it is necessary that the module specific directories. like 
+*branch_predictor*, *decoder* and *decompressor* should be named same as the
+verilog module name in order to improve comprehension. 
+
+The ``index.yaml`` contains the names of all modules for which tests are to be 
+generated. When invoked, UTG reads the *index.yaml* file first and checks only
+the directories which were specified in the yaml file for test_classes. Other 
+folders are not used to pick up tests.
+
+The structure of the *index.yaml* file is presented as follows,
+
+.. code-block:: yaml
+   
+   :linenos:
+
+  branch_predictor:
+    utg_gshare_fa_btb_fill_01: "fill the BTB with entries"
+    utg_gshare_fa_btb_selfmodifying_01: "ASM that modifies itself, also used to verify functioning of fence instruction"
+    utg_gshare_fa_fence_01: "Verify the functioning of fence instruction"
+    utg_gshare_fa_ghr_alternating_01: "fill the GHR Register with alternating 1-0 pattern"
+    utg_gshare_fa_ghr_ones_01: "fill the GHR Register with ones"
+    utg_gshare_fa_ghr_zeros_01: "fill the GHR Register with zeros"
+    utg_gshare_fa_mispredict_loop_01: ""
+    utg_gshare_fa_ras_push_pop_01: "Pushing and Popping the return address stack using call-ret instructions"
+  decoder:
+    utg_decoder_arithmetic_insts: "tests arithmetic instructions"
+
+  decompressor:
+    utg_decompressor: "checks if mis-predictions occur and tests macro's"
+
+
+The above file contains information required for UTG to pick-up the tests from 
+your directory. 
+
+This index file is written based on the modules present in the chromite core. 
+The tests for the branch_predictor unit are present in the branch_predictor 
+directory as shown earlier. It is important that the name of the directory 
+containing the module specific tests is **SAME** as that of the entry(key) in 
+the *index.yaml* file.
+
+If the names differ, UTG will ignore the directory with the tests due to this
+name mismatch.
+
+.. note:: We require you to create a new directory for every module because
+   it makes the directory more organized and handling tests as well as
+   yapsy-plugin generation for multiple modules becomes easier.
+
+Organizing your own directory for storing tests
+-----------------------------------------------
+
+As an example, let us assume you want to create a test for a module ``stack``.
+Let us assume you are in your ``home`` directory. 
+
+First we make a top_level directory called ``tests`` in the 
+``home, i.e /home/user/ or ~/`` directory. 
+
+.. code-block:: console
+
+   $ mkdir /home/user/tests
+
+Once you've created the tests directory. ``cd`` into the directory and create
+another directory. The name of this new directory should be same as the name of 
+the module you are writing the test for. In this case, *stack*.
+
+.. code-block:: console
+
+   $ cd tests
+   $ mkdir stack
+
+Upon creating this new directory, ``cd`` into the ``stack directory`` and 
+create your test class. The naming guidelines to be followed while creating 
+new test_classes will be explained in the later sections of the same document. 
+For now, we are creating a test which would overflow the stack.
+
+.. code-block:: console
+
+   $ cd stack
+   $ vi utg_stack_overflow.py
+
+Once you have created the test_class, return to your ``~/tests/`` directory and 
+create a, ``index.yaml`` file. 
+
+.. code-block:: console
+
+   $ cd ../
+   $ vi index.yaml
+
+The content to typed within the yaml file for UTG to recognize the test is this.
+
+.. code-block:: yaml
+
+   stack: 
+     utg_stack_overflow: "Overflows the stack"
+
+Here, the first key ``stack`` indicates that the module is a ``stack``, for 
+which the tests have been generated. The next key ``utg_stack_overflow`` 
+is the name of the actual test_class. 
+
+.. warning:: if the module name or test_class are inconsistent between the 
+   index.yaml and actual test files, UTG will not pickup the tests. 
+
+The string value is just a comment which serves the purpose of documentation.
+
+Your directory structure at the end of this activity should be this
+
+.. code-block:: console
+
+  tests/
+  ├── index.yaml
+  └── stack
+      └── utg_stack_overflow.py
+     
+You can go about adding several tests in a similiar fashion.
+
 ================
 Adding new tests
 ================
