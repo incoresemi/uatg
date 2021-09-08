@@ -17,10 +17,10 @@ Important Rules
 
 -  Maximum line length is **80** characters. Exceptions are: Imports,
    URL's, Paths and docstrings that cant be split into separate lines.
--  Variables **SHOULD** be named in ***snake*\ case\_** and not in
-   CamelCasing.
+-  Variables **SHOULD** be named in ``snake_case`` and not in
+   ``CamelCasing``.
+-  Avoid global variables.
 -  Use parantheses ``()`` minimally.
--  Prefer small and focussed functions & classes.
 -  Python's implicit line concatenation allow extending of expressions
    in ``(), [], {}``. These expressions can be split over multiple line
    without using backslashes.
@@ -61,11 +61,17 @@ Important Rules
         # Instead Use F-strings
         print(f'Full Name: {first\_name} {last\_name}') \`\`\`
 
+-  Prefer small and focussed functions & classes. Use lambda expressions for one-line functions instead of writing new functions.
+
+.. warning::
+    Do not use functions from ``__future__`` module. Import modules/libraries that are available in Python 3.6.
+
 Indendation
------------
-\* Never use tabs and spaces together. \* Use **Tabs for indentation**.
-And each tab corresponds to 4 spaces. \* In the case of line
-continuation, align the new line's wrapping vertically.
+~~~~~~~~~~~
+- Never use tabs and spaces together.
+- Use **Tabs for indentation**.
+- And each tab corresponds to 4 spaces.
+- In the case of line continuation, align the new line's wrapping vertically.
 
 Whitespaces
 ~~~~~~~~~~~
@@ -103,16 +109,16 @@ Blank Lines
 Docstrings & Comments
 ~~~~~~~~~~~~~~~~~~~~~
 
-A docstring is a string that is the first statement in a package,
-module, class or function. \* Always use the three double-quote
-``""" docstring """`` format for docstrings (`PEP
-257 <https://www.google.com/url?sa=D&q=http://www.python.org/dev/peps/pep-0257/>`__).
-\* A docstring should be organized as a summary line (a line not
-exceeding 80 characters) terminated by punctuation. When writing more
-(encouraged), this must be followed by a blank line, followed by the
-rest of the docstring starting at the same cursor position as the first
-quote of the first line. There are more formatting guidelines for
-docstrings below.
+- A docstring is a string that is the first statement in a package, module, class or function.
+- Always use the three double-quote ``""" docstring """`` format for docstrings (`PEP 257 <https://www.google.com/url?sa=D&q=http://www.python.org/dev/peps/pep-0257/>`__).
+- A docstring should be organized as a summary line (a line not exceeding 80 characters) terminated by punctuation.
+- When writing more (encouraged), this must be followed by a blank line, followed by the rest of the docstring starting at the same cursor position as the first quote of the first line.
+- A function/class should have a docstring, unless it meets all of the following criteria :
+    - not externally visible
+    - very short
+    - obvious
+
+
 
 Naming Conventions
 ~~~~~~~~~~~~~~~~~~
@@ -123,4 +129,29 @@ Naming Conventions
    to its scope of visibility.
 -  Avoid overriding python's internal keywords.
 -  File names should not contain ``-``.
+
+Functions & Classes
+~~~~~~~~~~~~~~~~~~~
+
+- Use lambda expressions for simple functions.
+- List arguments with default values after arguments without default values in function headers.
+
+.. code-block:: python
+
+    # Wrong!
+    def function(a=None, b):
+        pass
+    # Proper way
+    def function(b, a=None):
+        pass
+
+- Try to specify default values for arguments as far as possible.
+- Specify ``__init__`` function (constructor) for all class definitions and initialize the variables that will be used with default values.
+- Usage of type annotations if highly recommended. Refer `PEP484 <https://www.python.org/dev/peps/pep-0484/>`_
+
+.. code-block:: python
+
+    def add_2_integers(a: int, b: int = 5) -> int:
+        # adds a and b if both are specified, else returns a + 5
+        return(a + b)
 
