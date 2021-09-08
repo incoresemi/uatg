@@ -331,7 +331,7 @@ You should see the following log on your screen
       info  | ****** Finished Generating Covergroups ******
 
 
-Now. you will find the generated files within the work directory. The directory
+You will find the generated files within the work directory. The directory
 structure is as follows.
 
 .. code-block:: bash
