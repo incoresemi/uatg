@@ -20,7 +20,7 @@ Important Rules
 -  Variables **SHOULD** be named in ``snake_case`` and not in
    ``CamelCasing``.
 -  Avoid global variables.
--  Use parantheses ``()`` minimally.
+-  Use parentheses ``()`` minimally.
 -  Python's implicit line concatenation allow extending of expressions
    in ``(), [], {}``. These expressions can be split over multiple line
    without using backslashes.
@@ -49,7 +49,7 @@ Important Rules
 -  Use Python3's `f-strings <https://www.python.org/dev/peps/pep-0498/>`__ wherever
    possible and avoid ``.format`` and string concatenations.
 
-    .. code-block:: python
+    .. code:: python
 
         first_name = 'John'
         last_name = 'Doe'
@@ -59,14 +59,14 @@ Important Rules
         print('Full Name: ' + first\_name + ' ' + last\_name)
 
         # Instead Use F-strings
-        print(f'Full Name: {first\_name} {last\_name}') \`\`\`
+        print(f'Full Name: {first\_name} {last\_name}')
 
 -  Prefer small and focussed functions & classes. Use lambda expressions for one-line functions instead of writing new functions.
 
 .. warning::
     Do not use functions from ``__future__`` module. Import modules/libraries that are available in Python 3.6.
 
-Indendation
+Indentation
 ~~~~~~~~~~~
 - Never use tabs and spaces together.
 - Use **Tabs for indentation**.
@@ -114,6 +114,7 @@ Docstrings & Comments
 - A docstring should be organized as a summary line (a line not exceeding 80 characters) terminated by punctuation.
 - When writing more (encouraged), this must be followed by a blank line, followed by the rest of the docstring starting at the same cursor position as the first quote of the first line.
 - A function/class should have a docstring, unless it meets all of the following criteria :
+
     - not externally visible
     - very short
     - obvious
