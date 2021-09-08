@@ -490,11 +490,11 @@ chromite's configuration file.
    formatter to format their test files.
 
 
-Using the rvtest_data function
-------------------------------
+Using the ``rvtest_data`` function
+----------------------------------
 [UNDER DEVELOPMENT]
 
-The rvtest_data function in utg.utils assists in writing automated assembly file by populating the RVTEST_DATA section with either random values or algorithmically computed values.
+The rvtest_data function in utg.utils assists in writing automated assembly file by populating the ``RVTEST_DATA`` section with either random values or algorithmically computed values.
 The function has the following parameters.
 
 .. code:: python
@@ -510,11 +510,11 @@ The function has the following parameters.
 ``signed`` is a boolean flag to determine whether to generate signed or unsigned values.
 
 ``align`` is the byte boundary that the values should be aligned to.
-The function returns a string that contains the RVTEST_DATA section populated with values.
+The function returns a string that contains the ``RVTEST_DATA`` section populated with values.
 
 .. code-block:: python
 
-    print(rvtest_data(16, 2, True, False, 4))
+    print(rvtest_data(bit_width=16, num_vals=2, random=True, signed=False, align=4))
     # The above line generates the following output
     # RVTEST_DATA_BEGIN
     # .align 4
