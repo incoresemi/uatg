@@ -139,6 +139,11 @@ generator to identify tests that can suitably exercise functional coverpoints
 in the design as well as parameterize the test to exploit the hardware features 
 to the fullest.
 
+.. warning:: It is paramount that the user's preferring their custom 
+   ``dut_config.yaml`` make sure that their file contains the ``ISA`` supported 
+   by the DUT as a parameter. UTG **will throw an error and exit** if the ISA
+   argument is not present in the yaml.
+
 Sample ``dut_config.yaml``
 --------------------------
 
