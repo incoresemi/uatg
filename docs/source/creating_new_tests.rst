@@ -501,7 +501,9 @@ The function has the following parameters.
 
     rvtest_data(bit_width=32, num_vals=20, random=True, signed=False, align=4)
 
-``bit_width`` is the width of data values that needs to be stored in the data section. The permitted values for bit_width are 8, 16, 32, 64 and 128. For any other values the function raises exception and quits.
+``bit_width`` is the width of data values that needs to be stored in the data section. The permitted values for bit_width are 0, 8, 16, 32, 64 and 128. For any other values the function raises exception and quits.
+
+.. note:: if ``bit_width`` is ``0`` then the data section is populated with a single value ``0xbabecafe`` as a default string.
 
 ``num_vals`` is the number of data values that needs to be written in the data section. Any number more than 1 is valid.
 
@@ -516,11 +518,10 @@ The function returns a string that contains the ``RVTEST_DATA`` section populate
 
     print(rvtest_data(bit_width=16, num_vals=2, random=True, signed=False, align=4))
     # The above line generates the following output
-    # RVTEST_DATA_BEGIN
     # .align 4
     # RAND_VAL:
     #     .half	0xdb9b
     #     .half	0x5571
     # sample_data:
     #     .word	0xbabecafe
-    # RVTEST_DATA_END
+
