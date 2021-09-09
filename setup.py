@@ -14,7 +14,7 @@ def read(*parts):
 
 
 def read_requires():
-    with open(os.path.join(here, "utg/requirements.txt"),
+    with open(os.path.join(here, "uatg/requirements.txt"),
               "r") as reqfile:
         return reqfile.read().splitlines()
 
@@ -28,29 +28,29 @@ setup_requirements = []
 test_requirements = []
 
 setup(
-    name='utg',
+    name='uatg',
     version='dev-0.0.1',
-    description="UTG - Micro-Architectural Tests Generator",
+    description="UATG - Micro-Architectural (uArch) Tests Generator",
     long_description=readme + '\n\n',
     classifiers=[
         "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: BSD License",
         "Development Status :: 2 - Pre-Alpha"
     ],
-    url='https://github.com/incoresemi/utg',
+    url='https://github.com/incoresemi/uatg',
     author="InCore Semiconductors Pvt. Ltd.",
     author_email='incorebot@gmail.com',
     license="BSD-3-Clause",
     packages=find_packages(),
-    package_dir={'utg': 'utg'},
-    package_data={'utg': ['requirements.txt', 'target/*', 'env/*']},
+    package_dir={'uatg': 'uatg'},
+    package_data={'uatg': ['requirements.txt', 'target/*', 'env/*']},
     install_requires=read_requires(),
     python_requires='>=3.6.0',
     entry_points={
-        'console_scripts': ['utg=utg.main:cli'],
+        'console_scripts': ['uatg=uatg.main:cli'],
     },
     include_package_data=True,
-    keywords='utg',
+    keywords='uatg',
     test_suite='tests',
     tests_require=test_requirements,
     zip_safe=False,

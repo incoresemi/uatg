@@ -16,12 +16,12 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/incoresemi/utg/issues.
+Report bugs at https://github.com/incoresemi/uatg/issues.
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/incoresemi/utg/issues.
+The best way to send feedback is to file an issue at https://github.com/incoresemi/uatg/issues.
 
 If you are proposing a feature:
 
@@ -32,12 +32,12 @@ If you are proposing a feature:
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `utg` for local development.
+Ready to contribute? Here's how to set up `uatg` for local development.
 
-1. Fork the `utg` repo on Github.
+1. Fork the `uatg` repo on Github.
 2. Clone your fork locally::
 
-    $ git clone https://github.com/<your-username>/utg.git
+    $ git clone https://github.com/<your-username>/uatg.git
 
 3. Create an issue and WIP pull request that creates a working branch for you
 
