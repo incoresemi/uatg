@@ -3,7 +3,7 @@
 import os
 import glob
 import random as rnd
-from utg.log import logger
+from uatg.log import logger
 import ruamel
 from ruamel.yaml import YAML
 
@@ -361,15 +361,15 @@ def create_plugins(plugins_path):
 def create_config_file(config_path):
     """
         Creates a template config.ini file at the config_path directory.
-        Invoked by running utg setup
+        Invoked by running uatg setup
     """
     cfg = '# See LICENSE.incore for license details\n\n' \
-          '[utg]\n\n# [info, error, debug] set verbosity level to view ' \
+          '[uatg]\n\n# [info, error, debug] set verbosity level to view ' \
           'different levels of messages.\nverbose = info\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
           ' tests are to be generated/validated in comma separated format.\n# '\
-          'Run \'utg --list-modules -md <path> \' to find all the modules that'\
+          'Run \'uatg --list-modules -md <path> \' to find all the modules that'\
           ' are supported.\n# Use \'all\' to generate/validate all modules\n' \
           'modules = all\n\n# Absolute path to chromite_uarch_tests/modules ' \
           'Directory\n'\
@@ -402,7 +402,7 @@ def create_config_file(config_path):
 def create_alias_file(alias_path):
     """
         Creates a template aliasing.yaml file at the alias_path directory.
-        Invoked by running utg setup
+        Invoked by running uatg setup
     """
     alias = 'tb_top:\n path_to_bpu: ' \
             'mktbsoc.soc.ccore.riscv.stage0.bpu\n path_to_decoder: ' \
@@ -428,7 +428,7 @@ def create_dut_config(dut_config_path):
     """
     Creates a template dut_config.yaml (based on Chromite's default
     configuration at the dut_config_path.
-    Invoked by running the utg setup command
+    Invoked by running the uatg setup command
     """
     dut = 'ISA: RV64IMAFDCSU\niepoch_size: 2\ndepoch_size: 1\ndtvec_base: ' \
           '256\ns_extension:\n mode: sv39\n itlb_size: 4\n dtlb_size: ' \
@@ -504,7 +504,7 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
     return data
 
 
-# UTG Functions
+# UATG Functions
 def clean_modules(module_dir, modules, verbose):
     """
     Function to read the modules specified by the user, check if they exist or
@@ -550,7 +550,7 @@ def generate_test_list(asm_dir, uarch_dir, test_list):
         logger.debug(f"Current test is {test}")
         base_key = os.path.basename(test)[:-2]
         test_list[base_key] = {}
-        test_list[base_key]['generator'] = 'utg'
+        test_list[base_key]['generator'] = 'uatg'
         test_list[base_key]['work_dir'] = asm_dir + '/' + base_key
         test_list[base_key]['isa'] = 'rv64imafdc'
         test_list[base_key]['march'] = 'rv64imafdc'
