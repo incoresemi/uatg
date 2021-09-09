@@ -1,11 +1,11 @@
 .. _creating_new_tests: 
 
-###############################
-Writing Tests for UTG Framework
-###############################
+################################
+Writing Tests for UATG Framework
+################################
 
 The test classes as well the directories containing the classes should 
-atricly adhere to certain guidelines for UTG to pick them up during test 
+atricly adhere to certain guidelines for UATG to pick them up during test 
 generation. These guidelines are being presented here.
 
 ======================
@@ -22,21 +22,21 @@ The directory tree of the ``chromite_uarch_tests`` is as follows.
   modules/
   ├── branch_predictor
   │   ├── issues.rst
-  │   ├── utg_gshare_fa_btb_fill_01.py
-  │   ├── utg_gshare_fa_btb_selfmodifying_01.py
-  │   ├── utg_gshare_fa_fence_01.py
-  │   ├── utg_gshare_fa_ghr_alternating_01.py
-  │   ├── utg_gshare_fa_ghr_ones_01.py
-  │   ├── utg_gshare_fa_ghr_zeros_01.py
-  │   ├── utg_gshare_fa_mispredict_loop_01.py
-  │   └── utg_gshare_fa_ras_push_pop_01.py
+  │   ├── uatg_gshare_fa_btb_fill_01.py
+  │   ├── uatg_gshare_fa_btb_selfmodifying_01.py
+  │   ├── uatg_gshare_fa_fence_01.py
+  │   ├── uatg_gshare_fa_ghr_alternating_01.py
+  │   ├── uatg_gshare_fa_ghr_ones_01.py
+  │   ├── uatg_gshare_fa_ghr_zeros_01.py
+  │   ├── uatg_gshare_fa_mispredict_loop_01.py
+  │   └── uatg_gshare_fa_ras_push_pop_01.py
   ├── decoder
-  │   └── utg_decoder_i_ext_r_type.py
+  │   └── uatg_decoder_i_ext_r_type.py
   ├── decompressor
-  │   └── utg_decompressor.py
+  │   └── uatg_decompressor.py
   └── index.yaml
    
-Irrespective of the name, every directory purposed to host tests for UTG should
+Irrespective of the name, every directory purposed to host tests for UATG should
 have a similiar structure.
 
 Other than that, it is necessary that the module specific directories. like 
@@ -44,7 +44,7 @@ Other than that, it is necessary that the module specific directories. like
 verilog module name in order to improve comprehension. 
 
 The ``index.yaml`` contains the names of all modules for which tests are to be 
-generated. When invoked, UTG reads the *index.yaml* file first and checks only
+generated. When invoked, UATG reads the *index.yaml* file first and checks only
 the directories which were specified in the yaml file for test_classes. Other 
 folders are not used to pick up tests.
 
@@ -55,22 +55,22 @@ The structure of the *index.yaml* file is presented as follows,
    :linenos:
 
   branch_predictor:
-    utg_gshare_fa_btb_fill_01: "fill the BTB with entries"
-    utg_gshare_fa_btb_selfmodifying_01: "ASM that modifies itself, also used to verify functioning of fence instruction"
-    utg_gshare_fa_fence_01: "Verify the functioning of fence instruction"
-    utg_gshare_fa_ghr_alternating_01: "fill the GHR Register with alternating 1-0 pattern"
-    utg_gshare_fa_ghr_ones_01: "fill the GHR Register with ones"
-    utg_gshare_fa_ghr_zeros_01: "fill the GHR Register with zeros"
-    utg_gshare_fa_mispredict_loop_01: ""
-    utg_gshare_fa_ras_push_pop_01: "Pushing and Popping the return address stack using call-ret instructions"
+    uatg_gshare_fa_btb_fill_01: "fill the BTB with entries"
+    uatg_gshare_fa_btb_selfmodifying_01: "ASM that modifies itself, also used to verify functioning of fence instruction"
+    uatg_gshare_fa_fence_01: "Verify the functioning of fence instruction"
+    uatg_gshare_fa_ghr_alternating_01: "fill the GHR Register with alternating 1-0 pattern"
+    uatg_gshare_fa_ghr_ones_01: "fill the GHR Register with ones"
+    uatg_gshare_fa_ghr_zeros_01: "fill the GHR Register with zeros"
+    uatg_gshare_fa_mispredict_loop_01: ""
+    uatg_gshare_fa_ras_push_pop_01: "Pushing and Popping the return address stack using call-ret instructions"
   decoder:
-    utg_decoder_arithmetic_insts: "tests arithmetic instructions"
+    uatg_decoder_arithmetic_insts: "tests arithmetic instructions"
 
   decompressor:
-    utg_decompressor: "checks if mis-predictions occur and tests macro's"
+    uatg_decompressor: "checks if mis-predictions occur and tests macro's"
 
 
-The above file contains information required for UTG to pick-up the tests from 
+The above file contains information required for UATG to pick-up the tests from 
 your directory. 
 
 This index file is written based on the modules present in the chromite core. 
@@ -79,7 +79,7 @@ directory as shown earlier. It is important that the name of the directory
 containing the module specific tests is **SAME** as that of the entry(key) in 
 the *index.yaml* file.
 
-If the names differ, UTG will ignore the directory with the tests due to this
+If the names differ, UATG will ignore the directory with the tests due to this
 name mismatch.
 
 .. note:: We require you to create a new directory for every module because
@@ -116,7 +116,7 @@ For now, we are creating a test which would overflow the stack.
 .. code-block:: console
 
    $ cd stack
-   $ vi utg_stack_overflow.py
+   $ vi uatg_stack_overflow.py
 
 Once you have created the test_class, return to your ``~/tests/`` directory and 
 create a, ``index.yaml`` file. 
@@ -126,19 +126,19 @@ create a, ``index.yaml`` file.
    $ cd ../
    $ vi index.yaml
 
-The content to typed within the yaml file for UTG to recognize the test is this.
+The content to typed within the yaml file for UATG to recognize the test is this.
 
 .. code-block:: yaml
 
    stack: 
-     utg_stack_overflow: "Overflows the stack"
+     uatg_stack_overflow: "Overflows the stack"
 
 Here, the first key ``stack`` indicates that the module is a ``stack``, for 
-which the tests have been generated. The next key ``utg_stack_overflow`` 
+which the tests have been generated. The next key ``uatg_stack_overflow`` 
 is the name of the actual test_class. 
 
 .. warning:: if the module name or test_class are inconsistent between the 
-   index.yaml and actual test files, UTG will not pickup the tests. 
+   index.yaml and actual test files, UATG will not pickup the tests. 
 
 The string value is just a comment which serves the purpose of documentation.
 
@@ -149,7 +149,7 @@ Your directory structure at the end of this activity should be this
   tests/
   ├── index.yaml
   └── stack
-      └── utg_stack_overflow.py
+      └── uatg_stack_overflow.py
      
 You can go about adding several tests in a similiar fashion.
 
@@ -160,7 +160,7 @@ Adding new tests
 Before adding new test cases to the framework, one needs to understand the 
 conventions that are followed to ensure code compatibility. This document 
 attempts to throw some light about writing such tests which comply with the 
-requirements of UTG.
+requirements of UATG.
 
 Naming Convention and Coding Guidelines
 ---------------------------------------
@@ -169,21 +169,21 @@ Test naming convention:
     The name of the test file is strictly required to comply the following 
     naming structure. The name of the test file should be as follows,
   
-  ``utg_<module_name>_<test_name>.py``
+  ``uatg_<module_name>_<test_name>.py``
 
-    Here, the ``utg`` is to indicate that the test was written for UTG. Without 
+    Here, the ``uatg`` is to indicate that the test was written for UATG. Without 
     this, the plugin manager **will not** pickup the test file for test 
     generation. Hence, it is imperative to name the file with 
-    *utg_...*. The ``module_name`` and ``test_name`` are the name of the module
+    *uatg_...*. The ``module_name`` and ``test_name`` are the name of the module
     being tested and the name given to the test by the user. The user is 
     expected to give a name which reduces the effort required to comprehend 
     the test's purpose. 
 
     An example name would be,
   
-  ``utg_decompressor_compressed_arith_insts.py``
+  ``uatg_decompressor_compressed_arith_insts.py``
 
-    This name meets the requirements specified earlier. It has the ``utg`` tag 
+    This name meets the requirements specified earlier. It has the ``uatg`` tag 
     which enables the plugin manager to detect the file, the module name is 
     specified and the test name is clear and complements the reader's attempt to 
     discern the test's purpose.
@@ -202,7 +202,7 @@ Python packages imported by the test file
 Required Packages:
   1. **Yapsy: for plugin management**.
      
-     This package would have been installed when you installed utg. It is 
+     This package would have been installed when you installed uatg. It is 
      necessary that you import the IPlugin class from the yapsy package in 
      your test. You can see it imported like this 
      ``from yapsy.IPlugin import IPlugin`` in the example that follows.
@@ -216,7 +216,7 @@ Optional Packages:
      using regular expressions, there is no need to import this package.
    
    .. note:: In the snippet that follows, we also import a module named
-      ``regex_formats`` from ``utg``. This is a file which contains all the 
+      ``regex_formats`` from ``uatg``. This is a file which contains all the 
       regular expression formats which we would compare our logs against. 
       Currently the file has few patterns for checking Branch Predictor unit. 
       The user can add new expressions to the same file.
@@ -235,11 +235,11 @@ class.
 As mentioned earlier, the name of the class should be the **same** as the file. 
 For instance, if the user is writing a test to check the decoding of 
 *R type Arithmetic instructions* they could name the test as 
-``utg_decoder_r_type_arith``. In this case, the name of the class, as well as 
+``uatg_decoder_r_type_arith``. In this case, the name of the class, as well as 
 the python file should **same** as the test name, i.e. 
-``utg_decoder_r_type_arith``.
+``uatg_decoder_r_type_arith``.
 
-.. note:: The ``utg_`` label is mandatory since the plugin manager requires that 
+.. note:: The ``uatg_`` label is mandatory since the plugin manager requires that 
    for picking up the test.
 
 This test class provides features to check if the test is valid on the current 
@@ -254,14 +254,14 @@ This is done as follows
 
 .. code-block:: python
 
-   class utg_decoder_r_type_arith(IPlugin):
+   class uatg_decoder_r_type_arith(IPlugin):
       """ This class generates assembly tests for checking the decoding of r-type arithmetic instructions """
       #methods follow
 
-Now, the ``utg_decoder_r_type_arith`` class has inherited the ``IPlugin`` class 
+Now, the ``uatg_decoder_r_type_arith`` class has inherited the ``IPlugin`` class 
 from Yapsy. This will enable the Yapsy plugin manager to detect and pick up this 
 class as a plugin when generating tests. All the tests, irrespective of the 
-module/core being tested will be mounted as plugins in the UTG. Hence, importing 
+module/core being tested will be mounted as plugins in the UATG. Hence, importing 
 the IPlugin class is paramount to the generation of the tests.
 
 .. warning:: The ``execute``, ``generate_asm``, ``generate_covergroups`` and 
@@ -510,7 +510,7 @@ The user can use this as a template to write some methods of his own.
 Example Test Class
 ==================
 
-A generic test ``utg_module_test_name.py`` is written in this manner. This test
+A generic test ``uatg_module_test_name.py`` is written in this manner. This test
 uses the parameters from the Chromite's default configuration. We write
 a test for the BPU here. Hence, we use the BPU parameters obtained from 
 chromite's configuration file.
@@ -526,7 +526,7 @@ chromite's configuration file.
     import regex_formats as rf         # file containing regex_patterns useful for log parsing
     import re                          # inbuilt package for regular expression matching
 
-    class utg_module_test_name(IPlugin):
+    class uatg_module_test_name(IPlugin):
       # The name of this class should be the same as the file name, i.e test_name.
 
       def __init__(self):
@@ -643,7 +643,7 @@ Using the ``rvtest_data`` function
 ----------------------------------
 [UNDER DEVELOPMENT]
 
-The rvtest_data function in utg.utils assists in writing automated assembly file by populating the ``RVTEST_DATA`` section with either random values or algorithmically computed values.
+The rvtest_data function in uatg.utils assists in writing automated assembly file by populating the ``RVTEST_DATA`` section with either random values or algorithmically computed values.
 The function has the following parameters.
 
 .. code:: python
