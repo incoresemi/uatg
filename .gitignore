@@ -1,7 +1,7 @@
 # Pycache stuff
-utg/modules/__pycache__/
-utg/modules/branch_predictor/__pycache__/
-utg/modules/branch_predictor/tests/
+uatg/modules/__pycache__/
+uatg/modules/branch_predictor/__pycache__/
+uatg/modules/branch_predictor/tests/
 **.pyc
 **.pyo
 
@@ -21,6 +21,7 @@ utg/work/*
 .idea/*
 
 .*
+!.github
 *.egg-info
 docs/build/
 utg/target/*
