@@ -1,5 +1,5 @@
-######################################################
-**UATG - Micro-Architectural (uArch) Tests Generator**
-######################################################
+#########################################
+**UATG - μArchitectural Tests Generator**
+#########################################
 
-Please see `uatg.readthedocs.io <uatg.readthedocs.io>`_ for documentation.
+Please see `Read the Docs <uatg.readthedocs.io>`_ for documentation.
