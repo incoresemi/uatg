@@ -4,20 +4,20 @@
 
 .. _tutorial:
 
-############
-UTG Tutorial
-############
+#############
+UATG Tutorial
+#############
 
-.. note:: utg is interchangeably denoted as 'framework' in this section.
+.. note:: uatg is interchangeably denoted as 'framework' in this section.
 
-This section provides a deeper insight about using the UTG Tool.
+This section provides a deeper insight about using the UATG Tool.
 We will be using the generate command as an alternative to the from-config 
 command. 
 
 .. warning:: It is assumed that you have followed the 
    :ref:`Quickstart<quickstart>` before trying this out.
 
-Successfully getting through quick start should indicate that the UTG framework
+Successfully getting through quick start should indicate that the UATG framework
 is successsfully installed in your computer.
 
 We will be continuing in the same ``myquickstart`` directory which we had 
@@ -33,18 +33,18 @@ something like this
     │   ├── modules
     │   │   ├── branch_predictor
     │   │   │   ├── issues.rst
-    │   │   │   ├── utg_gshare_fa_btb_fill_01.py
-    │   │   │   ├── utg_gshare_fa_btb_selfmodifying_01.py
-    │   │   │   ├── utg_gshare_fa_fence_01.py
-    │   │   │   ├── utg_gshare_fa_ghr_alternating_01.py
-    │   │   │   ├── utg_gshare_fa_ghr_ones_01.py
-    │   │   │   ├── utg_gshare_fa_ghr_zeros_01.py
-    │   │   │   ├── utg_gshare_fa_mispredict_loop_01.py
-    │   │   │   └── utg_gshare_fa_ras_push_pop_01.py
+    │   │   │   ├── uatg_gshare_fa_btb_fill_01.py
+    │   │   │   ├── uatg_gshare_fa_btb_selfmodifying_01.py
+    │   │   │   ├── uatg_gshare_fa_fence_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_alternating_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_ones_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_zeros_01.py
+    │   │   │   ├── uatg_gshare_fa_mispredict_loop_01.py
+    │   │   │   └── uatg_gshare_fa_ras_push_pop_01.py
     │   │   ├── decoder
-    │   │   │   └── utg_decoder_i_ext_r_type.py
+    │   │   │   └── uatg_decoder_i_ext_r_type.py
     │   │   ├── decompressor
-    │   │   │   └── utg_decompressor.py
+    │   │   │   └── uatg_decompressor.py
     │   │   └── index.yaml
     │   └── README.rst
     ├── config.ini
@@ -54,13 +54,13 @@ something like this
 If you had gone through the quickstart, you may find some more ``.yapsy_plugin``
 files, ``__pycache__`` directories and you will find several tests within the 
 ``work`` directory. It is okay for your directory tree to be so. It will not
-impact your workflow with UTG.
+impact your workflow with UATG.
 
 Here, the *aliasing.yaml*, *dut_config.yaml* and *config.ini* were created by 
-the ``utg setup`` command.
+the ``uatg setup`` command.
 
 Detailed description about the options used along with the subcommands has been 
-discussed in the :ref:`CLI docs<utg_cli>`. We will be breifly explaining the 
+discussed in the :ref:`CLI docs<uatg_cli>`. We will be breifly explaining the 
 flags in this section.
        
 Let's start by generating the tests.
@@ -73,14 +73,14 @@ Let's start by generating the tests.
 
 .. code-block:: console
 
-  $ utg generate -v debug -m all -wd ~/myquickstart/work/ \
+  $ uatg generate -v debug -m all -wd ~/myquickstart/work/ \
     -ld ~/myquickstart/work/ -t -gc \ 
     -md ~/myquickstart/chromite_uarch_tests/modules/ \ 
     -dc ~/myquickstart/dut_config.yaml -af ~/myquickstart/aliasing.yaml
 
 - Here the ``-v`` option is used to control the verbosity of the log. Debug logs
   everything which will be useful in debugging the code.
-- ``-wd`` UTG will create the test files within this directory. 
+- ``-wd`` UATG will create the test files within this directory. 
   It will also create a `model_test.h` and `link.ld` file in the same directory 
   by default. [REQUIRED]
 - ``-ld`` is an optional parameter. If not specified, the ``-wd`` parameter is 
@@ -95,8 +95,8 @@ Let's start by generating the tests.
   directory.
 - ``-md`` is the path to the modules directory containing the test_classes. The
   test_classes will be sorted into directories based on the module being tested.
-- ``-dc`` is the path to the dut_config.yaml generated using ``utg setup``.
-- ``-af`` is the path to the aliasing.yaml file generated using ``utg setup``.
+- ``-dc`` is the path to the dut_config.yaml generated using ``uatg setup``.
+- ``-af`` is the path to the aliasing.yaml file generated using ``uatg setup``.
 
 Running this command should generate this log in your terminal.
 
@@ -106,7 +106,7 @@ Running this command should generate this log in your terminal.
           info  | Version : dev-0.0.1
           info  | Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.
           info  | All Rights Reserved.
-          info  | utg dir is /home/akrish/work/InCore/micro-arch-tests/utg
+          info  | uatg dir is /home/akrish/work/InCore/micro-arch-tests/uatg
           info  | work_dir is /home/akrish/myquickstart/work
          debug  | Checking /home/akrish/myquickstart/chromite_uarch_tests/modules for modules
          debug  | The modules are ['branch_predictor', 'decoder', 'decompressor']
@@ -115,62 +115,62 @@ Running this command should generate this log in your terminal.
           info  | Starting plugin Creation for branch_predictor
           info  | Created plugins for branch_predictor
          debug  | Generating assembly tests for branch_predictor
-         debug  | Generating test for utg_gshare_fa_btb_fill_01
-         debug  | Generating test for utg_gshare_fa_mispredict_loop_01
-         debug  | Generating test for utg_gshare_fa_ghr_ones_01
-         debug  | Generating test for utg_gshare_fa_ras_push_pop_01
-         debug  | Generating test for utg_gshare_fa_ghr_alternating_01
-         debug  | Generating test for utg_gshare_fa_ghr_zeros_01
-         debug  | Generating test for utg_gshare_fa_fence_01
-         debug  | Generating test for utg_gshare_fa_btb_selfmodifying_01
+         debug  | Generating test for uatg_gshare_fa_btb_fill_01
+         debug  | Generating test for uatg_gshare_fa_mispredict_loop_01
+         debug  | Generating test for uatg_gshare_fa_ghr_ones_01
+         debug  | Generating test for uatg_gshare_fa_ras_push_pop_01
+         debug  | Generating test for uatg_gshare_fa_ghr_alternating_01
+         debug  | Generating test for uatg_gshare_fa_ghr_zeros_01
+         debug  | Generating test for uatg_gshare_fa_fence_01
+         debug  | Generating test for uatg_gshare_fa_btb_selfmodifying_01
          debug  | Finished Generating Assembly Tests for branch_predictor
           info  | Creating test_list for the branch_predictor
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/utg_gshare_fa_btb_fill_01/utg_gshare_fa_btb_fill_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/utg_gshare_fa_mispredict_loop_01/utg_gshare_fa_mispredict_loop_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/utg_gshare_fa_ghr_ones_01/utg_gshare_fa_ghr_ones_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/utg_gshare_fa_ras_push_pop_01/utg_gshare_fa_ras_push_pop_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/utg_gshare_fa_ghr_alternating_01/utg_gshare_fa_ghr_alternating_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/utg_gshare_fa_ghr_zeros_01/utg_gshare_fa_ghr_zeros_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/utg_gshare_fa_fence_01/utg_gshare_fa_fence_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/utg_gshare_fa_btb_selfmodifying_01/utg_gshare_fa_btb_selfmodifying_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_btb_fill_01/uatg_gshare_fa_btb_fill_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_mispredict_loop_01/uatg_gshare_fa_mispredict_loop_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_ones_01/uatg_gshare_fa_ghr_ones_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ras_push_pop_01/uatg_gshare_fa_ras_push_pop_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_alternating_01/uatg_gshare_fa_ghr_alternating_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_zeros_01/uatg_gshare_fa_ghr_zeros_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_fence_01/uatg_gshare_fa_fence_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_btb_selfmodifying_01/uatg_gshare_fa_btb_selfmodifying_01.S
          debug  | Directory for decoder is /home/akrish/myquickstart/chromite_uarch_tests/modules/decoder
           info  | Starting plugin Creation for decoder
           info  | Created plugins for decoder
          debug  | Generating assembly tests for decoder
-         debug  | Generating test for utg_decoder_i_ext_r_type
+         debug  | Generating test for uatg_decoder_i_ext_r_type
          debug  | Finished Generating Assembly Tests for decoder
           info  | Creating test_list for the decoder
-         debug  | Current test is /home/akrish/myquickstart/work/decoder/utg_decoder_i_ext_r_type/utg_decoder_i_ext_r_type.S
+         debug  | Current test is /home/akrish/myquickstart/work/decoder/uatg_decoder_i_ext_r_type/uatg_decoder_i_ext_r_type.S
          debug  | Directory for decompressor is /home/akrish/myquickstart/chromite_uarch_tests/modules/decompressor
           info  | Starting plugin Creation for decompressor
           info  | Created plugins for decompressor
          debug  | Generating assembly tests for decompressor
-         debug  | Generating test for utg_decompressor
+         debug  | Generating test for uatg_decompressor
          debug  | Finished Generating Assembly Tests for decompressor
           info  | Creating test_list for the decompressor
-         debug  | Current test is /home/akrish/myquickstart/work/decompressor/utg_decompressor/utg_decompressor.S
+         debug  | Current test is /home/akrish/myquickstart/work/decompressor/uatg_decompressor/uatg_decompressor.S
           info  | ****** Finished Generating Tests ******
          debug  | Creating a linker file at /home/akrish/myquickstart/work
          debug  | Creating Model_test.h file at /home/akrish/myquickstart/work
-          info  | Test List was generated by utg. You can find it in the work dir 
+          info  | Test List was generated by uatg. You can find it in the work dir 
          debug  | Checking /home/akrish/myquickstart/chromite_uarch_tests/modules for modules
           info  | ****** Generating Covergroups ******
          debug  | Generated tbtop, defines and interface files
          debug  | Generating CoverPoints for branch_predictor
-          info  | Generating coverpoints SV file for utg_gshare_fa_mispredict_loop_01
-       warning  | Skipping coverpoint generation for utg_gshare_fa_ras_push_pop_01 as there is no gen_covergroup method 
-       warning  | Skipping coverpoint generation for utg_gshare_fa_ghr_ones_01 as there is no gen_covergroup method 
-          info  | Generating coverpoints SV file for utg_gshare_fa_ghr_zeros_01
-       warning  | Skipping coverpoint generation for utg_gshare_fa_btb_selfmodifying_01 as there is no gen_covergroup method 
-       warning  | Skipping coverpoint generation for utg_gshare_fa_ghr_alternating_01 as there is no gen_covergroup method 
-          info  | Generating coverpoints SV file for utg_gshare_fa_btb_fill_01
-          info  | Generating coverpoints SV file for utg_gshare_fa_fence_01
+          info  | Generating coverpoints SV file for uatg_gshare_fa_mispredict_loop_01
+       warning  | Skipping coverpoint generation for uatg_gshare_fa_ras_push_pop_01 as there is no gen_covergroup method 
+       warning  | Skipping coverpoint generation for uatg_gshare_fa_ghr_ones_01 as there is no gen_covergroup method 
+          info  | Generating coverpoints SV file for uatg_gshare_fa_ghr_zeros_01
+       warning  | Skipping coverpoint generation for uatg_gshare_fa_btb_selfmodifying_01 as there is no gen_covergroup method 
+       warning  | Skipping coverpoint generation for uatg_gshare_fa_ghr_alternating_01 as there is no gen_covergroup method 
+          info  | Generating coverpoints SV file for uatg_gshare_fa_btb_fill_01
+          info  | Generating coverpoints SV file for uatg_gshare_fa_fence_01
          debug  | Finished Generating Coverpoints for branch_predictor
          debug  | Generating CoverPoints for decoder
-          info  | Generating coverpoints SV file for utg_decoder_i_ext_r_type
+          info  | Generating coverpoints SV file for uatg_decoder_i_ext_r_type
          debug  | Finished Generating Coverpoints for decoder
          debug  | Generating CoverPoints for decompressor
-       warning  | Skipping coverpoint generation for utg_decompressor as there is no gen_covergroup method 
+       warning  | Skipping coverpoint generation for uatg_decompressor as there is no gen_covergroup method 
          debug  | Finished Generating Coverpoints for decompressor
           info  | ****** Finished Generating Covergroups ******
 
@@ -186,68 +186,68 @@ Your directory structure should be like this.
     │   │   ├── branch_predictor
     │   │   │   ├── issues.rst
     │   │   │   ├── __pycache__
-    │   │   │   │   ├── utg_gshare_fa_btb_fill_01.cpython-39.pyc
-    │   │   │   │   ├── utg_gshare_fa_btb_selfmodifying_01.cpython-39.pyc
-    │   │   │   │   ├── utg_gshare_fa_fence_01.cpython-39.pyc
-    │   │   │   │   ├── utg_gshare_fa_ghr_alternating_01.cpython-39.pyc
-    │   │   │   │   ├── utg_gshare_fa_ghr_ones_01.cpython-39.pyc
-    │   │   │   │   ├── utg_gshare_fa_ghr_zeros_01.cpython-39.pyc
-    │   │   │   │   ├── utg_gshare_fa_mispredict_loop_01.cpython-39.pyc
-    │   │   │   │   └── utg_gshare_fa_ras_push_pop_01.cpython-39.pyc
-    │   │   │   ├── utg_gshare_fa_btb_fill_01.py
-    │   │   │   ├── utg_gshare_fa_btb_fill_01.yapsy-plugin
-    │   │   │   ├── utg_gshare_fa_btb_selfmodifying_01.py
-    │   │   │   ├── utg_gshare_fa_btb_selfmodifying_01.yapsy-plugin
-    │   │   │   ├── utg_gshare_fa_fence_01.py
-    │   │   │   ├── utg_gshare_fa_fence_01.yapsy-plugin
-    │   │   │   ├── utg_gshare_fa_ghr_alternating_01.py
-    │   │   │   ├── utg_gshare_fa_ghr_alternating_01.yapsy-plugin
-    │   │   │   ├── utg_gshare_fa_ghr_ones_01.py
-    │   │   │   ├── utg_gshare_fa_ghr_ones_01.yapsy-plugin
-    │   │   │   ├── utg_gshare_fa_ghr_zeros_01.py
-    │   │   │   ├── utg_gshare_fa_ghr_zeros_01.yapsy-plugin
-    │   │   │   ├── utg_gshare_fa_mispredict_loop_01.py
-    │   │   │   ├── utg_gshare_fa_mispredict_loop_01.yapsy-plugin
-    │   │   │   ├── utg_gshare_fa_ras_push_pop_01.py
-    │   │   │   └── utg_gshare_fa_ras_push_pop_01.yapsy-plugin
+    │   │   │   │   ├── uatg_gshare_fa_btb_fill_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_btb_selfmodifying_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_fence_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_ghr_alternating_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_ghr_ones_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_ghr_zeros_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_mispredict_loop_01.cpython-39.pyc
+    │   │   │   │   └── uatg_gshare_fa_ras_push_pop_01.cpython-39.pyc
+    │   │   │   ├── uatg_gshare_fa_btb_fill_01.py
+    │   │   │   ├── uatg_gshare_fa_btb_fill_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_btb_selfmodifying_01.py
+    │   │   │   ├── uatg_gshare_fa_btb_selfmodifying_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_fence_01.py
+    │   │   │   ├── uatg_gshare_fa_fence_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_ghr_alternating_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_alternating_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_ghr_ones_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_ones_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_ghr_zeros_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_zeros_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_mispredict_loop_01.py
+    │   │   │   ├── uatg_gshare_fa_mispredict_loop_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_ras_push_pop_01.py
+    │   │   │   └── uatg_gshare_fa_ras_push_pop_01.yapsy-plugin
     │   │   ├── decoder
     │   │   │   ├── __pycache__
-    │   │   │   │   └── utg_decoder_i_ext_r_type.cpython-39.pyc
-    │   │   │   ├── utg_decoder_i_ext_r_type.py
-    │   │   │   └── utg_decoder_i_ext_r_type.yapsy-plugin
+    │   │   │   │   └── uatg_decoder_i_ext_r_type.cpython-39.pyc
+    │   │   │   ├── uatg_decoder_i_ext_r_type.py
+    │   │   │   └── uatg_decoder_i_ext_r_type.yapsy-plugin
     │   │   ├── decompressor
     │   │   │   ├── __pycache__
-    │   │   │   │   └── utg_decompressor.cpython-39.pyc
-    │   │   │   ├── utg_decompressor.py
-    │   │   │   └── utg_decompressor.yapsy-plugin
+    │   │   │   │   └── uatg_decompressor.cpython-39.pyc
+    │   │   │   ├── uatg_decompressor.py
+    │   │   │   └── uatg_decompressor.yapsy-plugin
     │   │   └── index.yaml
     │   └── README.rst
     ├── config.ini
     ├── dut_config.yaml
     └── work
         ├── branch_predictor
-        │   ├── utg_gshare_fa_btb_fill_01
-        │   │   └── utg_gshare_fa_btb_fill_01.S
-        │   ├── utg_gshare_fa_btb_selfmodifying_01
-        │   │   └── utg_gshare_fa_btb_selfmodifying_01.S
-        │   ├── utg_gshare_fa_fence_01
-        │   │   └── utg_gshare_fa_fence_01.S
-        │   ├── utg_gshare_fa_ghr_alternating_01
-        │   │   └── utg_gshare_fa_ghr_alternating_01.S
-        │   ├── utg_gshare_fa_ghr_ones_01
-        │   │   └── utg_gshare_fa_ghr_ones_01.S
-        │   ├── utg_gshare_fa_ghr_zeros_01
-        │   │   └── utg_gshare_fa_ghr_zeros_01.S
-        │   ├── utg_gshare_fa_mispredict_loop_01
-        │   │   └── utg_gshare_fa_mispredict_loop_01.S
-        │   └── utg_gshare_fa_ras_push_pop_01
-        │       └── utg_gshare_fa_ras_push_pop_01.S
+        │   ├── uatg_gshare_fa_btb_fill_01
+        │   │   └── uatg_gshare_fa_btb_fill_01.S
+        │   ├── uatg_gshare_fa_btb_selfmodifying_01
+        │   │   └── uatg_gshare_fa_btb_selfmodifying_01.S
+        │   ├── uatg_gshare_fa_fence_01
+        │   │   └── uatg_gshare_fa_fence_01.S
+        │   ├── uatg_gshare_fa_ghr_alternating_01
+        │   │   └── uatg_gshare_fa_ghr_alternating_01.S
+        │   ├── uatg_gshare_fa_ghr_ones_01
+        │   │   └── uatg_gshare_fa_ghr_ones_01.S
+        │   ├── uatg_gshare_fa_ghr_zeros_01
+        │   │   └── uatg_gshare_fa_ghr_zeros_01.S
+        │   ├── uatg_gshare_fa_mispredict_loop_01
+        │   │   └── uatg_gshare_fa_mispredict_loop_01.S
+        │   └── uatg_gshare_fa_ras_push_pop_01
+        │       └── uatg_gshare_fa_ras_push_pop_01.S
         ├── decoder
-        │   └── utg_decoder_i_ext_r_type
-        │       └── utg_decoder_i_ext_r_type.S
+        │   └── uatg_decoder_i_ext_r_type
+        │       └── uatg_decoder_i_ext_r_type.S
         ├── decompressor
-        │   └── utg_decompressor
-        │       └── utg_decompressor.S
+        │   └── uatg_decompressor
+        │       └── uatg_decompressor.S
         ├── link.ld
         ├── model_test.h
         ├── sv_top
@@ -265,7 +265,7 @@ For example, a test written for ``decoder`` will be present at
 ``~/myquickstart/work/decoder/``. 
 
 You can also find that the *link.ld* and *model_test.h* files have been 
-generated by UTG. This is because the directory passed along with ``-ld`` option
+generated by UATG. This is because the directory passed along with ``-ld`` option
 did not already contain a linker file. If it had, these files would have not 
 been generated.
 
@@ -284,11 +284,11 @@ environment. The framework itself provides a central control point for calling
 these plugins and thereby generating, compiling and simulating tests on 
 different targets. It provides a management surface of sorts. 
 
-In this section, we will be setting up RiVer Core and then use UTG to run tests
+In this section, we will be setting up RiVer Core and then use UATG to run tests
 on the Chromite DUT. 
 
 .. warning:: We are assuming that you have worked through the 
-   :ref:`Quickstart<quickstart>`, ergo, have UTG already installed. 
+   :ref:`Quickstart<quickstart>`, ergo, have UATG already installed. 
 
 Installing RiVer Core
 =====================
@@ -424,10 +424,10 @@ With this you should now have all the following available as command line argume
    required.
 
 
-The UTG package should be installed in your computer. Guide to installing UTG 
+The UATG package should be installed in your computer. Guide to installing UATG 
 can be found in the :ref:`Quickstart<quickstart>`.
 
-.. warning:: Check if utg is installed by using the ``utg --help`` command.
+.. warning:: Check if uatg is installed by using the ``uatg --help`` command.
 
 Setting up RiVer Core
 =====================
@@ -446,18 +446,18 @@ This should be the structure of your directory tree.
     │   ├── modules
     │   │   ├── branch_predictor
     │   │   │   ├── issues.rst
-    │   │   │   ├── utg_gshare_fa_btb_fill_01.py
-    │   │   │   ├── utg_gshare_fa_btb_selfmodifying_01.py
-    │   │   │   ├── utg_gshare_fa_fence_01.py
-    │   │   │   ├── utg_gshare_fa_ghr_alternating_01.py
-    │   │   │   ├── utg_gshare_fa_ghr_ones_01.py
-    │   │   │   ├── utg_gshare_fa_ghr_zeros_01.py
-    │   │   │   ├── utg_gshare_fa_mispredict_loop_01.py
-    │   │   │   └── utg_gshare_fa_ras_push_pop_01.py
+    │   │   │   ├── uatg_gshare_fa_btb_fill_01.py
+    │   │   │   ├── uatg_gshare_fa_btb_selfmodifying_01.py
+    │   │   │   ├── uatg_gshare_fa_fence_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_alternating_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_ones_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_zeros_01.py
+    │   │   │   ├── uatg_gshare_fa_mispredict_loop_01.py
+    │   │   │   └── uatg_gshare_fa_ras_push_pop_01.py
     │   │   ├── decoder
-    │   │   │   └── utg_decoder_i_ext_r_type.py
+    │   │   │   └── uatg_decoder_i_ext_r_type.py
     │   │   ├── decompressor
-    │   │   │   └── utg_decompressor.py
+    │   │   │   └── uatg_decompressor.py
     │   │   └── index.yaml
     │   └── README.rst
     ├── config.ini
@@ -550,30 +550,30 @@ Details and further specification of the config file syntax is available at
    filter =
    count = 1
 
-Setting up the Generator Plugin - UTG
--------------------------------------
+Setting up the Generator Plugin - UATG
+--------------------------------------
 
 By default, the ``river_core.ini`` file specifies aapg to be the generator. But,
-we are using ``UTG`` as the generator. Hence, it is necesssary to specify 
-``utg`` as the generator in line 12. 
+we are using ``UATG`` as the generator. Hence, it is necesssary to specify 
+``uatg`` as the generator in line 12. 
 
 .. code-block:: ini
 
-   generator = utg
+   generator = uatg
 
-In addition to that, you're required to create a ``[utg]`` section between the 
+In addition to that, you're required to create a ``[uatg]`` section between the 
 *[coverage]* and *[aapg]* section of the INI file. This will be
 similiar to the ``[aapg]`` section in the ``river_core.ini`` file. For this 
 tutorial you can paste the following code-block into the ``river_core.ini`` file
 . This section will contain the path to the directories and files required by
-utg to generate tests. 
+uatg to generate tests. 
 
 .. warning:: replace ``user`` in the paths with your username.
    
 .. code-block:: ini
    :linenos:
 
-    [utg]
+    [uatg]
     jobs = 8
     count = 1
     seed = random
@@ -587,7 +587,7 @@ utg to generate tests.
     check_logs = True
 
 Once you have pasted this into the INI file and have also updated the generator
-argument in line 12. You should be able use UTG as a generator for RiVer core.
+argument in line 12. You should be able use UATG as a generator for RiVer core.
 
 Setting up the DUT Plugin
 -------------------------
@@ -674,8 +674,8 @@ You should see the following log on the console:
           info  | Plugin Jobs : 4
           info  | Plugin Seed : random
           info  | Plugin Count (Times to run the test) : 1
-          info  | Now loading utg Suite
-         debug  | Loading module from /home/akrish/myquickstart//river_core_plugins/generator_plugins/utg_plugin/utg_plugin.py
+          info  | Now loading uatg Suite
+         debug  | Loading module from /home/akrish/myquickstart//river_core_plugins/generator_plugins/uatg_plugin/uatg_plugin.py
         ================================================= test session starts ==================================================
         platform linux -- Python 3.9.6, pytest-6.2.4, py-1.10.0, pluggy-0.13.1 -- /usr/bin/python
         cachedir: .pytest_cache
@@ -687,14 +687,14 @@ You should see the following log on the console:
         gw0 [1]
         scheduling tests via LoadScheduling
 
-        river_core_plugins/generator_plugins/utg_plugin/gen_framework.py::test_eval[Generating Test-list using utg] 
-        [gw0] [100%] PASSED river_core_plugins/generator_plugins/utg_plugin/gen_framework.py::test_eval[Generating Test-list using utg] 
+        river_core_plugins/generator_plugins/uatg_plugin/gen_framework.py::test_eval[Generating Test-list using uatg] 
+        [gw0] [100%] PASSED river_core_plugins/generator_plugins/uatg_plugin/gen_framework.py::test_eval[Generating Test-list using uatg] 
 
-        --------------- generated report log file: /home/akrish/myquickstart/mywork/.json/utg_20210908-1132.json ---------------
-        -------------------- generated html file: file:///home/akrish/myquickstart/mywork/reports/utg.html ---------------------
+        --------------- generated report log file: /home/akrish/myquickstart/mywork/.json/uatg_20210908-1132.json ---------------
+        -------------------- generated html file: file:///home/akrish/myquickstart/mywork/reports/uatg.html ---------------------
         ================================================== 1 passed in 0.82s ===================================================
 
-Upon running the command, your UTG Work directory structure will be like this. This 
+Upon running the command, your UATG Work directory structure will be like this. This 
 indicates that RiVer core has generated the tests which you had written for the
 DUT.
 
@@ -702,28 +702,28 @@ DUT.
 
     work/
     ├── branch_predictor
-    │   ├── utg_gshare_fa_btb_fill_01
-    │   │   └── utg_gshare_fa_btb_fill_01.S
-    │   ├── utg_gshare_fa_btb_selfmodifying_01
-    │   │   └── utg_gshare_fa_btb_selfmodifying_01.S
-    │   ├── utg_gshare_fa_fence_01
-    │   │   └── utg_gshare_fa_fence_01.S
-    │   ├── utg_gshare_fa_ghr_alternating_01
-    │   │   └── utg_gshare_fa_ghr_alternating_01.S
-    │   ├── utg_gshare_fa_ghr_ones_01
-    │   │   └── utg_gshare_fa_ghr_ones_01.S
-    │   ├── utg_gshare_fa_ghr_zeros_01
-    │   │   └── utg_gshare_fa_ghr_zeros_01.S
-    │   ├── utg_gshare_fa_mispredict_loop_01
-    │   │   └── utg_gshare_fa_mispredict_loop_01.S
-    │   └── utg_gshare_fa_ras_push_pop_01
-    │       └── utg_gshare_fa_ras_push_pop_01.S
+    │   ├── uatg_gshare_fa_btb_fill_01
+    │   │   └── uatg_gshare_fa_btb_fill_01.S
+    │   ├── uatg_gshare_fa_btb_selfmodifying_01
+    │   │   └── uatg_gshare_fa_btb_selfmodifying_01.S
+    │   ├── uatg_gshare_fa_fence_01
+    │   │   └── uatg_gshare_fa_fence_01.S
+    │   ├── uatg_gshare_fa_ghr_alternating_01
+    │   │   └── uatg_gshare_fa_ghr_alternating_01.S
+    │   ├── uatg_gshare_fa_ghr_ones_01
+    │   │   └── uatg_gshare_fa_ghr_ones_01.S
+    │   ├── uatg_gshare_fa_ghr_zeros_01
+    │   │   └── uatg_gshare_fa_ghr_zeros_01.S
+    │   ├── uatg_gshare_fa_mispredict_loop_01
+    │   │   └── uatg_gshare_fa_mispredict_loop_01.S
+    │   └── uatg_gshare_fa_ras_push_pop_01
+    │       └── uatg_gshare_fa_ras_push_pop_01.S
     ├── decoder
-    │   └── utg_decoder_i_ext_r_type
-    │       └── utg_decoder_i_ext_r_type.S
+    │   └── uatg_decoder_i_ext_r_type
+    │       └── uatg_decoder_i_ext_r_type.S
     ├── decompressor
-    │   └── utg_decompressor
-    │       └── utg_decompressor.S
+    │   └── uatg_decompressor
+    │       └── uatg_decompressor.S
     ├── link.ld
     ├── model_test.h
     └── sv_top
@@ -740,9 +740,9 @@ understood by reading the :ref:`Configuration spec<configuration_files>`.
 
   mywork/
   ├── reports
-  │   └── utg.html
+  │   └── uatg.html
   ├── test_list.yaml
-  └── utg
+  └── uatg
    
 
 Running the tests on DUT using RiVer Core
@@ -771,7 +771,7 @@ You should see the following log on the console:
           info  | The river_core is currently configured to run with following parameters
           info  | The Output Directory (work_dir) : mywork
           info  | ISA : rv64imafdc
-          info  | Generator Plugin : utg
+          info  | Generator Plugin : uatg
           info  | Target Plugin : ['chromite_verilator']
           info  | Reference Plugin : ['modspike']
           info  | DuT Info
@@ -803,16 +803,16 @@ You should see the following log on the console:
          debug  | make: Leaving directory '/home/akrish/myquickstart/river_core_plugins/dut_plugins/chromite_verilator_plugin/boot'
          debug  | chromite.dts:20.39-24.9: Warning (interrupt_provider): /cpus/cpu@0/interrupt-controller: Missing #address-cells in interrupt provider
           info  | Build Hook
-         debug  | Creating Make Target for utg_decoder_i_ext_r_type
-         debug  | Creating Make Target for utg_decompressor
-         debug  | Creating Make Target for utg_gshare_fa_btb_fill_01
-         debug  | Creating Make Target for utg_gshare_fa_btb_selfmodifying_01
-         debug  | Creating Make Target for utg_gshare_fa_fence_01
-         debug  | Creating Make Target for utg_gshare_fa_ghr_alternating_01
-         debug  | Creating Make Target for utg_gshare_fa_ghr_ones_01
-         debug  | Creating Make Target for utg_gshare_fa_ghr_zeros_01
-         debug  | Creating Make Target for utg_gshare_fa_mispredict_loop_01
-         debug  | Creating Make Target for utg_gshare_fa_ras_push_pop_01
+         debug  | Creating Make Target for uatg_decoder_i_ext_r_type
+         debug  | Creating Make Target for uatg_decompressor
+         debug  | Creating Make Target for uatg_gshare_fa_btb_fill_01
+         debug  | Creating Make Target for uatg_gshare_fa_btb_selfmodifying_01
+         debug  | Creating Make Target for uatg_gshare_fa_fence_01
+         debug  | Creating Make Target for uatg_gshare_fa_ghr_alternating_01
+         debug  | Creating Make Target for uatg_gshare_fa_ghr_ones_01
+         debug  | Creating Make Target for uatg_gshare_fa_ghr_zeros_01
+         debug  | Creating Make Target for uatg_gshare_fa_mispredict_loop_01
+         debug  | Creating Make Target for uatg_gshare_fa_ras_push_pop_01
           info  | Run Hook
          debug  | Module dir: /home/akrish/myquickstart//river_core_plugins/dut_plugins
          debug  | Pytest file: /home/akrish/myquickstart//river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py
@@ -827,26 +827,26 @@ You should see the following log on the console:
     gw0 [10] / gw1 [10] / gw2 [10] / gw3 [10]
     scheduling tests via LoadScheduling
 
-    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_decompressor] 
-    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_btb_fill_01] 
-    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_btb_selfmodifying_01] 
-    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_decoder_i_ext_r_type] 
-    [gw3] [ 10%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_btb_selfmodifying_01] 
-    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_ghr_zeros_01] 
-    [gw2] [ 20%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_btb_fill_01] 
-    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_ghr_ones_01] 
-    [gw1] [ 30%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_decompressor] 
-    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_ghr_alternating_01] 
-    [gw3] [ 40%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_ghr_zeros_01] 
-    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_mispredict_loop_01] 
-    [gw2] [ 50%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_ghr_ones_01] 
-    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_ras_push_pop_01] 
-    [gw1] [ 60%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_ghr_alternating_01] 
-    [gw3] [ 70%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_mispredict_loop_01] 
-    [gw2] [ 80%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_ras_push_pop_01] 
-    [gw0] [ 90%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_decoder_i_ext_r_type] 
-    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_fence_01] 
-    [gw0] [100%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator utg_gshare_fa_fence_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_decompressor] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_btb_fill_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_btb_selfmodifying_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_decoder_i_ext_r_type] 
+    [gw3] [ 10%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_btb_selfmodifying_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_zeros_01] 
+    [gw2] [ 20%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_btb_fill_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_ones_01] 
+    [gw1] [ 30%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_decompressor] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_alternating_01] 
+    [gw3] [ 40%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_zeros_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_mispredict_loop_01] 
+    [gw2] [ 50%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_ones_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ras_push_pop_01] 
+    [gw1] [ 60%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_alternating_01] 
+    [gw3] [ 70%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_mispredict_loop_01] 
+    [gw2] [ 80%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ras_push_pop_01] 
+    [gw0] [ 90%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_decoder_i_ext_r_type] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_fence_01] 
+    [gw0] [100%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_fence_01] 
 
     ------------------------------- generated report log file: /home/akrish/myquickstart/mywork/.json/chromite_verilator_20210908-1142.json --------------------------------
     ------------------------------------- generated html file: file:///home/akrish/myquickstart/mywork/reports/chromite_verilator.html -------------------------------------
@@ -861,16 +861,16 @@ You should see the following log on the console:
              debug  | Pre Compile Stage
              debug  | /home/akrish/myquickstart/mywork//.json/ Directory exists
              debug  | Build Hook
-             debug  | Creating Make Target for utg_decoder_i_ext_r_type
-             debug  | Creating Make Target for utg_decompressor
-             debug  | Creating Make Target for utg_gshare_fa_btb_fill_01
-             debug  | Creating Make Target for utg_gshare_fa_btb_selfmodifying_01
-             debug  | Creating Make Target for utg_gshare_fa_fence_01
-             debug  | Creating Make Target for utg_gshare_fa_ghr_alternating_01
-             debug  | Creating Make Target for utg_gshare_fa_ghr_ones_01
-             debug  | Creating Make Target for utg_gshare_fa_ghr_zeros_01
-             debug  | Creating Make Target for utg_gshare_fa_mispredict_loop_01
-             debug  | Creating Make Target for utg_gshare_fa_ras_push_pop_01
+             debug  | Creating Make Target for uatg_decoder_i_ext_r_type
+             debug  | Creating Make Target for uatg_decompressor
+             debug  | Creating Make Target for uatg_gshare_fa_btb_fill_01
+             debug  | Creating Make Target for uatg_gshare_fa_btb_selfmodifying_01
+             debug  | Creating Make Target for uatg_gshare_fa_fence_01
+             debug  | Creating Make Target for uatg_gshare_fa_ghr_alternating_01
+             debug  | Creating Make Target for uatg_gshare_fa_ghr_ones_01
+             debug  | Creating Make Target for uatg_gshare_fa_ghr_zeros_01
+             debug  | Creating Make Target for uatg_gshare_fa_mispredict_loop_01
+             debug  | Creating Make Target for uatg_gshare_fa_ras_push_pop_01
              debug  | Run Hook
              debug  | Module dir: /home/akrish/myquickstart//river_core_plugins/reference_plugins
              debug  | Pytest file: /home/akrish/myquickstart//river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py
@@ -882,65 +882,65 @@ You should see the following log on the console:
     gw0 [10]
     scheduling tests via LoadScheduling
 
-    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_decoder_i_ext_r_type] 
-    [gw0] [ 10%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_decoder_i_ext_r_type] 
-    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_decompressor] 
-    [gw0] [ 20%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_decompressor] 
-    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_btb_fill_01] 
-    [gw0] [ 30%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_btb_fill_01] 
-    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_btb_selfmodifying_01] 
-    [gw0] [ 40%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_btb_selfmodifying_01] 
-    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_fence_01] 
-    [gw0] [ 50%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_fence_01] 
-    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_ghr_alternating_01] 
-    [gw0] [ 60%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_ghr_alternating_01] 
-    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_ghr_ones_01] 
-    [gw0] [ 70%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_ghr_ones_01] 
-    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_ghr_zeros_01] 
-    [gw0] [ 80%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_ghr_zeros_01] 
-    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_mispredict_loop_01] 
-    [gw0] [ 90%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_mispredict_loop_01] 
-    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_ras_push_pop_01] 
-    [gw0] [100%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike utg_gshare_fa_ras_push_pop_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_decoder_i_ext_r_type] 
+    [gw0] [ 10%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_decoder_i_ext_r_type] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_decompressor] 
+    [gw0] [ 20%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_decompressor] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_btb_fill_01] 
+    [gw0] [ 30%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_btb_fill_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_btb_selfmodifying_01] 
+    [gw0] [ 40%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_btb_selfmodifying_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_fence_01] 
+    [gw0] [ 50%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_fence_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_alternating_01] 
+    [gw0] [ 60%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_alternating_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_ones_01] 
+    [gw0] [ 70%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_ones_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_zeros_01] 
+    [gw0] [ 80%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_zeros_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_mispredict_loop_01] 
+    [gw0] [ 90%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_mispredict_loop_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ras_push_pop_01] 
+    [gw0] [100%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ras_push_pop_01] 
 
     -------------------------------------- generated report log file: /home/akrish/myquickstart/mywork/.json/spike_20210908-1143.json --------------------------------------
     ------------------------------------------- generated html file: file:///home/akrish/myquickstart/mywork/reports/spike.html --------------------------------------------
     ========================================================================== 10 passed in 5.91s ==========================================================================
-          info  | Dumps for test utg_decoder_i_ext_r_type Match. TEST PASSED
-          info  | Dumps for test utg_decompressor Match. TEST PASSED
-          info  | Dumps for test utg_gshare_fa_btb_fill_01 Match. TEST PASSED
-          info  | Dumps for test utg_gshare_fa_btb_selfmodifying_01 Match. TEST PASSED
-          info  | Dumps for test utg_gshare_fa_fence_01 Match. TEST PASSED
-          info  | Dumps for test utg_gshare_fa_ghr_alternating_01 Match. TEST PASSED
-          info  | Dumps for test utg_gshare_fa_ghr_ones_01 Match. TEST PASSED
-          info  | Dumps for test utg_gshare_fa_ghr_zeros_01 Match. TEST PASSED
-          info  | Dumps for test utg_gshare_fa_mispredict_loop_01 Match. TEST PASSED
-          info  | Dumps for test utg_gshare_fa_ras_push_pop_01 Match. TEST PASSED
+          info  | Dumps for test uatg_decoder_i_ext_r_type Match. TEST PASSED
+          info  | Dumps for test uatg_decompressor Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_btb_fill_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_btb_selfmodifying_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_fence_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_ghr_alternating_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_ghr_ones_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_ghr_zeros_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_mispredict_loop_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_ras_push_pop_01 Match. TEST PASSED
           info  | Checking for a generator json to create final report
-         debug  | Detected generated JSON Files: ['mywork/.json/utg_20210908-1025.json', 'mywork/.json/utg_20210908-1026.json', 'mywork/.json/utg_20210908-1132.json']
+         debug  | Detected generated JSON Files: ['mywork/.json/uatg_20210908-1025.json', 'mywork/.json/uatg_20210908-1026.json', 'mywork/.json/uatg_20210908-1132.json']
           info  | Not checking logs
          debug  | Removing artifacts for Chromite
-         debug  | Removing extra files for Test: utg_decoder_i_ext_r_type
-         debug  | Removing extra files for Test: utg_decompressor
-         debug  | Removing extra files for Test: utg_gshare_fa_btb_fill_01
-         debug  | Removing extra files for Test: utg_gshare_fa_btb_selfmodifying_01
-         debug  | Removing extra files for Test: utg_gshare_fa_fence_01
-         debug  | Removing extra files for Test: utg_gshare_fa_ghr_alternating_01
-         debug  | Removing extra files for Test: utg_gshare_fa_ghr_ones_01
-         debug  | Removing extra files for Test: utg_gshare_fa_ghr_zeros_01
-         debug  | Removing extra files for Test: utg_gshare_fa_mispredict_loop_01
-         debug  | Removing extra files for Test: utg_gshare_fa_ras_push_pop_01
+         debug  | Removing extra files for Test: uatg_decoder_i_ext_r_type
+         debug  | Removing extra files for Test: uatg_decompressor
+         debug  | Removing extra files for Test: uatg_gshare_fa_btb_fill_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_btb_selfmodifying_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_fence_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_alternating_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_ones_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_zeros_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_mispredict_loop_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ras_push_pop_01
          debug  | Removing artifacts for Spike
-         debug  | Removing extra files for Test: utg_decoder_i_ext_r_type
-         debug  | Removing extra files for Test: utg_decompressor
-         debug  | Removing extra files for Test: utg_gshare_fa_btb_fill_01
-         debug  | Removing extra files for Test: utg_gshare_fa_btb_selfmodifying_01
-         debug  | Removing extra files for Test: utg_gshare_fa_fence_01
-         debug  | Removing extra files for Test: utg_gshare_fa_ghr_alternating_01
-         debug  | Removing extra files for Test: utg_gshare_fa_ghr_ones_01
-         debug  | Removing extra files for Test: utg_gshare_fa_ghr_zeros_01
-         debug  | Removing extra files for Test: utg_gshare_fa_mispredict_loop_01
-         debug  | Removing extra files for Test: utg_gshare_fa_ras_push_pop_01
+         debug  | Removing extra files for Test: uatg_decoder_i_ext_r_type
+         debug  | Removing extra files for Test: uatg_decompressor
+         debug  | Removing extra files for Test: uatg_gshare_fa_btb_fill_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_btb_selfmodifying_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_fence_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_alternating_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_ones_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_zeros_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_mispredict_loop_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ras_push_pop_01
           info  | Now generating some good HTML reports for you
           info  | Final report saved at mywork/reports//report.html
    

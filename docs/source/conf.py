@@ -25,7 +25,7 @@ def get_version():
 sys.path.insert(0, os.path.abspath('../..'))
 sys.setrecursionlimit(1500)
 
-project = u'UTG'
+project = u'UATG'
 copyright = '2021 InCore Semiconductors Pvt. Ltd.'
 author = 'InCore Semiconductors Pvt. Ltd.'
 
@@ -92,7 +92,7 @@ pygments_style = 'sphinx'
 # -- Options for HTML output -------------------------------------------------
 
 #gitlab_url = 'https://gitlab.com/incoresemi/micro-arch-tests'
-github_url = 'https://github.com/incoresemi/utg'
+github_url = 'https://github.com/incoresemi/uatg'
 html_show_sourcelink = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -165,7 +165,7 @@ html_show_license = True
 
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'UTGdoc'
+htmlhelp_basename = 'UATGdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -376,7 +376,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'UTG.tex', 'InCore Micro-Architectural Test Framework Documentation',
+    (master_doc, 'UATG.tex', 'InCore Micro-Architectural Test Framework Documentation',
      'InCore Semiconductors Pvt. Ltd.', 'manual'),
 ]
 
@@ -400,8 +400,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'UTG', 'InCore Micro-Architectural Test Framework Documentation',
-     author, 'UTG', 'One line description of project.',
+    (master_doc, 'UATG', 'InCore Micro-Architectural Test Framework Documentation',
+     author, 'UATG', 'One line description of project.',
      'Miscellaneous'),
 ]
 
