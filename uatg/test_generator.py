@@ -73,6 +73,7 @@ def generate_tests(work_dir,
             # logger.critical("The {0} module is not in the dut config_file",
             # format(module))
             module_params = {}
+        module_params['isa'] = isa
         logger.debug(f'Directory for {module} is {module_dir}')
         logger.info(f'Starting plugin Creation for {module}')
         create_plugins(plugins_path=module_dir)
@@ -192,6 +193,13 @@ def generate_sv(work_dir,
         modules = list_of_modules(modules_dir, verbose)
 
     inp_yaml = config_dict
+    try:
+        isa = inp_yaml['ISA']
+    except Exception as e:
+        logger.error(e)
+        logger.error('Exiting UATG')
+        exit(0)
+
     logger.info('****** Generating Covergroups ******')
 
     sv_dir = os.path.join(work_dir, 'sv_top')
@@ -216,10 +224,12 @@ def generate_sv(work_dir,
         except KeyError:
             module_params = {}
 
+        module_params['isa'] = isa
+
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
-
+        
         for plugin in manager.getAllPlugins():
             _check = plugin.plugin_object.execute(module_params)
             _name = (str(plugin.plugin_object).split(".", 1))
