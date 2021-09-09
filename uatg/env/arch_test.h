@@ -568,6 +568,11 @@ rvtest_data_end:
     .endif;\
     .set offset,0;
 
+#define RVTEST_FP_ENABLE()\
+    LI x2, MSTATUS_FS;\
+    csrrs x3, mstatus,x0;\
+    or x2, x3, x2;\
+    csrrw x0,mstatus,x2;
 
 
 //------------------------------ BORROWED FROM ANDREW's RISC-V TEST MACROS -----------------------//
