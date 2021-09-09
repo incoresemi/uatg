@@ -38,7 +38,8 @@ if certain features in the configuration have been disabled.
 
 UTG has ensured that the framework and tests are decoupled and thus the tests themselves can be
 hosted as a separate directory or repository and can be fed into UTG to generate Assembly tests. You
-can find examples of python-plugins for some of Chromite's modules in the `chromite-utg-tests <>`_
+can find examples of python-plugins for some of Chromite's modules in the 
+`chromite-utg-tests <https://github.com/incoresemi/chromite_uarch_tests>`_
 repository
 
 The tests generated using UTG can be run on the DUT in the conventional way or by using a 
@@ -48,8 +49,8 @@ Core automatically selects the utg plugin to generate the tests, run it on the D
 obtain coverage as well as compare the logs from DUT, and reference and finally provide a 
 comprehensive report of your test's health !
 
-Steps to install and run the tests can be found in the ``quickstart`` section of this document. 
-Steps to create tests can be found here in the ``UTG Framework`` section. 
+Steps to install and run the tests can be found in the :ref:`quickstart <quickstart>` section of this document. 
+Steps to create tests can be found here in the :ref:`UTG Framework <creating_new_tests>` section.
 
 The overall tool flow is shown in the diagram below:
 
