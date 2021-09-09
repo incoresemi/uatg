@@ -8,7 +8,7 @@
 Quickstart
 ==========
 
-This section is meant to serve as a quick-guide to setup UATG(uArch Test Generator). This guide
+This section is meant to serve as a quick-guide to setup UATG(μArch Test Generator). This guide
 will help you setup all the required tooling for running uatg on your system.
 
 

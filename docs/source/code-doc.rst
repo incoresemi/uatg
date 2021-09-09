@@ -7,7 +7,7 @@ Code Documentation
 Test_Generator
 ^^^^^^^^^^^^^^
 
-.. automodule:: utg.test_generator
+.. automodule:: uatg.test_generator
    :members: 
    :special-members:
    :private-members:
@@ -15,7 +15,7 @@ Test_Generator
 Utils
 ^^^^^
 
-.. automodule:: utg.utils
+.. automodule:: uatg.utils
    :members:
    :special-members:
    :private-members:

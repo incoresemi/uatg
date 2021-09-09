@@ -5,7 +5,7 @@
 Overview
 ========
 
-``UATG`` - Architectural Test Generator - is an open-source python based framework developed
+``UATG`` - μArchitectural Test Generator - is an open-source python based framework developed
 by InCore to generate RISC-V Assembly tests for functional verification of the RISC-V cores 
 (currently supports in-house and SHAKTI cores only). While complements of UATG, like
 `RISCV-CTG <https://github.com/riscv-software-src/riscv-ctg>`_ , `AAPG

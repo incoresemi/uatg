@@ -1,6 +1,6 @@
-####################
-Welcome to UArchTest 
-####################
+###############
+Welcome to UATG 
+###############
 
 .. toctree::
    :glob:
