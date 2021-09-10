@@ -4,7 +4,7 @@ base_reg_file = ['x' + str(reg_no) for reg_no in range(32)]
 
 arithmetic_instructions = {
     'add-sub-reg': ['add', 'addw', 'sub', 'subw'],
-    'add-sub-imm': ['addi', 'addiw'],
+    'add-imm': ['addi', 'addiw'],
     'shift-rl-reg': ['sll', 'sllw', 'sra', 'sraw', 'srl', 'srlw'],
     'shift-rl-imm': ['slli', 'slliw', 'srai', 'sraiw', 'srli', 'srliw']
 }
@@ -53,14 +53,9 @@ def bit_walker(bit_width=8, n_ones=1, invert=False):
         temp = (1 << n_ones) - 1
         for loop_var in range(bit_width):
             if temp <= (1 << bit_width) - 1:
-                # binary = format(temp, f'0{bit_width}x')
                 if not invert:
-                    # walked.append(binary)
                     walked.append(hex(temp))
                 elif invert:
-                    # binary = format((temp ^ ((1 << bit_width)-1)),
-                    #                 f'0{bit_width}x')
-                    # walked.append(binary)
                     walked.append(hex(temp ^ ((1 << bit_width) - 1)))
                 temp = temp << 1
             else:
