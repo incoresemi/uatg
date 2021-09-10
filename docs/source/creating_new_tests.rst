@@ -43,10 +43,11 @@ Other than that, it is necessary that the module specific directories. like
 *branch_predictor*, *decoder* and *decompressor* should be named same as the
 verilog module name in order to improve comprehension. 
 
-The ``index.yaml`` contains the names of all modules for which tests are to be 
-generated. When invoked, UATG reads the *index.yaml* file first and checks only
-the directories which were specified in the yaml file for test_classes. Other 
-folders are not used to pick up tests.
+The ``index.yaml`` should contain the names of all modules for which test classes
+exist in the directory, and for which the tests are to be generated. 
+When invoked, UATG reads the *index.yaml* file first and checks for test classes
+only in the directories which were specified in the yaml file. Other 
+folders will not be used to pick up test classes.
 
 The structure of the *index.yaml* file is presented as follows,
 
@@ -127,6 +128,11 @@ create a, ``index.yaml`` file.
    $ vi index.yaml
 
 The content to typed within the yaml file for UATG to recognize the test is this.
+
+.. warning:: If the yaml file does not contain an entry with the module name 
+   and test name, UATG will not recognize it's presence and hence skip it.
+   So, you should make an entry for every new test and every new module which 
+   requires UATG to generate tests.
 
 .. code-block:: yaml
 
