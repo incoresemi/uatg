@@ -6,7 +6,7 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+    branches: [ main ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -35,7 +35,7 @@ jobs:
   
       - name: Install dependencies
         run: |
-          pip install -r river_core/requirements.txt
+          pip install -r uatg/requirements.txt
           python -m pip install --upgrade pip
           pip install setuptools wheel twine
           
