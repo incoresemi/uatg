@@ -212,7 +212,7 @@ def load_yaml(file):
         If the file is in YAML, it reads the file and returns the data from the 
         file as a dictionary.
     """
-    if file.endswith('.yaml') or file.endswith('.yml'):
+    if os.path.exists(file) and (file.endswith('.yaml') or file.endswith('.yml')):
         yaml = YAML(typ="safe")
         yaml.default_flow_style = False
         yaml.allow_unicode = True
@@ -223,7 +223,7 @@ def load_yaml(file):
             logger.error(f'error: {msg}')
     else:
         logger.error(f'error: {file} is not a valid yaml file')
-        exit('INVALID_FILE')
+        exit('INVALID_FILE/PATH')
 
 
 def join_yaml_reports(work_dir='abs_path_here/', module='branch_predictor'):
