@@ -24,7 +24,7 @@ def cli():
 @click.option('--module_dir',
               '-md',
               multiple=False,
-              required=False,
+              required=True,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Absolute Path to the directory containing the python files"
               " which generates the assembly tests. "
@@ -199,7 +199,7 @@ def list_modules(module_dir, verbose):
 @click.option('--config_file',
               '-c',
               multiple=False,
-              required=False,
+              required=True,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Provide a config.ini file's path. This runs uatg based upon "
               "the parameters stored in the file. If not specified "
@@ -315,14 +315,14 @@ def setup(config_path, alias_path, dut_path):
 @click.option('--dut_config',
               '-dc',
               multiple=False,
-              required=False,
+              required=True,
               type=click.Path(resolve_path=True, readable=True),
               help="Path to the yaml file containing DUT configuration. "
               "Needed to generate/validate tests")
 @click.option('--module_dir',
               '-md',
               multiple=False,
-              required=False,
+              required=True,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Absolute Path to the directory containing the python files"
               " which generate the assembly tests. "
@@ -330,7 +330,7 @@ def setup(config_path, alias_path, dut_path):
 @click.option('--work_dir',
               '-wd',
               multiple=False,
-              required=False,
+              required=True,
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the working directory where generated files will be"
               " stored.")
