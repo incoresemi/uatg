@@ -147,7 +147,7 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
                    modules_dir=module_dir,
                    modules=module,
                    config_dict=dut_dict,
-                   test_list=gen_test_list,
+                   test_list=str(gen_test_list),
                    verbose=verbose)
     if gen_cvg:
         if alias_file is not None:
