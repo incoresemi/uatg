@@ -32,9 +32,7 @@ def generate_tests(work_dir,
     test_list is also created in the yaml format by the function. The test
     generator also creates a linker file as well as the header files for running
     the ASM files on the DUT, when required. Finally, the test generator only 
-    generates the tests whose targets are present in the DUT*.
-
-    *assuming that the user does a check within the test_class.
+    generates the tests whose targets are implemented in the DUT.
     """
     uarch_dir = os.path.dirname(uatg.__file__)
 
