@@ -29,23 +29,23 @@ test_requirements = []
 
 setup(
     name='uatg',
-    version='dev-0.0.1',
+    version='1.0.0',
     description="UATG - Micro-Architectural (uArch) Tests Generator",
     long_description=readme + '\n\n',
     classifiers=[
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: BSD License",
-        "Development Status :: 2 - Pre-Alpha"
+        "Development Status :: 3 - Alpha"
     ],
     url='https://github.com/incoresemi/uatg',
     author="InCore Semiconductors Pvt. Ltd.",
-    author_email='incorebot@gmail.com',
+    author_email='neelgala@incoresemi.com',
     license="BSD-3-Clause",
     packages=find_packages(),
     package_dir={'uatg': 'uatg'},
     package_data={'uatg': ['requirements.txt', 'target/*', 'env/*']},
     install_requires=read_requires(),
-    python_requires='>=3.6.0',
+    python_requires='>=3.7.0',
     entry_points={
         'console_scripts': ['uatg=uatg.main:cli'],
     },

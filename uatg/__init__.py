@@ -3,5 +3,5 @@
 """Top-level package for RISC-V Micro Architecture Test Generator (UATG)"""
 
 __author__ = """InCore Semiconductors Pvt Ltd"""
-__email__ = 'incorebot@gmail.com'
-__version__ = 'dev-0.0.1'
+__email__ = 'neelgala@incoresemi.com'
+__version__ = '1.0.0'
