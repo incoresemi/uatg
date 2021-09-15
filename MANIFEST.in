@@ -1,0 +1,8 @@
+include LICENSE.incore
+include README.md
+include uatg/requirements.txt
+
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *.S
+recursive-exclude * *.yapsy-plugin

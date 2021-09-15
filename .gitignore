@@ -1,0 +1,28 @@
+# Pycache stuff
+uatg/modules/__pycache__/
+uatg/modules/branch_predictor/__pycache__/
+uatg/modules/branch_predictor/tests/
+**.pyc
+**.pyo
+
+# Modules Directory and Repo
+config.ini
+
+# Build Directory
+work/
+utg/temp/*
+utg/work/*
+
+# Assembly, Plugins
+**.S
+**.yapsy-plugin
+
+# IDE Settings
+.idea/*
+
+.*
+!.github
+*.egg-info
+docs/build/
+utg/target/*
+utg/*.yaml

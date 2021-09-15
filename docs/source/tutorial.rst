@@ -1,0 +1,952 @@
+.. See LICENSE.incore for details
+
+.. highlight:: shell
+
+.. _tutorial:
+
+#############
+UATG Tutorial
+#############
+
+.. note:: uatg is interchangeably denoted as 'framework' in this section.
+
+This section provides a deeper insight about using the UATG Tool.
+We will be using the generate command as an alternative to the from-config 
+command. 
+
+.. warning:: It is assumed that you have followed the 
+   :ref:`Quickstart<quickstart>` before trying this out.
+
+Successfully getting through quick start should indicate that the UATG framework
+is successsfully installed in your computer.
+
+We will be continuing in the same ``myquickstart`` directory which we had 
+created for the quickstart. Right now, the directory structure will be 
+something like this
+
+.. code-block:: console
+
+    myquickstart/
+    ├── aliasing.yaml
+    ├── chromite_uarch_tests
+    │   ├── aliasing.yaml
+    │   ├── modules
+    │   │   ├── branch_predictor
+    │   │   │   ├── issues.rst
+    │   │   │   ├── uatg_gshare_fa_btb_fill_01.py
+    │   │   │   ├── uatg_gshare_fa_btb_selfmodifying_01.py
+    │   │   │   ├── uatg_gshare_fa_fence_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_alternating_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_ones_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_zeros_01.py
+    │   │   │   ├── uatg_gshare_fa_mispredict_loop_01.py
+    │   │   │   └── uatg_gshare_fa_ras_push_pop_01.py
+    │   │   ├── decoder
+    │   │   │   └── uatg_decoder_i_ext_r_type.py
+    │   │   ├── decompressor
+    │   │   │   └── uatg_decompressor.py
+    │   │   └── index.yaml
+    │   └── README.rst
+    ├── config.ini
+    ├── dut_config.yaml
+    └── work
+
+If you had gone through the quickstart, you may find some more ``.yapsy_plugin``
+files, ``__pycache__`` directories and you will find several tests within the 
+``work`` directory. It is okay for your directory tree to be so. It will not
+impact your workflow with UATG.
+
+Here, the *aliasing.yaml*, *dut_config.yaml* and *config.ini* were created by 
+the ``uatg setup`` command.
+
+Detailed description about the options used along with the subcommands has been 
+discussed in the :ref:`CLI docs<uatg_cli>`. We will be breifly explaining the 
+flags in this section.
+       
+Let's start by generating the tests.
+
+.. warning:: All paths are absolute.
+
+=======================
+**Generate** ASM tests 
+=======================
+
+.. code-block:: console
+
+  $ uatg generate -v debug -m all -wd ~/myquickstart/work/ \
+    -ld ~/myquickstart/work/ -t -gc \ 
+    -md ~/myquickstart/chromite_uarch_tests/modules/ \ 
+    -dc ~/myquickstart/dut_config.yaml -af ~/myquickstart/aliasing.yaml
+
+- Here the ``-v`` option is used to control the verbosity of the log. Debug logs
+  everything which will be useful in debugging the code.
+- ``-wd`` UATG will create the test files within this directory. 
+  It will also create a `model_test.h` and `link.ld` file in the same directory 
+  by default. [REQUIRED]
+- ``-ld`` is an optional parameter. If not specified, the ``-wd`` parameter is 
+  reused. If the user has his own linker files, he may rename the linker file as
+  ``link.ld`` and pass the path to the directory containing the ``link.ld`` file
+  along with the ``-ld`` option.
+- ``-t`` is a flag used to generate a test_list.yaml file. Information about the 
+  test_list format can be found :ref:`here <configuration_files>`.
+- ``-gc`` flag is used to specify the generation of SV covergroup and TB files. 
+  It is required to pass the `-gc` flag along with the alias file (`-af`).
+  The SV files will be found within the ``sv_top`` directory in the ``work`` 
+  directory.
+- ``-md`` is the path to the modules directory containing the test_classes. The
+  test_classes will be sorted into directories based on the module being tested.
+- ``-dc`` is the path to the dut_config.yaml generated using ``uatg setup``.
+- ``-af`` is the path to the aliasing.yaml file generated using ``uatg setup``.
+
+Running this command should generate this log in your terminal.
+
+.. code-block:: console
+
+          info  | ****** Micro Architectural Tests *******
+          info  | Version : dev-0.0.1
+          info  | Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.
+          info  | All Rights Reserved.
+          info  | uatg dir is /home/akrish/work/InCore/micro-arch-tests/uatg
+          info  | work_dir is /home/akrish/myquickstart/work
+         debug  | Checking /home/akrish/myquickstart/chromite_uarch_tests/modules for modules
+         debug  | The modules are ['branch_predictor', 'decoder', 'decompressor']
+          info  | ****** Generating Tests ******
+         debug  | Directory for branch_predictor is /home/akrish/myquickstart/chromite_uarch_tests/modules/branch_predictor
+          info  | Starting plugin Creation for branch_predictor
+          info  | Created plugins for branch_predictor
+         debug  | Generating assembly tests for branch_predictor
+         debug  | Generating test for uatg_gshare_fa_btb_fill_01
+         debug  | Generating test for uatg_gshare_fa_mispredict_loop_01
+         debug  | Generating test for uatg_gshare_fa_ghr_ones_01
+         debug  | Generating test for uatg_gshare_fa_ras_push_pop_01
+         debug  | Generating test for uatg_gshare_fa_ghr_alternating_01
+         debug  | Generating test for uatg_gshare_fa_ghr_zeros_01
+         debug  | Generating test for uatg_gshare_fa_fence_01
+         debug  | Generating test for uatg_gshare_fa_btb_selfmodifying_01
+         debug  | Finished Generating Assembly Tests for branch_predictor
+          info  | Creating test_list for the branch_predictor
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_btb_fill_01/uatg_gshare_fa_btb_fill_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_mispredict_loop_01/uatg_gshare_fa_mispredict_loop_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_ones_01/uatg_gshare_fa_ghr_ones_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ras_push_pop_01/uatg_gshare_fa_ras_push_pop_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_alternating_01/uatg_gshare_fa_ghr_alternating_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_zeros_01/uatg_gshare_fa_ghr_zeros_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_fence_01/uatg_gshare_fa_fence_01.S
+         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_btb_selfmodifying_01/uatg_gshare_fa_btb_selfmodifying_01.S
+         debug  | Directory for decoder is /home/akrish/myquickstart/chromite_uarch_tests/modules/decoder
+          info  | Starting plugin Creation for decoder
+          info  | Created plugins for decoder
+         debug  | Generating assembly tests for decoder
+         debug  | Generating test for uatg_decoder_i_ext_r_type
+         debug  | Finished Generating Assembly Tests for decoder
+          info  | Creating test_list for the decoder
+         debug  | Current test is /home/akrish/myquickstart/work/decoder/uatg_decoder_i_ext_r_type/uatg_decoder_i_ext_r_type.S
+         debug  | Directory for decompressor is /home/akrish/myquickstart/chromite_uarch_tests/modules/decompressor
+          info  | Starting plugin Creation for decompressor
+          info  | Created plugins for decompressor
+         debug  | Generating assembly tests for decompressor
+         debug  | Generating test for uatg_decompressor
+         debug  | Finished Generating Assembly Tests for decompressor
+          info  | Creating test_list for the decompressor
+         debug  | Current test is /home/akrish/myquickstart/work/decompressor/uatg_decompressor/uatg_decompressor.S
+          info  | ****** Finished Generating Tests ******
+         debug  | Creating a linker file at /home/akrish/myquickstart/work
+         debug  | Creating Model_test.h file at /home/akrish/myquickstart/work
+          info  | Test List was generated by uatg. You can find it in the work dir 
+         debug  | Checking /home/akrish/myquickstart/chromite_uarch_tests/modules for modules
+          info  | ****** Generating Covergroups ******
+         debug  | Generated tbtop, defines and interface files
+         debug  | Generating CoverPoints for branch_predictor
+          info  | Generating coverpoints SV file for uatg_gshare_fa_mispredict_loop_01
+       warning  | Skipping coverpoint generation for uatg_gshare_fa_ras_push_pop_01 as there is no gen_covergroup method 
+       warning  | Skipping coverpoint generation for uatg_gshare_fa_ghr_ones_01 as there is no gen_covergroup method 
+          info  | Generating coverpoints SV file for uatg_gshare_fa_ghr_zeros_01
+       warning  | Skipping coverpoint generation for uatg_gshare_fa_btb_selfmodifying_01 as there is no gen_covergroup method 
+       warning  | Skipping coverpoint generation for uatg_gshare_fa_ghr_alternating_01 as there is no gen_covergroup method 
+          info  | Generating coverpoints SV file for uatg_gshare_fa_btb_fill_01
+          info  | Generating coverpoints SV file for uatg_gshare_fa_fence_01
+         debug  | Finished Generating Coverpoints for branch_predictor
+         debug  | Generating CoverPoints for decoder
+          info  | Generating coverpoints SV file for uatg_decoder_i_ext_r_type
+         debug  | Finished Generating Coverpoints for decoder
+         debug  | Generating CoverPoints for decompressor
+       warning  | Skipping coverpoint generation for uatg_decompressor as there is no gen_covergroup method 
+         debug  | Finished Generating Coverpoints for decompressor
+          info  | ****** Finished Generating Covergroups ******
+
+Your directory structure should be like this. 
+
+.. code-block:: console
+
+    myquickstart/
+    ├── aliasing.yaml
+    ├── chromite_uarch_tests
+    │   ├── aliasing.yaml
+    │   ├── modules
+    │   │   ├── branch_predictor
+    │   │   │   ├── issues.rst
+    │   │   │   ├── __pycache__
+    │   │   │   │   ├── uatg_gshare_fa_btb_fill_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_btb_selfmodifying_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_fence_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_ghr_alternating_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_ghr_ones_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_ghr_zeros_01.cpython-39.pyc
+    │   │   │   │   ├── uatg_gshare_fa_mispredict_loop_01.cpython-39.pyc
+    │   │   │   │   └── uatg_gshare_fa_ras_push_pop_01.cpython-39.pyc
+    │   │   │   ├── uatg_gshare_fa_btb_fill_01.py
+    │   │   │   ├── uatg_gshare_fa_btb_fill_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_btb_selfmodifying_01.py
+    │   │   │   ├── uatg_gshare_fa_btb_selfmodifying_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_fence_01.py
+    │   │   │   ├── uatg_gshare_fa_fence_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_ghr_alternating_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_alternating_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_ghr_ones_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_ones_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_ghr_zeros_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_zeros_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_mispredict_loop_01.py
+    │   │   │   ├── uatg_gshare_fa_mispredict_loop_01.yapsy-plugin
+    │   │   │   ├── uatg_gshare_fa_ras_push_pop_01.py
+    │   │   │   └── uatg_gshare_fa_ras_push_pop_01.yapsy-plugin
+    │   │   ├── decoder
+    │   │   │   ├── __pycache__
+    │   │   │   │   └── uatg_decoder_i_ext_r_type.cpython-39.pyc
+    │   │   │   ├── uatg_decoder_i_ext_r_type.py
+    │   │   │   └── uatg_decoder_i_ext_r_type.yapsy-plugin
+    │   │   ├── decompressor
+    │   │   │   ├── __pycache__
+    │   │   │   │   └── uatg_decompressor.cpython-39.pyc
+    │   │   │   ├── uatg_decompressor.py
+    │   │   │   └── uatg_decompressor.yapsy-plugin
+    │   │   └── index.yaml
+    │   └── README.rst
+    ├── config.ini
+    ├── dut_config.yaml
+    └── work
+        ├── branch_predictor
+        │   ├── uatg_gshare_fa_btb_fill_01
+        │   │   └── uatg_gshare_fa_btb_fill_01.S
+        │   ├── uatg_gshare_fa_btb_selfmodifying_01
+        │   │   └── uatg_gshare_fa_btb_selfmodifying_01.S
+        │   ├── uatg_gshare_fa_fence_01
+        │   │   └── uatg_gshare_fa_fence_01.S
+        │   ├── uatg_gshare_fa_ghr_alternating_01
+        │   │   └── uatg_gshare_fa_ghr_alternating_01.S
+        │   ├── uatg_gshare_fa_ghr_ones_01
+        │   │   └── uatg_gshare_fa_ghr_ones_01.S
+        │   ├── uatg_gshare_fa_ghr_zeros_01
+        │   │   └── uatg_gshare_fa_ghr_zeros_01.S
+        │   ├── uatg_gshare_fa_mispredict_loop_01
+        │   │   └── uatg_gshare_fa_mispredict_loop_01.S
+        │   └── uatg_gshare_fa_ras_push_pop_01
+        │       └── uatg_gshare_fa_ras_push_pop_01.S
+        ├── decoder
+        │   └── uatg_decoder_i_ext_r_type
+        │       └── uatg_decoder_i_ext_r_type.S
+        ├── decompressor
+        │   └── uatg_decompressor
+        │       └── uatg_decompressor.S
+        ├── link.ld
+        ├── model_test.h
+        ├── sv_top
+        │   ├── coverpoints.sv
+        │   ├── defines.sv
+        │   ├── interface.sv
+        │   └── tb_top.sv
+        └── test_list.yaml
+
+You can find all the test files within the ``work`` directory. The test names 
+will be same as the test_class. The test will be located within the directory 
+named same as the module for which the test is written. 
+
+For example, a test written for ``decoder`` will be present at 
+``~/myquickstart/work/decoder/``. 
+
+You can also find that the *link.ld* and *model_test.h* files have been 
+generated by UATG. This is because the directory passed along with ``-ld`` option
+did not already contain a linker file. If it had, these files would have not 
+been generated.
+
+=============================
+Using RiVer Core to run tests
+=============================
+
+RiVer Core is an open source python based verification framework. RiVer Core 
+enables running tests generated from any source (random or directed) 
+on any target (irrespective of the language of design and simulation 
+environment) and compare results with any choice of a valid golden 
+reference model. RiVer Core achieves this by splitting the entire verification 
+flow into multiple standardized python-plugin calls. Each plugin encapsulates 
+either a test-generator, target test-environment or the reference simulation 
+environment. The framework itself provides a central control point for calling
+these plugins and thereby generating, compiling and simulating tests on 
+different targets. It provides a management surface of sorts. 
+
+In this section, we will be setting up RiVer Core and then use UATG to run tests
+on the Chromite DUT. 
+
+.. warning:: We are assuming that you have worked through the 
+   :ref:`Quickstart<quickstart>`, ergo, have UATG already installed. 
+
+Installing RiVer Core
+=====================
+
+.. note:: If you are using `pyenv` as mentioned above, make sure to enable that environment before
+   performing the following steps.
+     
+.. tabs:: 
+
+   .. tab:: via Git
+
+     To install RiVer Core, run this command in your terminal:
+     
+     .. code-block:: console
+     
+         $ pip3 install git+https://github.com/incoresemi/river_core.git
+     
+     This is the preferred method to install RiVer Core, as it will always install the most recent stable release.
+     
+     If you don't have `pip`_ installed, this `Python installation guide`_ can guide
+     you through the process.
+     
+     .. _pip: https://pip.pypa.io
+     .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
+
+   .. tab:: via Pip
+
+     .. code-block:: bash
+     
+       $ pip3 install river_core
+     
+     To update an already installed version of RiVer Core to the latest version:
+     
+     .. code-block:: bash
+     
+       $ pip3 install -U river_core
+     
+     To checkout a specific version of RiVer Core:
+     
+     .. code-block:: bash
+     
+       $ pip3 install river_core==1.x.x
+
+   .. tab:: For Dev
+
+     The sources for RiVer Core can be downloaded from the `Github Repo <https://github.com/incoresemi/river_core>`_.
+     
+     You can clone the repository:
+     
+     .. code-block:: console
+     
+         $ git clone https://github.com/incoresemi/river_core.git
+     
+     
+     Once you have a copy of the source, you can install it with:
+     
+     .. code-block:: console
+         
+         $ cd river_core
+         $ pip3 install --editable .
+
+Testing Installation
+--------------------
+
+Output for ``river_core --help``:
+
+.. code-block:: console
+
+  Usage: river_core [OPTIONS] COMMAND [ARGS]...
+  
+    RiVer Core Verification Framework
+  
+  Options:
+    --version  Show the version and exit.
+    --help     Show this message and exit.
+  
+  Commands:
+    clean     subcommand to clean generated programs.
+    compile   subcommand to compile generated programs.
+    generate  subcommand to generate programs.
+    merge     subcommand to merge coverage databases.
+    setup     subcommand to generate template setup files
+
+Install RISCV-GNU Toolchain
+===========================
+
+This guide will use the 32-bit riscv-gnu tool chain to compile the architectural suite.
+If you already have the 32-bit gnu-toolchain available, you can skip to the next section.
+
+.. note:: The git clone and installation will take significant time. Please be patient. If you face
+   issues with any of the following steps please refer to
+   https://github.com/riscv/riscv-gnu-toolchain for further help in installation.
+
+.. tabs::
+
+   .. tab:: Ubuntu (32/64bit)
+
+     .. code-block:: bash
+       
+       $ sudo apt-get install autoconf automake autotools-dev curl python3 libmpc-dev \
+             libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool \
+             patchutils bc zlib1g-dev libexpat-dev
+       $ git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
+       $ git clone --recursive https://github.com/riscv/riscv-opcodes.git
+       $ cd riscv-gnu-toolchain
+       $ ./configure --prefix=/path/to/install --enable-multilib # for both 32 and 64bit
+       $ [sudo] make # sudo is required depending on the path chosen in the previous setup
+     
+   
+Make sure to add the path ``/path/to/install`` to your `$PATH` in the .bashrc/cshrc
+With this you should now have all the following available as command line arguments::
+
+  compgen -c | grep 'riscv64' # requires bash
+  riscv64-unknown-elf-addr2line      riscv64-unknown-elf-elfedit
+  riscv64-unknown-elf-ar             riscv64-unknown-elf-g++
+  riscv64-unknown-elf-as             riscv64-unknown-elf-gcc
+  riscv64-unknown-elf-c++            riscv64-unknown-elf-gcc-8.3.0
+  riscv64-unknown-elf-c++filt        riscv64-unknown-elf-gcc-ar
+  riscv64-unknown-elf-cpp            riscv64-unknown-elf-gcc-nm
+  riscv64-unknown-elf-gcc-ranlib     riscv64-unknown-elf-gprof
+  riscv64-unknown-elf-gcov           riscv64-unknown-elf-ld
+  riscv64-unknown-elf-gcov-dump      riscv64-unknown-elf-ld.bfd
+  riscv64-unknown-elf-gcov-tool      riscv64-unknown-elf-nm
+  riscv64-unknown-elf-gdb            riscv64-unknown-elf-objcopy
+  riscv64-unknown-elf-gdb-add-index  riscv64-unknown-elf-objdump
+  riscv64-unknown-elf-ranlib         riscv64-unknown-elf-readelf
+  riscv64-unknown-elf-run            riscv64-unknown-elf-size
+  riscv64-unknown-elf-strings        riscv64-unknown-elf-strip
+
+
+.. warning:: Each of the generators have their own unique config.yamls to 
+   configure their plugin specific details, ensure you have changed them as 
+   required.
+
+
+The UATG package should be installed in your computer. Guide to installing UATG 
+can be found in the :ref:`Quickstart<quickstart>`.
+
+.. warning:: Check if uatg is installed by using the ``uatg --help`` command.
+
+Setting up RiVer Core
+=====================
+
+We will be using the ``myquickstart`` directory which we created earlier in this
+document.
+
+This should be the structure of your directory tree.
+
+.. code-block:: console
+
+    myquickstart/
+    ├── aliasing.yaml
+    ├── chromite_uarch_tests
+    │   ├── aliasing.yaml
+    │   ├── modules
+    │   │   ├── branch_predictor
+    │   │   │   ├── issues.rst
+    │   │   │   ├── uatg_gshare_fa_btb_fill_01.py
+    │   │   │   ├── uatg_gshare_fa_btb_selfmodifying_01.py
+    │   │   │   ├── uatg_gshare_fa_fence_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_alternating_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_ones_01.py
+    │   │   │   ├── uatg_gshare_fa_ghr_zeros_01.py
+    │   │   │   ├── uatg_gshare_fa_mispredict_loop_01.py
+    │   │   │   └── uatg_gshare_fa_ras_push_pop_01.py
+    │   │   ├── decoder
+    │   │   │   └── uatg_decoder_i_ext_r_type.py
+    │   │   ├── decompressor
+    │   │   │   └── uatg_decompressor.py
+    │   │   └── index.yaml
+    │   └── README.rst
+    ├── config.ini
+    ├── dut_config.yaml
+    └── work
+
+You should install some of the pre-built plugins from the `Plugin Repo <https://github.com/incoresemi/river_core_plugins.git>`_
+
+.. code-block:: console
+
+    $ cd ~/myquickstart
+    $ git clone https://github.com/incoresemi/river_core_plugins.git
+
+We will next create a ``river_core.ini`` under the ``myquickstart`` directory. 
+You can use the setup to create this file:
+
+In addition to the
+.. code-block:: console
+
+   $ cd ~/myquickstart
+   $ river_core setup --config
+
+You should also create a new directory ``mywork`` within ``~/myquickstart`` 
+for RiVer core to store the files generated. 
+
+The above should create a ``river_core.ini`` file with the following contents.
+Details and further specification of the config file syntax is available at 
+:ref:`Config Spec<configuration_files>`.
+
+.. warning:: You will need to change ``user`` to your username in the below file
+
+.. warning:: Make sure to adjust jobs parameters everywhere accordingly. This
+   guide assumes 8 jobs are available for parallel processing.
+
+.. code-block:: ini
+   :linenos:
+
+   [river_core]
+   # Main directory for all files generated by river_core
+   work_dir = mywork 
+   
+   # Name of the target DuT plugin
+   target = chromite_verilator
+   
+   # Name of the reference model plugin
+   reference = spike 
+   
+   # Name of the generator(s) to be used. Comma separated
+   generator = aapg
+   
+   # ISA for the tests
+   isa = rv64imafdc
+   
+   # Set paths for each plugin
+   # TODO Change the following paths
+   path_to_target = /home/user/myquickstart/river_core_plugins/dut_plugins
+   path_to_ref = /home/user/myquickstart/river_core_plugins/reference_plugins
+   path_to_suite = /home/user/myquickstart/river_core_plugins/generator_plugins
+   
+   # To open the report automatically in the browser
+   open_browser = True
+   
+   # Enable Space Saver
+   space_saver = True
+   
+   # Coverage Options
+   # Enable via True/False
+   [coverage]
+   code = False
+   functional = False
+   
+   [aapg]
+   # Number of jobs to use to generate the tests
+   jobs = 8
+   filter = rv64imafdc_hazards_s
+   seed = random
+   count = 2
+   config_yaml = /home/user/myquickstart/river_core_plugins/generator_plugins/aapg_plugin/aapg_gen_config.yaml
+   
+   [chromite_verilator]
+   jobs = 8
+   filter = 
+   count = 1
+   # src dir: Verilog Dir, BSC Path, Wrapper path
+   src_dir = /home/user/myquickstart/chromite/build/hw/verilog/,/tools/bsc/inst/lib/Verilog,/home/user/myquickstart/chromite/bsvwrappers/common_lib
+   top_module = mkTbSoc
+   
+   [spike]
+   jobs = 1
+   filter =
+   count = 1
+
+Setting up the Generator Plugin - UATG
+--------------------------------------
+
+By default, the ``river_core.ini`` file specifies aapg to be the generator. But,
+we are using ``UATG`` as the generator. Hence, it is necesssary to specify 
+``uatg`` as the generator in line 12. 
+
+.. code-block:: ini
+
+   generator = uatg
+
+In addition to that, you're required to create a ``[uatg]`` section between the 
+*[coverage]* and *[aapg]* section of the INI file. This will be
+similiar to the ``[aapg]`` section in the ``river_core.ini`` file. For this 
+tutorial you can paste the following code-block into the ``river_core.ini`` file
+. This section will contain the path to the directories and files required by
+uatg to generate tests. 
+
+.. warning:: replace ``user`` in the paths with your username.
+   
+.. code-block:: ini
+   :linenos:
+
+    [uatg]
+    jobs = 8
+    count = 1
+    seed = random
+    dut_config_yaml = /home/user/myquickstart/dut_config.yaml
+    modules_dir = /home/user/myquickstart/chromite_uarch_tests/modules/
+    work_dir = /home/user/myquickstart/work/ 
+    linker_dir = /home/user/myquickstart/work/
+    modules = all
+    generate_covergroups = True 
+    alias_file = /home/user/myquickstart/aliasing.yaml
+    check_logs = True
+
+Once you have pasted this into the INI file and have also updated the generator
+argument in line 12. You should be able use UATG as a generator for RiVer core.
+
+Setting up the DUT Plugin
+-------------------------
+
+We will using the chromite core to as a DUT for testing in this quickstart
+guide. We shall use the verilator simulator to run tests on the DUT.
+
+The chromite core can be built using the guide available `here
+<https://chromite.readthedocs.io/en/latest/getting_started.html>`_. If you
+already have the `bsc <https://github.com/B-Lang-org/bsc>`_ compiler and other
+dependencies installed you can do the following steps to generate the verilated
+executable:
+
+.. code-block:: console
+
+   $ cd ~/myquickstart
+   $ git clone https://gitlab.com/incoresemi/core-generators/chromite.git
+   $ cd chromite
+   $ pip install -r requirements.txt
+   $ python -m configure.main
+   $ make -j<jobs> generate_verilog
+
+The above steps shall generate a directory: ``build/hw/verilog`` which includes
+all the generated verilog files. 
+
+We will next modify the ``river_core.ini`` to update paths of the directories in
+line 48 above. Here we need to provide three paths (in comma separated fashion):
+
+  - path to ``build/hw/verilog``
+  - path to Verilog directory present in the bsc installation directory
+  - path to ``chromite/bsvwrappers/common_lib``
+
+if you have cloned the ``river_core_plugins`` repo in a different place then you
+will need to update the parameter ``path_to_target`` in line 19 above.
+
+Setting up the Reference Plugin
+-------------------------------
+
+For this quickstart we will be using a modified version of spike. Do the
+following to setup spike:
+
+.. code-block:: console
+
+   $ git clone https://gitlab.com/shaktiproject/tools/mod-spike.git
+   $ cd mod-spike
+   $ git checkout bump-to-latest
+   $ git clone https://github.com/riscv/riscv-isa-sim.git
+   $ cd riscv-isa-sim
+   $ git checkout 6d15c93fd75db322981fe58ea1db13035e0f7add
+   $ git apply ../shakti.patch
+   $ export RISCV=<path you to install spike>
+   $ mkdir build
+   $ cd build
+   $ ../configure --prefix=$RISCV # export RISCV to where you would like to install
+   $ make
+   $ [sudo] make install
+
+As long as spike is available in the your ``$PATH`` no other changes are
+required.
+
+Running RiVer Core
+==================
+
+Generating Tests
+----------------
+
+.. code-block:: console
+
+   $ cd ~/myquickstart
+   $ river_core generate -v debug -c river_core.ini
+
+You should see the following log on the console:
+
+.. code-block:: console
+
+          info  | ------------RiVer Core Verification Framework------------
+          info  | Version: 1.0.1
+          info  | Copyright (c) 2021 InCore Semiconductors Pvt. Ltd.
+         debug  | Read file from river_core.ini
+          info  | ****** Generation Mode ****** 
+          info  | The river_core is currently configured to run with following parameters
+          info  | The Output Directory (work_dir) : mywork
+          info  | ISA : rv64imafdc
+          info  | Plugin Jobs : 4
+          info  | Plugin Seed : random
+          info  | Plugin Count (Times to run the test) : 1
+          info  | Now loading uatg Suite
+         debug  | Loading module from /home/akrish/myquickstart//river_core_plugins/generator_plugins/uatg_plugin/uatg_plugin.py
+        ================================================= test session starts ==================================================
+        platform linux -- Python 3.9.6, pytest-6.2.4, py-1.10.0, pluggy-0.13.1 -- /usr/bin/python
+        cachedir: .pytest_cache
+        metadata: {'Python': '3.9.6', 'Platform': 'Linux-5.13.13-200.fc34.x86_64-x86_64-with-glibc2.33', 'Packages': {'pytest': '6.2.4', 'py': '1.10.0', 'pluggy': '0.13.1'}, 'Plugins': {'metadata': '1.11.0', 'forked': '1.3.0', 'xdist': '2.2.1', 'reportlog': '0.1.2', 'html': '3.1.1'}}
+        rootdir: /home/akrish/myquickstart
+        plugins: metadata-1.11.0, forked-1.3.0, xdist-2.2.1, reportlog-0.1.2, html-3.1.1
+        [gw0] linux Python 3.9.6 cwd: /home/akrish/myquickstart
+        [gw0] Python 3.9.6 (default, Jul 16 2021, 00:00:00)  -- [GCC 11.1.1 20210531 (Red Hat 11.1.1-3)]
+        gw0 [1]
+        scheduling tests via LoadScheduling
+
+        river_core_plugins/generator_plugins/uatg_plugin/gen_framework.py::test_eval[Generating Test-list using uatg] 
+        [gw0] [100%] PASSED river_core_plugins/generator_plugins/uatg_plugin/gen_framework.py::test_eval[Generating Test-list using uatg] 
+
+        --------------- generated report log file: /home/akrish/myquickstart/mywork/.json/uatg_20210908-1132.json ---------------
+        -------------------- generated html file: file:///home/akrish/myquickstart/mywork/reports/uatg.html ---------------------
+        ================================================== 1 passed in 0.82s ===================================================
+
+Upon running the command, your UATG Work directory structure will be like this. This 
+indicates that RiVer core has generated the tests which you had written for the
+DUT.
+
+.. code-block:: console
+
+    work/
+    ├── branch_predictor
+    │   ├── uatg_gshare_fa_btb_fill_01
+    │   │   └── uatg_gshare_fa_btb_fill_01.S
+    │   ├── uatg_gshare_fa_btb_selfmodifying_01
+    │   │   └── uatg_gshare_fa_btb_selfmodifying_01.S
+    │   ├── uatg_gshare_fa_fence_01
+    │   │   └── uatg_gshare_fa_fence_01.S
+    │   ├── uatg_gshare_fa_ghr_alternating_01
+    │   │   └── uatg_gshare_fa_ghr_alternating_01.S
+    │   ├── uatg_gshare_fa_ghr_ones_01
+    │   │   └── uatg_gshare_fa_ghr_ones_01.S
+    │   ├── uatg_gshare_fa_ghr_zeros_01
+    │   │   └── uatg_gshare_fa_ghr_zeros_01.S
+    │   ├── uatg_gshare_fa_mispredict_loop_01
+    │   │   └── uatg_gshare_fa_mispredict_loop_01.S
+    │   └── uatg_gshare_fa_ras_push_pop_01
+    │       └── uatg_gshare_fa_ras_push_pop_01.S
+    ├── decoder
+    │   └── uatg_decoder_i_ext_r_type
+    │       └── uatg_decoder_i_ext_r_type.S
+    ├── decompressor
+    │   └── uatg_decompressor
+    │       └── uatg_decompressor.S
+    ├── link.ld
+    ├── model_test.h
+    └── sv_top
+        ├── coverpoints.sv
+        ├── defines.sv
+        ├── interface.sv
+        └── tb_top.sv
+
+You can also find a ``test_list.yaml`` file within the mywork directory which 
+you had created for RiVer Core to dump files. The test_list format can be 
+understood by reading the :ref:`Configuration spec<configuration_files>`.
+
+.. code-block:: console
+
+  mywork/
+  ├── reports
+  │   └── uatg.html
+  ├── test_list.yaml
+  └── uatg
+   
+
+Running the tests on DUT using RiVer Core
+-----------------------------------------
+
+We shall now generate a verilated executable of the chromite core, compile the
+tests and run them on the DUT. We then compile the same tests and run them on
+spike and compare the results. Following command shall initiate the whole flow:
+
+.. code-block:: console
+
+   $ cd ~/myquickstart
+   $ river_core compile -v debug -t mywork/test_list.yaml -c river_core.ini
+
+You should see the following log on the console:
+
+.. code-block:: console
+
+          info  | ------------RiVer Core Verification Framework------------
+          info  | Version: 1.0.1
+          info  | Copyright (c) 2021 InCore Semiconductors Pvt. Ltd.
+          info  | Auto mode detected for DuT Plugin
+          info  | Auto mode detected for Ref Plugin
+         debug  | Read file from river_core.ini
+          info  | ****** Compilation Mode ******
+          info  | The river_core is currently configured to run with following parameters
+          info  | The Output Directory (work_dir) : mywork
+          info  | ISA : rv64imafdc
+          info  | Generator Plugin : uatg
+          info  | Target Plugin : ['chromite_verilator']
+          info  | Reference Plugin : ['modspike']
+          info  | DuT Info
+          info  | DuT Jobs : 4
+          info  | DuT Count (Times to run) : 1
+          info  | Now running on the Target Plugins
+          info  | Now loading chromite_verilator-target
+         debug  | Loading module from /home/akrish/myquickstart//river_core_plugins/dut_plugins/chromite_verilator_plugin/chromite_verilator_plugin.py
+         debug  | All modes enabled
+         debug  | Running run
+          info  | Pre Compile Stage
+         debug  | /home/akrish/myquickstart/mywork//.json/ Directory exists
+          info  | Build verilator
+          info  | Coverage is disabled, compiling the chromite with usual options
+       command  | $ timeout=500 verilator -O3 -LDFLAGS -static --x-assign fast --x-initial fast --noassert sim_main.cpp --bbox-sys -Wno-STMTDLY -Wno-UNOPTFLAT -Wno-WIDTH -Wno-lint -Wno-COMBDLY -Wno-INITIALDLY --autoflush --threads 1 -DBSV_RESET_FIFO_HEAD -DBSV_RESET_FIFO_ARRAY --output-split 20000 --output-split-ctrace 10000 --cc mkTbSoc.v -y /home/akrish/work/InCore/river_core/river_start/chromite/build/hw/verilog/ -y /home/akrish/work/bluespec/inst/lib/Verilog -y /home/akrish/work/InCore/river_core/river_start/chromite/bsvwrappers/common_lib/ --exe 
+          info  | Linking verilator simulation sources
+       command  | $ timeout=240 ln -f -s ../sim_main.cpp obj_dir/sim_main.cpp 
+       command  | $ timeout=240 ln -f -s ../sim_main.h obj_dir/sim_main.h 
+          info  | Making verilator binary
+       command  | $ timeout=500 make OPT_SLOW=-O3 OPT_FAST=-O3 VM_PARALLEL_BUILDS=1 -j4 -C obj_dir -f VmkTbSoc.mk 
+         debug  | make: Entering directory '/home/akrish/myquickstart/mywork/chromite_verilator/obj_dir'
+         debug  | g++  -I.  -MMD -I/usr/share/verilator/include -I/usr/share/verilator/include/vltstd -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TRACE=0 -DVM_TRACE_FST=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-sign-compare -Wno-uninitialized -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-shadow      -DVL_THREADED -std=gnu++14 -O3 -c -o sim_main.o sim_main.cpp
+         debug  | g++    sim_main.o verilated.o VmkTbSoc__ALL.a   -static  -pthread -lpthread   -o VmkTbSoc
+         debug  | make: Leaving directory '/home/akrish/myquickstart/mywork/chromite_verilator/obj_dir'
+          info  | Renaming verilator Binary
+          info  | Creating boot-files
+       command  | $ timeout=240 make -C /home/akrish/myquickstart//river_core_plugins/dut_plugins/chromite_verilator_plugin/boot/ XLEN=64 
+         debug  | make: Entering directory '/home/akrish/myquickstart/river_core_plugins/dut_plugins/chromite_verilator_plugin/boot'
+         debug  | make: Leaving directory '/home/akrish/myquickstart/river_core_plugins/dut_plugins/chromite_verilator_plugin/boot'
+         debug  | chromite.dts:20.39-24.9: Warning (interrupt_provider): /cpus/cpu@0/interrupt-controller: Missing #address-cells in interrupt provider
+          info  | Build Hook
+         debug  | Creating Make Target for uatg_decoder_i_ext_r_type
+         debug  | Creating Make Target for uatg_decompressor
+         debug  | Creating Make Target for uatg_gshare_fa_btb_fill_01
+         debug  | Creating Make Target for uatg_gshare_fa_btb_selfmodifying_01
+         debug  | Creating Make Target for uatg_gshare_fa_fence_01
+         debug  | Creating Make Target for uatg_gshare_fa_ghr_alternating_01
+         debug  | Creating Make Target for uatg_gshare_fa_ghr_ones_01
+         debug  | Creating Make Target for uatg_gshare_fa_ghr_zeros_01
+         debug  | Creating Make Target for uatg_gshare_fa_mispredict_loop_01
+         debug  | Creating Make Target for uatg_gshare_fa_ras_push_pop_01
+          info  | Run Hook
+         debug  | Module dir: /home/akrish/myquickstart//river_core_plugins/dut_plugins
+         debug  | Pytest file: /home/akrish/myquickstart//river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py
+    ========================================================================= test session starts ==========================================================================
+    platform linux -- Python 3.9.6, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
+    rootdir: /home/akrish/myquickstart
+    plugins: metadata-1.11.0, forked-1.3.0, xdist-2.2.1, reportlog-0.1.2, html-3.1.1
+    [gw0] Python 3.9.6 (default, Jul 16 2021, 00:00:00)  -- [GCC 11.1.1 20210531 (Red Hat 11.1.1-3)]
+    [gw1] Python 3.9.6 (default, Jul 16 2021, 00:00:00)  -- [GCC 11.1.1 20210531 (Red Hat 11.1.1-3)]
+    [gw2] Python 3.9.6 (default, Jul 16 2021, 00:00:00)  -- [GCC 11.1.1 20210531 (Red Hat 11.1.1-3)]
+    [gw3] Python 3.9.6 (default, Jul 16 2021, 00:00:00)  -- [GCC 11.1.1 20210531 (Red Hat 11.1.1-3)]
+    gw0 [10] / gw1 [10] / gw2 [10] / gw3 [10]
+    scheduling tests via LoadScheduling
+
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_decompressor] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_btb_fill_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_btb_selfmodifying_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_decoder_i_ext_r_type] 
+    [gw3] [ 10%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_btb_selfmodifying_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_zeros_01] 
+    [gw2] [ 20%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_btb_fill_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_ones_01] 
+    [gw1] [ 30%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_decompressor] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_alternating_01] 
+    [gw3] [ 40%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_zeros_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_mispredict_loop_01] 
+    [gw2] [ 50%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_ones_01] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ras_push_pop_01] 
+    [gw1] [ 60%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ghr_alternating_01] 
+    [gw3] [ 70%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_mispredict_loop_01] 
+    [gw2] [ 80%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_ras_push_pop_01] 
+    [gw0] [ 90%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_decoder_i_ext_r_type] 
+    river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_fence_01] 
+    [gw0] [100%] PASSED river_core_plugins/dut_plugins/chromite_verilator_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.chromite_verilator uatg_gshare_fa_fence_01] 
+
+    ------------------------------- generated report log file: /home/akrish/myquickstart/mywork/.json/chromite_verilator_20210908-1142.json --------------------------------
+    ------------------------------------- generated html file: file:///home/akrish/myquickstart/mywork/reports/chromite_verilator.html -------------------------------------
+    ==================================================================== 10 passed in 62.82s (0:01:02) =====================================================================
+              info  | Reference Info
+              info  | Reference Jobs : 1
+              info  | Reference Count (Times to run the test) : 1
+              info  | Now loading modspike-target
+             debug  | Loading module from /home/akrish/myquickstart//river_core_plugins/reference_plugins/modspike_plugin/modspike_plugin.py
+             debug  | All modes detected
+             debug  | Running build
+             debug  | Pre Compile Stage
+             debug  | /home/akrish/myquickstart/mywork//.json/ Directory exists
+             debug  | Build Hook
+             debug  | Creating Make Target for uatg_decoder_i_ext_r_type
+             debug  | Creating Make Target for uatg_decompressor
+             debug  | Creating Make Target for uatg_gshare_fa_btb_fill_01
+             debug  | Creating Make Target for uatg_gshare_fa_btb_selfmodifying_01
+             debug  | Creating Make Target for uatg_gshare_fa_fence_01
+             debug  | Creating Make Target for uatg_gshare_fa_ghr_alternating_01
+             debug  | Creating Make Target for uatg_gshare_fa_ghr_ones_01
+             debug  | Creating Make Target for uatg_gshare_fa_ghr_zeros_01
+             debug  | Creating Make Target for uatg_gshare_fa_mispredict_loop_01
+             debug  | Creating Make Target for uatg_gshare_fa_ras_push_pop_01
+             debug  | Run Hook
+             debug  | Module dir: /home/akrish/myquickstart//river_core_plugins/reference_plugins
+             debug  | Pytest file: /home/akrish/myquickstart//river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py
+    ========================================================================= test session starts ==========================================================================
+    platform linux -- Python 3.9.6, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
+    rootdir: /home/akrish/myquickstart
+    plugins: metadata-1.11.0, forked-1.3.0, xdist-2.2.1, reportlog-0.1.2, html-3.1.1
+    [gw0] Python 3.9.6 (default, Jul 16 2021, 00:00:00)  -- [GCC 11.1.1 20210531 (Red Hat 11.1.1-3)]
+    gw0 [10]
+    scheduling tests via LoadScheduling
+
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_decoder_i_ext_r_type] 
+    [gw0] [ 10%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_decoder_i_ext_r_type] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_decompressor] 
+    [gw0] [ 20%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_decompressor] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_btb_fill_01] 
+    [gw0] [ 30%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_btb_fill_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_btb_selfmodifying_01] 
+    [gw0] [ 40%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_btb_selfmodifying_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_fence_01] 
+    [gw0] [ 50%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_fence_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_alternating_01] 
+    [gw0] [ 60%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_alternating_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_ones_01] 
+    [gw0] [ 70%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_ones_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_zeros_01] 
+    [gw0] [ 80%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ghr_zeros_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_mispredict_loop_01] 
+    [gw0] [ 90%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_mispredict_loop_01] 
+    river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ras_push_pop_01] 
+    [gw0] [100%] PASSED river_core_plugins/reference_plugins/modspike_plugin/gen_framework.py::test_eval[make -f /home/akrish/myquickstart/mywork/Makefile.spike uatg_gshare_fa_ras_push_pop_01] 
+
+    -------------------------------------- generated report log file: /home/akrish/myquickstart/mywork/.json/spike_20210908-1143.json --------------------------------------
+    ------------------------------------------- generated html file: file:///home/akrish/myquickstart/mywork/reports/spike.html --------------------------------------------
+    ========================================================================== 10 passed in 5.91s ==========================================================================
+          info  | Dumps for test uatg_decoder_i_ext_r_type Match. TEST PASSED
+          info  | Dumps for test uatg_decompressor Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_btb_fill_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_btb_selfmodifying_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_fence_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_ghr_alternating_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_ghr_ones_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_ghr_zeros_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_mispredict_loop_01 Match. TEST PASSED
+          info  | Dumps for test uatg_gshare_fa_ras_push_pop_01 Match. TEST PASSED
+          info  | Checking for a generator json to create final report
+         debug  | Detected generated JSON Files: ['mywork/.json/uatg_20210908-1025.json', 'mywork/.json/uatg_20210908-1026.json', 'mywork/.json/uatg_20210908-1132.json']
+          info  | Not checking logs
+         debug  | Removing artifacts for Chromite
+         debug  | Removing extra files for Test: uatg_decoder_i_ext_r_type
+         debug  | Removing extra files for Test: uatg_decompressor
+         debug  | Removing extra files for Test: uatg_gshare_fa_btb_fill_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_btb_selfmodifying_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_fence_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_alternating_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_ones_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_zeros_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_mispredict_loop_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ras_push_pop_01
+         debug  | Removing artifacts for Spike
+         debug  | Removing extra files for Test: uatg_decoder_i_ext_r_type
+         debug  | Removing extra files for Test: uatg_decompressor
+         debug  | Removing extra files for Test: uatg_gshare_fa_btb_fill_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_btb_selfmodifying_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_fence_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_alternating_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_ones_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ghr_zeros_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_mispredict_loop_01
+         debug  | Removing extra files for Test: uatg_gshare_fa_ras_push_pop_01
+          info  | Now generating some good HTML reports for you
+          info  | Final report saved at mywork/reports//report.html
+   
+
+At the end you shall also see a html report open up in your default browser
+containing information of all the runs. The reports folder will have additional
+reports generated as well.
+
+Congratulations, you have successfully completed this guide.
