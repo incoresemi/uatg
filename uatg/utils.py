@@ -515,14 +515,14 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
 
 
 # UATG Functions
-def clean_modules(module_dir, modules, verbose):
+def clean_modules(module_dir, modules):
     """
     Function to read the modules specified by the user, check if they exist or
     raise an error. 
     Returns a list of the modules for which tests will be generated.
     """
     module = None
-    available_modules = list_of_modules(module_dir, verbose)
+    available_modules = list_of_modules(module_dir)
 
     if 'all' in modules:
 
@@ -604,12 +604,11 @@ def generate_sv_components(sv_dir, alias_file):
         defines_file.write(defines)
 
 
-def list_of_modules(module_dir, verbose='error'):
+def list_of_modules(module_dir):
     """
     lists the tests modules available by reading the index.yaml file present 
     in the modules directory.
     """
-    logger.level(verbose)
     module_list = []
     if os.path.exists(os.path.join(module_dir, 'index.yaml')):
         modules = load_yaml(os.path.join(module_dir, 'index.yaml'))
