@@ -98,7 +98,7 @@ Install UATG
 
    .. tab:: for Dev
 
-     The sources for UATG can be downloaded from the `Github repo`_.
+     The sources for UATG can be downloaded from the `Github repo <https://github.com/incoresemi/uatg>`_.
      
      You can clone the repository:
      

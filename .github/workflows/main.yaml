@@ -4,7 +4,7 @@ name: CI
 
 # Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [ main ]
 
@@ -40,7 +40,7 @@ jobs:
           pip install setuptools wheel twine
           
       - name: Publish package
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         env:
           TWINE_USERNAME: ${{ secrets.PYPIUSERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPIPASSWORD }}
@@ -51,23 +51,23 @@ jobs:
           
       - name: Extract release notes
         id: extract-release-notes
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: ffurrer2/extract-release-notes@v1
           
       - name: Tag
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         run: |
           git tag ${{ steps.get_version.outputs.version }}
           git push origin ${{ steps.get_version.outputs.version }}
       
       - name: Create Release
         id: create_release
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          release_branch: refs/heads/master
+          release_branch: refs/heads/main
           release_name: ${{ steps.get_version.outputs.version }}
           tag_name: ${{ steps.get_version.outputs.version }}
           body: ${{ steps.extract-release-notes.outputs.release_notes }}
@@ -75,7 +75,7 @@ jobs:
           prerelease: false
           
           #      - name: Script
-          #        uses: ammaraskar/sphinx-action@master
+          #        uses: ammaraskar/sphinx-action@main
           #        with:
           #          docs-folder: "docs/"
           #          pre-build-command: " apt-get update -y && apt-get install -y latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended"
@@ -84,7 +84,7 @@ jobs:
        
           #      - name: Upload Release Asset
           #        id: upload-release-asset 
-          #        if: github.ref == 'refs/heads/master'
+          #        if: github.ref == 'refs/heads/main'
           #        uses: actions/upload-release-asset@v1
           #        env:
           #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

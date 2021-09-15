@@ -2,4 +2,4 @@
 **UATG - μArchitectural Tests Generator**
 #########################################
 
-Please see `Read the Docs <uatg.readthedocs.io>`_ for documentation.
+Please see `Read the Docs <https://uatg.readthedocs.io/en/latest/>`_ for documentation.
