@@ -1,3 +1,5 @@
+.. See LICENSE.incore for details
+
 .. raw:: latex
 
    \pagebreak
