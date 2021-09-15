@@ -4,6 +4,21 @@ import logging
 import colorlog
 
 
+# Filter for logs from yapsy module
+class yapsy_filter(logging.Filter):
+    """
+    This class implemets a subclass of the Filter() class of logging
+    and helps us filter out the logs generated from the yapsy plugin manager
+    package. These errors are (currently) irrelevent to the operation of UATG.
+    Hence, we filter these log statements.
+    """
+
+    def filter(self, log):
+        if '<LogRecord: yapsy,' in str(log.getMessage):
+            return 0
+        return 1
+
+
 class Log:
     """
     this class holds all the logic; see the end of the script to
@@ -88,6 +103,10 @@ class Log:
 
         self.stream.setFormatter(
             colorlog.ColoredFormatter(self.format, log_colors=self.colors))
+
+        # Adding our filter to the Handler.
+        self.stream.addFilter(yapsy_filter())
+
         self.logger.setLevel(self._lvl)
 
         self.logger.addHandler(self.stream)
