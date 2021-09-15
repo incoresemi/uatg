@@ -140,7 +140,7 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
 
     dut_dict = load_yaml(dut_config)
 
-    module = clean_modules(module_dir, modules, verbose)
+    module = clean_modules(module_dir, modules)
 
     generate_tests(work_dir=work_dir,
                    linker_dir=linker_dir,
@@ -187,8 +187,9 @@ def list_modules(module_dir, verbose):
     Provides the list of modules supported from the module_dir\n
     Requires: -md, --module_dir
     """
+    logger.level(verbose)
     module_str = "\nSupported modules:\n"
-    for module in (list_of_modules(module_dir, verbose)):
+    for module in (list_of_modules(module_dir)):
         module_str += '\t' + module + '\n'
     print(f'{module_str}')
 
@@ -225,10 +226,9 @@ def from_config(config_file, verbose):
 
     module_dir = config['uatg']['module_dir']
     modules = config['uatg']['modules']
-    verbosity = config['uatg']['verbose']
-    
-    module = clean_modules(module_dir, modules, verbose=verbose)
-    logger.level(verbosity)
+    verbose = config['uatg']['verbose']
+    logger.level(verbose)
+    module = clean_modules(module_dir, modules)
 
     info(__version__)
 
@@ -294,6 +294,7 @@ def setup(config_path, alias_path, dut_path):
         files will be written to default paths.\n
         Optional: -dp, --dut_path;  -ap, --alias_path; -cp, --config_path
     """
+
     if config_path is None:
         config_path = './'
     if alias_path is None:
