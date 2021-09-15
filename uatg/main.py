@@ -53,7 +53,7 @@ def clean(module_dir, work_dir, verbose):
     logger.level(verbose)
     info(__version__)
     logger.debug('Invoking clean_dirs')
-    clean_dirs(work_dir=work_dir, modules_dir=module_dir, verbose=verbose)
+    clean_dirs(work_dir=work_dir, modules_dir=module_dir)
 
 
 # -------------------------
@@ -147,8 +147,7 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
                    modules_dir=module_dir,
                    modules=module,
                    config_dict=dut_dict,
-                   test_list=str(gen_test_list),
-                   verbose=verbose)
+                   test_list=str(gen_test_list))
     if gen_cvg:
         if alias_file is not None:
             alias_dict = load_yaml(alias_file)
@@ -156,8 +155,7 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
                         config_dict=dut_dict,
                         modules_dir=module_dir,
                         modules=module,
-                        alias_dict=alias_dict,
-                        verbose=verbose)
+                        alias_dict=alias_dict)
         else:
             logger.error('Can not generate covergroups without alias_file.')
             exit('GEN_CVG WITHOUT ALIAS_FILE')
@@ -197,16 +195,17 @@ def list_modules(module_dir, verbose):
 # -------------------------
 
 
-@click.option('--config_file',
-              '-c',
-              multiple=False,
-              required=True,
-              type=click.Path(exists=True, resolve_path=True, readable=True),
-              help="Provide a config.ini file's path. This runs uatg based upon "
-              "the parameters stored in the file. If not specified "
-              "individual args/flags are to be passed through cli. In the"
-              "case of conflict between cli and config.ini values, config"
-              ".ini values will be chosen")
+@click.option(
+    '--config_file',
+    '-c',
+    multiple=False,
+    required=True,
+    type=click.Path(exists=True, resolve_path=True, readable=True),
+    help="Provide a config.ini file's path. This runs uatg based upon "
+    "the parameters stored in the file. If not specified "
+    "individual args/flags are to be passed through cli. In the"
+    "case of conflict between cli and config.ini values, config"
+    ".ini values will be chosen")
 @click.option('--verbose',
               '-v',
               default='info',
@@ -239,8 +238,8 @@ def from_config(config_file, verbose):
                        modules_dir=module_dir,
                        modules=module,
                        config_dict=dut_dict,
-                       test_list=config['uatg']['gen_test_list'],
-                       verbose=verbose)
+                       test_list=config['uatg']['gen_test_list'])
+
     if config['uatg']['gen_cvg'].lower() == 'true':
         dut_dict = load_yaml(config['uatg']['dut_config'])
         alias_dict = load_yaml(config['uatg']['alias_file'])
@@ -248,21 +247,18 @@ def from_config(config_file, verbose):
                     modules=module,
                     modules_dir=module_dir,
                     config_dict=dut_dict,
-                    alias_dict=alias_dict,
-                    verbose=verbose)
+                    alias_dict=alias_dict)
+
     if config['uatg']['val_test'].lower() == 'true':
         dut_dict = load_yaml(config['uatg']['dut_config'])
         validate_tests(modules=module,
                        work_dir=config['uatg']['work_dir'],
                        config_dict=dut_dict,
-                       modules_dir=module_dir,
-                       verbose=verbose)
+                       modules_dir=module_dir)
 
     if config['uatg']['clean'].lower() == 'true':
         logger.debug('Invoking clean_dirs')
-        clean_dirs(work_dir=config['uatg']['work_dir'],
-                   modules_dir=module_dir,
-                   verbose=verbose)
+        clean_dirs(work_dir=config['uatg']['work_dir'], modules_dir=module_dir)
 
 
 # -------------------------
@@ -355,9 +351,8 @@ def validate(dut_config, module_dir, work_dir, modules, verbose):
     info(__version__)
     dut_yaml = load_yaml(dut_config)
 
-    module = clean_modules(module_dir, modules, verbose)
+    module = clean_modules(module_dir, modules)
     validate_tests(modules=module,
                    work_dir=work_dir,
                    config_dict=dut_yaml,
-                   modules_dir=module_dir,
-                   verbose=verbose)
+                   modules_dir=module_dir)
