@@ -2,7 +2,7 @@
 
 # imports
 import os
-import glob 
+import glob
 import random as rnd
 from uatg.log import logger
 import ruamel
@@ -22,14 +22,18 @@ class sv_components:
         config = config_file
 
         # entries from the aliasing file being read in.
-        self.rg_initialize = config['branch_predictor']['register']['bpu_rg_initialize']
-        self.rg_allocate = config['branch_predictor']['register']['bpu_rg_allocate']
+        self.rg_initialize = config['branch_predictor']['register'][
+            'bpu_rg_initialize']
+        self.rg_allocate = config['branch_predictor']['register'][
+            'bpu_rg_allocate']
         self.btb_tag = config['branch_predictor']['wire']['bpu_btb_tag']
         self.btb_entry = config['branch_predictor']['wire']['bpu_btb_entry']
-        self.ras_top_index = config['branch_predictor']['wire']['bpu_ras_top_index']
+        self.ras_top_index = config['branch_predictor']['wire'][
+            'bpu_ras_top_index']
         self.rg_ghr = config['branch_predictor']['register']['bpu_rg_ghr']
         self.valids = config['branch_predictor']['wire']['bpu_btb_tag_valid']
-        self.mispredict = config['branch_predictor']['wire']['bpu_mispredict_flag']
+        self.mispredict = config['branch_predictor']['wire'][
+            'bpu_mispredict_flag']
         self.bpu_path = config['tb_top']['path_to_bpu']
         self.decoder_path = config['tb_top']['path_to_decoder']
         self.stage0_path = config['tb_top']['path_to_stage0']
@@ -166,7 +170,7 @@ endmoduleNeeded to generate/validate tests
 
         return tb_top
 
-    # generate the defines file to select the tests the user wants to be run 
+    # generate the defines file to select the tests the user wants to be run
     # on the simulator.
     def generate_defines(self):
         """
@@ -199,7 +203,7 @@ endmoduleNeeded to generate/validate tests
 # Utility Functions
 def info(version):
     """The function prints the Information about UATG. """
-    logger.info('****** Micro Architectural Tests *******')
+    logger.info('****** μArchitectural Test Generator - UATG *******')
     logger.info(f'Version : {version}')
     logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
     logger.info('All Rights Reserved.')
@@ -212,7 +216,8 @@ def load_yaml(file):
         If the file is in YAML, it reads the file and returns the data from the 
         file as a dictionary.
     """
-    if os.path.exists(file) and (file.endswith('.yaml') or file.endswith('.yml')):
+    if os.path.exists(file) and (file.endswith('.yaml') or
+                                 file.endswith('.yml')):
         yaml = YAML(typ="safe")
         yaml.default_flow_style = False
         yaml.allow_unicode = True
@@ -493,9 +498,9 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
     if bit_width == 0:
         pass
     else:
-        max_signed = 2 ** (bit_width - 1) - 1
-        min_signed = -2 ** (bit_width - 1)
-        max_unsigned = 2 ** bit_width - 1
+        max_signed = 2**(bit_width - 1) - 1
+        min_signed = -2**(bit_width - 1)
+        max_unsigned = 2**bit_width - 1
         min_unsigned = 0
         # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
         #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
