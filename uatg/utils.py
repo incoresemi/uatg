@@ -385,9 +385,9 @@ def create_config_file(config_path):
           ' tests are to be generated/validated in comma separated format.\n# '\
           'Run \'uatg --list-modules -md <path> \' to find all the modules that'\
           ' are supported.\n# Use \'all\' to generate/validate all modules\n' \
-          'modules = all\n\n# Absolute path to chromite_uarch_tests/modules ' \
+          'modules = all\n\n# Absolute path to chromite_uatg_tests/modules ' \
           'Directory\n'\
-          'module_dir = /home/user/myquickstart/chromite_uarch_tests/modules/'\
+          'module_dir = /home/user/myquickstart/chromite_uatg_tests/modules/'\
           '\n\n# Directory to dump assembly files and reports\n'\
           'work_dir = /home/user/myquickstart/work/' \
           '\n\n# location to store the link.ld linker file. By default it\'s '\
