@@ -95,8 +95,8 @@ Sample ``config.ini``
     # Use 'all' to generate/validate all modules
     modules = all
 
-    # Absolute path of the uarch_modules/modules Directory
-    module_dir = /home/user/work/InCore/chromite_uarch_tests/modules/
+    # Absolute path of the chromite_uatg_tests/modules Directory
+    module_dir = /home/user/work/InCore/chromite_uatg_tests/modules/
     # Directory to dump assembly files and reports
     work_dir = /home/user/work/InCore/micro-arch-tests/work
     # location to store the link.ld linker file. By default it's same as work_dir
@@ -106,8 +106,8 @@ Sample ``config.ini``
     # By default the configuration is "uatg/target/dut_config.yaml"
     dut_config = /home/user/work/InCore/micro-arch-tests/uatg/target/dut_config.yaml
     # Absolute Path of the yaml file containing the signal aliases of the DUT
-    # presently it is stored in 'uarch_modules/aliasing.yaml'
-    alias_file = /home/user/work/InCore/chromite_uarch_tests/aliasing.yaml
+    # presently it is stored in 'chromite_uatg_tests/aliasing.yaml'
+    alias_file = /home/user/work/InCore/chromite_uatg_tests/aliasing.yaml
 
     # [True, False] If the gen_test_list flag is True, the test_list.yaml needed for running tests in river_core are generated automatically.
     # Until you want to validate individual tests in river_core set the flag to True
