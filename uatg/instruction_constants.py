@@ -1,24 +1,53 @@
 # See LICENSE.incore for license details
+from typing import List
 
 base_reg_file = ['x' + str(reg_no) for reg_no in range(32)]
 
 arithmetic_instructions = {
-    'add-sub-reg': ['add', 'addw', 'sub', 'subw'],
-    'add-imm': ['addi', 'addiw'],
-    'shift-rl-reg': ['sll', 'sllw', 'sra', 'sraw', 'srl', 'srlw'],
-    'shift-rl-imm': ['slli', 'slliw', 'srai', 'sraiw', 'srli', 'srliw']
+    'rv32-add-reg': ['add', 'sub'],
+    'rv64-add-reg': ['add', 'addw',
+                     'sub', 'subw'],
+    'rv128-add-reg': ['add', 'addw', 'addd',
+                      'sub', 'subw', 'subd'],
+
+    'rv32-add-imm': ['addi'],
+    'rv64-add-imm': ['addi', 'addiw'],
+    'rv128-add-imm': ['addi', 'addiw', 'addid'],
+
+    'rv32-shift-reg': ['sll', 'sra', 'srl'],
+    'rv64-shift-reg': ['sll', 'sra', 'srl',
+                       'sllw', 'sraw', 'srlw'],
+    'rv128-shift-reg': ['sll', 'sra', 'srl',
+                        'sllw', 'sraw', 'srlw'
+                                        'slld', 'srad', 'srld'],
+
+    'rv32-shift-imm': ['slli', 'srli', 'srai'],
+    'rv64-shift-imm': ['slli', 'srli', 'srai',
+                       'slliw', 'srliw', 'sraiw'],
+    'rv128-shift-imm': ['slli', 'srli', 'srai',
+                        'slliw', 'srliw', 'sraiw',
+                        'sllid', 'srlid', 'sraid']
 }
 
-branch_instructions = {'branch': ['beq', 'bge', 'bgeu', 'blt', 'bltu', 'bne']}
+branch_instructions = {
+    'branch': ['beq', 'bge', 'bgeu', 'blt', 'bltu', 'bne']
+
+}
 
 csr_insts = {
     'csr-reg': ['csrrc', 'csrrs', 'csrrw'],
     'csr-imm': ['csrrci', 'csrrsi', 'csrrwi'],
 }
-environment_instructions = {'env': ['ebreak', 'ecall']}
-fence_instructions = {'fence': ['fence'], 'fencei': ['fence.i']}
+environment_instructions = {
+    'env': ['ebreak', 'ecall']
+}
+fence_instructions = {
+    'fence': ['fence'], 'fencei': ['fence.i']
+}
 
-jump_instructions = {'jal': ['jal'], 'jalr': ['jalr']}
+jump_instructions = {
+    'jal': ['jal'], 'jalr': ['jalr']
+}
 
 logic_instructions = {
     'logic-reg': ['and', 'or', 'slt', 'sltu', 'xor'],
@@ -27,8 +56,16 @@ logic_instructions = {
 
 load_store_instructions = {
     'auipc': ['auipc'],
-    'loads': ['lb', 'lbu', 'ld', 'lh', 'lhu', 'lui', 'lw', 'lwu'],
-    'stores': ['sb', 'sd', 'sh', 'sw']
+    'rv32-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw'],
+    'rv64-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw',
+                   'ld', 'lwu'],
+    'rv128-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw',
+                    'ld', 'lq', 'lwu', 'ldu'],
+    'rv32-stores': ['sb', 'sh', 'sw'],
+    'rv64-stores': ['sb', 'sh', 'sw',
+                    'sd'],
+    'rv128s-stores': ['sb', 'sh', 'sw',
+                      'sd', 'sq']
 }
 
 
@@ -49,7 +86,7 @@ def bit_walker(bit_width=8, n_ones=1, invert=False):
         raise Exception(f'You cant store {hex((1 << n_ones) - 1)} '
                         f' in {bit_width} bits')
     else:
-        walked = []
+        walked: List[str] = []
         temp = (1 << n_ones) - 1
         for loop_var in range(bit_width):
             if temp <= (1 << bit_width) - 1:
