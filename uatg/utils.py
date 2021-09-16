@@ -385,9 +385,9 @@ def create_config_file(config_path):
           ' tests are to be generated/validated in comma separated format.\n# '\
           'Run \'uatg --list-modules -md <path> \' to find all the modules that'\
           ' are supported.\n# Use \'all\' to generate/validate all modules\n' \
-          'modules = all\n\n# Absolute path to chromite_uarch_tests/modules ' \
+          'modules = all\n\n# Absolute path to chromite_uatg_tests/modules ' \
           'Directory\n'\
-          'module_dir = /home/user/myquickstart/chromite_uarch_tests/modules/'\
+          'module_dir = /home/user/myquickstart/chromite_uatg_tests/modules/'\
           '\n\n# Directory to dump assembly files and reports\n'\
           'work_dir = /home/user/myquickstart/work/' \
           '\n\n# location to store the link.ld linker file. By default it\'s '\
@@ -424,7 +424,7 @@ def create_alias_file(alias_path):
             ' path_to_stage0: mktbsoc.soc.ccore.riscv.stage0\n ' \
             'path_to_fn_decompress: ' \
             'mktbsoc.soc.ccore.riscv.stage1.instance_fn_decompress_0\n\ntest_' \
-            'case:\n test: regression\n\nbpu:\n input:\n output:\n register:' \
+            'case:\n test: regression\n\nbranch_predictor:\n input:\n output:\n register:' \
             '\n  bpu_rg_ghr: rg_ghr_port1__read\n  bpu_rg_initialize: ' \
             'rg_initialize\n  bpu_rg_allocate: ' \
             'rg_allocate\n wire:\n  bpu_mispredict_flag: ' \

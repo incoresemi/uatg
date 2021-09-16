@@ -17,7 +17,7 @@ Directory Organization
 The tests being writen by the user should be placed withing directories which
 stritly follow certain guidelines.
 
-The directory tree of the ``chromite_uarch_tests`` is as follows.
+The directory tree of the ``chromite_uatg_tests`` is as follows.
 
 .. code-block:: console
 
