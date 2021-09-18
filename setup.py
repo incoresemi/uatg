@@ -29,7 +29,7 @@ test_requirements = []
 
 setup(
     name='uatg',
-    version='1.0.1',
+    version='1.0.2',
     description="UATG - Micro-Architectural (uArch) Tests Generator",
     long_description=readme + '\n\n',
     classifiers=[
