@@ -424,7 +424,7 @@ def create_alias_file(alias_path):
             ' path_to_stage0: mktbsoc.soc.ccore.riscv.stage0\n ' \
             'path_to_fn_decompress: ' \
             'mktbsoc.soc.ccore.riscv.stage1.instance_fn_decompress_0\n\ntest_' \
-            'case:\n test: regression\n\nbpu:\n input:\n output:\n register:' \
+            'case:\n test: regression\n\nbranch_predictor:\n input:\n output:\n register:' \
             '\n  bpu_rg_ghr: rg_ghr_port1__read\n  bpu_rg_initialize: ' \
             'rg_initialize\n  bpu_rg_allocate: ' \
             'rg_allocate\n wire:\n  bpu_mispredict_flag: ' \
