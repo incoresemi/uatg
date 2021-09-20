@@ -382,16 +382,16 @@ def create_config_file(config_path):
           'different levels of messages.\nverbose = info\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
-          ' tests are to be generated/validated in comma separated format.\n# '\
-          'Run \'uatg --list-modules -md <path> \' to find all the modules that'\
-          ' are supported.\n# Use \'all\' to generate/validate all modules\n' \
-          'modules = all\n\n# Absolute path to chromite_uatg_tests/modules ' \
-          'Directory\n'\
-          'module_dir = /home/user/myquickstart/chromite_uatg_tests/modules/'\
-          '\n\n# Directory to dump assembly files and reports\n'\
+          ' tests are to be generated/validated in comma separated format.\n' \
+          '# Run \'uatg --list-modules -md <path> \' to find all the modules ' \
+          'that are supported.\n# Use \'all\' to generate/validate all ' \
+          'modules\nmodules = all\n\n# Absolute path to chromite_uatg_tests' \
+          '/modules Directory\n' \
+          'module_dir = /home/user/myquickstart/chromite_uatg_tests/modules/' \
+          '\n\n# Directory to dump assembly files and reports\n' \
           'work_dir = /home/user/myquickstart/work/' \
-          '\n\n# location to store the link.ld linker file. By default it\'s '\
-          'same as work_dir\n'\
+          '\n\n# location to store the link.ld linker file. By default it\'s ' \
+          'same as work_dir\n' \
           'linker_dir = /home/user/myquickstart/work/' \
           '\n\n# Path of the yaml file containing DUT Configuration.\n' \
           'dut_config = /home/user/myquickstart/dut_config.yaml' \
@@ -438,41 +438,92 @@ def create_alias_file(alias_path):
         f.write(alias)
 
 
-def create_dut_config(dut_config_path):
+def create_config_files(dut_config_path):
     """
     Creates a template dut_config.yaml (based on Chromite's default
     configuration at the dut_config_path.
     Invoked by running the uatg setup command
     """
-    dut = 'ISA: RV64IMAFDCSU\niepoch_size: 2\ndepoch_size: 1\ndtvec_base: ' \
-          '256\ns_extension:\n mode: sv39\n itlb_size: 4\n dtlb_size: ' \
-          '4\n asid_width: 9\npmp:\n enable: true\n entries: ' \
-          '4\n granularity: 8\nm_extension:\n mul_stages: 1\n div_stages: ' \
-          '32\nbranch_predictor:\n instantiate: True\n predictor: ' \
-          'gshare\n on_reset: enable\n btb_depth: 32\n bht_depth: ' \
-          '512\n history_len: 8\n history_bits: 5\n ras_depth: ' \
-          '8\nicache_configuration:\n instantiate: true\n on_reset: ' \
-          'enable\n sets: 64\n word_size: 4\n block_size: 16\n ways: ' \
-          '4\n fb_size: 4\n replacement: RR\n ecc_enable: false\n ' \
-          'one_hot_select: false\ndcache_configuration:\n ' \
-          'instantiate: true\n on_reset: enable\n sets: 64\n word_size: 8' \
-          '\n block_size: 8\n ways: 4\n fb_size: 8\n sb_size: 2\n ' \
-          'replacement: RR\n ecc_enable: false\n one_hot_select: false\n ' \
-          'rwports: 1\nreset_pc: 4096\nphysical_addr_size: 32\nbus_protocol: ' \
-          'AXI4\nfpu_trap: false\ndebugger_support: false\nno_of_triggers: 0 ' \
-          '\ncsr_configuration:\n structure: daisy\n counters_in_grp4: 7\n' \
-          ' counters_in_grp5: 7\n counters_in_grp6: 7\n counters_in_grp7: ' \
-          '8\nbsc_compile_options:\n test_memory_size: 33554432\n ' \
-          'assertions: true\n trace_dump: true\n compile_target: \'sim\'\n' \
-          ' suppress_warnings: ["all"]\n verilog_dir: build/hw/verilog\n ' \
-          'build_dir: build/hw/intermediate\n top_module: mkTbSoc\n ' \
-          'top_file: TbSoc.bsv\n top_dir: test_soc\n open_ocd: ' \
-          'False\nverilator_configuration:\n coverage: none\n trace: ' \
-          'false\n threads: 1\n verbosity: true\n sim_speed: ' \
-          'fast\n out_dir: bin'
 
-    with open(os.path.join(dut_config_path, 'dut_config.yaml'), 'w') as f:
-        f.write(dut)
+    s2 = ' ' * 2
+    s4 = s2 * 2
+    s6 = s2 * 3
+    s8 = s4 * 2
+    rv64i_isa = f'hart_ids: [0]\nhart0:\n{s2}custom_exceptions:\n{s4}- cause' \
+                f'_val: 25\n{s4}cause_name: halt_ebreak\n{s4}priv_mode: M' \
+                f'\n{s4}- cause_val: 26\n{s4}cause_name: halt_trigger\n{s4}' \
+                f'priv_mode: M\n{s4}- cause_val: 28\n{s4}cause_name: halt_' \
+                f'step\n{s4}priv_mode: M\n{s4}- cause_val: 29\n{s4}cause_name' \
+                f': halt_reset\n{s4}priv_mode: M\n{s2}custom_interrupts:' \
+                f'\n{s4}- cause_val: 16\n{s4}cause_name: debug_interrupt' \
+                f'\n{s4}on_reset_enable: 1\n{s4}priv_mode : M\n{s2}ISA: ' \
+                f'RV64IMACSUZicsr_Zifencei\n{s2}User_Spec_Version: "2.3"' \
+                f'\n{s2}pmp_granularity: 1\n{s2}physical_addr_sz: 32\n{s2}' \
+                f'supported_xlen:\n{s4}- 64\n'
+
+    with open(os.path.join(dut_config_path, 'rv64i_isa.yaml'), 'w') as f:
+        f.write(rv64i_isa)
+
+    rv64i_custom = f'hart_ids: [0]\nhart0:\n  dtim_base:\n{s4}reset-val: 0x0' \
+                   f'\n{s4}rv32:\n{s6}accessible: false\n{s4}rv64:\n{s6}' \
+                   f'accessible: false\n{s6}type:\n{s8}ro_constant: 0x0\n{s6}' \
+                   f'shadow:\n{s6}shadow_type:\n{s6}msb: 63\n{s6}lsb: 0\n{s4}' \
+                   f'description: dtim base\n{s4}address: 0x7C3\n{s4}priv_' \
+                   f'mode: M\n{s2}itim_base:\n{s4}reset-val: 0x0\n{s4}rv32:' \
+                   f'\n{s6}accessible: false\n{s4}rv64:\n{s6}accessible: ' \
+                   f'false\n{s6}type:\n{s8}ro_constant: 0x0\n{s6}shadow:' \
+                   f'\n{s6}shadow_type:\n{s6}msb: 63\n{s6}lsb: 0\n{s4}' \
+                   f'description: dtim base\n{s4}address: 0x7C2\n{s4}priv_' \
+                   f'mode: M\n  customcontrol:\n{s4}reset-val: 0x000000000000' \
+                   f'0017\n{s4}rv32:\n{s6}accessible: false\n{s4}rv64:\n{s6}' \
+                   f'accessible: true\n{s6}ienable:\n{s8}implemented: true' \
+                   f'\n{s8}type:\n{s8}{s2}ro_constant: 0x1\n{s8}description:' \
+                   f' bit for cache-enable of instruction cache, part of rg_' \
+                   f'customcontrol\n{s8}shadow:\n{s8}shadow_type:\n{s8}msb: 0' \
+                   f'\n{s8}lsb: 0\n{s6}denable:\n{s8}implemented: true\n{s8}' \
+                   f'type:\n{s8}{s2}ro_constant: 0x1\n{s8}description: bit ' \
+                   f'for cache-enable of data cache, part of rg_customcontrol' \
+                   f'\n{s8}shadow:\n{s8}shadow_type:\n{s8}msb: 1\n{s8}lsb: 1' \
+                   f'\n{s6}bpuenable:\n{s8}implemented: true\n{s8}type:\n{s8}' \
+                   f'{s2}ro_constant: 0x1\n{s8}description: bit for enabling ' \
+                   f'branch predictor unit, part of rg_customcontrol\n{s8}' \
+                   f'shadow:\n{s8}shadow_type:\n{s8}msb: 2\n{s8}lsb: 2\n{s6}' \
+                   f'arith_excep:\n{s8}implemented: true\n{s8}type:\n{s8}{s2}' \
+                   f'ro_constant: 0x0\n{s8}description: bit for enabling ' \
+                   f'arithmetic exceptions, part of rg_customcontrol\n{s8}' \
+                   f'shadow:\n{s8}shadow_type:\n{s8}msb: 3\n{s8}lsb: 3\n{s6}' \
+                   f'debug_enable:\n{s8}implemented: true\n{s8}type:\n{s8}' \
+                   f'{s2}ro_constant: 0x1\n{s8}description: bit for enabling ' \
+                   f'debugger on the current hart\n{s8}shadow:\n{s8}shadow_' \
+                   f'type:\n{s8}msb: 4\n{s8}lsb: 4\n{s6}description: the ' \
+                   f'register holds enable bits for arithmetic exceptions, ' \
+                   f'branch predictor unit, i-cache, d-cache units\n{s6}' \
+                   f'address: 0x800\n{s6}priv_mode: U\n'
+
+    with open(os.path.join(dut_config_path, 'rv64i_custom.yaml'), 'w') as f:
+        f.write(rv64i_custom)
+
+    core64 = f'm_extension:\n{s2}mul_stages_in : 1\n{s2}mul_stages_out: 1' \
+             f'\n{s2}div_stages : 32\nbranch_predictor:\n{s2}instantiate: ' \
+             f'True\n{s2}predictor: gshare\n{s2}btb_depth: 32\n{s2}bht_depth:' \
+             f' 512\n{s2}history_len: 8\n{s2}history_bits: 5\n{s2}ras_depth: 8'
+
+    with open(os.path.join(dut_config_path, 'core64.yaml'), 'w') as f:
+        f.write(core64)
+
+    csr_grouping64 = f'grp1:\n{s2}- MISA\n{s2}- MSCRATCH\n{s2}- SSCRATCH' \
+                     f'\n{s2}- MVENDORID\n{s2}- MSTATUS\n{s2}- SSTATUS\n{s2}' \
+                     f'- MIE\n{s2}- SIE\n{s2}- MIP\n{s2}- SIP\n{s2}- MTVEC' \
+                     f'\n{s2}- STVEC\n{s2}- MEPC\n{s2}- SEPC\n{s2}- MCAUSE\n' \
+                     f'{s2}- SCAUSE\n{s2}- MTVAL\n{s2}- STVAL\n{s2}- MCYCLE' \
+                     f'\n{s2}- MINSTRET\n{s2}- MHARTID\n{s2}- MARCHID\n{s2}' \
+                     f'- MIMPID\n{s2}- TIME\n{s2}- CYCLE\n{s2}- MCOUNTINHIBIT' \
+                     f'\n{s2}- INSTRET\n{s2}- SATP\n{s2}- MIDELEG\n{s2}' \
+                     f'- MEDELEG\n{s2}- PMPCFG0\n{s2}- PMPADDR0\n{s2}' \
+                     f'- PMPADDR1\n{s2}- PMPADDR2\n{s2}- PMPADDR3\n{s2}' \
+                     f'- CUSTOMCONTROL'
+    with open(os.path.join(dut_config_path, 'csr_grouping64.yaml'), 'w') as f:
+        f.write(csr_grouping64)
 
 
 def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
@@ -498,9 +549,9 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
     if bit_width == 0:
         pass
     else:
-        max_signed = 2**(bit_width - 1) - 1
-        min_signed = -2**(bit_width - 1)
-        max_unsigned = 2**bit_width - 1
+        max_signed = 2 ** (bit_width - 1) - 1
+        min_signed = -2 ** (bit_width - 1)
+        max_unsigned = 2 ** bit_width - 1
         min_unsigned = 0
         # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
         #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
