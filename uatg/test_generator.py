@@ -41,12 +41,11 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     logger.info(f'uatg dir is {uarch_dir}')
     logger.info(f'work_dir is {work_dir}')
 
-    inp_yaml = config_dict
     try:
-        isa = inp_yaml['ISA']
+            isa = config_dict['rv64i_isa']['hart0']['ISA']
     except Exception as e:
         logger.error(e)
-        logger.error('Exiting UATG')
+        logger.error('Exiting UATG. ISA cannot be found/understood')
         exit(0)
 
     if modules == ['all']:
@@ -60,7 +59,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         module_dir = os.path.join(modules_dir, module)
         work_tests_dir = os.path.join(work_dir, module)
         try:
-            module_params = config_dict[module]
+            module_params = config_dict['core64'][module]
         except KeyError:
             # logger.critical("The {0} module is not in the dut config_file",
             # format(module))
@@ -180,12 +179,11 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         logger.debug(f'Checking {modules_dir} for modules')
         modules = list_of_modules(modules_dir)
 
-    inp_yaml = config_dict
     try:
-        isa = inp_yaml['ISA']
+        isa = config_dict['rv64i_isa']['hart0']['ISA']
     except Exception as e:
         logger.error(e)
-        logger.error('Exiting UATG')
+        logger.error('Exiting UATG. ISA cannot be found/understood')
         exit(0)
 
     logger.info('****** Generating Covergroups ******')
@@ -208,7 +206,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         module_dir = os.path.join(modules_dir, module)
 
         try:
-            module_params = inp_yaml[module]
+            module_params = config_dict['core64'][module]
         except KeyError:
             module_params = {}
 
@@ -255,7 +253,6 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
     """
 
     uarch_dir = os.path.dirname(uatg.__file__)
-    inp_yaml = config_dict
 
     logger.info('****** Validating Test results, Minimal log checking ******')
 
@@ -281,7 +278,7 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
         os.makedirs(reports_dir, exist_ok=True)
 
         try:
-            module_params = inp_yaml[module]
+            module_params = config_dict['core64'][module]
         except KeyError:
             # logger.critical("The {0} module is not "
             #                 "in the dut config_file",format(module))
