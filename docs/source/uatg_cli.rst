@@ -17,7 +17,7 @@ UATG CLI Commands
     $ uatg --help
     Usage: uatg [OPTIONS] COMMAND [ARGS]...
 
-    RISC-V Micro-Architectural Test Generator
+    RISC-V µArchitectural Test Generator
 
     Options:
       --version  Show the version and exit.

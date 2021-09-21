@@ -136,7 +136,7 @@ Once you have installed UArchTest you can execute ``uatg --help`` to print the h
 
     Usage: uatg [OPTIONS] COMMAND [ARGS]...
 
-      RISC-V Micro-Architectural Test Generator
+      RISC-V µArchitectural Test Generator
 
     Options:
       --version  Show the version and exit.
