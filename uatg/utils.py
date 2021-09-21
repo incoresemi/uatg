@@ -395,8 +395,8 @@ def create_config_file(config_path):
           '\n\n# location to store the link.ld linker file. By default it\'s ' \
           'same as work_dir\n' \
           'linker_dir = /home/user/myquickstart/work/' \
-          '\n\n# Path of the yaml file containing DUT Configuration.\n' \
-          'dut_config = /home/user/myquickstart/dut_config.yaml' \
+          '\n\n# Path to the yaml files containing DUT Configuration.\n' \
+          'configuration_files = /home/user/myquickstart/dut_config.yaml' \
           '\n\n# Absolute Path of the yaml file contain' \
           'ing the signal aliases of the DUT ' \
           '\nalias_file = /home/user/myquickstart/aliasing.yaml' \
@@ -440,7 +440,7 @@ def create_alias_file(alias_path):
         f.write(alias)
 
 
-def create_config_files(dut_config_path):
+def create_dut_config_files(dut_config_path):
     """
     Creates a template dut_config.yaml (based on Chromite's default
     configuration at the dut_config_path.
