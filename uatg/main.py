@@ -194,7 +194,8 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
 @cli.command()
 def list_modules(module_dir, verbose):
     """
-    Provides the list of modules supported from the module_dir\n
+    Lists the micro-architecture modules of core supported 
+    among the modules actually present in the DUT\n
     Requires: -md, --module_dir
     """
     logger.level(verbose)
@@ -227,8 +228,7 @@ def list_modules(module_dir, verbose):
 @cli.command()
 def from_config(config_file, verbose):
     """
-    This subcommand reads parameters from config.ini and runs uatg based on the
-    values.\n
+    Reads config.ini and invokes uatg with read paramaters.\n
     Optional: -c, --config
     """
 
@@ -303,6 +303,8 @@ def from_config(config_file, verbose):
 @cli.command()
 def setup(config_path, alias_path, dut_path):
     """
+        Creates template configuration files.
+
         Setups template files for config.ini, dut_config.yaml and aliasing.yaml.
         Optionally you can provide the path's for each of them. If not specified
         files will be written to default paths.\n
@@ -376,6 +378,10 @@ def setup(config_path, alias_path, dut_path):
                                 case_sensitive=False))
 @cli.command()
 def validate(configuration, module_dir, work_dir, modules, verbose):
+    """
+        Parses the log generated upon test execution using regular expressions
+        and provides a minimal coverage report.
+    """
     logger.level(verbose)
     info(__version__)
 
