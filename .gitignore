@@ -7,11 +7,13 @@ uatg/modules/branch_predictor/tests/
 
 # Modules Directory and Repo
 config.ini
+*.yaml
+
 
 # Build Directory
 work/
-utg/temp/*
-utg/work/*
+uatg/temp/*
+uatg/work/*
 
 # Assembly, Plugins
 **.S
@@ -24,5 +26,5 @@ utg/work/*
 !.github
 *.egg-info
 docs/build/
-utg/target/*
-utg/*.yaml
+uatg/target/*
+uatg/*.yaml
