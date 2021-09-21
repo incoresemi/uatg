@@ -262,7 +262,7 @@ def from_config(config_file, verbose):
        config['uatg']['gen_cvg'].lower() == 'true' or \
        config['uatg']['val_test'].lower() == 'true':
 
-        configuration = config['uatg']['dut_config'].split(',')
+        configuration = config['uatg']['configuration_files'].split(',')
         try:
             dut_dict['rv64i_isa'] = load_yaml(configuration[0])  # Yaml for ISA
         except IndexError:
