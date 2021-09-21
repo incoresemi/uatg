@@ -74,9 +74,18 @@ def clean(module_dir, work_dir, verbose):
     multiple=True,
     required=True,
     type=click.Path(exists=True, resolve_path=True, readable=True),
-    # TODO: Update documentation here!
-    help="Path to the yaml file containing DUT configuration. "
-    "Needed to generate/validate tests")
+    help=
+    ("Path to the DUT configuration YAML Files. "
+     "The YAML files should be specified (space separated) in the following "
+     " order "
+     "1. isa_config.yaml "
+     "2. core_config.yaml "
+     "3. custom_config.yaml "
+     "4. csr_grouping.yaml "
+     "The ordering should be strictly followed and any deviation will result in "
+     "UATG erroring out. "
+     "This Parameter is needed to generate/validate tests and also generate "
+     "covergroups"))
 @click.option('--module_dir',
               '-md',
               multiple=False,
@@ -129,9 +138,9 @@ def clean(module_dir, work_dir, verbose):
 def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
              gen_test_list, work_dir, modules, verbose):
     """
-    #TODO change documentation here!
     Generates tests, cover-groups for a list of modules corresponding to the DUT
-    defined in dut_config inside the work_dir. Can also generate the test_list
+    parameters specified in the configuration yamls, inside the work_dir. 
+    Can also generate the test_list
     needed to execute them on RiverCore.\n
     Requires: -cfg, --configuration, -md, --module_dir; -wd, --work_dir\n
     Depends : (-gc, --gen_cvg -> -af, --alias_file)\n
@@ -308,7 +317,6 @@ def setup(config_path, alias_path, dut_path):
         dut_path = './'
 
     create_config_file(config_path=config_path)
-    # TODO: modify these functions to write 4 separate yamls
     create_dut_config_files(dut_config_path=dut_path)
     create_alias_file(alias_path=alias_path)
 
@@ -325,9 +333,18 @@ def setup(config_path, alias_path, dut_path):
     multiple=True,
     required=True,
     type=click.Path(exists=True, resolve_path=True, readable=True),
-    # TODO: Update documentation here!
-    help="Path to the yaml file containing DUT configuration. "
-    "Needed to generate/validate tests")
+    help=
+    ("Path to the DUT configuration YAML Files. "
+     "The YAML files should be specified (space separated) in the following "
+     " order "
+     "1. isa_config.yaml "
+     "2. core_config.yaml "
+     "3. custom_config.yaml "
+     "4. csr_grouping.yaml "
+     "The ordering should be strictly followed and any deviation will result in "
+     "UATG erroring out. "
+     "This Parameter is needed to generate/validate tests and also generate "
+     "covergroups"))
 @click.option('--module_dir',
               '-md',
               multiple=False,
