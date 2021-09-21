@@ -232,6 +232,41 @@ def load_yaml(file):
         exit('INVALID_FILE/PATH')
 
 
+def combine_config_yamls(configuration_path):
+    """
+        This function reads all the YAML file paths specified by the user.
+        Loads the data into a dictionary and then returns it to the invoking 
+        method.
+    """
+    dut_dict = {}
+    try:
+        dut_dict['rv64i_isa'] = load_yaml(configuration_path[0])  # Yaml for ISA
+    except IndexError:
+        logger.error('rv64i_isa path is missing. UATG Can not proceed without '
+                     'providing a path to rv64i_isa.yaml file')
+        raise Exception('MISSING_RV64I_ISA')
+    try:
+        dut_dict['core64'] = load_yaml(configuration_path[1])  # Yaml for ISA
+    except IndexError:
+        logger.error('core64 path is missing. UATG Can not proceed without '
+                     'providing a path to rv64i_isa.yaml file')
+        raise Exception('MISSING_CORE64')
+    try:
+        dut_dict['rv64i_custom'] = load_yaml(
+            configuration_path[2])  # Yaml for Modules
+    except IndexError:
+        logger.error('rv64i_custom path is missing. UATG Can not proceed '
+                     'without providing a path to rv64i_custom.yaml file')
+        raise Exception('MISSING_RV64I_CUSTOM')
+    try:
+        dut_dict['csr_grouping'] = load_yaml(configuration_path[3])
+    except IndexError:
+        logger.error('csr_grouping.yaml parameter is missing')
+        raise Exception('MISSING_RV64I_ISA')
+
+    return (dut_dict)
+
+
 def join_yaml_reports(work_dir='abs_path_here/', module='branch_predictor'):
     """
         Function that combines all the verification report yaml files into one.
@@ -551,9 +586,9 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
     if bit_width == 0:
         pass
     else:
-        max_signed = 2 ** (bit_width - 1) - 1
-        min_signed = -2 ** (bit_width - 1)
-        max_unsigned = 2 ** bit_width - 1
+        max_signed = 2**(bit_width - 1) - 1
+        min_signed = -2**(bit_width - 1)
+        max_unsigned = 2**bit_width - 1
         min_unsigned = 0
         # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
         #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
