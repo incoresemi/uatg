@@ -65,7 +65,8 @@ if(test == \"gshare_fa_mispredict_loop_01\")
      gshare_fa_mispredict_loop_cg mispredict_cg;
      mispredict_cg=new();
   end
-if(test == \"gshare_fa_ghr_zeros_01\" || test == \"gshare_fa_ghr_ones_01\" || test == \"gshare_fa_ghr_alternating_01\")
+if(test == \"gshare_fa_ghr_zeros_01\" || test == \"gshare_fa_ghr_ones_01\" 
+                                   || test == \"gshare_fa_ghr_alternating_01\")
   begin
      bpu_rg_ghr_cg ghr_cg;
      ghr_cg=new();
@@ -279,7 +280,7 @@ SECTIONS
 } 
 '''
 
-    with open(target_dir + '/' + "link.ld", "w") as outfile:
+    with open(os.path.join(target_dir, + "link.ld"), 'w') as outfile:
         outfile.write(out)
 
 
@@ -351,7 +352,7 @@ shakti_end:                                                             \
 #define RVMODEL_CLEAR_MEXT_INT
 #endif // _COMPLIANCE_MODEL_H'''
 
-    with open(target_dir + '/' + 'model_test.h', 'w') as outfile:
+    with open(os.path.join(target_dir, + 'model_test.h'), 'w') as outfile:
         outfile.write(out)
 
 
@@ -367,7 +368,8 @@ def create_plugins(plugins_path):
     for file in files:
         if ('.py' in file) and (not file.startswith('.')):
             module_name = file[0:-3]
-            f = open(plugins_path + '/' + module_name + '.yapsy-plugin', "w")
+            f = open(os.path.join(plugins_path, module_name, '.yapsy-plugin'),
+                     'w')
             f.write("[Core]\nName=" + module_name + "\nModule=" + module_name)
             f.close()
 
@@ -424,9 +426,9 @@ def create_alias_file(alias_path):
             ' path_to_stage0: mktbsoc.soc.ccore.riscv.stage0\n ' \
             'path_to_fn_decompress: ' \
             'mktbsoc.soc.ccore.riscv.stage1.instance_fn_decompress_0\n\ntest_' \
-            'case:\n test: regression\n\nbranch_predictor:\n input:\n output:\n register:' \
-            '\n  bpu_rg_ghr: rg_ghr_port1__read\n  bpu_rg_initialize: ' \
-            'rg_initialize\n  bpu_rg_allocate: ' \
+            'case:\n test: regression\n\nbranch_predictor:\n input:\n output:' \
+            '\n register:\n  bpu_rg_ghr: rg_ghr_port1__read\n  bpu_rg_' \
+            'initialize: rg_initialize\n  bpu_rg_allocate: ' \
             'rg_allocate\n wire:\n  bpu_mispredict_flag: ' \
             'ma_mispredict_g\n  bpu_btb_tag: ' \
             'v_reg_btb_tag\n  bpu_btb_entry: ' \
@@ -650,13 +652,13 @@ def generate_sv_components(sv_dir, alias_file):
     interface = sv_obj.generate_interface()
     defines = sv_obj.generate_defines()
 
-    with open(sv_dir + "/tb_top.sv", "w") as tb_top_file:
+    with open(os.path.join(sv_dir, "/tb_top.sv"), 'w') as tb_top_file:
         tb_top_file.write(tb_top)
 
-    with open(sv_dir + "/interface.sv", "w") as interface_file:
+    with open(os.path.join(sv_dir, "/interface.sv"), 'w') as interface_file:
         interface_file.write(interface)
 
-    with open(sv_dir + "/defines.sv", "w") as defines_file:
+    with open(os.path.join(sv_dir, "/defines.sv"), 'w') as defines_file:
         defines_file.write(defines)
 
 
