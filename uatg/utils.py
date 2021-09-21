@@ -240,29 +240,32 @@ def combine_config_yamls(configuration_path):
     """
     dut_dict = {}
     try:
-        dut_dict['rv64i_isa'] = load_yaml(configuration_path[0])  # Yaml for ISA
+        dut_dict['isa_dict'] = load_yaml(configuration_path[0])  # Yaml for ISA
     except IndexError:
-        logger.error('rv64i_isa path is missing. UATG Can not proceed without '
-                     'providing a path to rv64i_isa.yaml file')
-        raise Exception('MISSING_RV64I_ISA')
+        logger.error('isa configuration yaml is missing. '
+                     'UATG cannot proceed without '
+                     'providing a path to the valid YAML file')
+        raise Exception('MISSING_ISA_CONFIG_YAML')
     try:
-        dut_dict['core64'] = load_yaml(configuration_path[1])  # Yaml for ISA
+        dut_dict['core_config'] = load_yaml(
+            configuration_path[1])  # Yaml for DUT configuration
     except IndexError:
-        logger.error('core64 path is missing. UATG Can not proceed without '
-                     'providing a path to rv64i_isa.yaml file')
-        raise Exception('MISSING_CORE64')
+        logger.error('core config yaml is missing. UATG cannot proceed without '
+                     'providing a path to the valid YAML file')
+        raise Exception('MISSING_CORE_CONFIGURATION_YAML')
     try:
         dut_dict['rv64i_custom'] = load_yaml(
             configuration_path[2])  # Yaml for Modules
     except IndexError:
-        logger.error('rv64i_custom path is missing. UATG Can not proceed '
+        logger.error('rv64i_custom path is missing. UATG cannot proceed '
                      'without providing a path to rv64i_custom.yaml file')
         raise Exception('MISSING_RV64I_CUSTOM')
     try:
-        dut_dict['csr_grouping'] = load_yaml(configuration_path[3])
+        dut_dict['csr_grouping'] = load_yaml(
+            configuration_path[3])  # YAML for CSRs
     except IndexError:
-        logger.error('csr_grouping.yaml parameter is missing')
-        raise Exception('MISSING_RV64I_ISA')
+        logger.error('Path to csr_grouping.yaml is invalid.')
+        raise Exception('MISSING_CSRGROUPING64')
 
     return (dut_dict)
 
