@@ -380,7 +380,13 @@ def setup(config_path, alias_path, dut_path):
 def validate(configuration, module_dir, work_dir, modules, verbose):
     """
         Parses the log generated upon test execution using regular expressions
-        and provides a minimal coverage report.
+        and provides a minimal coverage report.\n
+
+        Required: -wd, --work_dir\n
+                  -cfg, --configuration\n
+                  -md, --module_dir\n
+        Optional: -m, --modules (default - all)\n
+                  -v, --verbose\n
     """
     logger.level(verbose)
     info(__version__)
