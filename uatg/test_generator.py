@@ -42,7 +42,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     logger.info(f'work_dir is {work_dir}')
 
     try:
-            isa = config_dict['rv64i_isa']['hart0']['ISA']
+        isa = config_dict['isa_dict']['hart0']['ISA']
     except Exception as e:
         logger.error(e)
         logger.error('Exiting UATG. ISA cannot be found/understood')
@@ -59,7 +59,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         module_dir = os.path.join(modules_dir, module)
         work_tests_dir = os.path.join(work_dir, module)
         try:
-            module_params = config_dict['core64'][module]
+            module_params = config_dict['core_config'][module]
         except KeyError:
             # logger.critical("The {0} module is not in the dut config_file",
             # format(module))
@@ -180,7 +180,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         modules = list_of_modules(modules_dir)
 
     try:
-        isa = config_dict['rv64i_isa']['hart0']['ISA']
+        isa = config_dict['isa_dict']['hart0']['ISA']
     except Exception as e:
         logger.error(e)
         logger.error('Exiting UATG. ISA cannot be found/understood')
@@ -206,7 +206,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         module_dir = os.path.join(modules_dir, module)
 
         try:
-            module_params = config_dict['core64'][module]
+            module_params = config_dict['core_config'][module]
         except KeyError:
             module_params = {}
 
@@ -278,7 +278,7 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
         os.makedirs(reports_dir, exist_ok=True)
 
         try:
-            module_params = config_dict['core64'][module]
+            module_params = config_dict['core_config'][module]
         except KeyError:
             # logger.critical("The {0} module is not "
             #                 "in the dut config_file",format(module))
