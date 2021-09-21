@@ -8,7 +8,7 @@ from uatg.test_generator import generate_tests, clean_dirs, validate_tests, \
     generate_sv
 from uatg.__init__ import __version__
 from uatg.utils import list_of_modules, info, load_yaml, clean_modules
-from uatg.utils import create_config_files, create_config_file, \
+from uatg.utils import create_dut_config_files, create_config_file, \
     create_alias_file
 
 
@@ -239,7 +239,7 @@ def list_modules(module_dir, verbose):
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
 @cli.command()
-def from_config(config_file):
+def from_config(config_file, verbose):
     """
     This subcommand reads parameters from config.ini and runs uatg based on the
     values.\n
@@ -357,7 +357,7 @@ def setup(config_path, alias_path, dut_path):
 
     create_config_file(config_path=config_path)
     # TODO: modify these functions to write 4 separate yamls
-    create_config_files(dut_config_path=dut_path)
+    create_dut_config_files(dut_config_path=dut_path)
     create_alias_file(alias_path=alias_path)
 
     print(f'Files created')
