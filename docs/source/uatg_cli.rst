@@ -90,8 +90,8 @@ support said option. It is followed by the description in the third column.
                             validate                    the DUT for which the user wants to generate tests. 
                                                         The yaml paths should be separated using spaces and should 
                                                         be passed in the following order, 
-                                                        1. ISA_config.yaml 2. Core_config.yaml 3. Custom_config.yaml
-                                                        4. CSR_grouping.yaml. (The names here represent the functionality of
+                                                        1. isa_config.yaml 2. core_config.yaml 3. custom_config.yaml
+                                                        4. csr_grouping.yaml. (The names here represent the functionality of
                                                         the and not the actual name required by UATG. 
                                                         The user can name his files as he wishes.)
   -af, \\-\\-alias_file     generate         Required   The **absolute/relative** path to the ``aliasing.yaml`` file of 
