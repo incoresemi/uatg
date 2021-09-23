@@ -86,14 +86,14 @@ support said option. It is followed by the description in the third column.
                             validate                    generated.
   -ld, \\-\\-linker_dir     generate,        Optional   The directory where the user has stored his ``link.ld`` file.
                                                         If not specified, UATG will generate a linker at the work_dir.
-  -cfg, \\-\\-configuration generate,        Required   The **absolute/relative** path to the *configuration_yaml* file of 
-                            validate                    the DUT for which the user wants to generate tests. 
+  -cfg, \\-\\-configuration generate,        Required   The **absolute/relative** path to the *configuration_yaml* file(s) 
+                            validate                    of the DUT for which the user wants to generate tests. 
                                                         The yaml paths should be separated using spaces and should 
                                                         be passed in the following order, 
                                                         1. isa_config.yaml 2. core_config.yaml 3. custom_config.yaml
                                                         4. csr_grouping.yaml. (The names here represent the functionality of
                                                         the and not the actual name required by UATG. 
-                                                        The user can name his files as he wishes.)
+                                                        The user can name his files as they wish.)
   -af, \\-\\-alias_file     generate         Required   The **absolute/relative** path to the ``aliasing.yaml`` file of 
                                                         the DUT for which the user wants to generate covergroups.       
   -t, \\-\\-gen_test_list   generate         Optional   [Flag] Creates a ``test_list.yaml`` file in the 
