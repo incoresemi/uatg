@@ -88,8 +88,8 @@ support said option. It is followed by the description in the third column.
                                                         If not specified, UATG will generate a linker at the work_dir.
   -cfg, \\-\\-configuration generate,        Required   The **absolute/relative** path to the *configuration_yaml* file(s) 
                             validate                    of the DUT for which the user wants to generate tests. 
-                                                        The yaml paths should be separated using spaces and should 
-                                                        be passed in the following order, 
+                                                        The yaml paths should be provided individually with a -cfg for
+                                                        every path and should be passed in the following order, 
                                                         1. isa_config.yaml 2. core_config.yaml 3. custom_config.yaml
                                                         4. csr_grouping.yaml. (The names here represent the functionality of
                                                         the and not the actual name required by UATG. 
