@@ -506,7 +506,7 @@ def create_dut_config_files(dut_config_path):
                 f'\n{s2}pmp_granularity: 1\n{s2}physical_addr_sz: 32\n{s2}' \
                 f'supported_xlen:\n{s4}- 64\n'
 
-    with open(os.path.join(dut_config_path, 'rv64i_isa.yaml'), 'w') as f:
+    with open(os.path.join(dut_config_path, 'isa_config.yaml'), 'w') as f:
         f.write(rv64i_isa)
 
     rv64i_custom = f'hart_ids: [0]\nhart0:\n  dtim_base:\n{s4}reset-val: 0x0' \
@@ -545,7 +545,7 @@ def create_dut_config_files(dut_config_path):
                    f'branch predictor unit, i-cache, d-cache units\n{s6}' \
                    f'address: 0x800\n{s6}priv_mode: U\n'
 
-    with open(os.path.join(dut_config_path, 'rv64i_custom.yaml'), 'w') as f:
+    with open(os.path.join(dut_config_path, 'custom_config.yaml'), 'w') as f:
         f.write(rv64i_custom)
 
     core64 = f'm_extension:\n{s2}mul_stages_in : 1\n{s2}mul_stages_out: 1' \
@@ -553,7 +553,7 @@ def create_dut_config_files(dut_config_path):
              f'True\n{s2}predictor: gshare\n{s2}btb_depth: 32\n{s2}bht_depth:' \
              f' 512\n{s2}history_len: 8\n{s2}history_bits: 5\n{s2}ras_depth: 8'
 
-    with open(os.path.join(dut_config_path, 'core64.yaml'), 'w') as f:
+    with open(os.path.join(dut_config_path, 'core_config.yaml'), 'w') as f:
         f.write(core64)
 
     csr_grouping64 = f'grp1:\n{s2}- MISA\n{s2}- MSCRATCH\n{s2}- SSCRATCH' \
@@ -567,7 +567,7 @@ def create_dut_config_files(dut_config_path):
                      f'- MEDELEG\n{s2}- PMPCFG0\n{s2}- PMPADDR0\n{s2}' \
                      f'- PMPADDR1\n{s2}- PMPADDR2\n{s2}- PMPADDR3\n{s2}' \
                      f'- CUSTOMCONTROL'
-    with open(os.path.join(dut_config_path, 'csr_grouping64.yaml'), 'w') as f:
+    with open(os.path.join(dut_config_path, 'csr_grouping.yaml'), 'w') as f:
         f.write(csr_grouping64)
 
 
