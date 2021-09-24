@@ -618,8 +618,9 @@ uatg to generate tests.
     alias_file = /home/user/myquickstart/aliasing.yaml
     check_logs = True
 
-Once you have pasted this into the INI file and have also updated the generator
-argument in line 12. You should be able use UATG as a generator for RiVer core.
+Once you have pasted this into the ``river_core.ini`` file and have also updated 
+the generator argument in line 12. You should be able use UATG as a generator 
+for RiVer core.
 
 Setting up the DUT Plugin
 -------------------------
@@ -658,19 +659,15 @@ will need to update the parameter ``path_to_target`` in line 19 above.
 Setting up the Reference Plugin
 -------------------------------
 
-For this quickstart we will be using a modified version of spike. Do the
+For this quickstart we will be using SPIKE, the RISC-V ISA Simulator. Do the
 following to setup spike:
 
 .. code-block:: console
 
-   $ git clone https://gitlab.com/shaktiproject/tools/mod-spike.git
-   $ cd mod-spike
-   $ git checkout bump-to-latest
    $ git clone https://github.com/riscv/riscv-isa-sim.git
    $ cd riscv-isa-sim
-   $ git checkout 6d15c93fd75db322981fe58ea1db13035e0f7add
-   $ git apply ../shakti.patch
-   $ export RISCV=<path you to install spike>
+   $ git checkout a04da860635b4e94fc05f23f75fd99578258bc3e
+   $ export RISCV=<path to install spike>
    $ mkdir build
    $ cd build
    $ ../configure --prefix=$RISCV # export RISCV to where you would like to install
