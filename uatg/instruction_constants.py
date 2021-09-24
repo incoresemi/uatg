@@ -19,7 +19,7 @@ arithmetic_instructions = {
                        'sllw', 'sraw', 'srlw'],
     'rv128-shift-reg': ['sll', 'sra', 'srl',
                         'sllw', 'sraw', 'srlw'
-                                        'slld', 'srad', 'srld'],
+                        'slld', 'srad', 'srld'],
 
     'rv32-shift-imm': ['slli', 'srli', 'srai'],
     'rv64-shift-imm': ['slli', 'srli', 'srai',

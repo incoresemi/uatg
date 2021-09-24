@@ -40,7 +40,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
     logger.info(f'uatg dir is {uarch_dir}')
     logger.info(f'work_dir is {work_dir}')
-
+    isa = 'RV64I'
     try:
         isa = config_dict['isa_dict']['hart0']['ISA']
     except Exception as e:
@@ -178,7 +178,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
     if modules == ['all']:
         logger.debug(f'Checking {modules_dir} for modules')
         modules = list_of_modules(modules_dir)
-
+    isa = 'RV64I'
     try:
         isa = config_dict['isa_dict']['hart0']['ISA']
     except Exception as e:
