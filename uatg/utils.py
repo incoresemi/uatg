@@ -257,15 +257,15 @@ def combine_config_yamls(configuration_path):
         dut_dict['rv64i_custom'] = load_yaml(
             configuration_path[2])  # Yaml for Modules
     except IndexError:
-        logger.error('rv64i_custom path is missing. UATG cannot proceed '
-                     'without providing a path to rv64i_custom.yaml file')
-        raise Exception('MISSING_RV64I_CUSTOM')
+        logger.error('custom_config.yaml path is missing. UATG cannot proceed '
+                     'without providing a path to the YAMLfile')
+        raise Exception('MISSING_CUSTOM_CONFIGURATION_YAML')
     try:
         dut_dict['csr_grouping'] = load_yaml(
             configuration_path[3])  # YAML for CSRs
     except IndexError:
         logger.error('Path to csr_grouping.yaml is invalid.')
-        raise Exception('MISSING_CSRGROUPING64')
+        raise Exception('MISSING_CSRGROUPING')
 
     return (dut_dict)
 
@@ -434,10 +434,14 @@ def create_config_file(config_path):
           'same as work_dir\n' \
           'linker_dir = /home/user/myquickstart/work/' \
           '\n\n# Path to the yaml files containing DUT Configuration.\n' \
-          'configuration_files = /home/user/myquickstart/dut_config.yaml' \
+          'configuration_files = /home/user/myquickstart/isa_config.yaml,'\
+          '/home/user/myquickstart/core_config.yaml,' \
+          '/home/user/myquickstart/custom_config.yaml,' \
+          '/home/user/myquickstart/csr_grouping.yaml' \
           '\n\n# Absolute Path of the yaml file contain' \
           'ing the signal aliases of the DUT ' \
-          '\nalias_file = /home/user/myquickstart/aliasing.yaml' \
+          '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/'\
+          'aliasing.yaml' \
           '\n\n# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Unless you want to ' \
@@ -490,18 +494,19 @@ def create_dut_config_files(dut_config_path):
     s6 = s2 * 3
     s8 = s4 * 2
     rv64i_isa = f'hart_ids: [0]\nhart0:\n{s2}custom_exceptions:\n{s4}- cause' \
-                f'_val: 25\n{s4}cause_name: halt_ebreak\n{s4}priv_mode: M' \
-                f'\n{s4}- cause_val: 26\n{s4}cause_name: halt_trigger\n{s4}' \
-                f'priv_mode: M\n{s4}- cause_val: 28\n{s4}cause_name: halt_' \
-                f'step\n{s4}priv_mode: M\n{s4}- cause_val: 29\n{s4}cause_name' \
-                f': halt_reset\n{s4}priv_mode: M\n{s2}custom_interrupts:' \
-                f'\n{s4}- cause_val: 16\n{s4}cause_name: debug_interrupt' \
-                f'\n{s4}on_reset_enable: 1\n{s4}priv_mode : M\n{s2}ISA: ' \
+                f'_val: 25\n{s4}  cause_name: halt_ebreak\n{s4}  priv_mode: M' \
+                f'\n{s4}- cause_val: 26\n{s4}  cause_name: halt_trigger\n{s4}' \
+                f'  priv_mode: M\n{s4}- cause_val: 28\n{s4}  cause_name: halt_'\
+                f'step\n{s4}  priv_mode: M\n{s4}- cause_val: 29\n' \
+                f'{s4}  cause_name: halt_reset\n'\
+                f'{s4}  priv_mode: M\n{s2}custom_interrupts:' \
+                f'\n{s4}- cause_val: 16\n{s4}  cause_name: debug_interrupt' \
+                f'\n{s4}  on_reset_enable: 1\n{s4}  priv_mode : M\n{s2}ISA: ' \
                 f'RV64IMACSUZicsr_Zifencei\n{s2}User_Spec_Version: "2.3"' \
                 f'\n{s2}pmp_granularity: 1\n{s2}physical_addr_sz: 32\n{s2}' \
                 f'supported_xlen:\n{s4}- 64\n'
 
-    with open(os.path.join(dut_config_path, 'rv64i_isa.yaml'), 'w') as f:
+    with open(os.path.join(dut_config_path, 'isa_config.yaml'), 'w') as f:
         f.write(rv64i_isa)
 
     rv64i_custom = f'hart_ids: [0]\nhart0:\n  dtim_base:\n{s4}reset-val: 0x0' \
@@ -540,7 +545,7 @@ def create_dut_config_files(dut_config_path):
                    f'branch predictor unit, i-cache, d-cache units\n{s6}' \
                    f'address: 0x800\n{s6}priv_mode: U\n'
 
-    with open(os.path.join(dut_config_path, 'rv64i_custom.yaml'), 'w') as f:
+    with open(os.path.join(dut_config_path, 'custom_config.yaml'), 'w') as f:
         f.write(rv64i_custom)
 
     core64 = f'm_extension:\n{s2}mul_stages_in : 1\n{s2}mul_stages_out: 1' \
@@ -548,7 +553,7 @@ def create_dut_config_files(dut_config_path):
              f'True\n{s2}predictor: gshare\n{s2}btb_depth: 32\n{s2}bht_depth:' \
              f' 512\n{s2}history_len: 8\n{s2}history_bits: 5\n{s2}ras_depth: 8'
 
-    with open(os.path.join(dut_config_path, 'core64.yaml'), 'w') as f:
+    with open(os.path.join(dut_config_path, 'core_config.yaml'), 'w') as f:
         f.write(core64)
 
     csr_grouping64 = f'grp1:\n{s2}- MISA\n{s2}- MSCRATCH\n{s2}- SSCRATCH' \
@@ -562,7 +567,7 @@ def create_dut_config_files(dut_config_path):
                      f'- MEDELEG\n{s2}- PMPCFG0\n{s2}- PMPADDR0\n{s2}' \
                      f'- PMPADDR1\n{s2}- PMPADDR2\n{s2}- PMPADDR3\n{s2}' \
                      f'- CUSTOMCONTROL'
-    with open(os.path.join(dut_config_path, 'csr_grouping64.yaml'), 'w') as f:
+    with open(os.path.join(dut_config_path, 'csr_grouping.yaml'), 'w') as f:
         f.write(csr_grouping64)
 
 

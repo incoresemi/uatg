@@ -299,7 +299,7 @@ def from_config(config_file, verbose):
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
-              help="Directory to store the dut_config.yaml file")
+              help="Directory to store the DUT configuration yaml files")
 @cli.command()
 def setup(config_path, alias_path, dut_path):
     """

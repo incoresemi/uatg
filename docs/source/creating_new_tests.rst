@@ -1,5 +1,7 @@
 .. See LICENSE.incore for details
 
+.. highlight:: shell 
+
 .. _creating_new_tests: 
 
 ################################
@@ -53,9 +55,7 @@ folders will not be used to pick up test classes.
 
 The structure of the *index.yaml* file is presented as follows,
 
-.. code-block:: yaml
-   
-   :linenos:
+.. code-block:: yaml  
 
   branch_predictor:
     uatg_gshare_fa_btb_fill_01: "fill the BTB with entries"
@@ -351,8 +351,11 @@ values present in the DUT configuration for running generating the tests.
 For example, when writing a test for a gshare_BPU, the user should make 
 sure he creates a ``self.history_len = config_dict[history_len]`` within this 
 method if he thinks he'd need the ``history_len`` somewhere in the following 
-methods. **Only** the ``execute()`` method can take in the config_dict among 
-all the methods of the test class.
+methods. 
+
+.. warning:: **Only** the ``execute()`` method can take in the config_dict among 
+   all the methods of the test class. There are no other methods in the class
+   which receives this dictionary as an input.
 
 generate_asm(self):
 -------------------
