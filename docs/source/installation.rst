@@ -185,7 +185,8 @@ UATG will be store the ASM test files as well as test reports and logs.
    $ cd ~/myquickstart
    $ mkdir work
 
-We will next create the ``config.ini``, ``dut_config.yaml`` and the 
+We will next create the ``config.ini``, ``isa_config.yaml``, 
+``core_config.yaml``, ``custom_config.yaml``, ``csr_grouping.yaml``,  and the 
 ``aliasing.yaml`` files under the ``myquickstart`` directory. You
 can use the setup to create this file:
 
@@ -195,7 +196,8 @@ can use the setup to create this file:
    $ uatg setup
 
 The above should create a ``config.ini`` file with the following contents.
-It should also create the ``aliasing.yaml`` and ``dut_config.yaml`` files.
+It should also create the ``aliasing.yaml``, ``csr_grouping.yaml`` and 
+``*_config.yaml`` files.
 Details and further specification of the config file syntax is available at 
 :ref:`Configuration files Spec<configuration_files>`.
 
