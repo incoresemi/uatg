@@ -257,15 +257,15 @@ def combine_config_yamls(configuration_path):
         dut_dict['rv64i_custom'] = load_yaml(
             configuration_path[2])  # Yaml for Modules
     except IndexError:
-        logger.error('rv64i_custom path is missing. UATG cannot proceed '
-                     'without providing a path to rv64i_custom.yaml file')
-        raise Exception('MISSING_RV64I_CUSTOM')
+        logger.error('custom_config.yaml path is missing. UATG cannot proceed '
+                     'without providing a path to the YAMLfile')
+        raise Exception('MISSING_CUSTOM_CONFIGURATION_YAML')
     try:
         dut_dict['csr_grouping'] = load_yaml(
             configuration_path[3])  # YAML for CSRs
     except IndexError:
         logger.error('Path to csr_grouping.yaml is invalid.')
-        raise Exception('MISSING_CSRGROUPING64')
+        raise Exception('MISSING_CSRGROUPING')
 
     return (dut_dict)
 
