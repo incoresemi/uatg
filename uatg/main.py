@@ -15,7 +15,7 @@ from uatg.utils import combine_config_yamls, create_alias_file
 @click.group()
 @click.version_option(version=__version__)
 def cli():
-    """RISC-V \u00b5-Architectural Test Generator (UATG)"""
+    """RISC-V Micro-Architectural Test Generator (UATG)"""
 
 
 # -----------------
@@ -214,7 +214,7 @@ def list_modules(module_dir, verbose):
     multiple=False,
     required=True,
     type=click.Path(exists=True, resolve_path=True, readable=True),
-    help="Provide a config.ini file's path. This runs uatg based upon "
+    help="Provide a config.ini file\'s path. This runs uatg based upon "
     "the parameters stored in the file. If not specified "
     "individual args/flags are to be passed through cli. In the"
     "case of conflict between cli and config.ini values, config"
@@ -306,7 +306,7 @@ def setup(config_path, alias_path, dut_path):
         Creates template configuration files.
 
         Setups template files for config.ini, dut_config.yaml and aliasing.yaml.
-        Optionally you can provide the path's for each of them. If not specified
+        Optionally you can provide the path\'s for each of them. If not specified
         files will be written to default paths.\n
         Optional: -dp, --dut_path;  -ap, --alias_path; -cp, --config_path
     """

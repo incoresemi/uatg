@@ -204,7 +204,7 @@ endmoduleNeeded to generate/validate tests
 # Utility Functions
 def info(version):
     """The function prints the Information about UATG. """
-    logger.info('****** μArchitectural Test Generator - UATG *******')
+    logger.info('****** Micro-Architectural Test Generator - UATG *******')
     logger.info(f'Version : {version}')
     logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
     logger.info('All Rights Reserved.')
