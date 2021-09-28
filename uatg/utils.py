@@ -65,7 +65,8 @@ if(test == \"gshare_fa_mispredict_loop_01\")
      gshare_fa_mispredict_loop_cg mispredict_cg;
      mispredict_cg=new();
   end
-if(test == \"gshare_fa_ghr_zeros_01\" || test == \"gshare_fa_ghr_ones_01\" || test == \"gshare_fa_ghr_alternating_01\")
+if(test == \"gshare_fa_ghr_zeros_01\" || test == \"gshare_fa_ghr_ones_01\" 
+                                   || test == \"gshare_fa_ghr_alternating_01\")
   begin
      bpu_rg_ghr_cg ghr_cg;
      ghr_cg=new();
@@ -203,7 +204,7 @@ endmoduleNeeded to generate/validate tests
 # Utility Functions
 def info(version):
     """The function prints the Information about UATG. """
-    logger.info('****** μArchitectural Test Generator - UATG *******')
+    logger.info('****** Micro-Architectural Test Generator - UATG *******')
     logger.info(f'Version : {version}')
     logger.info('Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.')
     logger.info('All Rights Reserved.')
@@ -218,7 +219,7 @@ def load_yaml(file):
     """
     if os.path.exists(file) and (file.endswith('.yaml') or
                                  file.endswith('.yml')):
-        yaml = YAML(typ="safe")
+        yaml = YAML(typ="rt")
         yaml.default_flow_style = False
         yaml.allow_unicode = True
         try:
@@ -229,6 +230,44 @@ def load_yaml(file):
     else:
         logger.error(f'error: {file} is not a valid yaml file')
         exit('INVALID_FILE/PATH')
+
+
+def combine_config_yamls(configuration_path):
+    """
+        This function reads all the YAML file paths specified by the user.
+        Loads the data into a dictionary and then returns it to the invoking 
+        method.
+    """
+    dut_dict = {}
+    try:
+        dut_dict['isa_dict'] = load_yaml(configuration_path[0])  # Yaml for ISA
+    except IndexError:
+        logger.error('isa configuration yaml is missing. '
+                     'UATG cannot proceed without '
+                     'providing a path to the valid YAML file')
+        raise Exception('MISSING_ISA_CONFIG_YAML')
+    try:
+        dut_dict['core_config'] = load_yaml(
+            configuration_path[1])  # Yaml for DUT configuration
+    except IndexError:
+        logger.error('core config yaml is missing. UATG cannot proceed without '
+                     'providing a path to the valid YAML file')
+        raise Exception('MISSING_CORE_CONFIGURATION_YAML')
+    try:
+        dut_dict['rv64i_custom'] = load_yaml(
+            configuration_path[2])  # Yaml for Modules
+    except IndexError:
+        logger.error('custom_config.yaml path is missing. UATG cannot proceed '
+                     'without providing a path to the YAMLfile')
+        raise Exception('MISSING_CUSTOM_CONFIGURATION_YAML')
+    try:
+        dut_dict['csr_grouping'] = load_yaml(
+            configuration_path[3])  # YAML for CSRs
+    except IndexError:
+        logger.error('Path to csr_grouping.yaml is invalid.')
+        raise Exception('MISSING_CSRGROUPING')
+
+    return (dut_dict)
 
 
 def join_yaml_reports(work_dir='abs_path_here/', module='branch_predictor'):
@@ -279,7 +318,7 @@ SECTIONS
 } 
 '''
 
-    with open(target_dir + '/' + "link.ld", "w") as outfile:
+    with open(os.path.join(target_dir, "link.ld"), 'w') as outfile:
         outfile.write(out)
 
 
@@ -351,7 +390,7 @@ shakti_end:                                                             \
 #define RVMODEL_CLEAR_MEXT_INT
 #endif // _COMPLIANCE_MODEL_H'''
 
-    with open(target_dir + '/' + 'model_test.h', 'w') as outfile:
+    with open(os.path.join(target_dir, 'model_test.h'), 'w') as outfile:
         outfile.write(out)
 
 
@@ -367,7 +406,8 @@ def create_plugins(plugins_path):
     for file in files:
         if ('.py' in file) and (not file.startswith('.')):
             module_name = file[0:-3]
-            f = open(plugins_path + '/' + module_name + '.yapsy-plugin', "w")
+            f = open(os.path.join(plugins_path, module_name + '.yapsy-plugin'),
+                     'w')
             f.write("[Core]\nName=" + module_name + "\nModule=" + module_name)
             f.close()
 
@@ -382,22 +422,26 @@ def create_config_file(config_path):
           'different levels of messages.\nverbose = info\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
-          ' tests are to be generated/validated in comma separated format.\n# '\
-          'Run \'uatg --list-modules -md <path> \' to find all the modules that'\
-          ' are supported.\n# Use \'all\' to generate/validate all modules\n' \
-          'modules = all\n\n# Absolute path to chromite_uatg_tests/modules ' \
-          'Directory\n'\
-          'module_dir = /home/user/myquickstart/chromite_uatg_tests/modules/'\
-          '\n\n# Directory to dump assembly files and reports\n'\
+          ' tests are to be generated/validated in comma separated format.\n' \
+          '# Run \'uatg --list-modules -md <path> \' to find all the modules ' \
+          'that are supported.\n# Use \'all\' to generate/validate all ' \
+          'modules\nmodules = all\n\n# Absolute path to chromite_uatg_tests' \
+          '/modules Directory\n' \
+          'module_dir = /home/user/myquickstart/chromite_uatg_tests/modules/' \
+          '\n\n# Directory to dump assembly files and reports\n' \
           'work_dir = /home/user/myquickstart/work/' \
-          '\n\n# location to store the link.ld linker file. By default it\'s '\
-          'same as work_dir\n'\
+          '\n\n# location to store the link.ld linker file. By default it\'s ' \
+          'same as work_dir\n' \
           'linker_dir = /home/user/myquickstart/work/' \
-          '\n\n# Path of the yaml file containing DUT Configuration.\n' \
-          'dut_config = /home/user/myquickstart/dut_config.yaml' \
+          '\n\n# Path to the yaml files containing DUT Configuration.\n' \
+          'configuration_files = /home/user/myquickstart/isa_config.yaml,'\
+          '/home/user/myquickstart/core_config.yaml,' \
+          '/home/user/myquickstart/custom_config.yaml,' \
+          '/home/user/myquickstart/csr_grouping.yaml' \
           '\n\n# Absolute Path of the yaml file contain' \
           'ing the signal aliases of the DUT ' \
-          '\nalias_file = /home/user/myquickstart/aliasing.yaml' \
+          '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/'\
+          'aliasing.yaml' \
           '\n\n# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Unless you want to ' \
@@ -424,9 +468,9 @@ def create_alias_file(alias_path):
             ' path_to_stage0: mktbsoc.soc.ccore.riscv.stage0\n ' \
             'path_to_fn_decompress: ' \
             'mktbsoc.soc.ccore.riscv.stage1.instance_fn_decompress_0\n\ntest_' \
-            'case:\n test: regression\n\nbranch_predictor:\n input:\n output:\n register:' \
-            '\n  bpu_rg_ghr: rg_ghr_port1__read\n  bpu_rg_initialize: ' \
-            'rg_initialize\n  bpu_rg_allocate: ' \
+            'case:\n test: regression\n\nbranch_predictor:\n input:\n output:' \
+            '\n register:\n  bpu_rg_ghr: rg_ghr_port1__read\n  bpu_rg_' \
+            'initialize: rg_initialize\n  bpu_rg_allocate: ' \
             'rg_allocate\n wire:\n  bpu_mispredict_flag: ' \
             'ma_mispredict_g\n  bpu_btb_tag: ' \
             'v_reg_btb_tag\n  bpu_btb_entry: ' \
@@ -438,41 +482,93 @@ def create_alias_file(alias_path):
         f.write(alias)
 
 
-def create_dut_config(dut_config_path):
+def create_dut_config_files(dut_config_path):
     """
     Creates a template dut_config.yaml (based on Chromite's default
     configuration at the dut_config_path.
     Invoked by running the uatg setup command
     """
-    dut = 'ISA: RV64IMAFDCSU\niepoch_size: 2\ndepoch_size: 1\ndtvec_base: ' \
-          '256\ns_extension:\n mode: sv39\n itlb_size: 4\n dtlb_size: ' \
-          '4\n asid_width: 9\npmp:\n enable: true\n entries: ' \
-          '4\n granularity: 8\nm_extension:\n mul_stages: 1\n div_stages: ' \
-          '32\nbranch_predictor:\n instantiate: True\n predictor: ' \
-          'gshare\n on_reset: enable\n btb_depth: 32\n bht_depth: ' \
-          '512\n history_len: 8\n history_bits: 5\n ras_depth: ' \
-          '8\nicache_configuration:\n instantiate: true\n on_reset: ' \
-          'enable\n sets: 64\n word_size: 4\n block_size: 16\n ways: ' \
-          '4\n fb_size: 4\n replacement: RR\n ecc_enable: false\n ' \
-          'one_hot_select: false\ndcache_configuration:\n ' \
-          'instantiate: true\n on_reset: enable\n sets: 64\n word_size: 8' \
-          '\n block_size: 8\n ways: 4\n fb_size: 8\n sb_size: 2\n ' \
-          'replacement: RR\n ecc_enable: false\n one_hot_select: false\n ' \
-          'rwports: 1\nreset_pc: 4096\nphysical_addr_size: 32\nbus_protocol: ' \
-          'AXI4\nfpu_trap: false\ndebugger_support: false\nno_of_triggers: 0 ' \
-          '\ncsr_configuration:\n structure: daisy\n counters_in_grp4: 7\n' \
-          ' counters_in_grp5: 7\n counters_in_grp6: 7\n counters_in_grp7: ' \
-          '8\nbsc_compile_options:\n test_memory_size: 33554432\n ' \
-          'assertions: true\n trace_dump: true\n compile_target: \'sim\'\n' \
-          ' suppress_warnings: ["all"]\n verilog_dir: build/hw/verilog\n ' \
-          'build_dir: build/hw/intermediate\n top_module: mkTbSoc\n ' \
-          'top_file: TbSoc.bsv\n top_dir: test_soc\n open_ocd: ' \
-          'False\nverilator_configuration:\n coverage: none\n trace: ' \
-          'false\n threads: 1\n verbosity: true\n sim_speed: ' \
-          'fast\n out_dir: bin'
 
-    with open(os.path.join(dut_config_path, 'dut_config.yaml'), 'w') as f:
-        f.write(dut)
+    s2 = ' ' * 2
+    s4 = s2 * 2
+    s6 = s2 * 3
+    s8 = s4 * 2
+    rv64i_isa = f'hart_ids: [0]\nhart0:\n{s2}custom_exceptions:\n{s4}- cause' \
+                f'_val: 25\n{s4}  cause_name: halt_ebreak\n{s4}  priv_mode: M' \
+                f'\n{s4}- cause_val: 26\n{s4}  cause_name: halt_trigger\n{s4}' \
+                f'  priv_mode: M\n{s4}- cause_val: 28\n{s4}  cause_name: halt_'\
+                f'step\n{s4}  priv_mode: M\n{s4}- cause_val: 29\n' \
+                f'{s4}  cause_name: halt_reset\n'\
+                f'{s4}  priv_mode: M\n{s2}custom_interrupts:' \
+                f'\n{s4}- cause_val: 16\n{s4}  cause_name: debug_interrupt' \
+                f'\n{s4}  on_reset_enable: 1\n{s4}  priv_mode : M\n{s2}ISA: ' \
+                f'RV64IMACSUZicsr_Zifencei\n{s2}User_Spec_Version: "2.3"' \
+                f'\n{s2}pmp_granularity: 1\n{s2}physical_addr_sz: 32\n{s2}' \
+                f'supported_xlen:\n{s4}- 64\n'
+
+    with open(os.path.join(dut_config_path, 'isa_config.yaml'), 'w') as f:
+        f.write(rv64i_isa)
+
+    rv64i_custom = f'hart_ids: [0]\nhart0:\n  dtim_base:\n{s4}reset-val: 0x0' \
+                   f'\n{s4}rv32:\n{s6}accessible: false\n{s4}rv64:\n{s6}' \
+                   f'accessible: false\n{s6}type:\n{s8}ro_constant: 0x0\n{s6}' \
+                   f'shadow:\n{s6}shadow_type:\n{s6}msb: 63\n{s6}lsb: 0\n{s4}' \
+                   f'description: dtim base\n{s4}address: 0x7C3\n{s4}priv_' \
+                   f'mode: M\n{s2}itim_base:\n{s4}reset-val: 0x0\n{s4}rv32:' \
+                   f'\n{s6}accessible: false\n{s4}rv64:\n{s6}accessible: ' \
+                   f'false\n{s6}type:\n{s8}ro_constant: 0x0\n{s6}shadow:' \
+                   f'\n{s6}shadow_type:\n{s6}msb: 63\n{s6}lsb: 0\n{s4}' \
+                   f'description: dtim base\n{s4}address: 0x7C2\n{s4}priv_' \
+                   f'mode: M\n  customcontrol:\n{s4}reset-val: 0x000000000000' \
+                   f'0017\n{s4}rv32:\n{s6}accessible: false\n{s4}rv64:\n{s6}' \
+                   f'accessible: true\n{s6}ienable:\n{s8}implemented: true' \
+                   f'\n{s8}type:\n{s8}{s2}ro_constant: 0x1\n{s8}description:' \
+                   f' bit for cache-enable of instruction cache, part of rg_' \
+                   f'customcontrol\n{s8}shadow:\n{s8}shadow_type:\n{s8}msb: 0' \
+                   f'\n{s8}lsb: 0\n{s6}denable:\n{s8}implemented: true\n{s8}' \
+                   f'type:\n{s8}{s2}ro_constant: 0x1\n{s8}description: bit ' \
+                   f'for cache-enable of data cache, part of rg_customcontrol' \
+                   f'\n{s8}shadow:\n{s8}shadow_type:\n{s8}msb: 1\n{s8}lsb: 1' \
+                   f'\n{s6}bpuenable:\n{s8}implemented: true\n{s8}type:\n{s8}' \
+                   f'{s2}ro_constant: 0x1\n{s8}description: bit for enabling ' \
+                   f'branch predictor unit, part of rg_customcontrol\n{s8}' \
+                   f'shadow:\n{s8}shadow_type:\n{s8}msb: 2\n{s8}lsb: 2\n{s6}' \
+                   f'arith_excep:\n{s8}implemented: true\n{s8}type:\n{s8}{s2}' \
+                   f'ro_constant: 0x0\n{s8}description: bit for enabling ' \
+                   f'arithmetic exceptions, part of rg_customcontrol\n{s8}' \
+                   f'shadow:\n{s8}shadow_type:\n{s8}msb: 3\n{s8}lsb: 3\n{s6}' \
+                   f'debug_enable:\n{s8}implemented: true\n{s8}type:\n{s8}' \
+                   f'{s2}ro_constant: 0x1\n{s8}description: bit for enabling ' \
+                   f'debugger on the current hart\n{s8}shadow:\n{s8}shadow_' \
+                   f'type:\n{s8}msb: 4\n{s8}lsb: 4\n{s6}description: the ' \
+                   f'register holds enable bits for arithmetic exceptions, ' \
+                   f'branch predictor unit, i-cache, d-cache units\n{s6}' \
+                   f'address: 0x800\n{s6}priv_mode: U\n'
+
+    with open(os.path.join(dut_config_path, 'custom_config.yaml'), 'w') as f:
+        f.write(rv64i_custom)
+
+    core64 = f'm_extension:\n{s2}mul_stages_in : 1\n{s2}mul_stages_out: 1' \
+             f'\n{s2}div_stages : 32\nbranch_predictor:\n{s2}instantiate: ' \
+             f'True\n{s2}predictor: gshare\n{s2}btb_depth: 32\n{s2}bht_depth:' \
+             f' 512\n{s2}history_len: 8\n{s2}history_bits: 5\n{s2}ras_depth: 8'
+
+    with open(os.path.join(dut_config_path, 'core_config.yaml'), 'w') as f:
+        f.write(core64)
+
+    csr_grouping64 = f'grp1:\n{s2}- MISA\n{s2}- MSCRATCH\n{s2}- SSCRATCH' \
+                     f'\n{s2}- MVENDORID\n{s2}- MSTATUS\n{s2}- SSTATUS\n{s2}' \
+                     f'- MIE\n{s2}- SIE\n{s2}- MIP\n{s2}- SIP\n{s2}- MTVEC' \
+                     f'\n{s2}- STVEC\n{s2}- MEPC\n{s2}- SEPC\n{s2}- MCAUSE\n' \
+                     f'{s2}- SCAUSE\n{s2}- MTVAL\n{s2}- STVAL\n{s2}- MCYCLE' \
+                     f'\n{s2}- MINSTRET\n{s2}- MHARTID\n{s2}- MARCHID\n{s2}' \
+                     f'- MIMPID\n{s2}- TIME\n{s2}- CYCLE\n{s2}- MCOUNTINHIBIT' \
+                     f'\n{s2}- INSTRET\n{s2}- SATP\n{s2}- MIDELEG\n{s2}' \
+                     f'- MEDELEG\n{s2}- PMPCFG0\n{s2}- PMPADDR0\n{s2}' \
+                     f'- PMPADDR1\n{s2}- PMPADDR2\n{s2}- PMPADDR3\n{s2}' \
+                     f'- CUSTOMCONTROL'
+    with open(os.path.join(dut_config_path, 'csr_grouping.yaml'), 'w') as f:
+        f.write(csr_grouping64)
 
 
 def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
@@ -599,13 +695,13 @@ def generate_sv_components(sv_dir, alias_file):
     interface = sv_obj.generate_interface()
     defines = sv_obj.generate_defines()
 
-    with open(sv_dir + "/tb_top.sv", "w") as tb_top_file:
+    with open(os.path.join(sv_dir, "tb_top.sv"), 'w') as tb_top_file:
         tb_top_file.write(tb_top)
 
-    with open(sv_dir + "/interface.sv", "w") as interface_file:
+    with open(os.path.join(sv_dir, "interface.sv"), 'w') as interface_file:
         interface_file.write(interface)
 
-    with open(sv_dir + "/defines.sv", "w") as defines_file:
+    with open(os.path.join(sv_dir, "defines.sv"), 'w') as defines_file:
         defines_file.write(defines)
 
 

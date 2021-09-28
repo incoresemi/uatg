@@ -4,17 +4,18 @@
 import click
 from configparser import ConfigParser
 from uatg.log import logger
-from uatg.test_generator import generate_tests, clean_dirs, validate_tests, \
-    generate_sv
+from uatg.test_generator import generate_tests, clean_dirs, validate_tests
+from uatg.test_generator import generate_sv
 from uatg.__init__ import __version__
-from uatg.utils import list_of_modules, info, load_yaml, clean_modules
-from uatg.utils import create_dut_config, create_config_file, create_alias_file
+from uatg.utils import list_of_modules, info, clean_modules, load_yaml
+from uatg.utils import create_dut_config_files, create_config_file
+from uatg.utils import combine_config_yamls, create_alias_file
 
 
 @click.group()
 @click.version_option(version=__version__)
 def cli():
-    """RISC-V Micro-Architectural Test Generator"""
+    """RISC-V Micro-Architectural Test Generator (UATG)"""
 
 
 # -----------------
@@ -67,13 +68,24 @@ def clean(module_dir, work_dir, verbose):
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Path to the aliasing file containing containing BSV alias "
               "names.")
-@click.option('--dut_config',
-              '-dc',
-              multiple=False,
-              required=True,
-              type=click.Path(exists=True, resolve_path=True, readable=True),
-              help="Path to the yaml file containing DUT configuration. "
-              "Needed to generate/validate tests")
+@click.option(
+    '--configuration',
+    '-cfg',
+    multiple=True,
+    required=True,
+    type=click.Path(exists=True, resolve_path=True, readable=True),
+    help=
+    ("Path to the DUT configuration YAML Files. "
+     "The YAML files should be specified (space separated) in the following "
+     " order "
+     "1. isa_config.yaml "
+     "2. core_config.yaml "
+     "3. custom_config.yaml "
+     "4. csr_grouping.yaml "
+     "The ordering should be strictly followed and any deviation will result in "
+     "UATG erroring out. "
+     "This Parameter is needed to generate/validate tests and also generate "
+     "covergroups"))
 @click.option('--module_dir',
               '-md',
               multiple=False,
@@ -99,8 +111,8 @@ def clean(module_dir, work_dir, verbose):
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
-              help="Path to the directory containing the linker file."
-              "Work Directory is Chosen for linker if this argument is empty")
+              help="Path to the directory containing the linker file. Work "
+              "Directory is Chosen for linker if this argument is empty")
 @click.option('--work_dir',
               '-wd',
               multiple=False,
@@ -123,22 +135,22 @@ def clean(module_dir, work_dir, verbose):
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
 @cli.command()
-def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
+def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
              gen_test_list, work_dir, modules, verbose):
     """
     Generates tests, cover-groups for a list of modules corresponding to the DUT
-    defined in dut_config inside the work_dir. Can also generate the test_list
+    parameters specified in the configuration yamls, inside the work_dir. 
+    Can also generate the test_list
     needed to execute them on RiverCore.\n
-    Requires: -dc, --dut_config, -md, --module_dir; -wd, --work_dir\n
+    Requires: -cfg, --configuration, -md, --module_dir; -wd, --work_dir\n
     Depends : (-gc, --gen_cvg -> -af, --alias_file)\n
     Optional: -gc, --gen_cvg; -t, --gen_test_list; -ld, --linker_dir;\n
               -m, --modules; -v, --verbose
     """
-
     logger.level(verbose)
     info(__version__)
 
-    dut_dict = load_yaml(dut_config)
+    dut_dict = combine_config_yamls(configuration)
 
     module = clean_modules(module_dir, modules)
 
@@ -182,7 +194,8 @@ def generate(alias_file, dut_config, linker_dir, module_dir, gen_cvg,
 @cli.command()
 def list_modules(module_dir, verbose):
     """
-    Provides the list of modules supported from the module_dir\n
+    Lists the micro-architecture modules of core supported 
+    among the modules actually present in the DUT\n
     Requires: -md, --module_dir
     """
     logger.level(verbose)
@@ -201,7 +214,7 @@ def list_modules(module_dir, verbose):
     multiple=False,
     required=True,
     type=click.Path(exists=True, resolve_path=True, readable=True),
-    help="Provide a config.ini file's path. This runs uatg based upon "
+    help="Provide a config.ini file\'s path. This runs uatg based upon "
     "the parameters stored in the file. If not specified "
     "individual args/flags are to be passed through cli. In the"
     "case of conflict between cli and config.ini values, config"
@@ -215,8 +228,7 @@ def list_modules(module_dir, verbose):
 @cli.command()
 def from_config(config_file, verbose):
     """
-    This subcommand reads parameters from config.ini and runs uatg based on the
-    values.\n
+    Reads config.ini and invokes uatg with read paramaters.\n
     Optional: -c, --config
     """
 
@@ -231,8 +243,14 @@ def from_config(config_file, verbose):
 
     info(__version__)
 
+    if config['uatg']['gen_test'].lower() == 'true' or \
+       config['uatg']['gen_cvg'].lower() == 'true' or \
+       config['uatg']['val_test'].lower() == 'true':
+
+        configuration = config['uatg']['configuration_files'].split(',')
+        dut_dict = combine_config_yamls(configuration)
+
     if config['uatg']['gen_test'].lower() == 'true':
-        dut_dict = load_yaml(config['uatg']['dut_config'])
         generate_tests(work_dir=config['uatg']['work_dir'],
                        linker_dir=config['uatg']['linker_dir'],
                        modules_dir=module_dir,
@@ -241,7 +259,7 @@ def from_config(config_file, verbose):
                        test_list=config['uatg']['gen_test_list'])
 
     if config['uatg']['gen_cvg'].lower() == 'true':
-        dut_dict = load_yaml(config['uatg']['dut_config'])
+
         alias_dict = load_yaml(config['uatg']['alias_file'])
         generate_sv(work_dir=config['uatg']['work_dir'],
                     modules=module,
@@ -250,7 +268,7 @@ def from_config(config_file, verbose):
                     alias_dict=alias_dict)
 
     if config['uatg']['val_test'].lower() == 'true':
-        dut_dict = load_yaml(config['uatg']['dut_config'])
+
         validate_tests(modules=module,
                        work_dir=config['uatg']['work_dir'],
                        config_dict=dut_dict,
@@ -281,12 +299,14 @@ def from_config(config_file, verbose):
               multiple=False,
               required=False,
               type=click.Path(exists=True, resolve_path=True, readable=True),
-              help="Directory to store the dut_config.yaml file")
+              help="Directory to store the DUT configuration yaml files")
 @cli.command()
 def setup(config_path, alias_path, dut_path):
     """
+        Creates template configuration files.
+
         Setups template files for config.ini, dut_config.yaml and aliasing.yaml.
-        Optionally you can provide the path's for each of them. If not specified
+        Optionally you can provide the path\'s for each of them. If not specified
         files will be written to default paths.\n
         Optional: -dp, --dut_path;  -ap, --alias_path; -cp, --config_path
     """
@@ -299,7 +319,7 @@ def setup(config_path, alias_path, dut_path):
         dut_path = './'
 
     create_config_file(config_path=config_path)
-    create_dut_config(dut_config_path=dut_path)
+    create_dut_config_files(dut_config_path=dut_path)
     create_alias_file(alias_path=alias_path)
 
     print(f'Files created')
@@ -309,13 +329,24 @@ def setup(config_path, alias_path, dut_path):
 
 
 @click.version_option(version=__version__)
-@click.option('--dut_config',
-              '-dc',
-              multiple=False,
-              required=True,
-              type=click.Path(resolve_path=True, readable=True),
-              help="Path to the yaml file containing DUT configuration. "
-              "Needed to generate/validate tests")
+@click.option(
+    '--configuration',
+    '-cfg',
+    multiple=True,
+    required=True,
+    type=click.Path(exists=True, resolve_path=True, readable=True),
+    help=
+    ("Path to the DUT configuration YAML Files. "
+     "The YAML files should be specified (space separated) in the following "
+     " order "
+     "1. isa_config.yaml "
+     "2. core_config.yaml "
+     "3. custom_config.yaml "
+     "4. csr_grouping.yaml "
+     "The ordering should be strictly followed and any deviation will result in "
+     "UATG erroring out. "
+     "This Parameter is needed to generate/validate tests and also generate "
+     "covergroups"))
 @click.option('--module_dir',
               '-md',
               multiple=False,
@@ -346,13 +377,24 @@ def setup(config_path, alias_path, dut_path):
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
 @cli.command()
-def validate(dut_config, module_dir, work_dir, modules, verbose):
+def validate(configuration, module_dir, work_dir, modules, verbose):
+    """
+        Parses the log generated upon test execution using regular expressions
+        and provides a minimal coverage report.\n
+
+        Required: -wd, --work_dir\n
+                  -cfg, --configuration\n
+                  -md, --module_dir\n
+        Optional: -m, --modules (default - all)\n
+                  -v, --verbose\n
+    """
     logger.level(verbose)
     info(__version__)
-    dut_yaml = load_yaml(dut_config)
+
+    dut_dict = combine_config_yamls(configuration)
 
     module = clean_modules(module_dir, modules)
     validate_tests(modules=module,
                    work_dir=work_dir,
-                   config_dict=dut_yaml,
+                   config_dict=dut_dict,
                    modules_dir=module_dir)
