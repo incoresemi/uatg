@@ -639,9 +639,14 @@ executable:
    $ cd ~/myquickstart
    $ git clone https://gitlab.com/incoresemi/core-generators/chromite.git
    $ cd chromite
-   $ pip install -r requirements.txt
-   $ python -m configure.main
+   $ git checkout using-csrbox
+   $ pip install -U -r requirements.txt
+   $ python -m configure.main -ispec sample_config/c64/rv64i_isa.yaml \
+     -customspec sample_config/c64/rv64i_custom.yaml \
+     -cspec sample_config/c64/core64.yaml \
+     -gspec sample_config/c64/csr_grouping64.yaml --verbose debug
    $ make -j<jobs> generate_verilog
+   $ make link_verilator generate_boot_files
 
 The above steps shall generate a directory: ``build/hw/verilog`` which includes
 all the generated verilog files. 
