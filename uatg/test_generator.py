@@ -110,14 +110,17 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                 # Adding License, includes and macros
                 asm = license_str + includes + test_entry
                 # Appending Coding Macros & Instructions
-                asm += rvcode_begin + asm_body + rvcode_end
-                # Appending RVTEST_DATA macros and data values
-                asm += rvtest_data_begin + rvtest_data(bit_width=32,
-                                                       num_vals=1,
-                                                       random=True,
-                                                       signed=False,
-                                                       align=4)
-                asm += rvtest_data_end
+                asm += rvcode_begin + asm_body
+                if test_name == 'uatg_decoder_arithmetic_insts_4':
+                    asm += rvcode_end
+                    # Appending RVTEST_DATA macros and data values
+                    asm += rvtest_data_begin + rvtest_data(bit_width=32,
+                                                           num_vals=1,
+                                                           random=True,
+                                                           signed=False,
+                                                           align=4)
+                    asm += rvtest_data_end
+
                 # Appending RVMODEL macros
                 asm += rvmodel_data_begin + rvmodel_data_end
                 os.mkdir(os.path.join(work_tests_dir, test_name))
