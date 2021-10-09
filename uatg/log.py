@@ -41,7 +41,7 @@ class Log:
         self.colors = {
             'DEBUG': 'purple',
             'INFO': 'green',
-            'WARNING': 'red',
+            'WARNING': 'yellow',
             'ERROR': 'bold_red',
             'CRITICAL': 'bold_red',
         }
