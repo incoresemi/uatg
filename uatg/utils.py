@@ -656,29 +656,26 @@ def find_instances(string, character):
     """
     return [index for index, letter in enumerate(string) if letter==character]
 
-def clean_isa_string(isa_string):
+def split_isa_string(isa_string):
     """
     The function parses the ISA string, 
     removes the 'S,U,H and N' characters from it.
     The updates ISA string is returned.
     """
-    # remove the existing underscores
-    isa = re.sub('\_','',isa_string)
-    # find the indices of 'z' in the string to split
-    indices = find_instances(isa,'z')
-    split_isa = []
-    for i in range (len(indices)):
-        if i == 0:
-            split_isa.append(isa[0:indices[0]])
-        if i == (len(indices)-1):
-            split_isa.append(isa[indices[i]:])
-        else:
-            split_isa.append(isa[indices[i]:indices[i+1]])
-    # remove S,U,N and H from the ISA string
-    split_isa[0] = re.sub(r"[shnu]",'',split_isa[0])
-    # join the split isa into a single string separated by underscores
-    new_isa = '_'.join(split_isa)
-    return new_isa
+
+    str_match = re.findall(r'([^\d]*?)(?!_)*(Z.*?)*(_|$)',isa_string,re.M)
+    extension_list= []
+    standard_isa = ''
+    for match in str_match:
+        stdisa, z, ignore = match
+        if stdisa != '':
+            for e in stdisa:
+                extension_list.append(e)
+            standard_isa = stdisa
+        if z != '':
+            extension_list.append(z)
+
+    return extension_list
 
 def generate_test_list(asm_dir, uarch_dir, isa, test_list):
     """
@@ -692,7 +689,23 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list):
     env_dir = os.path.join(uarch_dir, 'env/')
     target_dir = asm_dir + '/../'
 
-    isa = clean_isa_string(isa)
+    extension_list = split_isa_string(isa)
+    march = ''
+    if 'rv32' in isa.lower():
+        march += 'rv32i'
+    elif 'rv64' in isa.lower():
+        march += 'rv64i'
+    if 'M' in extension_list:
+        march += 'm'
+    if 'A' in extension_list:
+        march += 'a'
+    if 'F' in extension_list:
+        march += 'f'
+    if 'D' in extension_list:
+        march += 'd'
+    if 'C' in extension_list:
+        march += 'c'
+
     
     for test in asm_test_list:
         logger.debug(f"Current test is {test}")
@@ -701,7 +714,7 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list):
         test_list[base_key]['generator'] = 'uatg'
         test_list[base_key]['work_dir'] = asm_dir + '/' + base_key
         test_list[base_key]['isa'] = isa
-        test_list[base_key]['march'] = isa
+        test_list[base_key]['march'] = march
         test_list[base_key]['mabi'] = 'lp64'
         test_list[base_key]['cc'] = 'riscv64-unknown-elf-gcc'
         test_list[base_key][

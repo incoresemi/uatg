@@ -139,7 +139,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         if test_list:
             logger.info(f'Creating test_list for the {module}')
             test_list_dict.update(
-                generate_test_list(work_tests_dir, uarch_dir, isa.lower(),
+                generate_test_list(work_tests_dir, uarch_dir, isa,
                                    test_list_dict))
 
     logger.info('****** Finished Generating Tests ******')
