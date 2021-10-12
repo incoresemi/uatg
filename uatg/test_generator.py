@@ -2,7 +2,7 @@
 
 import os
 import glob
-from shutil import rmtree
+from shutil import rmtree, copyfile
 from getpass import getuser
 from datetime import datetime
 import ruamel.yaml as yaml
@@ -133,7 +133,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                     f.write(asm)
                 logger.debug(f'Generating test for {test_name}')
             else:
-                logger.critical(f'Skipped {test_name}')
+                logger.warning(f'Skipped {test_name}')
         logger.debug(f'Finished Generating Assembly Tests for {module}')
         if test_list:
             logger.info(f'Creating test_list for the {module}')
@@ -143,13 +143,15 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     logger.info('****** Finished Generating Tests ******')
 
     if linker_dir and os.path.isfile(os.path.join(linker_dir, 'link.ld')):
-        logger.debug('Using user specified linker')
+        logger.debug('Using user specified linker: ' + os.path.join(linker_dir, 'link.ld'))
+        copyfile(os.path.join(linker_dir, 'link.ld'), work_dir+'/link.ld')
     else:
         create_linker(target_dir=work_dir)
         logger.debug(f'Creating a linker file at {work_dir}')
 
     if linker_dir and os.path.isfile(os.path.join(linker_dir, 'model_test.h')):
-        logger.debug('Using user specified model_test file')
+        logger.debug('Using user specified model_test file: ' + os.path.join(linker_dir, 'model_test.h'))
+        copyfile(os.path.join(linker_dir, 'model_test.h'), work_dir+'/model_test.h')
     else:
         create_model_test_h(target_dir=work_dir)
         logger.debug(f'Creating Model_test.h file at {work_dir}')
