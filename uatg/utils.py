@@ -572,7 +572,8 @@ def create_dut_config_files(dut_config_path):
         f.write(csr_grouping64)
 
 
-def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4):
+def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4)\
+        -> str:
     """
     
     Used to specify the data to be loaded into the test_data section of the
