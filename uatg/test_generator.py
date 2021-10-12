@@ -106,11 +106,18 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             name = (str(plugin.plugin_object).split(".", 1))
             test_name = ((name[1].split(" ", 1))[0])
             if check:
-                try:
-                    asm_code, asm_data = plugin.plugin_object.generate_asm()
-                except ValueError:
-                    asm_code = plugin.plugin_object.generate_asm()
+                ret_tup = plugin.plugin_object.generate_asm()
+                # Checking for the returned sections from each test
+                if len(ret_tup) == 1:
+                    asm_code = ret_tup
                     asm_data = rvtest_data(bit_width=0, num_vals=1, random=True)
+                    asm_sig = ''
+                elif len(ret_tup) == 2:
+                    (asm_code, asm_data) = ret_tup
+                    asm_sig = ''
+                else:
+                    (asm_code, asm_data, asm_sig) = ret_tup
+
                 # Adding License, includes and macros
                 asm = license_str + includes + test_entry
                 # Appending Coding Macros & Instructions
@@ -118,7 +125,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                 # Appending RVTEST_DATA macros and data values
                 asm += rvtest_data_begin + asm_data + rvtest_data_end
                 # Appending RVMODEL macros
-                asm += rvmodel_data_begin + rvmodel_data_end
+                asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
                 os.mkdir(os.path.join(work_tests_dir, test_name))
                 with open(
                         os.path.join(work_tests_dir, test_name,
