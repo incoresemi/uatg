@@ -106,17 +106,18 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             name = (str(plugin.plugin_object).split(".", 1))
             test_name = ((name[1].split(" ", 1))[0])
             if check:
-                ret_tup = plugin.plugin_object.generate_asm()
+                ret_dict = plugin.plugin_object.generate_asm()
+                assert isinstance(ret_dict, dict)
                 # Checking for the returned sections from each test
-                if len(ret_tup) == 1:
-                    asm_code = ret_tup
+                asm_code = ret_dict['asm_code']
+                try:
+                    asm_data = ret_dict['asm_data']
+                except KeyError:
                     asm_data = rvtest_data(bit_width=0, num_vals=1, random=True)
-                    asm_sig = ''
-                elif len(ret_tup) == 2:
-                    (asm_code, asm_data) = ret_tup
-                    asm_sig = ''
-                else:
-                    (asm_code, asm_data, asm_sig) = ret_tup
+                try:
+                    asm_sig = ret_dict['asm_sig']
+                except KeyError:
+                    asm_sig = '\n'
 
                 # Adding License, includes and macros
                 asm = license_str + includes + test_entry
@@ -144,15 +145,19 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     logger.info('****** Finished Generating Tests ******')
 
     if linker_dir and os.path.isfile(os.path.join(linker_dir, 'link.ld')):
-        logger.debug('Using user specified linker: ' + os.path.join(linker_dir, 'link.ld'))
-        copyfile(os.path.join(linker_dir, 'link.ld'), work_dir+'/link.ld')
+        logger.debug('Using user specified linker: ' + os.path.join(linker_dir,
+                                                                    'link.ld'))
+        copyfile(os.path.join(linker_dir, 'link.ld'), work_dir + '/link.ld')
     else:
         create_linker(target_dir=work_dir)
         logger.debug(f'Creating a linker file at {work_dir}')
 
     if linker_dir and os.path.isfile(os.path.join(linker_dir, 'model_test.h')):
-        logger.debug('Using user specified model_test file: ' + os.path.join(linker_dir, 'model_test.h'))
-        copyfile(os.path.join(linker_dir, 'model_test.h'), work_dir+'/model_test.h')
+        logger.debug(
+            'Using user specified model_test file: ' + os.path.join(linker_dir,
+                                                                    'model_test.h'))
+        copyfile(os.path.join(linker_dir, 'model_test.h'),
+                 work_dir + '/model_test.h')
     else:
         create_model_test_h(target_dir=work_dir)
         logger.debug(f'Creating Model_test.h file at {work_dir}')
