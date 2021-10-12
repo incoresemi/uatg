@@ -104,35 +104,39 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         for plugin in manager.getAllPlugins():
             check = plugin.plugin_object.execute(module_params)
             name = (str(plugin.plugin_object).split(".", 1))
-            test_name = ((name[1].split(" ", 1))[0])
             if check:
-                ret_dict = plugin.plugin_object.generate_asm()
-                assert isinstance(ret_dict, dict)
-                # Checking for the returned sections from each test
-                asm_code = ret_dict['asm_code']
-                try:
-                    asm_data = ret_dict['asm_data']
-                except KeyError:
-                    asm_data = rvtest_data(bit_width=0, num_vals=1, random=True)
-                try:
-                    asm_sig = ret_dict['asm_sig']
-                except KeyError:
-                    asm_sig = '\n'
+                test_seq = plugin.plugin_object.generate_asm()
+                seq = '001'
+                for ret_dict in test_seq:
+                    test_name = ((name[1].split(" ", 1))[0])+'-'+seq
+                    logger.debug(f'Selected test: {test_name}')
+                    assert isinstance(ret_dict, dict)
+                    # Checking for the returned sections from each test
+                    asm_code = ret_dict['asm_code']
+                    try:
+                        asm_data = ret_dict['asm_data']
+                    except KeyError:
+                        asm_data = rvtest_data(bit_width=0, num_vals=1, random=True)
+                    try:
+                        asm_sig = ret_dict['asm_sig']
+                    except KeyError:
+                        asm_sig = '\n'
 
-                # Adding License, includes and macros
-                asm = license_str + includes + test_entry
-                # Appending Coding Macros & Instructions
-                asm += rvcode_begin + asm_code + rvcode_end
-                # Appending RVTEST_DATA macros and data values
-                asm += rvtest_data_begin + asm_data + rvtest_data_end
-                # Appending RVMODEL macros
-                asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
-                os.mkdir(os.path.join(work_tests_dir, test_name))
-                with open(
-                        os.path.join(work_tests_dir, test_name,
-                                     test_name + '.S'), 'w') as f:
-                    f.write(asm)
-                logger.debug(f'Generating test for {test_name}')
+                    # Adding License, includes and macros
+                    asm = license_str + includes + test_entry
+                    # Appending Coding Macros & Instructions
+                    asm += rvcode_begin + asm_code + rvcode_end
+                    # Appending RVTEST_DATA macros and data values
+                    asm += rvtest_data_begin + asm_data + rvtest_data_end
+                    # Appending RVMODEL macros
+                    asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
+                    os.mkdir(os.path.join(work_tests_dir, test_name))
+                    with open(
+                            os.path.join(work_tests_dir, test_name,
+                                         test_name + '.S'), 'w') as f:
+                        f.write(asm)
+                    seq = '%03d' % (int(seq,10)+1)
+                    logger.debug(f'Generating test for {test_name}')
             else:
                 logger.warning(f'Skipped {test_name}')
         logger.debug(f'Finished Generating Assembly Tests for {module}')
