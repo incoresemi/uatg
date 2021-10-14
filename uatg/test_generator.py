@@ -99,6 +99,9 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
         logger.debug(f'Generating assembly tests for {module}')
 
+        # this dictionary will contain all the compile macros for each test
+        compile_macros_dict = {}
+
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
         for plugin in manager.getAllPlugins():
@@ -110,20 +113,34 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                 assert isinstance(test_seq, list)
                 seq = '001'
                 for ret_list_of_dicts in test_seq:
-                    test_name = ((name[1].split(" ", 1))[0])+'-'+seq
+                    test_name = ((name[1].split(" ", 1))[0]) + '-' + seq
                     logger.debug(f'Selected test: {test_name}')
+
+                    # create an entry in the compile_macros dict
+                    if 'rv64' in isa.lower():
+                        compile_macros_dict[test_name] = ['XLEN=64']
+                    else:
+                        compile_macros_dict[test_name] = ['XLEN=32']
+
                     assert isinstance(ret_list_of_dicts, dict)
                     # Checking for the returned sections from each test
                     asm_code = ret_list_of_dicts['asm_code']
                     try:
                         asm_data = ret_list_of_dicts['asm_data']
                     except KeyError:
-                        asm_data = rvtest_data(bit_width=0, num_vals=1,
+                        asm_data = rvtest_data(bit_width=0,
+                                               num_vals=1,
                                                random=True)
                     try:
                         asm_sig = ret_list_of_dicts['asm_sig']
                     except KeyError:
                         asm_sig = '\n'
+
+                    try:
+                        compile_macros_dict[test_name] = compile_macros_dict[
+                            test_name] + ret_list_of_dicts['compile_macros']
+                    except KeyError:
+                        exit(f'{test_name}, {KeyError}')
 
                     # Adding License, includes and macros
                     asm = license_str + includes + test_entry
@@ -138,7 +155,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                             os.path.join(work_tests_dir, test_name,
                                          test_name + '.S'), 'w') as f:
                         f.write(asm)
-                    seq = '%03d' % (int(seq, 10)+1)
+                    seq = '%03d' % (int(seq, 10) + 1)
                     logger.debug(f'Generating test for {test_name}')
             else:
                 logger.warning(f'Skipped {t_name}')
@@ -147,23 +164,21 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             logger.info(f'Creating test_list for the {module}')
             test_list_dict.update(
                 generate_test_list(work_tests_dir, uarch_dir, isa,
-                                   test_list_dict))
+                                   test_list_dict, compile_macros_dict))
 
     logger.info('****** Finished Generating Tests ******')
 
     if linker_dir and os.path.isfile(os.path.join(linker_dir, 'link.ld')):
-        logger.debug('Using user specified linker: ' + os.path.join(linker_dir,
-                                                                    'link.ld'))
+        logger.debug('Using user specified linker: ' +
+                     os.path.join(linker_dir, 'link.ld'))
         copyfile(os.path.join(linker_dir, 'link.ld'), work_dir + '/link.ld')
     else:
         create_linker(target_dir=work_dir)
         logger.debug(f'Creating a linker file at {work_dir}')
 
     if linker_dir and os.path.isfile(os.path.join(linker_dir, 'model_test.h')):
-        logger.debug(
-            'Using user specified model_test file: ' +
-            os.path.join(linker_dir, 'model_test.h')
-        )
+        logger.debug('Using user specified model_test file: ' +
+                     os.path.join(linker_dir, 'model_test.h'))
         copyfile(os.path.join(linker_dir, 'model_test.h'),
                  work_dir + '/model_test.h')
     else:
