@@ -206,7 +206,7 @@ restore_and_exit_trap:
   LREG t3, 4*REGWIDTH(sp)
   LREG t4, 5*REGWIDTH(sp)
   LREG t5, 6*REGWIDTH(sp)
-  csrrw, sp, mscratch, sp
+  csrrw sp, mscratch, sp
 
 trap_handler_exit:
   .option pop
