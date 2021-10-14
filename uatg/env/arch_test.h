@@ -120,116 +120,93 @@
   rvtest_code_end:
 #ifdef rvtest_mtrap_routine
 
+
+// the current handler works only for illegal instructions. Illegal trap caused by Jumping in the 
+// middle of a 32-bit instruction will not be handled. to return from illegal traps, we check the
+// lower 2 bits of the instruction and increment mepc accordingly. Basically, we are categorizing
+// illegals as 32-bit illegals or 16-bit illegals.
 trap_handler_entry:
   .option push
   .option norvc
   
   // store the current registers into memory
   // using space in memory instead of allocating a stack
-  la x1, trap_store
+  csrrw sp, mscratch, sp // save sp to mscratch before destroying it
+  la sp, trapreg_sv 
 
-  SREG x1, 1*REGWIDTH(x1)
-  SREG x2, 2*REGWIDTH(x1)
-  SREG x3, 3*REGWIDTH(x1)
-  SREG x4, 4*REGWIDTH(x1)
-  SREG x5, 5*REGWIDTH(x1)
-  SREG x6, 6*REGWIDTH(x1)
-  SREG x7, 7*REGWIDTH(x1)
-  SREG x8, 8*REGWIDTH(x1)
-  SREG x9, 9*REGWIDTH(x1)
-  SREG x10, 10*REGWIDTH(x1)
-  SREG x11, 11*REGWIDTH(x1)
-  SREG x12, 12*REGWIDTH(x1)
-  SREG x13, 13*REGWIDTH(x1)
-  SREG x14, 14*REGWIDTH(x1)
-  SREG x15, 15*REGWIDTH(x1)
-  SREG x16, 16*REGWIDTH(x1)
-  SREG x17, 17*REGWIDTH(x1)
-  SREG x18, 18*REGWIDTH(x1)
-  SREG x19, 19*REGWIDTH(x1)
-  SREG x20, 20*REGWIDTH(x1)
-  SREG x21, 21*REGWIDTH(x1)
-  SREG x22, 22*REGWIDTH(x1)
-  SREG x23, 23*REGWIDTH(x1)
-  SREG x24, 24*REGWIDTH(x1)
-  SREG x25, 25*REGWIDTH(x1)
-  SREG x26, 26*REGWIDTH(x1)
-  SREG x27, 27*REGWIDTH(x1)
-  SREG x28, 28*REGWIDTH(x1)
-  SREG x29, 29*REGWIDTH(x1)
-  SREG x30, 30*REGWIDTH(x1)
-  SREG x31, 31*REGWIDTH(x1)
+  // we will only store 6 registers which will be used in the routine
+  SREG t0, 1*REGWIDTH(sp)
+  SREG t1, 2*REGWIDTH(sp)
+  SREG t2, 3*REGWIDTH(sp)
+  SREG t3, 4*REGWIDTH(sp)
+  SREG t4, 5*REGWIDTH(sp)
+  SREG t5, 6*REGWIDTH(sp)
  
-  // copy the exception cause into t2
-  csrr t2, CSR_MCAUSE
-  
-  // store the mcause register into memory
-  la t5, mcause_save
-  SREG t2, 0(t5)
+  // copy the exception cause into t0
+  csrr t0, CSR_MCAUSE
 
-  // copy the virtual address of the program causing the exception into the t3
-  csrr t3, CSR_MEPC
+  // copy the mtbal into t1
+  csrr t1, CSR_MTVAL
 
-  // store the address of the exception causing instruction in memory
-  la t4, exception_address_save
-  SREG t3, 0(t4)
-  
-// signature region
-// load trapreg_sv into t1.
-
-// la t1, trapreg_sv
-  
-  
-  // check if the instruction is aligned in a 2 byte or 4 byte boundary
-  andi a0, t3, 0x2
-  bne a0,x0,two_byte 
-
-four_byte:
-  addi t3, t3, 0x4
-  j 1f
+  // copy the mepc into t2
+  csrr t2, CSR_MEPC
  
-two_byte:
-  addi t3, t3, 0x2
+  // load the current trap count from signature to t4. t3 used to hold the address of mtrap_count
+  la t3, mtrap_count
+  LREG t4, 0(t3)
+
+  // adjust sp to point to the mtrap_signature where the above csrs need to be stored
+  la sp, mtrap_sigptr
+  add sp, sp, t4
+
+  // store mcause, mtval and mepc to signature region
+  SREG t0, 0(sp)
+  SREG t1, 1*REGWIDTH(sp)
+  SREG t2, 2*REGWIDTH(sp)
+
+  //store the updated number of bytes in mtrap_count region
+  addi t4, t4, 3*REGWIDTH
+  SREG t4, 0(t3)
+
+  // mcause value of illegal initialized in t3
+  li t3, 2 
+  beq t3, t0, illegal_handler
+
+  // for all other cause values restore and exit handler
+  j restore_and_exit_trap
+
+illegal_handler:
+  // load the lowest byte of the instruction into t3. address of instruction in 
+  lb t3, 0(t2)
+
+  // check if the lower 2 bytes are 'b11, then jump to increment the mepc by 4, else by 2
+  andi t3, t3, 0x2
+  addi t4, x0, 3
+  beq t4, t3, four_byte
+  j two_byte
+
+  four_byte:
+    addi t2, t2, 0x4
+    j adjust_mepc
+ 
+  two_byte:
+    addi t2, t2, 0x2
+    j adjust_mepc
   
 // update the MEPC value to point to the next instruction.
-1:
-  csrw CSR_MEPC, t3
-
-// update mstatus to stay in M-Mode?
+adjust_mepc:
+  csrw CSR_MEPC, t2
 
 // Restore Register values 
-  la x1, trap_store
-  LREG x1, 1*REGWIDTH(x1)
-  LREG x2, 2*REGWIDTH(x1)
-  LREG x3, 3*REGWIDTH(x1)
-  LREG x4, 4*REGWIDTH(x1)
-  LREG x5, 5*REGWIDTH(x1)
-  LREG x6, 6*REGWIDTH(x1)
-  LREG x7, 7*REGWIDTH(x1)
-  LREG x8, 8*REGWIDTH(x1)
-  LREG x9, 9*REGWIDTH(x1)
-  LREG x10, 10*REGWIDTH(x1)
-  LREG x11, 11*REGWIDTH(x1)
-  LREG x12, 12*REGWIDTH(x1)
-  LREG x13, 13*REGWIDTH(x1)
-  LREG x14, 14*REGWIDTH(x1)
-  LREG x15, 15*REGWIDTH(x1)
-  LREG x16, 16*REGWIDTH(x1)
-  LREG x17, 17*REGWIDTH(x1)
-  LREG x18, 18*REGWIDTH(x1)
-  LREG x19, 19*REGWIDTH(x1)
-  LREG x20, 20*REGWIDTH(x1)
-  LREG x21, 21*REGWIDTH(x1)
-  LREG x22, 22*REGWIDTH(x1)
-  LREG x23, 23*REGWIDTH(x1)
-  LREG x24, 24*REGWIDTH(x1)
-  LREG x25, 25*REGWIDTH(x1)
-  LREG x26, 26*REGWIDTH(x1)
-  LREG x27, 27*REGWIDTH(x1)
-  LREG x28, 28*REGWIDTH(x1)
-  LREG x29, 29*REGWIDTH(x1)
-  LREG x30, 30*REGWIDTH(x1)
-  LREG x31, 31*REGWIDTH(x1)
+restore_and_exit_trap:
+  la sp, trapreg_sv
+  LREG t0, 1*REGWIDTH(sp)
+  LREG t1, 2*REGWIDTH(sp)
+  LREG t2, 3*REGWIDTH(sp)
+  LREG t3, 4*REGWIDTH(sp)
+  LREG t4, 5*REGWIDTH(sp)
+  LREG t5, 6*REGWIDTH(sp)
+  csrrw, sp, mscratch, sp
 
 trap_handler_exit:
   .option pop
@@ -284,17 +261,6 @@ rvtest_data_begin:
 #ifdef rvtest_mtrap_routine
 trapreg_sv:
   .fill 7, REGWIDTH, 0xdeadbeef
-//mtvec_save: // save region for mtvec value//
-//  .dword 0
-mcause_save: // save region for mcasue//
-  .dword 0
-exception_address_save:
-  .dword 0   // save the address of the instruction casuing exception //
-trap_store:
-  .fill 32, REGWIDTH, 0x0 // space to store register values before entering trap handler//
-mscratch_space:
-  .fill 32, REGWIDTH, 0x0 // scratch space for TRAP Handler
-
 #endif
 .endm
 
