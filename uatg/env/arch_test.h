@@ -11,8 +11,6 @@
 //   #define rvtest_gpr_save
 // #endif
 
-#define TEST_CASE_1
-
 //-----------------------------------------------------------------------
 // RV Arch Test Macros
 //-----------------------------------------------------------------------
@@ -171,18 +169,23 @@ trap_handler_entry:
   // mcause value of illegal initialized in t3
   li t3, 2 
   beq t3, t0, illegal_handler
+  li t3, 4
+  beq t3, t0, load_misaligned_handler
 
   // for all other cause values restore and exit handler
   j restore_and_exit_trap
 
-illegal_handler:
-  // load the lowest byte of the instruction into t3. address of instruction in 
-  lb t3, 0(t2)
 
-  // check if the lower 2 bytes are 'b11, then jump to increment the mepc by 4, else by 2
-  andi t3, t3, 0x2
+load_misaligned_handler:
+  // load the lowest byte of the instruction into t3. address of instruction in 
+  lb t1, 0(t2)
+  // we then follow the same stuff we do for illegal
+
+illegal_handler:
+
+  andi t1, t1, 0x3
   addi t4, x0, 3
-  beq t4, t3, four_byte
+  beq t4, t1, four_byte
   j two_byte
 
   four_byte:
