@@ -109,20 +109,20 @@ def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
         raise Exception(f'You cant store {hex((1 << n_ones) - 1)} '
                         f' in {bit_width} bits')
     else:
-        walked: List[str] = []
+        walked = []
         temp = (1 << n_ones) - 1
         for loop_var in range(bit_width):
             if temp <= (1 << bit_width) - 1:
                 if not invert:
                     if signed:
-                        walked.append(twos(hex(temp), bit_width))
+                        walked.append(twos(temp, bit_width))
                     else:
-                        walked.append(hex(temp))
+                        walked.append(temp)
                 elif invert:
                     if signed:
-                        walked.append(twos(hex(temp ^ ((1 << bit_width) - 1)),bit_width))
+                        walked.append(twos(temp ^ ((1 << bit_width) - 1),bit_width))
                     else:
-                        walked.append(hex(temp ^ ((1 << bit_width) - 1)))
+                        walked.append(temp ^ ((1 << bit_width) - 1))
                 temp = temp << 1
             else:
                 break
