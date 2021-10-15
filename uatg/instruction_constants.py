@@ -68,8 +68,31 @@ load_store_instructions = {
                       'sd', 'sq']
 }
 
+def twos(val,bits):
+    '''
+    Finds the twos complement of the number
+    :param val: input to be complemented
+    :param bits: size of the input
 
-def bit_walker(bit_width=8, n_ones=1, invert=False):
+    :type val: str or int
+    :type bits: int
+
+    :result: two's complement version of the input
+
+    '''
+    if isinstance(val,str):
+        if '0x' in val:
+            val = int(val,16)
+        else:
+            val = int(val,2)
+    if (val & (1 << (bits - 1))) != 0:
+        val = val - (1 << bits)
+    return val
+
+
+
+
+def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
     """
     Returns a list of binary values each with a width of bit_width that
     walks with n_ones walking from lsb to msb. If invert is True, then list
@@ -91,9 +114,15 @@ def bit_walker(bit_width=8, n_ones=1, invert=False):
         for loop_var in range(bit_width):
             if temp <= (1 << bit_width) - 1:
                 if not invert:
-                    walked.append(hex(temp))
+                    if signed:
+                        walked.append(twos(hex(temp), bit_width))
+                    else:
+                        walked.append(hex(temp))
                 elif invert:
-                    walked.append(hex(temp ^ ((1 << bit_width) - 1)))
+                    if signed:
+                        walked.append(twos(hex(temp ^ ((1 << bit_width) - 1)),bit_width))
+                    else:
+                        walked.append(hex(temp ^ ((1 << bit_width) - 1)))
                 temp = temp << 1
             else:
                 break
