@@ -3,6 +3,13 @@ from typing import List
 
 base_reg_file = ['x' + str(reg_no) for reg_no in range(32)]
 
+mext_instructions = {
+    'rv32-mul': ['mul', 'mulh', 'mulhsu', 'mulhu'],
+    'rv32-div': ['div', 'divu', 'rem', 'remu'],
+    'rv64-mul': ['mul', 'mulh', 'mulhsu', 'mulhu', 'mulw'],
+    'rv64-div': ['div', 'divu', 'rem', 'remu', 'divw', 'divuw','remuw', 'remw']
+        }
+
 arithmetic_instructions = {
     'rv32-add-reg': ['add', 'sub'],
     'rv64-add-reg': ['add', 'addw', 'sub', 'subw'],
