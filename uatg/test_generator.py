@@ -115,23 +115,18 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                     test_name = ((name[1].split(" ", 1))[0]) + '-' + seq
                     logger.debug(f'Selected test: {test_name}')
 
-                    # create an entry in the compile_macros dict
-                    if 'rv64' in isa.lower():
-                        compile_macros_dict[test_name] = ['XLEN=64']
-                    else:
-                        compile_macros_dict[test_name] = ['XLEN=32']
-
                     assert isinstance(ret_list_of_dicts, dict)
                     # Checking for the returned sections from each test
                     asm_code = ret_list_of_dicts['asm_code']
 
                     try:
-                        inst_name_postfix = ret_list_of_dicts['name_postfix']
+                        inst_name_postfix = '-' + ret_list_of_dicts[
+                            'name_postfix']
                     except KeyError:
                         inst_name_postfix = ''
 
                     # add inst name to test name as postfix
-                    test_name = test_name + '-' + inst_name_postfix
+                    test_name = test_name + inst_name_postfix
 
                     try:
                         asm_data = ret_list_of_dicts['asm_data']
@@ -144,6 +139,12 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                         asm_sig = ret_list_of_dicts['asm_sig']
                     except KeyError:
                         asm_sig = '\n'
+
+                    # create an entry in the compile_macros dict
+                    if 'rv64' in isa.lower():
+                        compile_macros_dict[test_name] = ['XLEN=64']
+                    else:
+                        compile_macros_dict[test_name] = ['XLEN=32']
 
                     try:
                         compile_macros_dict[test_name] = compile_macros_dict[
