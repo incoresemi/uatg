@@ -117,6 +117,10 @@
   .global rvtest_code_end
   rvtest_code_end:
 #ifdef rvtest_mtrap_routine
+  .option push
+  .option norvc
+  j end_code
+  
 
 
 // the current handler works only for illegal instructions. Illegal trap caused by Jumping in the 
@@ -124,9 +128,6 @@
 // lower 2 bits of the instruction and increment mepc accordingly. Basically, we are categorizing
 // illegals as 32-bit illegals or 16-bit illegals.
 trap_handler_entry:
-  .option push
-  .option norvc
-  
   // store the current registers into memory
   // using space in memory instead of allocating a stack
   csrrw sp, mscratch, sp // save sp to mscratch before destroying it
@@ -254,6 +255,7 @@ trap_handler_exit:
   csrr x31, CSR_MSCRATCH          // restore value of x31
   SREG x31, 31*REGWIDTH(x30)      // store x31
 #endif
+end_code:
 .endm
 
 .macro RVTEST_DATA_BEGIN
