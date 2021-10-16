@@ -5,49 +5,35 @@ base_reg_file = ['x' + str(reg_no) for reg_no in range(32)]
 
 arithmetic_instructions = {
     'rv32-add-reg': ['add', 'sub'],
-    'rv64-add-reg': ['add', 'addw',
-                     'sub', 'subw'],
-    'rv128-add-reg': ['add', 'addw', 'addd',
-                      'sub', 'subw', 'subd'],
-
+    'rv64-add-reg': ['add', 'addw', 'sub', 'subw'],
+    'rv128-add-reg': ['add', 'addw', 'addd', 'sub', 'subw', 'subd'],
     'rv32-add-imm': ['addi'],
     'rv64-add-imm': ['addi', 'addiw'],
     'rv128-add-imm': ['addi', 'addiw', 'addid'],
-
     'rv32-shift-reg': ['sll', 'sra', 'srl'],
-    'rv64-shift-reg': ['sll', 'sra', 'srl',
-                       'sllw', 'sraw', 'srlw'],
-    'rv128-shift-reg': ['sll', 'sra', 'srl',
-                        'sllw', 'sraw', 'srlw'
-                        'slld', 'srad', 'srld'],
-
+    'rv64-shift-reg': ['sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'],
+    'rv128-shift-reg': [
+        'sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'
+        'slld', 'srad', 'srld'
+    ],
     'rv32-shift-imm': ['slli', 'srli', 'srai'],
-    'rv64-shift-imm': ['slli', 'srli', 'srai',
-                       'slliw', 'srliw', 'sraiw'],
-    'rv128-shift-imm': ['slli', 'srli', 'srai',
-                        'slliw', 'srliw', 'sraiw',
-                        'sllid', 'srlid', 'sraid']
+    'rv64-shift-imm': ['slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw'],
+    'rv128-shift-imm': [
+        'slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw', 'sllid', 'srlid',
+        'sraid'
+    ]
 }
 
-branch_instructions = {
-    'branch': ['beq', 'bge', 'bgeu', 'blt', 'bltu', 'bne']
-
-}
+branch_instructions = {'branch': ['beq', 'bge', 'bgeu', 'blt', 'bltu', 'bne']}
 
 csr_insts = {
     'csr-reg': ['csrrc', 'csrrs', 'csrrw'],
     'csr-imm': ['csrrci', 'csrrsi', 'csrrwi'],
 }
-environment_instructions = {
-    'env': ['ebreak', 'ecall']
-}
-fence_instructions = {
-    'fence': ['fence'], 'fencei': ['fence.i']
-}
+environment_instructions = {'env': ['ebreak', 'ecall']}
+fence_instructions = {'fence': ['fence'], 'fencei': ['fence.i']}
 
-jump_instructions = {
-    'jal': ['jal'], 'jalr': ['jalr']
-}
+jump_instructions = {'jal': ['jal'], 'jalr': ['jalr']}
 
 logic_instructions = {
     'logic-reg': ['and', 'or', 'slt', 'sltu', 'xor'],
@@ -57,18 +43,19 @@ logic_instructions = {
 load_store_instructions = {
     'auipc': ['auipc'],
     'rv32-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw'],
-    'rv64-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw',
-                   'ld', 'lwu'],
-    'rv128-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw',
-                    'ld', 'lq', 'lwu', 'ldu'],
+    'rv64-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw', 'ld', 'lwu'],
+    'rv128-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw', 'ld', 'lq', 'lwu', 'ldu'],
     'rv32-stores': ['sb', 'sh', 'sw'],
-    'rv64-stores': ['sb', 'sh', 'sw',
-                    'sd'],
-    'rv128s-stores': ['sb', 'sh', 'sw',
-                      'sd', 'sq']
+    'rv64-stores': ['sb', 'sh', 'sw', 'sd'],
+    'rv128s-stores': ['sb', 'sh', 'sw', 'sd', 'sq']
 }
 
-def twos(val,bits):
+auipc = {'auipc': ['auipc']}
+
+lui = {'lui': ['lui']}
+
+
+def twos(val, bits):
     '''
     Finds the twos complement of the number
     :param val: input to be complemented
@@ -80,16 +67,14 @@ def twos(val,bits):
     :result: two's complement version of the input
 
     '''
-    if isinstance(val,str):
+    if isinstance(val, str):
         if '0x' in val:
-            val = int(val,16)
+            val = int(val, 16)
         else:
-            val = int(val,2)
+            val = int(val, 2)
     if (val & (1 << (bits - 1))) != 0:
         val = val - (1 << bits)
     return val
-
-
 
 
 def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
@@ -120,7 +105,8 @@ def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
                         walked.append(temp)
                 elif invert:
                     if signed:
-                        walked.append(twos(temp ^ ((1 << bit_width) - 1),bit_width))
+                        walked.append(
+                            twos(temp ^ ((1 << bit_width) - 1), bit_width))
                     else:
                         walked.append(temp ^ ((1 << bit_width) - 1))
                 temp = temp << 1
