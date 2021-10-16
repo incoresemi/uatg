@@ -41,8 +41,10 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     logger.info(f'uatg dir is {uarch_dir}')
     logger.info(f'work_dir is {work_dir}')
     isa = 'RV64I'
+    # yaml file containing the ISA parmaeters of the DUT
+    isa_yaml = config_dict['isa_dict']
     try:
-        isa = config_dict['isa_dict']['hart0']['ISA']
+        isa = isa_yaml['hart0']['ISA']
     except Exception as e:
         logger.error(e)
         logger.error('Exiting UATG. ISA cannot be found/understood')
@@ -58,13 +60,10 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     for module in modules:
         module_dir = os.path.join(modules_dir, module)
         work_tests_dir = os.path.join(work_dir, module)
-        try:
-            module_params = config_dict['core_config'][module]
-        except KeyError:
-            # logger.critical("The {0} module is not in the dut config_file",
-            # format(module))
-            module_params = {}
-        module_params['isa'] = isa
+
+        # the yaml file containing configuration data for the DUT
+        core_yaml = config_dict['core_config']
+
         logger.debug(f'Directory for {module} is {module_dir}')
         logger.info(f'Starting plugin Creation for {module}')
         create_plugins(plugins_path=module_dir)
@@ -105,7 +104,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
         for plugin in manager.getAllPlugins():
-            check = plugin.plugin_object.execute(module_params)
+            check = plugin.plugin_object.execute(core_yaml, isa_yaml)
             name = (str(plugin.plugin_object).split(".", 1))
             t_name = ((name[1].split(" ", 1))[0])
             if check:
@@ -216,8 +215,10 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         logger.debug(f'Checking {modules_dir} for modules')
         modules = list_of_modules(modules_dir)
     isa = 'RV64I'
+    # yaml containing ISA parameters of DUT
+    isa_yaml = config_dict['isa_dict']
     try:
-        isa = config_dict['isa_dict']['hart0']['ISA']
+        isa = isa_yaml['hart0']['ISA']
     except Exception as e:
         logger.error(e)
         logger.error('Exiting UATG. ISA cannot be found/understood')
@@ -242,19 +243,15 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
 
         module_dir = os.path.join(modules_dir, module)
 
-        try:
-            module_params = config_dict['core_config'][module]
-        except KeyError:
-            module_params = {}
-
-        module_params['isa'] = isa
+        # yaml file with core parameters
+        core_yaml = config_dict['core_config']
 
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
 
         for plugin in manager.getAllPlugins():
-            _check = plugin.plugin_object.execute(module_params)
+            _check = plugin.plugin_object.execute(core_yaml, isa_yaml)
             _name = (str(plugin.plugin_object).split(".", 1))
             _test_name = ((_name[1].split(" ", 1))[0])
             if _check:
@@ -313,14 +310,10 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
         work_tests_dir = os.path.join(work_dir, module)
         reports_dir = os.path.join(work_dir, 'reports', module)
         os.makedirs(reports_dir, exist_ok=True)
-
-        try:
-            module_params = config_dict['core_config'][module]
-        except KeyError:
-            # logger.critical("The {0} module is not "
-            #                 "in the dut config_file",format(module))
-            module_params = {}
-
+        # YAML with ISA paramters
+        core_yaml = config_dict['core_config']
+        # isa yaml with ISA paramters
+        isa_yaml = config_dict['isa_dict']
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
@@ -330,7 +323,7 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
         for plugin in manager.getAllPlugins():
             _name = (str(plugin.plugin_object).split(".", 1))
             _test_name = ((_name[1].split(" ", 1))[0])
-            _check = plugin.plugin_object.execute(module_params)
+            _check = plugin.plugin_object.execute(core_yaml, isa_yaml)
             _log_file_path = os.path.join(work_tests_dir, _test_name, 'log')
             if _check:
                 try:
