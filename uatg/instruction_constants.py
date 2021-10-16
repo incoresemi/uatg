@@ -17,11 +17,15 @@ arithmetic_instructions = {
         'slld', 'srad', 'srld'
     ],
     'rv32-shift-imm': ['slli', 'srli', 'srai'],
-    'rv64-shift-imm': ['slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw'],
-    'rv128-shift-imm': [
-        'slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw', 'sllid', 'srlid',
-        'sraid'
-    ]
+    'rv64-shift-imm': ['slli', 'srli', 'srai',
+                       'slliw', 'srliw', 'sraiw'],
+    'rv128-shift-imm': ['slli', 'srli', 'srai',
+                        'slliw', 'srliw', 'sraiw',
+                        'sllid', 'srlid', 'sraid'],
+
+    'rv32-ui': ['auipc', 'lui'],
+    'rv64-ui': ['auipc', 'lui'],
+    'rv128-ui': ['auipc', 'lui']
 }
 
 branch_instructions = {'branch': ['beq', 'bge', 'bgeu', 'blt', 'bltu', 'bne']}
@@ -41,7 +45,6 @@ logic_instructions = {
 }
 
 load_store_instructions = {
-    'auipc': ['auipc'],
     'rv32-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw'],
     'rv64-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw', 'ld', 'lwu'],
     'rv128-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw', 'ld', 'lq', 'lwu', 'ldu'],
@@ -49,11 +52,6 @@ load_store_instructions = {
     'rv64-stores': ['sb', 'sh', 'sw', 'sd'],
     'rv128s-stores': ['sb', 'sh', 'sw', 'sd', 'sq']
 }
-
-auipc = {'auipc': ['auipc']}
-
-lui = {'lui': ['lui']}
-
 
 def twos(val, bits):
     '''
