@@ -124,12 +124,22 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                     assert isinstance(ret_list_of_dicts, dict)
                     # Checking for the returned sections from each test
                     asm_code = ret_list_of_dicts['asm_code']
+
+                    try:
+                        inst_name_postfix = ret_list_of_dicts['name_postfix']
+                    except KeyError:
+                        inst_name_postfix = ''
+
+                    # add inst name to test name as postfix
+                    test_name = test_name + '-' + inst_name_postfix
+
                     try:
                         asm_data = ret_list_of_dicts['asm_data']
                     except KeyError:
                         asm_data = rvtest_data(bit_width=0,
                                                num_vals=1,
                                                random=True)
+
                     try:
                         asm_sig = ret_list_of_dicts['asm_sig']
                     except KeyError:
@@ -139,7 +149,9 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                         compile_macros_dict[test_name] = compile_macros_dict[
                             test_name] + ret_list_of_dicts['compile_macros']
                     except KeyError:
-                        exit(f'{test_name}, {KeyError}')
+                        logger.debug(
+                            f'No custom Compile macros specified for {test_name}'
+                        )
 
                     # Adding License, includes and macros
                     asm = license_str + includes + test_entry
