@@ -229,6 +229,11 @@ Optional Packages:
       Currently the file has few patterns for checking Branch Predictor unit. 
       The user can add new expressions to the same file.
 
+   .. note:: The user can import as many other packages and methods he deems
+      necessary for his tests. In fact, uatg contains few methods like 
+      ``bit_walker``, ``rvtest_data``, and modules like 
+      ``instruction_constants`` which the user may need to import.
+
 .. code-block:: python
 
     from yapsy.IPlugin import IPlugin  # class necessary from plugin management
@@ -311,21 +316,27 @@ methods of their class. In such case the user may declare a *xyz* as
         self.xyz = 5    # initialize the variables which are needed throughout the class as self.
         self.parameter_name2 = None # The self variable, like any variable, can be of any type.
 
-execute(self, config_dict):
----------------------------
-The execute method of the test class requires a dictionary (possibly extracted 
-from a yaml file) as an input. The user can parse and select from this 
+execute(self, core_yaml, isa_yaml):
+-----------------------------------
+The execute method of the test class requires two dictionary (possibly extracted 
+from yaml files) as an input. The user can parse and select from this 
 dictionary the parameters which would make their current test valid to be run on 
 the DUT.
 
+The isa_yaml is the ``ISA_configuration`` yaml file (as a dict) of the DUT,
+and the core_yaml is the ``Core_configuration`` yaml file (as a dictionary).
+
 .. code-block:: python
 
-    def execute(self, config_dict):
+    def execute(self, core_yaml, isa_yaml):
         """ Docstring explaining the rationale behind why the test was created or not based on the chosen parameters"""
         # _block_parameters( in this case config_dict) are the details of the configuration of a particular block given as a dictionary
-        self._history_len = config_dict['history_len'] #self variable as _history_len will be used in other methods within the class.
+        self._history_len = core_yaml['branch_predictor']['history_len'] #self variable as _history_len will be used in other methods within the class.
         # obtain the needed external parameters from the input dictionary
-        _bpu_enabled = config_dict['instantiate']
+        _bpu_enabled = core_yaml['branch_predictor']['instantiate']
+        
+        # obtain the ISA supported by the DUT as a variable
+        isa = isa_yaml['hart0']['ISA']
 
         # IMPORTANT: check for conditions in which the test needs to be generated
         if _history_len >= 1 and _bpu_enabled: # Since BPU is an optional feature, we check for it to be enabled. 
@@ -353,20 +364,54 @@ sure he creates a ``self.history_len = config_dict[history_len]`` within this
 method if he thinks he'd need the ``history_len`` somewhere in the following 
 methods. 
 
-.. warning:: **Only** the ``execute()`` method can take in the config_dict among 
-   all the methods of the test class. There are no other methods in the class
-   which receives this dictionary as an input.
+.. warning:: **Only** the ``execute()`` method can take in the core_yaml
+   and isa_yaml as arguments among all the methods of the test class. There are 
+   no other methods in the class which receives these dictionaries as an input.
 
 generate_asm(self):
 -------------------
 This function should be written in a way that it returns a well formatted 
-string, which complies with the RISC-V assembly format.
+string, which complies with the RISC-V assembly format. We make use of the 
+``test_format`` and ``test_macros`` specified 
+`here<https://riscof.readthedocs.io/en/1.17.1/testformat.html>`_
 
-The function does not take in any arguments.
+.. warning:: All tests written for UATG should comply with the test format. 
+   It is encouraged that the user goes through the link given above to
+   understand the format. This would make test writing experience a bit more
+   streamlined.
 
-The string returned by this function will be directly written into an assembly 
-file titled ``<test_class_name>.S``. Here, the test_class_name is the name of 
-the class within which the generate_asm() method is present.
+The ``generate_asm()`` function does not take in any arguments.
+
+The ``generate_asm()`` function will return a list of dictionaries. The list
+will contain ``n`` dictionaries for the ``n`` instructions being tested by the 
+test_class. The elements of the dict are
+  1. ``asm_code`` : A formatted string, which will be directly written as an 
+       Assembly file.
+  2. ``asm_data`` : A formatted string of the data and labels required to be 
+       populated in the ``RVTEST_DATA`` section of the Assembly test. 
+       If not required, the user can return an empty string ``''``.
+  3. ``asm_sig`` : A formatted string of the data and labels required to be 
+       populated in the ``RVMODEL_DATA`` section of the Assembly test. If not 
+       utilized, the user can specify an empty string ``''``. To learn more 
+       about test signatures, the user can refer to the test_format 
+       documentation previously shared.
+  4. ``compile_macros`` : The compile macros key of the return dict will contain 
+       a list of the all macros required to be passed along while compiling that
+       test. If there are no macros, the user can return an empty list.
+  5. ``name_postfix`` : The name_postfix key requires a string specifiying the 
+       name to be postfixed along with the test name. This is done in order to 
+       split a large test containing multiple instructions into a single test
+       per instruction. The user can return an empty string. 
+
+The list returned by this function will be parsed and written into an assembly 
+file titled ``<test_class_name>-<seq><name_postfix>.S``. 
+Here, the test_class_name is the name of the class within which the 
+generate_asm() method is present. The ``<seq>`` will indicate the number of 
+sub-tests that were generated from ``<test_class_name>``. The ``name_postfix``
+is added to the test_name if the user specifies it in his return list[dict{}].
+
+In this first example we can see a test which only fills the ``asm_code`` key, 
+while all other keys are assigned their default values.
 
 .. code-block:: python
 
@@ -378,15 +423,128 @@ the class within which the generate_asm() method is present.
         hist_len = self._history_len # we reuse the self._history_len variable here.
                                      # Since, it is not possible to access the config_dict from this method, the necessary variables
                                      # are to be stored as self variables to access across the methods of the class.
-        asm = ""  # assembly code to be generated as a formatted string. It is left empty, which is the default state.
+        asm_code = ""  # assembly code to be generated as a formatted string. It is left empty, which is the default state.
         for var_i in range(0,hist_len):
-            asm = asm + "  addi x0,x0,0\n" # inserting (hist_len)x NOPs
+            asm_code += "  addi x0,x0,0\n" # inserting (hist_len)x NOPs
 
-        return asm  # generate_asm returns the assembly code as a string
+        # compile macros for the test
+        compile_macros = []
 
-The string returned from the above function contains a formatted string which 
+        # return asm_code and sig_code
+        test_dict.append({
+            'asm_code': asm_code, # formatted string to be dumped as ASM
+            'asm_data': '',
+            'asm_sig': '',
+            'compile_macros': compile_macros,
+            'name_postfix': ''
+        })
+
+The string assigned to ``asm_code`` key contains a formatted string which 
 can be directly dumped into an assembly file. The string will contain *hist_len* 
-amount of *NOPs*. 
+amount of *NOPs*. The other keys are assigned default values. 
+
+This following example demonstrates a method with all the keys being assigned 
+different values.
+
+.. code-block:: python
+
+    def generate_asm(self) -> Dict[str, str]:
+        """x
+            Generates the ASM instructions for R type arithmetic instructions.
+            It creates asm for the following instructions based upon ISA
+               mul[w], mulh, mulhsu, mulhu, div[w], divu[w], rem[w], remu[w] 
+        """
+        # rd, rs1, rs2 iterate through all the 32 register combinations for
+        # every instruction in arithmetic_instructions['rv32-add-reg']
+
+        test_dict = []
+
+        reg_file = base_reg_file.copy()
+
+        instruction_list = []
+        if 'M' in self.isa or 'Zmmul' in self.isa:
+            instruction_list += mext_instructions[f'{self.isa_bit}-mul']
+        if 'M' in self.isa:
+            instruction_list += mext_instructions[f'{self.isa_bit}-div']
+
+        for inst in instruction_list:
+            asm_code = '#' * 5 + ' mul/div reg, reg, reg ' + '#' * 5 + '\n'
+
+            # initial register to use as signature pointer
+            swreg = 'x31'
+
+            # initialize swreg to point to signature_start label
+            asm_code += f'RVTEST_SIGBASE({swreg}, signature_start)\n'
+
+            # initial offset to with respect to signature label
+            offset = 0
+
+            # variable to hold the total number of signature bytes to be used.
+            sig_bytes = 0
+
+            inst_count = 0
+
+            for rd in reg_file:
+                for rs1 in reg_file:
+                    for rs2 in reg_file:
+
+                        rs1_val = hex(random.getrandbits(self.xlen))
+                        rs2_val = hex(random.getrandbits(self.xlen))
+
+                        # if signature register needs to be used for operations
+                        # then first choose a new signature pointer and move the
+                        # value to it.
+                        if swreg in [rd, rs1, rs2]:
+                            newswreg = random.choice([
+                                x for x in reg_file
+                                if x not in [rd, rs1, rs2, 'x0']
+                            ])
+                            asm_code += f'mv {newswreg}, {swreg}\n'
+                            swreg = newswreg
+
+                        # perform the  required assembly operation
+                        asm_code += f'\ninst_{inst_count}:'
+                        asm_code += f'\n#operation: {inst}, rs1={rs1}, rs2={rs2}, rd={rd}\n'
+                        asm_code += f'TEST_RR_OP({inst}, {rd}, {rs1}, {rs2}, 0, {rs1_val}, {rs2_val}, {swreg}, {offset}, x0)\n'
+
+                        # adjust the offset. reset to 0 if it crosses 2048 and
+                        # increment the current signature pointer with the
+                        # current offset value
+                        if offset + self.offset_inc >= 2048:
+                            asm_code += f'addi {swreg}, {swreg}, {offset}\n'
+                            offset = 0
+
+                        # increment offset by the amount of bytes updated in
+                        # signature by each test-macro.
+                        offset = offset + self.offset_inc
+
+                        # keep track of the total number of signature bytes used
+                        # so far.
+                        sig_bytes = sig_bytes + self.offset_inc
+
+                        inst_count += 1
+
+            # asm code to populate the signature region
+            sig_code = 'signature_start:\n'
+            sig_code += ' .fill {0},4,0xdeadbeef\n'.format(int(sig_bytes / 4))
+
+            # compile macros for the test
+            compile_macros = []
+
+            # return asm_code and sig_code
+            test_dict.append({
+                'asm_code': asm_code,
+                'asm_data': '',
+                'asm_sig': sig_code,
+                'compile_macros': compile_macros,
+                'name_postfix': inst
+            })
+        return test_dict
+
+In this example, all the keys are being populated. In addition to that, this 
+one test_class would return tests for all the instructions in the RV64-M 
+Extension, hence the name_potfix will come in to be beneficial to identify
+the ASM files.
 
 .. note:: The above snippet is just an example demostrating how to use the 
    generate_asm() method.
@@ -547,12 +705,12 @@ chromite's configuration file.
         self.parameter_name1 = 5    # initialize the internal parameters needed for the script
         self.parameter_name2 = None
 
-      def execute(self, config_dict):
+      def execute(self, core_yaml, isa_yaml):
         """ Docstring explaining the rationale behind why the test was created or not based on the chosen parameters"""
         # _block_parameters( in this case config_dict) are the details of the configuration of a particular block given as a dictionary
-        self._history_len = config_dict['history_len'] #self variable as _history_len will be used in other methods within the class.
+        self._history_len = core_yaml['branch_predictor']['history_len'] #self variable as _history_len will be used in other methods within the class.
         # obtain the needed external parameters from the input dictionary
-        _bpu_enabled = config_dict['instantiate']
+        _bpu_enabled = core_yaml['branch_predictor']['instantiate']
 
         # IMPORTANT: check for conditions in which the test needs to be generated
         if _history_len >= 1 and _bpu_enabled: # Since BPU is an optional feature, we check for it to be enabled. 
@@ -561,19 +719,30 @@ chromite's configuration file.
         else:
           return False
 
-      def execute(self, config_dict):
-        """ Docstring explaining the rationale behind why the test was created or not based on the chosen parameters"""
-        # _block_parameters( in this case config_dict) are the details of the configuration of a particular block given as a dictionary
-        self._history_len = config_dict['history_len'] #self variable as _history_len will be used in other methods within the class.
-        # obtain the needed external parameters from the input dictionary
-        _bpu_enabled = config_dict['instantiate']
+      def generate_asm(self):
 
-        # IMPORTANT: check for conditions in which the test needs to be generated
-        if _history_len >= 1 and _bpu_enabled: # Since BPU is an optional feature, we check for it to be enabled. 
-                                               # Likewise with the history_register 
-          return True
-        else:
-          return False  # generate_asm returns the assembly code as a string
+        """ Docstring for the generate_asm method explaining the asm code's details"""
+        """ Registers used and their functions, instructions called and their purposes etc"""
+
+        hist_len = self._history_len # we reuse the self._history_len variable here.
+                                     # Since, it is not possible to access the config_dict from this method, the necessary variables
+                                     # are to be stored as self variables to access across the methods of the class.
+        asm_code = ""  # assembly code to be generated as a formatted string. It is left empty, which is the default state.
+        for var_i in range(0,hist_len):
+            asm_code += "  addi x0,x0,0\n" # inserting (hist_len)x NOPs
+
+        # compile macros for the test
+        compile_macros = []
+
+        # return asm_code and sig_code
+        test_dict.append({
+            'asm_code': asm_code, # formatted string to be dumped as ASM
+            'asm_data': '',
+            'asm_sig': '',
+            'compile_macros': compile_macros,
+            'name_postfix': ''
+        })
+
       
       def generate_covergroups(self, alias_file):
         

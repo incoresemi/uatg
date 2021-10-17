@@ -206,7 +206,7 @@ Details and further specification of the config file syntax is available at
    the user when he tries to write his own YAMLs. These files, eventhough 
    working,  are likely to be very old and can be factually wrong. 
    So, the user is required to use these files only to get a feel of how UATG 
-   works. The user should move to the actual YAMLs once they understand the 
+   works. The user must start using the actual YAMLs once they understand the 
    UATG flow by following this quickstart or the tutorial.
 
 .. warning:: You will need to change ``user`` to your username in the below file.
