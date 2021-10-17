@@ -120,8 +120,11 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                     asm_code = ret_list_of_dicts['asm_code']
 
                     try:
-                        inst_name_postfix = '-' + ret_list_of_dicts[
-                            'name_postfix']
+                        if ret_list_of_dicts['name_postfix']:
+                            inst_name_postfix = '-' + ret_list_of_dicts[
+                                'name_postfix']
+                        else:
+                            inst_name_postfix = ''
                     except KeyError:
                         inst_name_postfix = ''
 
