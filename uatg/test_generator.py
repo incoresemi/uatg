@@ -66,7 +66,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
         logger.debug(f'Directory for {module} is {module_dir}')
         logger.info(f'Starting plugin Creation for {module}')
-        create_plugins(plugins_path=module_dir)
+        create_plugins(plugins_path=module_dir, module=module)
         logger.info(f'Created plugins for {module}')
         username = getuser()
         time = ((str(datetime.now())).split("."))[0]

@@ -395,7 +395,7 @@ shakti_end:                                                             \
         outfile.write(out)
 
 
-def create_plugins(plugins_path):
+def create_plugins(plugins_path, module):
     """
     This function is used to create Yapsy Plugin files.
     The YAPSY plugins are required to be in a certain pattern. This function 
@@ -403,14 +403,41 @@ def create_plugins(plugins_path):
     Yapsy will ignore all other python file which does not have a 
     .yapsy-plugin file associated with it.
     """
+    # the index yaml is in the modules directory
+    index_yaml = load_yaml(os.path.join(plugins_path, '../index.yaml'))
     files = os.listdir(plugins_path)
+
     for file in files:
         if ('.py' in file) and (not file.startswith('.')):
-            module_name = file[0:-3]
-            f = open(os.path.join(plugins_path, module_name + '.yapsy-plugin'),
-                     'w')
-            f.write("[Core]\nName=" + module_name + "\nModule=" + module_name)
-            f.close()
+            test_name = file[0:-3]
+
+            val = False
+
+            try:
+                val = index_yaml[module][test_name]
+            except KeyError as e:
+                logger.critical(f'There is no entry for test - {test_name}')
+                exit(f'update the index.yaml with your new test')
+
+            if val == True:
+                f = open(
+                    os.path.join(plugins_path, test_name + '.yapsy-plugin'),
+                    'w')
+                f.write("[Core]\nName=" + test_name + "\nModule=" + test_name)
+                f.close()
+                logger.debug(f'Created plugin for {test_name}')
+            else:
+                try:
+                    os.remove(
+                        os.path.join(plugins_path, test_name + '.yapsy-plugin'))
+                    logger.warn(
+                        f'removing already existing plugin file for {test_name}'
+                    )
+                except:
+                    logger.debug(f'no plugin for {test_name} to remove')
+                    pass
+                logger.warn(
+                    f'Skippping test {test_name} as index yaml has False')
 
 
 def create_config_file(config_path):
