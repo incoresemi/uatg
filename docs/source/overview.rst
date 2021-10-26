@@ -29,7 +29,7 @@ parameterized set of coverpoints which can help indicate the health of the test-
 target. 
 
 The parameterized tests in UATG are written as python-plugins which can generate assembly programs. 
-These python programs are required to follow a certain API has outlined by UATG and produce artifacts
+These python programs are required to follow a certain API as outlined by UATG and produce artifacts
 which UATG can use to generate the final Assembly tests. These python plugins have the capability to
 generate relevant tests based on the configuration of the target DUT or skip generation completely
 if certain features in the configuration have been disabled. 

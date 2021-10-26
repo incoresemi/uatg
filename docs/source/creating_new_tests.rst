@@ -35,46 +35,92 @@ The directory tree of the ``chromite_uatg_tests`` is as follows.
   │   ├── uatg_gshare_fa_mispredict_loop_01.py
   │   └── uatg_gshare_fa_ras_push_pop_01.py
   ├── decoder
-  │   └── uatg_decoder_i_ext_r_type.py
+  │   ├── uatg_decoder_arithmetic_insts_1.py
+  │   ├── uatg_decoder_arithmetic_insts_2.py
+  │   ├── uatg_decoder_arithmetic_insts_3.py
+  │   ├── uatg_decoder_arithmetic_insts_4.py
+  │   ├── uatg_decoder_arithmetic_insts_ui.py
+  │   ├── uatg_decoder_branch_insts_1.py
+  │   ├── uatg_decoder_jump_jal.py
+  │   ├── uatg_decoder_jump_jalr.py
+  │   ├── uatg_decoder_logical_insts_1.py
+  │   ├── uatg_decoder_logical_insts_2.py
+  │   ├── uatg_decoder_memory_insts_1.py
+  │   └── uatg_decoder_mext.py
   ├── decompressor
-  │   └── uatg_decompressor.py
-  └── index.yaml
+  │   ├── uatg_decompressor_01.py
+  │   ├── uatg_decompressor_02.py
+  │   └── uatg_decompressor_floating_01.py
+  ├── index.yaml
+  └── mbox
+      ├── uatg_mbox_divu_insts_01.py
+      ├── uatg_mbox_mul_div_insts_01.py
+      └── uatg_mbox_mulh_insts_01.py 
    
 Irrespective of the name, every directory purposed to host tests for UATG should
 have a similiar structure.
 
 Other than that, it is necessary that the module specific directories. like 
-*branch_predictor*, *decoder* and *decompressor* should be named same as the
-verilog module name in order to improve comprehension. 
+*branch_predictor*, *decoder*, *mbox* and *decompressor* should be named same 
+as the verilog module name in order to improve comprehension. 
 
-The ``index.yaml`` should contain the names of all modules for which test classes
-exist in the directory, and for which the tests are to be generated. 
+The ``index.yaml`` should contain the names of **all the tests** as well 
+as the modules for which test classes exist in the directory.
 When invoked, UATG reads the *index.yaml* file first and checks for test classes
-only in the directories which were specified in the yaml file. Other 
-folders will not be used to pick up test classes.
+**only** in the directories which were specified in the yaml file. In addition 
+to that, the test_generator will generate tests for which the value is set to
+``True``. Other tests for which the value is ``False`` will be skipped 
+with a warning. The modules not specified in the yaml will be 
+directly skipped.
+
+.. warning:: The ``index.yaml`` file should contain the module name and the 
+   test name as keys. The value of the ``test_name`` keys will govern if the
+   test is generated or not. It is mandatory for the user to update the file
+   when every new test is added.
 
 The structure of the *index.yaml* file is presented as follows,
 
-.. code-block:: yaml  
+.. code-block:: yaml
+   :linenos:
 
-  branch_predictor:
-    uatg_gshare_fa_btb_fill_01: "fill the BTB with entries"
-    uatg_gshare_fa_btb_selfmodifying_01: "ASM that modifies itself, also used to verify functioning of fence instruction"
-    uatg_gshare_fa_fence_01: "Verify the functioning of fence instruction"
-    uatg_gshare_fa_ghr_alternating_01: "fill the GHR Register with alternating 1-0 pattern"
-    uatg_gshare_fa_ghr_ones_01: "fill the GHR Register with ones"
-    uatg_gshare_fa_ghr_zeros_01: "fill the GHR Register with zeros"
-    uatg_gshare_fa_mispredict_loop_01: ""
-    uatg_gshare_fa_ras_push_pop_01: "Pushing and Popping the return address stack using call-ret instructions"
-  decoder:
-    uatg_decoder_arithmetic_insts: "tests arithmetic instructions"
+    branch_predictor:
+      uatg_gshare_fa_btb_fill_01: True
+      uatg_gshare_fa_btb_selfmodifying_01: True
+      uatg_gshare_fa_fence_01: True
+      uatg_gshare_fa_ghr_alternating_01: True
+      uatg_gshare_fa_ghr_ones_01: True
+      uatg_gshare_fa_ghr_zeros_01: True
+      uatg_gshare_fa_mispredict_loop_01: True
+      uatg_gshare_fa_ras_push_pop_01: True
 
-  decompressor:
-    uatg_decompressor: "checks if mis-predictions occur and tests macro's"
+    decoder:
+      uatg_decoder_arithmetic_insts_1: True
+      uatg_decoder_arithmetic_insts_2: True
+      uatg_decoder_arithmetic_insts_3: True
+      uatg_decoder_arithmetic_insts_4: True
+      uatg_decoder_arithmetic_insts_ui: True
+      uatg_decoder_branch_insts_1: True
+      uatg_decoder_jump_jal: True
+      uatg_decoder_jump_jalr: True
+      uatg_decoder_logical_insts_1: True
+      uatg_decoder_logical_insts_2: True
+      uatg_decoder_memory_insts_1: True
+      uatg_decoder_mext: True
 
+    decompressor:
+      uatg_decompressor_01: False
+      uatg_decompressor_02: True
+      uatg_decompressor_floating_01: True
 
-The above file contains information required for UATG to pick-up the tests from 
-your directory. 
+    mbox:
+      uatg_mbox_divu_insts_01: False
+      uatg_mbox_mul_div_insts_01: True
+      uatg_mbox_mulh_insts_01: False
+
+The above file contains information required for UATG to selectively
+pick-up the tests from your directory. This feature allows you to select tests
+even within the module level. The tests for which the value is false will not be
+generated.
 
 This index file is written based on the modules present in the chromite core. 
 The tests for the branch_predictor unit are present in the branch_predictor 
@@ -122,7 +168,8 @@ For now, we are creating a test which would overflow the stack.
    $ vi uatg_stack_overflow.py
 
 Once you have created the test_class, return to your ``~/tests/`` directory and 
-create a, ``index.yaml`` file. 
+create a, ``index.yaml`` file. Here, we suggest ``vi`` as the text editor. The 
+user can choose his preferred text editor.
 
 .. code-block:: console
 
@@ -139,16 +186,15 @@ The content to typed within the yaml file for UATG to recognize the test is this
 .. code-block:: yaml
 
    stack: 
-     uatg_stack_overflow: "Overflows the stack"
+     uatg_stack_overflow: True
 
 Here, the first key ``stack`` indicates that the module is a ``stack``, for 
 which the tests have been generated. The next key ``uatg_stack_overflow`` 
-is the name of the actual test_class. 
+is the name of the actual test_class. Since, the value is **True** this test 
+will be generated. Had it been false, UATG would have skipped this test.
 
 .. warning:: if the module name or test_class are inconsistent between the 
    index.yaml and actual test files, UATG will not pickup the tests. 
-
-The string value is just a comment which serves the purpose of documentation.
 
 Your directory structure at the end of this activity should be this
 
@@ -370,10 +416,11 @@ methods.
 
 generate_asm(self):
 -------------------
+
 This function should be written in a way that it returns a well formatted 
 string, which complies with the RISC-V assembly format. We make use of the 
-``test_format`` and ``test_macros`` specified 
-`here<https://riscof.readthedocs.io/en/1.17.1/testformat.html>`_
+``test_format`` and ``test_macros`` specified `here
+<https://riscof.readthedocs.io/en/1.17.1/testformat.html>`_
 
 .. warning:: All tests written for UATG should comply with the test format. 
    It is encouraged that the user goes through the link given above to
@@ -384,24 +431,25 @@ The ``generate_asm()`` function does not take in any arguments.
 
 The ``generate_asm()`` function will return a list of dictionaries. The list
 will contain ``n`` dictionaries for the ``n`` instructions being tested by the 
-test_class. The elements of the dict are
-  1. ``asm_code`` : A formatted string, which will be directly written as an 
-       Assembly file.
-  2. ``asm_data`` : A formatted string of the data and labels required to be 
-       populated in the ``RVTEST_DATA`` section of the Assembly test. 
-       If not required, the user can return an empty string ``''``.
-  3. ``asm_sig`` : A formatted string of the data and labels required to be 
-       populated in the ``RVMODEL_DATA`` section of the Assembly test. If not 
-       utilized, the user can specify an empty string ``''``. To learn more 
-       about test signatures, the user can refer to the test_format 
-       documentation previously shared.
-  4. ``compile_macros`` : The compile macros key of the return dict will contain 
-       a list of the all macros required to be passed along while compiling that
-       test. If there are no macros, the user can return an empty list.
-  5. ``name_postfix`` : The name_postfix key requires a string specifiying the 
-       name to be postfixed along with the test name. This is done in order to 
-       split a large test containing multiple instructions into a single test
-       per instruction. The user can return an empty string. 
+test_class. The elements of the dict are,
+
+   1. ``asm_code`` : A formatted string, which will be directly written as an 
+        Assembly file.
+   2. ``asm_data`` : A formatted string of the data and labels required to be 
+        populated in the ``RVTEST_DATA`` section of the Assembly test. 
+        If not required, the user can return an empty string ``''``.
+   3. ``asm_sig`` : A formatted string of the data and labels required to be 
+        populated in the ``RVMODEL_DATA`` section of the Assembly test. If not 
+        utilized, the user can specify an empty string ``''``. To learn more 
+        about test signatures, the user can refer to the test_format 
+        documentation previously shared.
+   4. ``compile_macros`` : The compile macros key of the return dict will contain 
+        a list of the all macros required to be passed along while compiling that
+        test. If there are no macros, the user can return an empty list.
+   5. ``name_postfix`` : The name_postfix key requires a string specifiying the 
+        name to be postfixed along with the test name. This is done in order to 
+        split a large test containing multiple instructions into a single test
+        per instruction. The user can return an empty string. 
 
 The list returned by this function will be parsed and written into an assembly 
 file titled ``<test_class_name>-<seq><name_postfix>.S``. 
