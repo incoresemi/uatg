@@ -237,7 +237,8 @@ def from_config(config_file, verbose):
 
     module_dir = config['uatg']['module_dir']
     modules = config['uatg']['modules']
-    verbose = config['uatg']['verbose']
+    # Uncomment to overwrite verbosity from config file.
+    # verbose = config['uatg']['verbose']
     logger.level(verbose)
     module = clean_modules(module_dir, modules)
 

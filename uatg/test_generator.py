@@ -2,7 +2,7 @@
 
 import os
 import glob
-from shutil import rmtree
+from shutil import rmtree, copyfile
 from getpass import getuser
 from datetime import datetime
 import ruamel.yaml as yaml
@@ -41,8 +41,10 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     logger.info(f'uatg dir is {uarch_dir}')
     logger.info(f'work_dir is {work_dir}')
     isa = 'RV64I'
+    # yaml file containing the ISA parmaeters of the DUT
+    isa_yaml = config_dict['isa_dict']
     try:
-        isa = config_dict['isa_dict']['hart0']['ISA']
+        isa = isa_yaml['hart0']['ISA']
     except Exception as e:
         logger.error(e)
         logger.error('Exiting UATG. ISA cannot be found/understood')
@@ -58,16 +60,13 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     for module in modules:
         module_dir = os.path.join(modules_dir, module)
         work_tests_dir = os.path.join(work_dir, module)
-        try:
-            module_params = config_dict['core_config'][module]
-        except KeyError:
-            # logger.critical("The {0} module is not in the dut config_file",
-            # format(module))
-            module_params = {}
-        module_params['isa'] = isa
+
+        # the yaml file containing configuration data for the DUT
+        core_yaml = config_dict['core_config']
+
         logger.debug(f'Directory for {module} is {module_dir}')
         logger.info(f'Starting plugin Creation for {module}')
-        create_plugins(plugins_path=module_dir)
+        create_plugins(plugins_path=module_dir, module=module)
         logger.info(f'Created plugins for {module}')
         username = getuser()
         time = ((str(datetime.now())).split("."))[0]
@@ -99,51 +98,104 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
         logger.debug(f'Generating assembly tests for {module}')
 
+        # this dictionary will contain all the compile macros for each test
+        compile_macros_dict = {}
+
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
         for plugin in manager.getAllPlugins():
-            check = plugin.plugin_object.execute(module_params)
+            check = plugin.plugin_object.execute(core_yaml, isa_yaml)
             name = (str(plugin.plugin_object).split(".", 1))
-            test_name = ((name[1].split(" ", 1))[0])
+            t_name = ((name[1].split(" ", 1))[0])
             if check:
-                asm_body = plugin.plugin_object.generate_asm()
-                # Adding License, includes and macros
-                asm = license_str + includes + test_entry
-                # Appending Coding Macros & Instructions
-                asm += rvcode_begin + asm_body + rvcode_end
-                # Appending RVTEST_DATA macros and data values
-                asm += rvtest_data_begin + rvtest_data(bit_width=32,
-                                                       num_vals=1,
-                                                       random=True,
-                                                       signed=False,
-                                                       align=4)
-                asm += rvtest_data_end
-                # Appending RVMODEL macros
-                asm += rvmodel_data_begin + rvmodel_data_end
-                os.mkdir(os.path.join(work_tests_dir, test_name))
-                with open(
-                        os.path.join(work_tests_dir, test_name,
-                                     test_name + '.S'), 'w') as f:
-                    f.write(asm)
-                logger.debug(f'Generating test for {test_name}')
+                test_seq = plugin.plugin_object.generate_asm()
+                assert isinstance(test_seq, list)
+                seq = '001'
+                for ret_list_of_dicts in test_seq:
+                    test_name = ((name[1].split(" ", 1))[0]) + '-' + seq
+                    logger.debug(f'Selected test: {test_name}')
+
+                    assert isinstance(ret_list_of_dicts, dict)
+                    # Checking for the returned sections from each test
+                    asm_code = ret_list_of_dicts['asm_code']
+
+                    try:
+                        if ret_list_of_dicts['name_postfix']:
+                            inst_name_postfix = '-' + ret_list_of_dicts[
+                                'name_postfix']
+                        else:
+                            inst_name_postfix = ''
+                    except KeyError:
+                        inst_name_postfix = ''
+
+                    # add inst name to test name as postfix
+                    test_name = test_name + inst_name_postfix
+
+                    try:
+                        asm_data = ret_list_of_dicts['asm_data']
+                    except KeyError:
+                        asm_data = rvtest_data(bit_width=0,
+                                               num_vals=1,
+                                               random=True)
+
+                    try:
+                        asm_sig = ret_list_of_dicts['asm_sig']
+                    except KeyError:
+                        asm_sig = '\n'
+
+                    # create an entry in the compile_macros dict
+                    if 'rv64' in isa.lower():
+                        compile_macros_dict[test_name] = ['XLEN=64']
+                    else:
+                        compile_macros_dict[test_name] = ['XLEN=32']
+
+                    try:
+                        compile_macros_dict[test_name] = compile_macros_dict[
+                            test_name] + ret_list_of_dicts['compile_macros']
+                    except KeyError:
+                        logger.debug(
+                            f'No custom Compile macros specified for {test_name}'
+                        )
+
+                    # Adding License, includes and macros
+                    asm = license_str + includes + test_entry
+                    # Appending Coding Macros & Instructions
+                    asm += rvcode_begin + asm_code + rvcode_end
+                    # Appending RVTEST_DATA macros and data values
+                    asm += rvtest_data_begin + asm_data + rvtest_data_end
+                    # Appending RVMODEL macros
+                    asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
+                    os.mkdir(os.path.join(work_tests_dir, test_name))
+                    with open(
+                            os.path.join(work_tests_dir, test_name,
+                                         test_name + '.S'), 'w') as f:
+                        f.write(asm)
+                    seq = '%03d' % (int(seq, 10) + 1)
+                    logger.debug(f'Generating test for {test_name}')
             else:
-                logger.critical(f'Skipped {test_name}')
+                logger.warning(f'Skipped {t_name}')
         logger.debug(f'Finished Generating Assembly Tests for {module}')
         if test_list:
             logger.info(f'Creating test_list for the {module}')
             test_list_dict.update(
-                generate_test_list(work_tests_dir, uarch_dir, test_list_dict))
+                generate_test_list(work_tests_dir, uarch_dir, isa,
+                                   test_list_dict, compile_macros_dict))
 
     logger.info('****** Finished Generating Tests ******')
 
     if linker_dir and os.path.isfile(os.path.join(linker_dir, 'link.ld')):
-        logger.debug('Using user specified linker')
+        logger.debug('Using user specified linker: ' +
+                     os.path.join(linker_dir, 'link.ld'))
+        copyfile(os.path.join(linker_dir, 'link.ld'), work_dir + '/link.ld')
     else:
         create_linker(target_dir=work_dir)
         logger.debug(f'Creating a linker file at {work_dir}')
 
     if linker_dir and os.path.isfile(os.path.join(linker_dir, 'model_test.h')):
-        logger.debug('Using user specified model_test file')
+        logger.debug('Using user specified model_test file: ' +
+                     os.path.join(linker_dir, 'model_test.h'))
+        copyfile(os.path.join(linker_dir, 'model_test.h'),
+                 work_dir + '/model_test.h')
     else:
         create_model_test_h(target_dir=work_dir)
         logger.debug(f'Creating Model_test.h file at {work_dir}')
@@ -179,8 +231,10 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         logger.debug(f'Checking {modules_dir} for modules')
         modules = list_of_modules(modules_dir)
     isa = 'RV64I'
+    # yaml containing ISA parameters of DUT
+    isa_yaml = config_dict['isa_dict']
     try:
-        isa = config_dict['isa_dict']['hart0']['ISA']
+        isa = isa_yaml['hart0']['ISA']
     except Exception as e:
         logger.error(e)
         logger.error('Exiting UATG. ISA cannot be found/understood')
@@ -205,19 +259,15 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
 
         module_dir = os.path.join(modules_dir, module)
 
-        try:
-            module_params = config_dict['core_config'][module]
-        except KeyError:
-            module_params = {}
-
-        module_params['isa'] = isa
+        # yaml file with core parameters
+        core_yaml = config_dict['core_config']
 
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
 
         for plugin in manager.getAllPlugins():
-            _check = plugin.plugin_object.execute(module_params)
+            _check = plugin.plugin_object.execute(core_yaml, isa_yaml)
             _name = (str(plugin.plugin_object).split(".", 1))
             _test_name = ((_name[1].split(" ", 1))[0])
             if _check:
@@ -276,14 +326,10 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
         work_tests_dir = os.path.join(work_dir, module)
         reports_dir = os.path.join(work_dir, 'reports', module)
         os.makedirs(reports_dir, exist_ok=True)
-
-        try:
-            module_params = config_dict['core_config'][module]
-        except KeyError:
-            # logger.critical("The {0} module is not "
-            #                 "in the dut config_file",format(module))
-            module_params = {}
-
+        # YAML with ISA paramters
+        core_yaml = config_dict['core_config']
+        # isa yaml with ISA paramters
+        isa_yaml = config_dict['isa_dict']
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
@@ -293,7 +339,7 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
         for plugin in manager.getAllPlugins():
             _name = (str(plugin.plugin_object).split(".", 1))
             _test_name = ((_name[1].split(" ", 1))[0])
-            _check = plugin.plugin_object.execute(module_params)
+            _check = plugin.plugin_object.execute(core_yaml, isa_yaml)
             _log_file_path = os.path.join(work_tests_dir, _test_name, 'log')
             if _check:
                 try:
