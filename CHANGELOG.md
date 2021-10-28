@@ -2,6 +2,9 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2021-10-28
+- update click version
+
 ## [1.2.0] - 2021-10-27
 - documentation.
 - feature to use index.yaml for test selection.
