@@ -2,7 +2,103 @@
 
 base_reg_file = ['x' + str(reg_no) for reg_no in range(32)]
 
-# Opcode data
+# Instructions classified based on the extension and further on function
+
+# I extension instructions (Integer)
+
+# Arithemtic operations
+arithmetic_instructions = {
+    'rv32-add-reg': ['add', 'sub'],
+    'rv64-add-reg': ['add', 'addw', 'sub', 'subw'],
+    'rv128-add-reg': ['add', 'addw', 'addd', 'sub', 'subw', 'subd'],
+    'rv32-add-imm': ['addi'],
+    'rv64-add-imm': ['addi', 'addiw'],
+    'rv128-add-imm': ['addi', 'addiw', 'addid'],
+    'rv32-shift-reg': ['sll', 'sra', 'srl'],
+    'rv64-shift-reg': ['sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'],
+    'rv128-shift-reg': [
+        'sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'
+                                             'slld', 'srad', 'srld'
+    ],
+    'rv32-shift-imm': ['slli', 'srli', 'srai'],
+    'rv64-shift-imm': ['slli', 'srli', 'srai',
+                       'slliw', 'srliw', 'sraiw'],
+    'rv128-shift-imm': ['slli', 'srli', 'srai',
+                        'slliw', 'srliw', 'sraiw',
+                        'sllid', 'srlid', 'sraid'],
+
+    'rv32-ui': ['auipc', 'lui'],
+    'rv64-ui': ['auipc', 'lui'],
+    'rv128-ui': ['auipc', 'lui']
+}
+
+# Branch instructions
+branch_instructions = {'branch': ['beq', 'bge', 'bgeu', 'blt', 'bltu', 'bne']}
+
+# CSR Instructions
+csr_insts = {
+    'csr-reg': ['csrrc', 'csrrs', 'csrrw'],
+    'csr-imm': ['csrrci', 'csrrsi', 'csrrwi'],
+}
+
+# Ecall and Ebreak
+environment_instructions = {'env': ['ebreak', 'ecall']}
+
+# Fence
+fence_instructions = {'fence': ['fence'], 'fencei': ['fence.i']}
+
+# Jumps
+jump_instructions = {'jal': ['jal'], 'jalr': ['jalr']}
+
+# Logical operations
+logic_instructions = {
+    'logic-reg': ['and', 'or', 'slt', 'sltu', 'xor'],
+    'logic-imm': ['andi', 'ori', 'slti', 'sltiu', 'xori'],
+}
+
+# load and store operations
+load_store_instructions = {
+    'rv32-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw'],
+    'rv64-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw', 'ld', 'lwu'],
+    'rv128-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw', 'ld', 'lq', 'lwu', 'ldu'],
+    'rv32-stores': ['sb', 'sh', 'sw'],
+    'rv64-stores': ['sb', 'sh', 'sw', 'sd'],
+    'rv128s-stores': ['sb', 'sh', 'sw', 'sd', 'sq']
+}
+
+# M extension instructions (Multiplication)
+
+mext_instructions = {
+    'rv32-mul': ['mul', 'mulh', 'mulhsu', 'mulhu'],
+    'rv32-div': ['div', 'divu', 'rem', 'remu'],
+    'rv64-mul': ['mul', 'mulh', 'mulhsu', 'mulhu', 'mulw'],
+    'rv64-div': ['div', 'divu', 'rem', 'remu', 'divw', 'divuw', 'remuw', 'remw']
+}
+
+
+# A Extension Instructions (Atomics)
+
+# atomic memory operations
+
+# Load reserved - Store Conditional Operations
+atomic_lr_sc = {
+    'rv32-lr-sc' : ['lr.w', 'sc.w'],
+    'rv64-lr-sc' : ['lr.w', 'sc.w', 'lr.d', 'sc.d']
+}
+
+# Memory operations
+atomic_mem_ops = {
+    'rv32-mem-ops': ['amoswap.w', 'amoadd.w', 'amoxor.w', 'amoand.w',
+        'amoor.w', 'amomin.w', 'amomax.w', 'amominu.w', 'amomaxu.w'],
+    'rv64-mem-ops': ['amoswap.w', 'amoadd.w', 'amoxor.w', 'amoand.w',
+        'amoor.w', 'amomin.w', 'amomax.w', 'amominu.w', 'amomaxu.w' 'amoswap.d',
+        'amoadd.d', 'amoxor.d', 'amoand.d', 'amoor.d', 'amomin.d', 'amomax.d',
+        'amominu.d', 'amomaxu.d']
+}
+
+# Instruction encodings for illegals generation
+
+# 32bit instructions
 rv32_encodings = {
     'i': [
         "add     rd rs1 rs2 31..25=0  14..12=0 6..2=0x0C 1..0=3",
@@ -106,12 +202,9 @@ rv32_encodings = {
         "fnmsub.d  rd rs1 rs2 rs3 rm 26..25=1 6..2=0x12 1..0=3",
         "fnmadd.d  rd rs1 rs2 rs3 rm 26..25=1 6..2=0x13 1..0=3",
     ],
-    # 'c': [
-    #     "@c.srli.rv32  1..0=1 15..13=4 12=0 11..10=0 9..2=ignore",
-    #     "@c.srai.rv32  1..0=1 15..13=4 12=0 11..10=1 9..2=ignore",
-    #     "@c.slli.rv32  1..0=2 15..13=0 12=0 11..2=ignore",
-    # ],
 }
+
+# 64 bit instructions
 rv64_encodings = {
     'i': rv32_encodings['i'] + [
         "addiw   rd rs1 imm12            14..12=0 6..2=0x06 1..0=3",
@@ -130,7 +223,7 @@ rv64_encodings = {
         "srli    rd rs1 31..26=0  shamt 14..12=5 6..2=0x04 1..0=3",
         "srai    rd rs1 31..26=16 shamt 14..12=5 6..2=0x04 1..0=3",
     ],
-    'm': rv32_encodings['i'] + [
+    'm': rv32_encodings['m'] + [
         "mulw    rd rs1 rs2 31..25=1 14..12=0 6..2=0x0E 1..0=3",
         "divw    rd rs1 rs2 31..25=1 14..12=4 6..2=0x0E 1..0=3",
         "divuw   rd rs1 rs2 31..25=1 14..12=5 6..2=0x0E 1..0=3",
@@ -177,71 +270,9 @@ rv64_encodings = {
         "fmv.d.x   rd rs1 24..20=0 31..27=0x1E 14..12=0 26..25=1 6..2=0x14 "
         "1..0=3",
     ],
-    # 'c': rv32_encodings['c'] + [
-    #     "@c.ld      1..0=0 15..13=3 12=ignore 11..2=ignore # c.flw for RV32",
-    #     "@c.sd      1..0=0 15..13=7 12=ignore 11..2=ignore # c.fsw for RV32",
-    #     "c.subw     1..0=1 15..13=4 12=1      11..10=3 9..7=ignore 6..5=0 "
-    #     "4..2=ignore",
-    #     "c.addw     1..0=1 15..13=4 12=1      11..10=3 9..7=ignore 6..5=1 "
-    #     "4..2=ignore",
-    #     "@c.addiw   1..0=1 15..13=1 12=ignore 11..2=ignore # c.jal for RV32",
-    #     "@c.ldsp    1..0=2 15..13=3 12=ignore 11..2=ignore # c.flwsp for RV32",
-    #     "@c.sdsp    1..0=2 15..13=7 12=ignore 11..2=ignore # c.fswsp for RV32",
-    # ],
 }
 
-# Instructions classified based on functions
-mext_instructions = {
-    'rv32-mul': ['mul', 'mulh', 'mulhsu', 'mulhu'],
-    'rv32-div': ['div', 'divu', 'rem', 'remu'],
-    'rv64-mul': ['mul', 'mulh', 'mulhsu', 'mulhu', 'mulw'],
-    'rv64-div': ['div', 'divu', 'rem', 'remu', 'divw', 'divuw', 'remuw', 'remw']
-}
-arithmetic_instructions = {
-    'rv32-add-reg': ['add', 'sub'],
-    'rv64-add-reg': ['add', 'addw', 'sub', 'subw'],
-    'rv128-add-reg': ['add', 'addw', 'addd', 'sub', 'subw', 'subd'],
-    'rv32-add-imm': ['addi'],
-    'rv64-add-imm': ['addi', 'addiw'],
-    'rv128-add-imm': ['addi', 'addiw', 'addid'],
-    'rv32-shift-reg': ['sll', 'sra', 'srl'],
-    'rv64-shift-reg': ['sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'],
-    'rv128-shift-reg': [
-        'sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'
-                                             'slld', 'srad', 'srld'
-    ],
-    'rv32-shift-imm': ['slli', 'srli', 'srai'],
-    'rv64-shift-imm': ['slli', 'srli', 'srai',
-                       'slliw', 'srliw', 'sraiw'],
-    'rv128-shift-imm': ['slli', 'srli', 'srai',
-                        'slliw', 'srliw', 'sraiw',
-                        'sllid', 'srlid', 'sraid'],
-
-    'rv32-ui': ['auipc', 'lui'],
-    'rv64-ui': ['auipc', 'lui'],
-    'rv128-ui': ['auipc', 'lui']
-}
-branch_instructions = {'branch': ['beq', 'bge', 'bgeu', 'blt', 'bltu', 'bne']}
-csr_insts = {
-    'csr-reg': ['csrrc', 'csrrs', 'csrrw'],
-    'csr-imm': ['csrrci', 'csrrsi', 'csrrwi'],
-}
-environment_instructions = {'env': ['ebreak', 'ecall']}
-fence_instructions = {'fence': ['fence'], 'fencei': ['fence.i']}
-jump_instructions = {'jal': ['jal'], 'jalr': ['jalr']}
-logic_instructions = {
-    'logic-reg': ['and', 'or', 'slt', 'sltu', 'xor'],
-    'logic-imm': ['andi', 'ori', 'slti', 'sltiu', 'xori'],
-}
-load_store_instructions = {
-    'rv32-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw'],
-    'rv64-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw', 'ld', 'lwu'],
-    'rv128-loads': ['lb', 'lbu', 'lh', 'lhu', 'lw', 'ld', 'lq', 'lwu', 'ldu'],
-    'rv32-stores': ['sb', 'sh', 'sw'],
-    'rv64-stores': ['sb', 'sh', 'sw', 'sd'],
-    'rv128s-stores': ['sb', 'sh', 'sw', 'sd', 'sq']
-}
-
+# Utility functions for data generation
 
 def twos(val, bits):
     """
