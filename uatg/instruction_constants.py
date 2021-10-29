@@ -1,4 +1,6 @@
 # See LICENSE.incore for license details
+from itertools import combinations
+from typing import Dict
 
 base_reg_file = ['x' + str(reg_no) for reg_no in range(32)]
 
@@ -21,12 +23,11 @@ arithmetic_instructions = {
                                              'slld', 'srad', 'srld'
     ],
     'rv32-shift-imm': ['slli', 'srli', 'srai'],
-    'rv64-shift-imm': ['slli', 'srli', 'srai',
-                       'slliw', 'srliw', 'sraiw'],
-    'rv128-shift-imm': ['slli', 'srli', 'srai',
-                        'slliw', 'srliw', 'sraiw',
-                        'sllid', 'srlid', 'sraid'],
-
+    'rv64-shift-imm': ['slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw'],
+    'rv128-shift-imm': [
+        'slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw', 'sllid', 'srlid',
+        'sraid'
+    ],
     'rv32-ui': ['auipc', 'lui'],
     'rv64-ui': ['auipc', 'lui'],
     'rv128-ui': ['auipc', 'lui']
@@ -72,9 +73,10 @@ mext_instructions = {
     'rv32-mul': ['mul', 'mulh', 'mulhsu', 'mulhu'],
     'rv32-div': ['div', 'divu', 'rem', 'remu'],
     'rv64-mul': ['mul', 'mulh', 'mulhsu', 'mulhu', 'mulw'],
-    'rv64-div': ['div', 'divu', 'rem', 'remu', 'divw', 'divuw', 'remuw', 'remw']
+    'rv64-div': [
+        'div', 'divu', 'rem', 'remu', 'divw', 'divuw', 'remuw', 'remw'
+    ]
 }
-
 
 # A Extension Instructions (Atomics)
 
@@ -82,18 +84,23 @@ mext_instructions = {
 
 # Load reserved - Store Conditional Operations
 atomic_lr_sc = {
-    'rv32-lr-sc' : ['lr.w', 'sc.w'],
-    'rv64-lr-sc' : ['lr.w', 'sc.w', 'lr.d', 'sc.d']
+    'rv32-lr-sc': ['lr.w', 'sc.w'],
+    'rv64-lr-sc': ['lr.w', 'sc.w', 'lr.d', 'sc.d']
 }
 
 # Memory operations
 atomic_mem_ops = {
-    'rv32-mem-ops': ['amoswap.w', 'amoadd.w', 'amoxor.w', 'amoand.w',
-        'amoor.w', 'amomin.w', 'amomax.w', 'amominu.w', 'amomaxu.w'],
-    'rv64-mem-ops': ['amoswap.w', 'amoadd.w', 'amoxor.w', 'amoand.w',
-        'amoor.w', 'amomin.w', 'amomax.w', 'amominu.w', 'amomaxu.w' 'amoswap.d',
-        'amoadd.d', 'amoxor.d', 'amoand.d', 'amoor.d', 'amomin.d', 'amomax.d',
-        'amominu.d', 'amomaxu.d']
+    'rv32-mem-ops': [
+        'amoswap.w', 'amoadd.w', 'amoxor.w', 'amoand.w', 'amoor.w', 'amomin.w',
+        'amomax.w', 'amominu.w', 'amomaxu.w'
+    ],
+    'rv64-mem-ops': [
+        'amoswap.w', 'amoadd.w', 'amoxor.w', 'amoand.w', 'amoor.w', 'amomin.w',
+        'amomax.w', 'amominu.w', 'amomaxu.w'
+                                 'amoswap.d', 'amoadd.d', 'amoxor.d',
+        'amoand.d', 'amoor.d', 'amomin.d',
+        'amomax.d', 'amominu.d', 'amomaxu.d'
+    ]
 }
 
 # Instruction encodings for illegals generation
@@ -162,11 +169,14 @@ rv32_encodings = {
         "feq.s     rd rs1 rs2   31..27=0x14 14..12=2 26..25=0 6..2=0x14 1..0=3",
         "fcvt.w.s  rd rs1 24..20=0 31..27=0x18 rm    26..25=0 6..2=0x14 1..0=3",
         "fcvt.wu.s rd rs1 24..20=1 31..27=0x18 rm    26..25=0 6..2=0x14 1..0=3",
-        "fmv.x.w   rd rs1 24..20=0 31..27=0x1C 14..12=0 26..25=0 6..2=0x14 1..0=3",
-        "fclass.s  rd rs1 24..20=0 31..27=0x1C 14..12=1 26..25=0 6..2=0x14 1..0=3",
+        "fmv.x.w   "
+        "rd rs1 24..20=0 31..27=0x1C 14..12=0 26..25=0 6..2=0x14 1..0=3",
+        "fclass.s  "
+        "rd rs1 24..20=0 31..27=0x1C 14..12=1 26..25=0 6..2=0x14 1..0=3",
         "fcvt.s.w  rd rs1 24..20=0 31..27=0x1A rm    26..25=0 6..2=0x14 1..0=3",
         "fcvt.s.wu rd rs1 24..20=1 31..27=0x1A rm    26..25=0 6..2=0x14 1..0=3",
-        "fmv.w.x   rd rs1 24..20=0 31..27=0x1E 14..12=0 26..25=0 6..2=0x14 1..0=3",
+        "fmv.w.x   "
+        "rd rs1 24..20=0 31..27=0x1E 14..12=0 26..25=0 6..2=0x14 1..0=3",
         "flw       rd rs1 imm12 14..12=2 6..2=0x01 1..0=3",
         "fsw       imm12hi rs1 rs2 imm12lo 14..12=2 6..2=0x09 1..0=3",
         "fmadd.s   rd rs1 rs2 rs3 rm 26..25=0 6..2=0x10 1..0=3",
@@ -192,7 +202,8 @@ rv32_encodings = {
         "feq.d     rd rs1 rs2   31..27=0x14 14..12=2 26..25=1 6..2=0x14 1..0=3",
         "fcvt.w.d  rd rs1 24..20=0 31..27=0x18 rm    26..25=1 6..2=0x14 1..0=3",
         "fcvt.wu.d rd rs1 24..20=1 31..27=0x18 rm    26..25=1 6..2=0x14 1..0=3",
-        "fclass.d  rd rs1 24..20=0 31..27=0x1C 14..12=1 26..25=1 6..2=0x14 1..0=3",
+        "fclass.d  "
+        "rd rs1 24..20=0 31..27=0x1C 14..12=1 26..25=1 6..2=0x14 1..0=3",
         "fcvt.d.w  rd rs1 24..20=0 31..27=0x1A rm    26..25=1 6..2=0x14 1..0=3",
         "fcvt.d.wu rd rs1 24..20=1 31..27=0x1A rm    26..25=1 6..2=0x14 1..0=3",
         "fld       rd rs1 imm12 14..12=3 6..2=0x01 1..0=3",
@@ -206,73 +217,88 @@ rv32_encodings = {
 
 # 64 bit instructions
 rv64_encodings = {
-    'i': rv32_encodings['i'] + [
-        "addiw   rd rs1 imm12            14..12=0 6..2=0x06 1..0=3",
-        "slliw   rd rs1 31..25=0  shamtw 14..12=1 6..2=0x06 1..0=3",
-        "srliw   rd rs1 31..25=0  shamtw 14..12=5 6..2=0x06 1..0=3",
-        "sraiw   rd rs1 31..25=32 shamtw 14..12=5 6..2=0x06 1..0=3",
-        "addw    rd rs1 rs2 31..25=0  14..12=0 6..2=0x0E 1..0=3",
-        "subw    rd rs1 rs2 31..25=32 14..12=0 6..2=0x0E 1..0=3",
-        "sllw    rd rs1 rs2 31..25=0  14..12=1 6..2=0x0E 1..0=3",
-        "srlw    rd rs1 rs2 31..25=0  14..12=5 6..2=0x0E 1..0=3",
-        "sraw    rd rs1 rs2 31..25=32 14..12=5 6..2=0x0E 1..0=3",
-        "ld      rd rs1       imm12 14..12=3 6..2=0x00 1..0=3",
-        "lwu     rd rs1       imm12 14..12=6 6..2=0x00 1..0=3",
-        "sd     imm12hi rs1 rs2 imm12lo 14..12=3 6..2=0x08 1..0=3",
-        "slli    rd rs1 31..26=0  shamt 14..12=1 6..2=0x04 1..0=3",
-        "srli    rd rs1 31..26=0  shamt 14..12=5 6..2=0x04 1..0=3",
-        "srai    rd rs1 31..26=16 shamt 14..12=5 6..2=0x04 1..0=3",
-    ],
-    'm': rv32_encodings['m'] + [
-        "mulw    rd rs1 rs2 31..25=1 14..12=0 6..2=0x0E 1..0=3",
-        "divw    rd rs1 rs2 31..25=1 14..12=4 6..2=0x0E 1..0=3",
-        "divuw   rd rs1 rs2 31..25=1 14..12=5 6..2=0x0E 1..0=3",
-        "remw    rd rs1 rs2 31..25=1 14..12=6 6..2=0x0E 1..0=3",
-        "remuw   rd rs1 rs2 31..25=1 14..12=7 6..2=0x0E 1..0=3",
-    ],
-    'a': rv32_encodings['a'] + [
-        "amoadd.d    rd rs1 rs2      aqrl 31..29=0 28..27=0 14..12=3 6..2=0x0B"
-        " 1..0=3",
-        "amoxor.d    rd rs1 rs2      aqrl 31..29=1 28..27=0 14..12=3 6..2=0x0B"
-        " 1..0=3",
-        "amoor.d     rd rs1 rs2      aqrl 31..29=2 28..27=0 14..12=3 6..2=0x0B"
-        " 1..0=3",
-        "amoand.d    rd rs1 rs2      aqrl 31..29=3 28..27=0 14..12=3 6..2=0x0B"
-        " 1..0=3",
-        "amomin.d    rd rs1 rs2      aqrl 31..29=4 28..27=0 14..12=3 6..2=0x0B"
-        " 1..0=3",
-        "amomax.d    rd rs1 rs2      aqrl 31..29=5 28..27=0 14..12=3 6..2=0x0B"
-        " 1..0=3",
-        "amominu.d   rd rs1 rs2      aqrl 31..29=6 28..27=0 14..12=3 6..2=0x0B"
-        " 1..0=3",
-        "amomaxu.d   rd rs1 rs2      aqrl 31..29=7 28..27=0 14..12=3 6..2=0x0B"
-        " 1..0=3",
-        "amoswap.d   rd rs1 rs2      aqrl 31..29=0 28..27=1 14..12=3 6..2=0x0B"
-        " 1..0=3",
-        "lr.d        rd rs1 24..20=0 aqrl 31..29=0 28..27=2 14..12=3 6..2=0x0B"
-        " 1..0=3",
-        "sc.d        rd rs1 rs2      aqrl 31..29=0 28..27=3 14..12=3 6..2=0x0B"
-        " 1..0=3",
-    ],
-    'f': rv32_encodings['f'] + [
-        "fcvt.l.s  rd rs1 24..20=2 31..27=0x18 rm 26..25=0 6..2=0x14 1..0=3",
-        "fcvt.lu.s rd rs1 24..20=3 31..27=0x18 rm 26..25=0 6..2=0x14 1..0=3",
-        "fcvt.s.l  rd rs1 24..20=2 31..27=0x1A rm 26..25=0 6..2=0x14 1..0=3",
-        "fcvt.s.lu rd rs1 24..20=3 31..27=0x1A rm 26..25=0 6..2=0x14 1..0=3",
-    ],
-    'd': rv32_encodings['d'] + [
-        "fcvt.l.d  rd rs1 24..20=2 31..27=0x18 rm 26..25=1 6..2=0x14 1..0=3",
-        "fcvt.lu.d rd rs1 24..20=3 31..27=0x18 rm 26..25=1 6..2=0x14 1..0=3",
-        "fmv.x.d   rd rs1 24..20=0 31..27=0x1C 14..12=0 26..25=1 6..2=0x14 "
-        "1..0=3",
-        "fcvt.d.l  rd rs1 24..20=2 31..27=0x1A rm 26..25=1 6..2=0x14 1..0=3",
-        "fcvt.d.lu rd rs1 24..20=3 31..27=0x1A rm 26..25=1 6..2=0x14 1..0=3",
-        "fmv.d.x   rd rs1 24..20=0 31..27=0x1E 14..12=0 26..25=1 6..2=0x14 "
-        "1..0=3",
-    ],
+    'i':
+        rv32_encodings['i'] + [
+            "addiw   rd rs1 imm12            14..12=0 6..2=0x06 1..0=3",
+            "slliw   rd rs1 31..25=0  shamtw 14..12=1 6..2=0x06 1..0=3",
+            "srliw   rd rs1 31..25=0  shamtw 14..12=5 6..2=0x06 1..0=3",
+            "sraiw   rd rs1 31..25=32 shamtw 14..12=5 6..2=0x06 1..0=3",
+            "addw    rd rs1 rs2 31..25=0  14..12=0 6..2=0x0E 1..0=3",
+            "subw    rd rs1 rs2 31..25=32 14..12=0 6..2=0x0E 1..0=3",
+            "sllw    rd rs1 rs2 31..25=0  14..12=1 6..2=0x0E 1..0=3",
+            "srlw    rd rs1 rs2 31..25=0  14..12=5 6..2=0x0E 1..0=3",
+            "sraw    rd rs1 rs2 31..25=32 14..12=5 6..2=0x0E 1..0=3",
+            "ld      rd rs1       imm12 14..12=3 6..2=0x00 1..0=3",
+            "lwu     rd rs1       imm12 14..12=6 6..2=0x00 1..0=3",
+            "sd     imm12hi rs1 rs2 imm12lo 14..12=3 6..2=0x08 1..0=3",
+            "slli    rd rs1 31..26=0  shamt 14..12=1 6..2=0x04 1..0=3",
+            "srli    rd rs1 31..26=0  shamt 14..12=5 6..2=0x04 1..0=3",
+            "srai    rd rs1 31..26=16 shamt 14..12=5 6..2=0x04 1..0=3",
+        ],
+    'm':
+        rv32_encodings['m'] + [
+            "mulw    rd rs1 rs2 31..25=1 14..12=0 6..2=0x0E 1..0=3",
+            "divw    rd rs1 rs2 31..25=1 14..12=4 6..2=0x0E 1..0=3",
+            "divuw   rd rs1 rs2 31..25=1 14..12=5 6..2=0x0E 1..0=3",
+            "remw    rd rs1 rs2 31..25=1 14..12=6 6..2=0x0E 1..0=3",
+            "remuw   rd rs1 rs2 31..25=1 14..12=7 6..2=0x0E 1..0=3",
+        ],
+    'a':
+        rv32_encodings['a'] + [
+            "amoadd.d    rd rs1 rs2   aqrl 31..29=0 28..27=0 14..12=3 6..2=0x0B"
+            " 1..0=3",
+            "amoxor.d    rd rs1 rs2   aqrl 31..29=1 28..27=0 14..12=3 6..2=0x0B"
+            " 1..0=3",
+            "amoor.d     rd rs1 rs2   aqrl 31..29=2 28..27=0 14..12=3 6..2=0x0B"
+            " 1..0=3",
+            "amoand.d    rd rs1 rs2   aqrl 31..29=3 28..27=0 14..12=3 6..2=0x0B"
+            " 1..0=3",
+            "amomin.d    rd rs1 rs2   aqrl 31..29=4 28..27=0 14..12=3 6..2=0x0B"
+            " 1..0=3",
+            "amomax.d    rd rs1 rs2   aqrl 31..29=5 28..27=0 14..12=3 6..2=0x0B"
+            " 1..0=3",
+            "amominu.d   rd rs1 rs2   aqrl 31..29=6 28..27=0 14..12=3 6..2=0x0B"
+            " 1..0=3",
+            "amomaxu.d   rd rs1 rs2   aqrl 31..29=7 28..27=0 14..12=3 6..2=0x0B"
+            " 1..0=3",
+            "amoswap.d   rd rs1 rs2   aqrl 31..29=0 28..27=1 14..12=3 6..2=0x0B"
+            " 1..0=3",
+            "lr.d    rd rs1 24..20=0 aqrl 31..29=0 28..27=2 14..12=3 6..2=0x0B"
+            " 1..0=3",
+            "sc.d        rd rs1 rs2   aqrl 31..29=0 28..27=3 14..12=3 6..2=0x0B"
+            " 1..0=3",
+        ],
+    'f':
+        rv32_encodings['f'] + [
+            "fcvt.l.s  "
+            "rd rs1 24..20=2 31..27=0x18 rm 26..25=0 6..2=0x14 1..0=3",
+            "fcvt.lu.s "
+            "rd rs1 24..20=3 31..27=0x18 rm 26..25=0 6..2=0x14 1..0=3",
+            "fcvt.s.l  "
+            "rd rs1 24..20=2 31..27=0x1A rm 26..25=0 6..2=0x14 1..0=3",
+            "fcvt.s.lu "
+            "rd rs1 24..20=3 31..27=0x1A rm 26..25=0 6..2=0x14 1..0=3",
+        ],
+    'd':
+        rv32_encodings['d'] + [
+            "fcvt.l.d  "
+            "rd rs1 24..20=2 31..27=0x18 rm 26..25=1 6..2=0x14 1..0=3",
+            "fcvt.lu.d "
+            "rd rs1 24..20=3 31..27=0x18 rm 26..25=1 6..2=0x14 1..0=3",
+            "fmv.x.d   "
+            "rd rs1 24..20=0 31..27=0x1C 14..12=0 26..25=1 6..2=0x14 1..0=3",
+            "fcvt.d.l  "
+            "rd rs1 24..20=2 31..27=0x1A rm 26..25=1 6..2=0x14 1..0=3",
+            "fcvt.d.lu "
+            "rd rs1 24..20=3 31..27=0x1A rm 26..25=1 6..2=0x14 1..0=3",
+            "fmv.d.x   "
+            "rd rs1 24..20=0 31..27=0x1E 14..12=0 26..25=1 6..2=0x14 1..0=3",
+        ],
 }
 
+
 # Utility functions for data generation
+
 
 def twos(val, bits):
     """
@@ -333,3 +359,118 @@ def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
             else:
                 break
         return walked
+
+
+def illegal_generator(isa='RV32I'):
+    """ 
+    @str isa: RV[32|64]{IMAFD}
+
+    Provide the ISA string and obtain the list of illegal opcodes
+    as integers. It uses the riscv-opcodes repository's instruction encoding
+    data and are stored above as rv32_encodings and rv64_encodings variables.
+
+    This function parses the instructions and initially finds all illegal
+    opcodes. Then for the variable encoding fields in each instruction, it makes
+    one/more/all of them to contain illegal values and appends such combination
+    into a list and returns it.
+    """
+
+    # Declaring the variable that will store all of the parsed data
+    instructions: Dict[int, Dict] = dict()
+    opcode: int
+    instruction_list = []
+
+    encodings = rv32_encodings if 'RV32' in isa else rv64_encodings
+    # add each ISA extension's instructions to instructions_list
+    for i in isa[4:]:
+        instruction_list += encodings[i.lower()]
+    # print(instruction_list)
+
+    # For each line in the file
+    for inst in instruction_list:
+        # Ignore the commented/empty lines
+        temp = list(e for e in inst.strip().split(' ') if e != '')
+        # Assuming all instructions have 7 bit opcodes [6:0]
+
+        # Variable to store the arguments for the instruction
+        args = []
+        # Variable to store the constant fields in an instruction
+        consts = dict()
+
+        # Parsing the instruction fields
+        for i in temp:
+            if i[0].isalpha():
+                args.append(i)
+            else:
+                [end, beg] = i.split('..')
+                [beg, val] = beg.split('=')
+                beg, end, val = int(beg), int(end), int(val, 16)
+                # Add/Create the key-value pair in consts
+                try:
+                    consts[(beg, end)].add(val)
+                except KeyError:
+                    consts[(beg, end)] = {val}
+
+        # Framing the opcode from 6..2 and 1..0 fields of the instruction
+        opcode = (tuple(consts[(2, 6)])[0] << 2) + tuple(consts[(0, 1)])[0]
+        # Removing the opcode fields since the test generated will have
+        # only valid opcodes
+        consts.pop((0, 1))
+        consts.pop((2, 6))
+        # Add/Create the key-value pairs in the "instructions" variable
+        try:
+            for key in consts:
+                instructions[opcode][key].update(consts[key])
+        except KeyError:
+            instructions[opcode] = consts
+    # illegal_list variable contains all the illegal values for a particular isa
+    # extension. it's initialized to store all illegal opcodes in the 7bit range
+    illegal_list = [i for i in range(2 ** 7) if i not in instructions.keys()]
+
+    for opcode in instructions:
+        # Variable to store the legal fields
+        legal_fields = []
+        # Alias variable containing the ranges and their legal values
+        legal_values = instructions[opcode]
+
+        # Variable to store the illegal values for each range in legal values
+        illegal_values = {
+            (beg, end): set(range(2 ** (end - beg + 1))) - instructions[opcode][
+                (beg, end)] for (beg, end) in instructions[opcode].keys()}
+        # Finding all permutations for illegal fields in an instruction
+        # combinations of one, two... all values of  illegal_values's ranges
+        illegal_fields = [
+            list(i)
+            for j in range(1,
+                           len(instructions[opcode]) + 1)
+            for i in combinations(instructions[opcode], j)
+        ]
+
+        # IMPORTANT: Populating the legal_fields variable based on the
+        # combinations of illegal_fields and making sure the keys are disjoint
+        for selection in illegal_fields:
+            temp = list(instructions[opcode])
+            for rng in selection:
+                temp.remove(rng)
+            legal_fields.append(temp)
+
+        for selection in zip(illegal_fields, legal_fields):
+            if not selection[0]:
+                # if illegal fields range is [] pass
+                pass
+            else:
+                for (beg_i, end_i) in selection[0]:
+                    for ival in illegal_values[(beg_i, end_i)]:
+                        if not selection[1]:
+                            # if legal fields range is []
+                            inst_32 = opcode
+                            inst_32 += (ival << beg_i)
+                            illegal_list.append(inst_32)
+                        else:
+                            for (beg_l, end_l) in selection[1]:
+                                for lval in legal_values[(beg_l, end_l)]:
+                                    inst_32 = opcode
+                                    inst_32 += (ival << beg_i) + (lval << beg_l)
+                                    illegal_list.append(inst_32)
+
+    return illegal_list
