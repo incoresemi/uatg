@@ -100,6 +100,8 @@ support said option. It is followed by the description in the third column.
                                                         ``work_dir``.
   -gc, \\-\\-gen_cvg        generate         Optional   [Flag] When True, UATG will generate the covergroups for 
                                                         the tests.
+  -dr, \\-\\-dry_run        generate         Optional   [Flag] When True, UATG will perform a dry compile of the tests
+                                                        generated. There will be no compilation artifacts generated.
   --version                 generate, clean, Optional   Prints the version of UATG and exits.
                             validate
                             list-modules
@@ -151,19 +153,21 @@ user passes. These template files can be edited by the user to meet his needs.
     $ uatg generate --help
     Usage: uatg generate [OPTIONS]
 
-      Generates tests, cover-groups for a list of modules corresponding to the
-      DUT parameters specified in the configuration yamls, inside the work_dir.
-      Can also generate the test_list needed to execute them on RiverCore.
+    Generates tests, cover-groups for a list of modules corresponding to the
+    DUT parameters specified in the configuration yamls, inside the work_dir.
+    Can also generate the test_list needed to execute them on RiverCore.
 
-      Requires: -cfg, --configuration, -md, --module_dir; -wd, --work_dir
+    Requires: -cfg, --configuration, -md, --module_dir; -wd, --work_dir
 
-      Depends : (-gc, --gen_cvg -> -af, --alias_file)
+    Depends : (-gc, --gen_cvg -> -af, --alias_file)
 
-      Optional: -gc, --gen_cvg; -t, --gen_test_list; -ld, --linker_dir;
+    Optional: -gc, --gen_cvg; -t, --gen_test_list; -ld, --linker_dir;
 
-                -m, --modules; -v, --verbose
+              -m, --modules; -v, --verbose
 
     Options:
+      -dr, --dry_run                  Checks for syntax correctness using
+                                      riscv64-unknown-elf-gcc tool
       -v, --verbose [info|error|debug]
                                       Set verbose level for debugging
       -m, --modules TEXT              Enter a list of modules as a string in a

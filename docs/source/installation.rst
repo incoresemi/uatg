@@ -216,6 +216,8 @@ Details and further specification of the config file syntax is available at
 .. code-block:: ini
    :linenos:
     
+    # See LICENSE.incore for license details
+
     [uatg]
 
     # [info, error, debug] set verbosity level to view different levels of messages.
@@ -235,7 +237,7 @@ Details and further specification of the config file syntax is available at
     work_dir = /home/user/myquickstart/work/
 
     # location to store the link.ld linker file. By default it's same as work_dir
-    linker_dir = /home/user/myquickstart/work/
+    linker_dir = /home/user/myquickstart/chromite_uatg_tests/target
 
     # Path to the yaml files containing DUT Configuration.
     configuration_files = /home/user/myquickstart/isa_config.yaml,/home/user/myquickstart/core_config.yaml,/home/user/myquickstart/custom_config.yaml,/home/user/myquickstart/csr_grouping.yaml
@@ -248,10 +250,14 @@ Details and further specification of the config file syntax is available at
     gen_test_list = True
     # [True, False] If the gen_test flag is True, assembly files are generated/overwritten
     gen_test = True
+    # [True, False] Perform a syntax check of the generated assembly files
+    dry_run = False
     # [True, False] If the val_test flag is True, Log from DUT are parsed and the modules are validated
     val_test = False
     # [True, False] If the gen_cvg flag is True, System Verilog cover-groups are generated
     gen_cvg = True
+    # [True, False] If the dry_run flag is True, assembly files are checked for syntax errors.
+    dry_run = False
 
 Once you have changed the user field in the paths, save the file. 
 You can run UATG using the ``from-config`` subcommand.

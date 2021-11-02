@@ -173,7 +173,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                         f.write(asm)
                     seq = '%03d' % (int(seq, 10) + 1)
                     logger.debug(f'Generating test for {test_name}')
-                    if dry_run:
+                    if dry_run.lower() == 'true':
                         if syntax_check(isa, link_path=work_dir,
                                         test_path=work_tests_dir,
                                         test_name=test_name,
