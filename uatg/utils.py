@@ -268,7 +268,7 @@ def combine_config_yamls(configuration_path):
         logger.error('Path to csr_grouping.yaml is invalid.')
         raise Exception('MISSING_CSRGROUPING')
 
-    return (dut_dict)
+    return dut_dict
 
 
 def join_yaml_reports(work_dir='abs_path_here/', module='branch_predictor'):
@@ -415,11 +415,11 @@ def create_plugins(plugins_path, module):
 
             try:
                 val = index_yaml[module][test_name]
-            except KeyError as e:
+            except KeyError:
                 logger.critical(f'There is no entry for test - {test_name}')
                 exit(f'update the index.yaml with your new test')
 
-            if val == True:
+            if val:
                 f = open(
                     os.path.join(plugins_path, test_name + '.yapsy-plugin'),
                     'w')
@@ -433,7 +433,7 @@ def create_plugins(plugins_path, module):
                     logger.warn(
                         f'removing already existing plugin file for {test_name}'
                     )
-                except:
+                except FileNotFoundError:
                     logger.debug(f'no plugin for {test_name} to remove')
                     pass
                 logger.warn(
@@ -462,13 +462,13 @@ def create_config_file(config_path):
           'same as work_dir\n' \
           'linker_dir = /home/user/myquickstart/work/' \
           '\n\n# Path to the yaml files containing DUT Configuration.\n' \
-          'configuration_files = /home/user/myquickstart/isa_config.yaml,'\
+          'configuration_files = /home/user/myquickstart/isa_config.yaml,' \
           '/home/user/myquickstart/core_config.yaml,' \
           '/home/user/myquickstart/custom_config.yaml,' \
           '/home/user/myquickstart/csr_grouping.yaml' \
           '\n\n# Absolute Path of the yaml file contain' \
           'ing the signal aliases of the DUT ' \
-          '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/'\
+          '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/' \
           'aliasing.yaml' \
           '\n\n# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
@@ -479,7 +479,8 @@ def create_config_file(config_path):
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = True'
+          'are generated\ngen_cvg = True\n# [True, False] If the dry_run flag' \
+          ' is True, assembly files are checked for syntax errors.\ndry_run = False'
 
     with open(os.path.join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
@@ -524,9 +525,9 @@ def create_dut_config_files(dut_config_path):
     rv64i_isa = f'hart_ids: [0]\nhart0:\n{s2}custom_exceptions:\n{s4}- cause' \
                 f'_val: 25\n{s4}  cause_name: halt_ebreak\n{s4}  priv_mode: M' \
                 f'\n{s4}- cause_val: 26\n{s4}  cause_name: halt_trigger\n{s4}' \
-                f'  priv_mode: M\n{s4}- cause_val: 28\n{s4}  cause_name: halt_'\
+                f'  priv_mode: M\n{s4}- cause_val: 28\n{s4}  cause_name: halt_' \
                 f'step\n{s4}  priv_mode: M\n{s4}- cause_val: 29\n' \
-                f'{s4}  cause_name: halt_reset\n'\
+                f'{s4}  cause_name: halt_reset\n' \
                 f'{s4}  priv_mode: M\n{s2}custom_interrupts:' \
                 f'\n{s4}- cause_val: 16\n{s4}  cause_name: debug_interrupt' \
                 f'\n{s4}  on_reset_enable: 1\n{s4}  priv_mode : M\n{s2}ISA: ' \
@@ -599,7 +600,7 @@ def create_dut_config_files(dut_config_path):
         f.write(csr_grouping64)
 
 
-def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4)\
+def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
         -> str:
     """
     
@@ -623,9 +624,9 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4)\
     if bit_width == 0:
         pass
     else:
-        max_signed = 2**(bit_width - 1) - 1
-        min_signed = -2**(bit_width - 1)
-        max_unsigned = 2**bit_width - 1
+        max_signed = 2 ** (bit_width - 1) - 1
+        min_signed = -2 ** (bit_width - 1)
+        max_unsigned = 2 ** bit_width - 1
         min_unsigned = 0
         # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
         #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
@@ -694,13 +695,11 @@ def split_isa_string(isa_string):
 
     str_match = re.findall(r'([^\d]*?)(?!_)*(Z.*?)*(_|$)', isa_string, re.M)
     extension_list = []
-    standard_isa = ''
     for match in str_match:
         stdisa, z, ignore = match
         if stdisa != '':
             for e in stdisa:
                 extension_list.append(e)
-            standard_isa = stdisa
         if z != '':
             extension_list.append(z)
 
@@ -797,3 +796,22 @@ def list_of_modules(module_dir):
     else:
         logger.error(f"index.yaml not found in {module_dir}")
         exit("FILE_NOT_FOUND")
+
+
+def syntax_check(isa, link_path, test_path, test_name, env_path, work_dir):
+    cmd = f'riscv64-unknown-elf-gcc ' \
+          f'-mcmodel=medany -static ' \
+          f'-std=gnu99 -O2 -fno-common ' \
+          f'-fno-builtin-printf ' \
+          f'-fvisibility=hidden  ' \
+          f'-march={isa.lower()[:8]} -mabi=lp64 ' \
+          f'-static -nostdlib -nostartfiles ' \
+          f'-lm -lgcc -T {link_path}/link.ld  {os.path.join(test_path, test_name, test_name + ".S")} -I {env_path}' \
+          f' -I {work_dir} -DXLEN=64 -o /dev/null'
+    # print(cmd)
+    os.system(cmd)
+    ret_val = os.system(cmd)
+    if ret_val != 0:
+        return False
+    else:
+        return True

@@ -10,13 +10,13 @@ import uatg
 from uatg.utils import create_plugins, generate_test_list
 from uatg.utils import create_linker, create_model_test_h
 from uatg.utils import join_yaml_reports, generate_sv_components
-from uatg.utils import list_of_modules, rvtest_data
+from uatg.utils import list_of_modules, rvtest_data, syntax_check
 from yapsy.PluginManager import PluginManager
 from uatg.log import logger
 
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
-                   modules_dir):
+                   modules_dir, dry_run=False):
     """
     The function generates ASM files for all the test classes specified within
     the module_dir. The user can also select the modules for which he would want
@@ -154,7 +154,8 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                             test_name] + ret_list_of_dicts['compile_macros']
                     except KeyError:
                         logger.debug(
-                            f'No custom Compile macros specified for {test_name}'
+                            f'No custom Compile macros specified for '
+                            f'{test_name}'
                         )
 
                     # Adding License, includes and macros
@@ -172,6 +173,16 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                         f.write(asm)
                     seq = '%03d' % (int(seq, 10) + 1)
                     logger.debug(f'Generating test for {test_name}')
+                    if dry_run:
+                        if syntax_check(isa, link_path=work_dir,
+                                        test_path=work_tests_dir,
+                                        test_name=test_name,
+                                        env_path=os.path.join(uarch_dir, 'env'),
+                                        work_dir=work_dir):
+                            logger.info(f'Syntax check passed for {test_name}')
+                        else:
+                            raise Exception(f'Syntax Check Failed for '
+                                            f'{test_name}')
             else:
                 logger.warning(f'Skipped {t_name}')
         logger.debug(f'Finished Generating Assembly Tests for {module}')
@@ -230,16 +241,8 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
     if modules == ['all']:
         logger.debug(f'Checking {modules_dir} for modules')
         modules = list_of_modules(modules_dir)
-    isa = 'RV64I'
     # yaml containing ISA parameters of DUT
     isa_yaml = config_dict['isa_dict']
-    try:
-        isa = isa_yaml['hart0']['ISA']
-    except Exception as e:
-        logger.error(e)
-        logger.error('Exiting UATG. ISA cannot be found/understood')
-        exit(0)
-
     logger.info('****** Generating Covergroups ******')
 
     sv_dir = os.path.join(work_dir, 'sv_top')
