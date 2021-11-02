@@ -96,7 +96,7 @@ atomic_mem_ops = {
     ],
     'rv64-mem-ops': [
         'amoswap.w', 'amoadd.w', 'amoxor.w', 'amoand.w', 'amoor.w', 'amomin.w',
-        'amomax.w', 'amominu.w', 'amomaxu.w'
+        'amomax.w', 'amominu.w', 'amomaxu.w',
                                  'amoswap.d', 'amoadd.d', 'amoxor.d',
         'amoand.d', 'amoor.d', 'amomin.d',
         'amomax.d', 'amominu.d', 'amomaxu.d'
