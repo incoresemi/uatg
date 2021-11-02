@@ -459,8 +459,8 @@ def create_config_file(config_path):
           '\n\n# Directory to dump assembly files and reports\n' \
           'work_dir = /home/user/myquickstart/work/' \
           '\n\n# location to store the link.ld linker file. By default it\'s ' \
-          'same as work_dir\n' \
-          'linker_dir = /home/user/myquickstart/work/' \
+          'the target directory within chromite_uatg_tests\n' \
+          'linker_dir = /home/user/myquickstart/chromite_uatg_tests/target' \
           '\n\n# Path to the yaml files containing DUT Configuration.\n' \
           'configuration_files = /home/user/myquickstart/isa_config.yaml,' \
           '/home/user/myquickstart/core_config.yaml,' \
