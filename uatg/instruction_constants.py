@@ -448,6 +448,10 @@ def illegal_generator(isa='RV32I'):
     # extension. it's initialized to store all illegal opcodes in the 7bit range
     illegal_list = [i for i in range(2 ** 7) if i not in instructions.keys()]
 
+    # Choosing illegals that DO NOT get interpreted as Compressed instructions.
+    # i.e now the list has instructions with opcode[1:0] == 0b11
+    illegal_list = [i for i in illegal_list if i % 4 == 3]
+
     for opcode in instructions:
         # Variable to store the legal fields
         legal_fields = []
