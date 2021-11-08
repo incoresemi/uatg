@@ -231,7 +231,6 @@ def list_modules(module_dir, verbose):
               help='Set verbose level for debugging',
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
-
 @cli.command()
 def from_config(config_file, verbose):
     """
