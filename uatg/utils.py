@@ -805,13 +805,13 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
     macros = ''
 
     if compile_macros:
-        macros = '-D' + '-D '.join(compile_macros)
+        macros = '-D' + ' -D'.join(compile_macros)
 
     flags = '-static -std=gnu99 -O2 -fno-common -fno-builtin-printf ' \
             '-fvisibility=hidden -static -nostdlib -nostartfiles -lm -lgcc'
     cmd = f'{compiler} -mcmodel={mcmodel} {flags} -march={march} -mabi={mabi}' \
           f' -lm -lgcc -T {os.path.join(link_path,"link.ld")} {test_path}' \
           f' -I {env_path}' \
-          f' -I {work_dir} -DXLEN=64 {macros}' \
+          f' -I {work_dir} {macros}' \
           f' -o /dev/null'
     return cmd
