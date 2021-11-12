@@ -84,8 +84,8 @@ mext_instructions = {
 
 # Load reserved - Store Conditional Operations
 atomic_lr_sc = {
-    'rv32-lr-sc': ['lr.w', 'sc.w'],
-    'rv64-lr-sc': ['lr.w', 'sc.w', 'lr.d', 'sc.d']
+    'rv32-lr-sc': [['lr.w', 'sc.w']],
+    'rv64-lr-sc': [['lr.w', 'sc.w'], ['lr.d', 'sc.d']]
 }
 
 # Memory operations
