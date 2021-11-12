@@ -134,18 +134,12 @@ def clean(module_dir, work_dir, verbose):
               help='Set verbose level for debugging',
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
-@click.option(
-    '--dry_run',
-    '-dr',
-    is_flag=True,
-    required=False,
-    help='Checks for syntax correctness using riscv64-unknown-elf-gcc tool')
 @cli.command()
 def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
              gen_test_list, work_dir, modules, verbose):
     """
     Generates tests, cover-groups for a list of modules corresponding to the DUT
-    parameters specified in the configuration yamls, inside the work_dir. 
+    parameters specified in the configuration yamls, inside the work_dir.
     Can also generate the test_list
     needed to execute them on RiverCore.\n
     Requires: -cfg, --configuration, -md, --module_dir; -wd, --work_dir\n
@@ -200,7 +194,7 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
 @cli.command()
 def list_modules(module_dir, verbose):
     """
-    Lists the micro-architecture modules of core supported 
+    Lists the micro-architecture modules of core supported
     among the modules actually present in the DUT\n
     Requires: -md, --module_dir
     """
@@ -262,8 +256,7 @@ def from_config(config_file, verbose):
                        modules_dir=module_dir,
                        modules=module,
                        config_dict=dut_dict,
-                       test_list=config['uatg']['gen_test_list'],
-                       dry_run=config['uatg']['dry_run'])
+                       test_list=config['uatg']['gen_test_list'])
 
     if config['uatg']['gen_cvg'].lower() == 'true':
         alias_dict = load_yaml(config['uatg']['alias_file'])

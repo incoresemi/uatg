@@ -6,14 +6,13 @@ import re
 import glob
 import random as rnd
 from uatg.log import logger
-import ruamel
 from ruamel.yaml import YAML
 
 
 class sv_components:
     """
         This class contains the methods which will return the tb_top and
-        interface system verilog tests. This text will be written into 
+        interface system verilog tests. This text will be written into
         SV files.
     """
 
@@ -44,7 +43,7 @@ class sv_components:
     # function to generate interface string to be written as interface.sv
     def generate_interface(self):
         """
-           returns interface SV syntax. 
+           returns interface SV syntax.
         """
         interface = f"interface chromite_intf(input bit CLK,RST_N);\n\t" \
                     f"logic {self.rg_initialize};\n\tlogic [4:0" \
@@ -176,7 +175,7 @@ endmoduleNeeded to generate/validate tests
     # on the simulator.
     def generate_defines(self):
         """
-        creates the syntax for the defines file which will be used to select 
+        creates the syntax for the defines file which will be used to select
         tests.
         """
         defines = f"""/// All compile time macros will be defined here
@@ -215,7 +214,7 @@ def load_yaml(file):
     """
         Common function to load YAML Files.
         The function checks if the file is of YAML format else exits.
-        If the file is in YAML, it reads the file and returns the data from the 
+        If the file is in YAML, it reads the file and returns the data from the
         file as a dictionary.
     """
     if os.path.exists(file) and (file.endswith('.yaml') or
@@ -226,8 +225,8 @@ def load_yaml(file):
         try:
             with open(file, "r") as file:
                 return yaml.load(file)
-        except ruamel.yaml.constructor.DuplicateKeyError as msg:
-            logger.error(f'error: {msg}')
+        except KeyError:
+            logger.error(f'Error Loading YAML')
     else:
         logger.error(f'error: {file} is not a valid yaml file')
         exit('INVALID_FILE/PATH')
@@ -236,7 +235,7 @@ def load_yaml(file):
 def combine_config_yamls(configuration_path):
     """
         This function reads all the YAML file paths specified by the user.
-        Loads the data into a dictionary and then returns it to the invoking 
+        Loads the data into a dictionary and then returns it to the invoking
         method.
     """
     dut_dict = {}
@@ -296,8 +295,8 @@ def join_yaml_reports(work_dir='abs_path_here/', module='branch_predictor'):
 
 def create_linker(target_dir):
     """
-        Creates a template linker file in the target_directory specified by the 
-        user. 
+        Creates a template linker file in the target_directory specified by the
+        user.
     """
 
     out = '''OUTPUT_ARCH( "riscv" )
@@ -398,9 +397,9 @@ shakti_end:                                                             \
 def create_plugins(plugins_path, module):
     """
     This function is used to create Yapsy Plugin files.
-    The YAPSY plugins are required to be in a certain pattern. This function 
+    The YAPSY plugins are required to be in a certain pattern. This function
     will read the test classes and create files complying to the pattern.
-    Yapsy will ignore all other python file which does not have a 
+    Yapsy will ignore all other python file which does not have a
     .yapsy-plugin file associated with it.
     """
     # the index yaml is in the modules directory
@@ -479,9 +478,7 @@ def create_config_file(config_path):
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = True\n# [True, False] If the dry_run flag' \
-          ' is True, assembly files are checked for syntax errors.\n' \
-          'dry_run = False'
+          'are generated\ngen_cvg = True\n'
 
     with open(os.path.join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
@@ -799,22 +796,22 @@ def list_of_modules(module_dir):
         exit("FILE_NOT_FOUND")
 
 
-def syntax_check(isa, link_path, test_path, test_name, env_path, work_dir):
-    cmd = f'riscv64-unknown-elf-gcc ' \
-          f'-mcmodel=medany -static ' \
-          f'-std=gnu99 -O2 -fno-common ' \
-          f'-fno-builtin-printf ' \
-          f'-fvisibility=hidden  ' \
-          f'-march={isa.lower()[:8]} -mabi=lp64 ' \
-          f'-static -nostdlib -nostartfiles ' \
-          f'-lm -lgcc -T {link_path}/link.ld  ' \
-          f'{os.path.join(test_path, test_name, test_name + ".S")}' \
+def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
+                  compile_macros):
+    compiler = 'riscv64-unknown-elf-gcc'
+    mcmodel = 'medany'
+    mabi = 'lp64'
+    march = isa.lower()[:8]
+    macros = ''
+
+    if compile_macros:
+        macros = '-D' + '-D '.join(compile_macros)
+
+    flags = '-static -std=gnu99 -O2 -fno-common -fno-builtin-printf ' \
+            '-fvisibility=hidden -static -nostdlib -nostartfiles -lm -lgcc'
+    cmd = f'{compiler} -mcmodel={mcmodel} {flags} -march={march} -mabi={mabi}' \
+          f' -lm -lgcc -T {os.path.join(link_path,"link.ld")} {test_path}' \
           f' -I {env_path}' \
-          f' -I {work_dir} -DXLEN=64 -o /dev/null'
-    # print(cmd)
-    os.system(cmd)
-    ret_val = os.system(cmd)
-    if ret_val != 0:
-        return False
-    else:
-        return True
+          f' -I {work_dir} -DXLEN=64 {macros}' \
+          f' -o /dev/null'
+    return cmd

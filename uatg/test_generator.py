@@ -7,26 +7,25 @@ from getpass import getuser
 from datetime import datetime
 import ruamel.yaml as yaml
 import uatg
-from uatg.utils import create_plugins, generate_test_list
-from uatg.utils import create_linker, create_model_test_h
-from uatg.utils import join_yaml_reports, generate_sv_components
-from uatg.utils import list_of_modules, rvtest_data, syntax_check
-from yapsy.PluginManager import PluginManager
 from uatg.log import logger
+from uatg.utils import create_plugins, generate_test_list, create_linker, \
+    create_model_test_h, join_yaml_reports, generate_sv_components, \
+    list_of_modules, rvtest_data, dump_makefile
+from yapsy.PluginManager import PluginManager
 
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
-                   modules_dir, dry_run=False):
+                   modules_dir):
     """
     The function generates ASM files for all the test classes specified within
     the module_dir. The user can also select the modules for which he would want
     the tests to be generated for. The YAPSY plugins for the tests are generated
     by the function automatically.
 
-    The tests are created within the work directory passed by the user. A 
+    The tests are created within the work directory passed by the user. A
     test_list is also created in the yaml format by the function. The test
     generator also creates a linker file as well as the header files for running
-    the ASM files on the DUT, when required. Finally, the test generator only 
+    the ASM files on the DUT, when required. Finally, the test generator only
     generates the tests whose targets are implemented in the DUT.
     """
     uarch_dir = os.path.dirname(uatg.__file__)
@@ -56,11 +55,17 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     logger.debug(f'The modules are {modules}')
 
     test_list_dict = {}
+    # creating a variable to store the makefile commands
+    make_file = {'all': modules, 'tests': []}
+    if os.path.exists(os.path.join(work_dir, 'makefile')):
+        os.remove(os.path.join(work_dir, 'makefile'))
+
     logger.info('****** Generating Tests ******')
     for module in modules:
         module_dir = os.path.join(modules_dir, module)
         work_tests_dir = os.path.join(work_dir, module)
 
+        # initializing make commands for individual modules
         # the yaml file containing configuration data for the DUT
         core_yaml = config_dict['core_config']
 
@@ -151,12 +156,12 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
                     try:
                         compile_macros_dict[test_name] = compile_macros_dict[
-                            test_name] + ret_list_of_dicts['compile_macros']
+                                                             test_name] + \
+                                                         ret_list_of_dicts[
+                                                             'compile_macros']
                     except KeyError:
-                        logger.debug(
-                            f'No custom Compile macros specified for '
-                            f'{test_name}'
-                        )
+                        logger.debug(f'No custom Compile macros specified for '
+                                     f'{test_name}')
 
                     # Adding License, includes and macros
                     asm = license_str + includes + test_entry
@@ -173,16 +178,21 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                         f.write(asm)
                     seq = '%03d' % (int(seq, 10) + 1)
                     logger.debug(f'Generating test for {test_name}')
-                    if dry_run.lower() == 'true':
-                        if syntax_check(isa, link_path=work_dir,
-                                        test_path=work_tests_dir,
-                                        test_name=test_name,
-                                        env_path=os.path.join(uarch_dir, 'env'),
-                                        work_dir=work_dir):
-                            logger.info(f'Syntax check passed for {test_name}')
-                        else:
-                            raise Exception(f'Syntax Check Failed for '
-                                            f'{test_name}')
+                    try:
+                        make_file[module].append(test_name)
+                    except KeyError:
+                        make_file[module] = [test_name]
+                    make_file['tests'].append(
+                        (test_name,
+                         dump_makefile(
+                             isa=isa,
+                             link_path=linker_dir,
+                             test_path=os.path.join(work_tests_dir, test_name,
+                                                    test_name + '.S'),
+                             test_name=test_name,
+                             compile_macros=compile_macros_dict[test_name],
+                             env_path=os.path.join(uarch_dir, 'env'),
+                             work_dir=work_dir)))
             else:
                 logger.warning(f'Skipped {t_name}')
         logger.debug(f'Finished Generating Assembly Tests for {module}')
@@ -191,7 +201,18 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             test_list_dict.update(
                 generate_test_list(work_tests_dir, uarch_dir, isa,
                                    test_list_dict, compile_macros_dict))
-
+    with open(os.path.join(work_dir, 'makefile'), 'w') as f:
+        f.write('all' + ': ')
+        f.write(' \\\n\t'.join(make_file['all']))
+        f.write('\n')
+        for i in modules:
+            f.write(i + ': ')
+            f.write(' \\\n\t'.join(make_file[i]))
+            f.write('\n')
+        f.write('\n')
+        for i in make_file['tests']:
+            f.write(i[0] + ': \n\t')
+            f.write(i[1] + '\n')
     logger.info('****** Finished Generating Tests ******')
 
     if linker_dir and os.path.isfile(os.path.join(linker_dir, 'link.ld')):
@@ -222,13 +243,13 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
 def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
     """
-    The generate_sv function dumps the covergroups written by the user into a 
+    The generate_sv function dumps the covergroups written by the user into a
     'coverpoints.sv' file present within the 'sv_top' directory within the work
-    directory. 
-    This function dumps into an SV file only if the test_class contains the 
+    directory.
+    This function dumps into an SV file only if the test_class contains the
     generate_covergroups method. This function, like generate_asm also allows to
     select the modules for which covergroups are to be generated.
-    In addition, the method also takes in an alias_dict which can be used to 
+    In addition, the method also takes in an alias_dict which can be used to
     alias the BSV signal names to something even more comprehensible.
     """
     uarch_dir = os.path.dirname(uatg.__file__)
@@ -298,10 +319,10 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
 def validate_tests(modules, config_dict, work_dir, modules_dir):
     """
        Parses the log returned from the DUT for finding if the tests
-       were successful. 
-       The user should have created regular expressions for the patterns he's 
+       were successful.
+       The user should have created regular expressions for the patterns he's
        expecting to be seen in the log generated by the DUT.
-       In addition to just the checking, it can also be set up to provide a 
+       In addition to just the checking, it can also be set up to provide a
        report for every test for which the user tries to validate.
     """
 
@@ -385,8 +406,8 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
 
 def clean_dirs(work_dir, modules_dir):
     """
-    This function cleans the files generated by UATG. 
-    Presently it removes __pycache__, work_dir directory and also removes 
+    This function cleans the files generated by UATG.
+    Presently it removes __pycache__, work_dir directory and also removes
     the '.yapsy plugins' files in the module's directories.
     """
     uarch_dir = os.path.dirname(uatg.__file__)
