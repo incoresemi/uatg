@@ -526,6 +526,10 @@ def illegal_generator(isa='RV32I'):
                 if (illegal_list[i] >> 7) % 32 == 0:
                     illegal_list[i] += rd << 7  # rd != x0
                 if (illegal_list[i] >> 15) % 32 == 0:
-                    illegal_list[i] += rs << 7  # rs1 != x0
+                    illegal_list[i] += rs << 15  # rs1 != x0
+
+            if opcode in [47] and (illegal_list[i] >> 12) % 8 in [2, 3]:
+                # TODO: Temporary fix for AMO instructions
+                illegal_list[i] -= 2 << 12  # converting illegal 2,3 to 0,1
 
     return illegal_list
