@@ -97,7 +97,7 @@ atomic_mem_ops = {
     'rv64-mem-ops': [
         'amoswap.w', 'amoadd.w', 'amoxor.w', 'amoand.w', 'amoor.w', 'amomin.w',
         'amomax.w', 'amominu.w', 'amomaxu.w',
-                                 'amoswap.d', 'amoadd.d', 'amoxor.d',
+        'amoswap.d', 'amoadd.d', 'amoxor.d',
         'amoand.d', 'amoor.d', 'amomin.d',
         'amomax.d', 'amominu.d', 'amomaxu.d'
     ]
@@ -497,5 +497,24 @@ def illegal_generator(isa='RV32I'):
                                     inst_32 = opcode
                                     inst_32 += (ival << beg_i) + (lval << beg_l)
                                     illegal_list.append(inst_32)
+        # Removing HINT instructions
+        for i in range(len(illegal_list)):
+            inst = illegal_list[i]
+            opcode = inst % 128
+            rs, rd = 5, 6
 
+            if opcode in [55, 23, 19, 27, 51, 59]:
+                # Avoiding hint regions for
+                # 55-LUI,
+                # 23-AUIPC
+                # 19-addi, xori, ori, andi, slti, sltiu
+                # 27-addiw, slliw, srliw, sraiw
+                # 51-add, sub, sll, slt, sltu, xor, srl, sra, or, and
+                # 59-addw, subw, sllw, srlw, sraw
+                # 19-slli, srli, srai
+                if (illegal_list[i] >> 7) % 32 == 0:
+                    illegal_list[i] += rd << 7  # rd != 0
+                    if opcode == 15 and (illegal_list[i] >> 12) % 8:
+                        # Fence pred/succ !=0
+                        inst += 1 << 20
     return illegal_list
