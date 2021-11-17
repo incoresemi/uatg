@@ -13,6 +13,129 @@ from uatg.utils import create_plugins, generate_test_list, create_linker, \
     list_of_modules, rvtest_data, dump_makefile
 from yapsy.PluginManager import PluginManager
 
+from multiprocessing import Pool, Manager
+
+
+def f1(args):
+    """
+        for every plugin, a process shall be spawned.
+    """
+
+    # unpacking the args tuple
+    plugin = args[0]
+    core_yaml = args[1]
+    isa_yaml = args[2]
+    isa = args[3]
+    test_format_string = args[4]
+    work_tests_dir = args[5]
+    make_file = args[6]
+    test_list_dict = args[7]
+    module = args[8]
+    linker_dir = args[9]
+    uarch_dir = args[10]
+    work_dir = args[11]
+    compile_macros_dict = args[12]
+
+    # actual generation process
+    check = plugin.plugin_object.execute(core_yaml, isa_yaml)
+    name = (str(plugin.plugin_object).split(".", 1))
+    t_name = ((name[1].split(" ", 1))[0])
+
+    if check:
+        test_seq = plugin.plugin_object.generate_asm()
+        assert isinstance(test_seq, list)
+        seq = '001'
+        for ret_list_of_dicts in test_seq:
+            test_name = ((name[1].split(" ", 1))[0]) + '-' + seq
+            logger.debug(f'Selected test: {test_name}')
+
+            assert isinstance(ret_list_of_dicts, dict)
+            # Checking for the returned sections from each test
+            asm_code = ret_list_of_dicts['asm_code']
+
+            try:
+                if ret_list_of_dicts['name_postfix']:
+                    inst_name_postfix = '-' + ret_list_of_dicts['name_postfix']
+                else:
+                    inst_name_postfix = ''
+            except KeyError:
+                inst_name_postfix = ''
+
+            # add inst name to test name as postfix
+            test_name = test_name + inst_name_postfix
+
+            try:
+                asm_data = ret_list_of_dicts['asm_data']
+            except KeyError:
+                asm_data = rvtest_data(bit_width=0, num_vals=1, random=True)
+
+            try:
+                asm_sig = ret_list_of_dicts['asm_sig']
+            except KeyError:
+                asm_sig = '\n'
+
+            # create an entry in the compile_macros dict
+            if 'rv64' in isa.lower():
+                compile_macros_dict[test_name] = ['XLEN=64']
+            else:
+                compile_macros_dict[test_name] = ['XLEN=32']
+
+            try:
+                compile_macros_dict[test_name] = compile_macros_dict[
+                                                     test_name] + \
+                                                 ret_list_of_dicts[
+                                                     'compile_macros']
+            except KeyError:
+                logger.debug(f'No custom Compile macros specified for '
+                             f'{test_name}')
+
+            # Adding License, includes and macros
+            # asm = license_str + includes + test_entry
+            asm = (test_format_string[0] + test_format_string [1] +\
+                   test_format_string[2])
+
+            # Appending Coding Macros & Instructions
+            # asm += rvcode_begin + asm_code + rvcode_end
+            asm += (test_format_string[3] + asm_code +\
+                    test_format_string[4])
+
+            # Appending RVTEST_DATA macros and data values
+            # asm += rvtest_data_begin + asm_data + rvtest_data_end
+            asm += (test_format_string[5] + asm_data+\
+                    test_format_string[6])
+
+            # Appending RVMODEL macros
+            # asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
+            asm += (test_format_string[7] + asm_sig+\
+                    test_format_string[8])
+
+            os.mkdir(os.path.join(work_tests_dir, test_name))
+            with open(os.path.join(work_tests_dir, test_name, test_name + '.S'),
+                      'w') as f:
+                f.write(asm)
+            seq = '%03d' % (int(seq, 10) + 1)
+            logger.debug(f'Generating test for {test_name}')
+            try:
+                make_file[module].append(test_name)
+            except KeyError:
+                make_file[module] = [test_name]
+            make_file['tests'].append(
+                (test_name,
+                 dump_makefile(isa=isa,
+                               link_path=linker_dir,
+                               test_path=os.path.join(work_tests_dir, test_name,
+                                                      test_name + '.S'),
+                               test_name=test_name,
+                               compile_macros=compile_macros_dict[test_name],
+                               env_path=os.path.join(uarch_dir, 'env'),
+                               work_dir=work_dir)))
+    else:
+        logger.warning(f'Skipped {t_name}')
+
+    logger.debug(f'Finished Generating Assembly Files for {t_name}')
+
+    return True
+
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                    modules_dir):
@@ -54,9 +177,22 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         modules = list_of_modules(modules_dir)
     logger.debug('The modules are {0}'.format((', '.join(modules))))
 
+    # create a manager for shared resources
+    process_manager = Manager()
+
+    # creating a shared dictionary which can be accessed by all processes
+    # stores the makefile commands
+
+    make_file = process_manager.dict({'all': modules, 'tests': []})
+
+    # creating a shared dict to store test_list info
+    # test_list_dict = process_manager.dict()
     test_list_dict = {}
-    # creating a variable to store the makefile commands
-    make_file = {'all': modules, 'tests': []}
+
+    # creating a shared compile_macros dict
+    # this dictionary will contain all the compile macros for each test
+    compile_macros_dict = process_manager.dict()
+
     if os.path.exists(os.path.join(work_dir, 'makefile')):
         os.remove(os.path.join(work_dir, 'makefile'))
 
@@ -103,104 +239,35 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
         logger.debug(f'Generating assembly tests for {module}')
 
-        # this dictionary will contain all the compile macros for each test
-        compile_macros_dict = {}
+        # test format strings
+        test_format_string = [
+            license_str, includes, test_entry, rvcode_begin, rvcode_end,
+            rvtest_data_begin, rvtest_data_end, rvmodel_data_begin,
+            rvmodel_data_end
+        ]
 
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
+        arg_list = []
         for plugin in manager.getAllPlugins():
-            check = plugin.plugin_object.execute(core_yaml, isa_yaml)
-            name = (str(plugin.plugin_object).split(".", 1))
-            t_name = ((name[1].split(" ", 1))[0])
-            if check:
-                test_seq = plugin.plugin_object.generate_asm()
-                assert isinstance(test_seq, list)
-                seq = '001'
-                for ret_list_of_dicts in test_seq:
-                    test_name = ((name[1].split(" ", 1))[0]) + '-' + seq
-                    logger.debug(f'Selected test: {test_name}')
+            arg_list.append(
+                (plugin, core_yaml, isa_yaml, isa, test_format_string,
+                 work_tests_dir, make_file, test_list_dict, module, linker_dir,
+                 uarch_dir, work_dir, compile_macros_dict))
 
-                    assert isinstance(ret_list_of_dicts, dict)
-                    # Checking for the returned sections from each test
-                    asm_code = ret_list_of_dicts['asm_code']
+        # multi processing process pool
+        process_pool = Pool()
+        process_pool.map(f1, arg_list)
+        process_pool.close()
 
-                    try:
-                        if ret_list_of_dicts['name_postfix']:
-                            inst_name_postfix = '-' + ret_list_of_dicts[
-                                'name_postfix']
-                        else:
-                            inst_name_postfix = ''
-                    except KeyError:
-                        inst_name_postfix = ''
-
-                    # add inst name to test name as postfix
-                    test_name = test_name + inst_name_postfix
-
-                    try:
-                        asm_data = ret_list_of_dicts['asm_data']
-                    except KeyError:
-                        asm_data = rvtest_data(bit_width=0,
-                                               num_vals=1,
-                                               random=True)
-
-                    try:
-                        asm_sig = ret_list_of_dicts['asm_sig']
-                    except KeyError:
-                        asm_sig = '\n'
-
-                    # create an entry in the compile_macros dict
-                    if 'rv64' in isa.lower():
-                        compile_macros_dict[test_name] = ['XLEN=64']
-                    else:
-                        compile_macros_dict[test_name] = ['XLEN=32']
-
-                    try:
-                        compile_macros_dict[test_name] = compile_macros_dict[
-                                                             test_name] + \
-                                                         ret_list_of_dicts[
-                                                             'compile_macros']
-                    except KeyError:
-                        logger.debug(f'No custom Compile macros specified for '
-                                     f'{test_name}')
-
-                    # Adding License, includes and macros
-                    asm = license_str + includes + test_entry
-                    # Appending Coding Macros & Instructions
-                    asm += rvcode_begin + asm_code + rvcode_end
-                    # Appending RVTEST_DATA macros and data values
-                    asm += rvtest_data_begin + asm_data + rvtest_data_end
-                    # Appending RVMODEL macros
-                    asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
-                    os.mkdir(os.path.join(work_tests_dir, test_name))
-                    with open(
-                            os.path.join(work_tests_dir, test_name,
-                                         test_name + '.S'), 'w') as f:
-                        f.write(asm)
-                    seq = '%03d' % (int(seq, 10) + 1)
-                    logger.debug(f'Generating test for {test_name}')
-                    try:
-                        make_file[module].append(test_name)
-                    except KeyError:
-                        make_file[module] = [test_name]
-                    make_file['tests'].append(
-                        (test_name,
-                         dump_makefile(
-                             isa=isa,
-                             link_path=linker_dir,
-                             test_path=os.path.join(work_tests_dir, test_name,
-                                                    test_name + '.S'),
-                             test_name=test_name,
-                             compile_macros=compile_macros_dict[test_name],
-                             env_path=os.path.join(uarch_dir, 'env'),
-                             work_dir=work_dir)))
-            else:
-                logger.warning(f'Skipped {t_name}')
         logger.debug(f'Finished Generating Assembly Tests for {module}')
+        
         if test_list:
             logger.info(f'Creating test_list for the {module}')
             test_list_dict.update(
-                generate_test_list(work_tests_dir, uarch_dir, isa,
-                                   test_list_dict, compile_macros_dict))
+                generate_test_list(work_tests_dir, uarch_dir, isa, test_list_dict,
+                                   compile_macros_dict))
+
     with open(os.path.join(work_dir, 'makefile'), 'w') as f:
         logger.debug('Dumping makefile')
         f.write('all' + ': ')
