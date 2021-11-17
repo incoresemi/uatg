@@ -522,11 +522,11 @@ def illegal_generator(isa='RV32I'):
             # Making load/stores to use proper address values
             # 3-lb, lh, lw, lbu, lhu, ld, lwu
             # 35-sb, sh, sw, sd
-            if opcode == 3 and (illegal_list[i] >> 7) % 32 == 0:
-                illegal_list[i] += rd << 7  # rd != x0
+            if opcode == 3 and (illegal_list[i] >> 15) % 32 == 0:
+                # illegal_list[i] += rd << 7  # rd != x0
+                illegal_list[i] += rs << 15  # rs != x0
             if opcode == 35 and (illegal_list[i] >> 15) % 32 == 0:
-                illegal_list[i] += rs << 19  # rs1 != x0
-
+                illegal_list[i] += rs << 15  # rs1 != x0
             if opcode in [47] and (illegal_list[i] >> 12) % 8 in [2, 3]:
                 # TODO: Temporary fix for AMO instructions
                 illegal_list[i] -= 2 << 12  # converting illegal 2,3 to 0,1
