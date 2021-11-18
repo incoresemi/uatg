@@ -1011,7 +1011,7 @@ RVTEST_SIGUPD(swreg,destreg,offset)
   LI(testreg, imm_val);\
   sub rs1, rs1, testreg;\
   inst1 destreg, rs1, rs2;\
-  inst destreg, imm_val(rs1):\
+  inst destreg, imm_val(rs1);\
   RVTEST_SIGUPD(swreg,destreg,offset)
 
 //-----------------------------------------------------------------------------
