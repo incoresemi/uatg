@@ -382,7 +382,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
     if modules == ['all']:
         logger.debug(f'Checking {modules_dir} for modules')
         modules = list_of_modules(modules_dir)
-    
+
     # yaml containing ISA parameters of DUT
     isa_yaml = config_dict['isa_dict']
     logger.info('****** Generating Covergroups ******')
@@ -413,7 +413,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
-        
+
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
         arg_list = []
@@ -432,7 +432,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
     with open(sv_file, 'w') as f:
         logger.info('Dumping the covergroups into SV file')
         f.write('\n'.join(cover_list))
-    
+
     logger.info('****** Finished Generating Covergroups ******')
 
 
