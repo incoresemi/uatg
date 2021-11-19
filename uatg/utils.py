@@ -814,4 +814,5 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
           f' -I {env_path}' \
           f' -I {work_dir} {macros}' \
           f' -o /dev/null'
+    
     return cmd

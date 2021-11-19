@@ -11,6 +11,7 @@ from uatg.utils import list_of_modules, info, clean_modules, load_yaml
 from uatg.utils import create_dut_config_files, create_config_file
 from uatg.utils import combine_config_yamls, create_alias_file
 
+from time import time as t
 
 @click.group()
 @click.version_option(version=__version__)
@@ -231,6 +232,7 @@ def from_config(config_file, verbose):
     Reads config.ini and invokes uatg with read paramaters.\n
     Optional: -c, --config
     """
+    time_val = t()
 
     config = ConfigParser()
     config.read(config_file)
@@ -276,7 +278,7 @@ def from_config(config_file, verbose):
         logger.debug('Invoking clean_dirs')
         clean_dirs(work_dir=config['uatg']['work_dir'], modules_dir=module_dir)
 
-
+    logger.debug('runtime is {}'.format(t() - time_val))
 # -------------------------
 
 

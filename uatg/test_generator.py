@@ -15,12 +15,15 @@ from yapsy.PluginManager import PluginManager
 
 from multiprocessing import Pool, Manager
 
+# create a manager for shared resources
+process_manager = Manager()
 
-def f1(args):
+
+def asm_generation_process(args):
     """
         for every plugin, a process shall be spawned.
+        The new process shall create an Assembly test file.
     """
-
     # unpacking the args tuple
     plugin = args[0]
     core_yaml = args[1]
@@ -29,12 +32,12 @@ def f1(args):
     test_format_string = args[4]
     work_tests_dir = args[5]
     make_file = args[6]
-    test_list_dict = args[7]
-    module = args[8]
-    linker_dir = args[9]
-    uarch_dir = args[10]
-    work_dir = args[11]
-    compile_macros_dict = args[12]
+    module = args[7]
+    linker_dir = args[8]
+    uarch_dir = args[9]
+    work_dir = args[10]
+    compile_macros_dict = args[11]
+    #process_manager = args[12]
 
     # actual generation process
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
@@ -115,10 +118,13 @@ def f1(args):
                 f.write(asm)
             seq = '%03d' % (int(seq, 10) + 1)
             logger.debug(f'Generating test for {test_name}')
+
             try:
                 make_file[module].append(test_name)
+
             except KeyError:
-                make_file[module] = [test_name]
+                make_file[module] = process_manager.list([test_name])
+
             make_file['tests'].append(
                 (test_name,
                  dump_makefile(isa=isa,
@@ -129,10 +135,44 @@ def f1(args):
                                compile_macros=compile_macros_dict[test_name],
                                env_path=os.path.join(uarch_dir, 'env'),
                                work_dir=work_dir)))
+
     else:
         logger.warning(f'Skipped {t_name}')
 
     logger.debug(f'Finished Generating Assembly Files for {t_name}')
+
+    return True
+
+
+def sv_generation_process(args):
+    """
+        for every plugin, a process shall be spawned.
+        The process shall generate System Verilog coverpoints
+    """
+    # unpack the args
+    plugin = args[0]
+    core_yaml = args[1]
+    isa_yaml = args[2]
+    alias_dict = args[3]
+    cover_list = args[4]
+
+    _check = plugin.plugin_object.execute(core_yaml, isa_yaml)
+    _name = (str(plugin.plugin_object).split(".", 1))
+    _test_name = ((_name[1].split(" ", 1))[0])
+    if _check:
+        try:
+            _sv = plugin.plugin_object.generate_covergroups(alias_dict)
+            cover_list.append(_sv)
+            logger.debug(f'Generating coverpoints SV file for {_test_name}')
+
+        except AttributeError:
+            logger.warn(f'Skipping coverpoint generation for {_test_name} as '
+                        f'there is no gen_covergroup method ')
+            pass
+
+    else:
+        logger.critical(f'Skipped {_test_name} as this test is not '
+                        f'created for the current DUT configuration ')
 
     return True
 
@@ -177,13 +217,16 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         modules = list_of_modules(modules_dir)
     logger.debug('The modules are {0}'.format((', '.join(modules))))
 
-    # create a manager for shared resources
-    process_manager = Manager()
-
     # creating a shared dictionary which can be accessed by all processes
     # stores the makefile commands
 
-    make_file = process_manager.dict({'all': modules, 'tests': []})
+    make_file = process_manager.dict({
+        'all': modules,
+        'tests': (process_manager.list())
+    })
+
+    #make_file['all'] = modules
+    #make_file['tests'] = []
 
     # creating a shared dict to store test_list info
     # test_list_dict = process_manager.dict()
@@ -252,21 +295,22 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         for plugin in manager.getAllPlugins():
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
-                 work_tests_dir, make_file, test_list_dict, module, linker_dir,
-                 uarch_dir, work_dir, compile_macros_dict))
+                 work_tests_dir, make_file, module, linker_dir, uarch_dir,
+                 work_dir, compile_macros_dict))
 
         # multi processing process pool
         process_pool = Pool()
-        process_pool.map(f1, arg_list)
+        # creating a map of processes
+        process_pool.map(asm_generation_process, arg_list)
         process_pool.close()
 
         logger.debug(f'Finished Generating Assembly Tests for {module}')
-        
+
         if test_list:
             logger.info(f'Creating test_list for the {module}')
             test_list_dict.update(
-                generate_test_list(work_tests_dir, uarch_dir, isa, test_list_dict,
-                                   compile_macros_dict))
+                generate_test_list(work_tests_dir, uarch_dir, isa,
+                                   test_list_dict, compile_macros_dict))
 
     with open(os.path.join(work_dir, 'makefile'), 'w') as f:
         logger.debug('Dumping makefile')
@@ -338,6 +382,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
     if modules == ['all']:
         logger.debug(f'Checking {modules_dir} for modules')
         modules = list_of_modules(modules_dir)
+    
     # yaml containing ISA parameters of DUT
     isa_yaml = config_dict['isa_dict']
     logger.info('****** Generating Covergroups ******')
@@ -354,6 +399,9 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         logger.debug("Removing Existing coverpoints SV file")
         os.remove(sv_file)
 
+    # create a shared list for storing the coverpoints
+    cover_list = process_manager.list()
+
     for module in modules:
         logger.debug(f'Generating CoverPoints for {module}')
 
@@ -365,30 +413,26 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         manager = PluginManager()
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
-
+        
+        # Loop around and find the plugins and writes the contents from the
+        # plugins into an asm file
+        arg_list = []
         for plugin in manager.getAllPlugins():
-            _check = plugin.plugin_object.execute(core_yaml, isa_yaml)
-            _name = (str(plugin.plugin_object).split(".", 1))
-            _test_name = ((_name[1].split(" ", 1))[0])
-            if _check:
-                try:
-                    _sv = plugin.plugin_object.generate_covergroups(alias_dict)
-                    with open(sv_file, "a") as f:
-                        logger.info(
-                            f'Generating coverpoints SV file for {_test_name}')
-                        f.write(_sv)
+            arg_list.append(
+                (plugin, core_yaml, isa_yaml, alias_dict, cover_list))
 
-                except AttributeError:
-                    logger.warn(
-                        f'Skipping coverpoint generation for {_test_name} as '
-                        f'there is no gen_covergroup method ')
-                    pass
-
-            else:
-                logger.critical(f'Skipped {_test_name} as this test is not '
-                                f'created for the current DUT configuration ')
+        # multi processing process pool
+        process_pool = Pool()
+        # creating a map of processes
+        process_pool.map(sv_generation_process, arg_list)
+        process_pool.close()
 
         logger.debug(f'Finished Generating Coverpoints for {module}')
+
+    with open(sv_file, 'w') as f:
+        logger.info('Dumping the covergroups into SV file')
+        f.write('\n'.join(cover_list))
+    
     logger.info('****** Finished Generating Covergroups ******')
 
 
