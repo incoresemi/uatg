@@ -89,10 +89,8 @@ class Log:
         for log_level in self.aliases:
             if lvl == log_level or lvl in self.aliases[log_level]:
                 return log_level
-        print(
-            'Invalid log level passed. Please select from debug '
-            '| info | warning | error'
-        )
+        print('Invalid log level passed. Please select from debug '
+              '| info | warning | error')
         raise ValueError("{}-Invalid log level.".format(lvl))
 
     def level(self, lvl=logging.CRITICAL):

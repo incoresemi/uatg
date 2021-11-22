@@ -622,9 +622,9 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
     if bit_width == 0:
         pass
     else:
-        max_signed = 2 ** (bit_width - 1) - 1
-        min_signed = -2 ** (bit_width - 1)
-        max_unsigned = 2 ** bit_width - 1
+        max_signed = 2**(bit_width - 1) - 1
+        min_signed = -2**(bit_width - 1)
+        max_unsigned = 2**bit_width - 1
         min_unsigned = 0
         # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
         #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
@@ -814,4 +814,5 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
           f' -I {env_path}' \
           f' -I {work_dir} {macros}' \
           f' -o /dev/null'
+
     return cmd

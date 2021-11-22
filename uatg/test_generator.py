@@ -13,6 +13,169 @@ from uatg.utils import create_plugins, generate_test_list, create_linker, \
     list_of_modules, rvtest_data, dump_makefile
 from yapsy.PluginManager import PluginManager
 
+from multiprocessing import Pool, Manager
+
+# create a manager for shared resources
+process_manager = Manager()
+
+
+def asm_generation_process(args):
+    """
+        for every plugin, a process shall be spawned.
+        The new process shall create an Assembly test file.
+    """
+    # unpacking the args tuple
+    plugin = args[0]
+    core_yaml = args[1]
+    isa_yaml = args[2]
+    isa = args[3]
+    test_format_string = args[4]
+    work_tests_dir = args[5]
+    make_file = args[6]
+    module = args[7]
+    linker_dir = args[8]
+    uarch_dir = args[9]
+    work_dir = args[10]
+    compile_macros_dict = args[11]
+    #process_manager = args[12]
+
+    # actual generation process
+    check = plugin.plugin_object.execute(core_yaml, isa_yaml)
+    name = (str(plugin.plugin_object).split(".", 1))
+    t_name = ((name[1].split(" ", 1))[0])
+
+    if check:
+        test_seq = plugin.plugin_object.generate_asm()
+        assert isinstance(test_seq, list)
+        seq = '001'
+        for ret_list_of_dicts in test_seq:
+            test_name = ((name[1].split(" ", 1))[0]) + '-' + seq
+            logger.debug(f'Selected test: {test_name}')
+
+            assert isinstance(ret_list_of_dicts, dict)
+            # Checking for the returned sections from each test
+            asm_code = ret_list_of_dicts['asm_code']
+
+            try:
+                if ret_list_of_dicts['name_postfix']:
+                    inst_name_postfix = '-' + ret_list_of_dicts['name_postfix']
+                else:
+                    inst_name_postfix = ''
+            except KeyError:
+                inst_name_postfix = ''
+
+            # add inst name to test name as postfix
+            test_name = test_name + inst_name_postfix
+
+            try:
+                asm_data = ret_list_of_dicts['asm_data']
+            except KeyError:
+                asm_data = rvtest_data(bit_width=0, num_vals=1, random=True)
+
+            try:
+                asm_sig = ret_list_of_dicts['asm_sig']
+            except KeyError:
+                asm_sig = '\n'
+
+            # create an entry in the compile_macros dict
+            if 'rv64' in isa.lower():
+                compile_macros_dict[test_name] = ['XLEN=64']
+            else:
+                compile_macros_dict[test_name] = ['XLEN=32']
+
+            try:
+                compile_macros_dict[test_name] = compile_macros_dict[
+                                                     test_name] + \
+                                                 ret_list_of_dicts[
+                                                     'compile_macros']
+            except KeyError:
+                logger.debug(f'No custom Compile macros specified for '
+                             f'{test_name}')
+
+            # Adding License, includes and macros
+            # asm = license_str + includes + test_entry
+            asm = (test_format_string[0] + test_format_string [1] +\
+                   test_format_string[2])
+
+            # Appending Coding Macros & Instructions
+            # asm += rvcode_begin + asm_code + rvcode_end
+            asm += (test_format_string[3] + asm_code +\
+                    test_format_string[4])
+
+            # Appending RVTEST_DATA macros and data values
+            # asm += rvtest_data_begin + asm_data + rvtest_data_end
+            asm += (test_format_string[5] + asm_data+\
+                    test_format_string[6])
+
+            # Appending RVMODEL macros
+            # asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
+            asm += (test_format_string[7] + asm_sig+\
+                    test_format_string[8])
+
+            os.mkdir(os.path.join(work_tests_dir, test_name))
+            with open(os.path.join(work_tests_dir, test_name, test_name + '.S'),
+                      'w') as f:
+                f.write(asm)
+            seq = '%03d' % (int(seq, 10) + 1)
+            logger.debug(f'Generating test for {test_name}')
+
+            try:
+                make_file[module].append(test_name)
+
+            except KeyError:
+                make_file[module] = process_manager.list([test_name])
+
+            make_file['tests'].append(
+                (test_name,
+                 dump_makefile(isa=isa,
+                               link_path=linker_dir,
+                               test_path=os.path.join(work_tests_dir, test_name,
+                                                      test_name + '.S'),
+                               test_name=test_name,
+                               compile_macros=compile_macros_dict[test_name],
+                               env_path=os.path.join(uarch_dir, 'env'),
+                               work_dir=work_dir)))
+
+    else:
+        logger.warning(f'Skipped {t_name}')
+
+    logger.debug(f'Finished Generating Assembly Files for {t_name}')
+
+    return True
+
+
+def sv_generation_process(args):
+    """
+        for every plugin, a process shall be spawned.
+        The process shall generate System Verilog coverpoints
+    """
+    # unpack the args
+    plugin = args[0]
+    core_yaml = args[1]
+    isa_yaml = args[2]
+    alias_dict = args[3]
+    cover_list = args[4]
+
+    _check = plugin.plugin_object.execute(core_yaml, isa_yaml)
+    _name = (str(plugin.plugin_object).split(".", 1))
+    _test_name = ((_name[1].split(" ", 1))[0])
+    if _check:
+        try:
+            _sv = plugin.plugin_object.generate_covergroups(alias_dict)
+            cover_list.append(_sv)
+            logger.debug(f'Generating coverpoints SV file for {_test_name}')
+
+        except AttributeError:
+            logger.warn(f'Skipping coverpoint generation for {_test_name} as '
+                        f'there is no gen_covergroup method ')
+            pass
+
+    else:
+        logger.critical(f'Skipped {_test_name} as this test is not '
+                        f'created for the current DUT configuration ')
+
+    return True
+
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                    modules_dir):
@@ -54,9 +217,25 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         modules = list_of_modules(modules_dir)
     logger.debug('The modules are {0}'.format((', '.join(modules))))
 
+    # creating a shared dictionary which can be accessed by all processes
+    # stores the makefile commands
+
+    make_file = process_manager.dict({
+        'all': modules,
+        'tests': (process_manager.list())
+    })
+
+    #make_file['all'] = modules
+    #make_file['tests'] = []
+
+    # creating a shared dict to store test_list info
+    # test_list_dict = process_manager.dict()
     test_list_dict = {}
-    # creating a variable to store the makefile commands
-    make_file = {'all': modules, 'tests': []}
+
+    # creating a shared compile_macros dict
+    # this dictionary will contain all the compile macros for each test
+    compile_macros_dict = process_manager.dict()
+
     if os.path.exists(os.path.join(work_dir, 'makefile')):
         os.remove(os.path.join(work_dir, 'makefile'))
 
@@ -103,104 +282,36 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
         logger.debug(f'Generating assembly tests for {module}')
 
-        # this dictionary will contain all the compile macros for each test
-        compile_macros_dict = {}
+        # test format strings
+        test_format_string = [
+            license_str, includes, test_entry, rvcode_begin, rvcode_end,
+            rvtest_data_begin, rvtest_data_end, rvmodel_data_begin,
+            rvmodel_data_end
+        ]
 
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
+        arg_list = []
         for plugin in manager.getAllPlugins():
-            check = plugin.plugin_object.execute(core_yaml, isa_yaml)
-            name = (str(plugin.plugin_object).split(".", 1))
-            t_name = ((name[1].split(" ", 1))[0])
-            if check:
-                test_seq = plugin.plugin_object.generate_asm()
-                assert isinstance(test_seq, list)
-                seq = '001'
-                for ret_list_of_dicts in test_seq:
-                    test_name = ((name[1].split(" ", 1))[0]) + '-' + seq
-                    logger.debug(f'Selected test: {test_name}')
+            arg_list.append(
+                (plugin, core_yaml, isa_yaml, isa, test_format_string,
+                 work_tests_dir, make_file, module, linker_dir, uarch_dir,
+                 work_dir, compile_macros_dict))
 
-                    assert isinstance(ret_list_of_dicts, dict)
-                    # Checking for the returned sections from each test
-                    asm_code = ret_list_of_dicts['asm_code']
+        # multi processing process pool
+        process_pool = Pool()
+        # creating a map of processes
+        process_pool.map(asm_generation_process, arg_list)
+        process_pool.close()
 
-                    try:
-                        if ret_list_of_dicts['name_postfix']:
-                            inst_name_postfix = '-' + ret_list_of_dicts[
-                                'name_postfix']
-                        else:
-                            inst_name_postfix = ''
-                    except KeyError:
-                        inst_name_postfix = ''
-
-                    # add inst name to test name as postfix
-                    test_name = test_name + inst_name_postfix
-
-                    try:
-                        asm_data = ret_list_of_dicts['asm_data']
-                    except KeyError:
-                        asm_data = rvtest_data(bit_width=0,
-                                               num_vals=1,
-                                               random=True)
-
-                    try:
-                        asm_sig = ret_list_of_dicts['asm_sig']
-                    except KeyError:
-                        asm_sig = '\n'
-
-                    # create an entry in the compile_macros dict
-                    if 'rv64' in isa.lower():
-                        compile_macros_dict[test_name] = ['XLEN=64']
-                    else:
-                        compile_macros_dict[test_name] = ['XLEN=32']
-
-                    try:
-                        compile_macros_dict[test_name] = compile_macros_dict[
-                                                             test_name] + \
-                                                         ret_list_of_dicts[
-                                                             'compile_macros']
-                    except KeyError:
-                        logger.debug(f'No custom Compile macros specified for '
-                                     f'{test_name}')
-
-                    # Adding License, includes and macros
-                    asm = license_str + includes + test_entry
-                    # Appending Coding Macros & Instructions
-                    asm += rvcode_begin + asm_code + rvcode_end
-                    # Appending RVTEST_DATA macros and data values
-                    asm += rvtest_data_begin + asm_data + rvtest_data_end
-                    # Appending RVMODEL macros
-                    asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
-                    os.mkdir(os.path.join(work_tests_dir, test_name))
-                    with open(
-                            os.path.join(work_tests_dir, test_name,
-                                         test_name + '.S'), 'w') as f:
-                        f.write(asm)
-                    seq = '%03d' % (int(seq, 10) + 1)
-                    logger.debug(f'Generating test for {test_name}')
-                    try:
-                        make_file[module].append(test_name)
-                    except KeyError:
-                        make_file[module] = [test_name]
-                    make_file['tests'].append(
-                        (test_name,
-                         dump_makefile(
-                             isa=isa,
-                             link_path=linker_dir,
-                             test_path=os.path.join(work_tests_dir, test_name,
-                                                    test_name + '.S'),
-                             test_name=test_name,
-                             compile_macros=compile_macros_dict[test_name],
-                             env_path=os.path.join(uarch_dir, 'env'),
-                             work_dir=work_dir)))
-            else:
-                logger.warning(f'Skipped {t_name}')
         logger.debug(f'Finished Generating Assembly Tests for {module}')
+
         if test_list:
             logger.info(f'Creating test_list for the {module}')
             test_list_dict.update(
                 generate_test_list(work_tests_dir, uarch_dir, isa,
                                    test_list_dict, compile_macros_dict))
+
     with open(os.path.join(work_dir, 'makefile'), 'w') as f:
         logger.debug('Dumping makefile')
         f.write('all' + ': ')
@@ -271,6 +382,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
     if modules == ['all']:
         logger.debug(f'Checking {modules_dir} for modules')
         modules = list_of_modules(modules_dir)
+
     # yaml containing ISA parameters of DUT
     isa_yaml = config_dict['isa_dict']
     logger.info('****** Generating Covergroups ******')
@@ -287,6 +399,9 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         logger.debug("Removing Existing coverpoints SV file")
         os.remove(sv_file)
 
+    # create a shared list for storing the coverpoints
+    cover_list = process_manager.list()
+
     for module in modules:
         logger.debug(f'Generating CoverPoints for {module}')
 
@@ -299,29 +414,25 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
         manager.setPluginPlaces([module_dir])
         manager.collectPlugins()
 
+        # Loop around and find the plugins and writes the contents from the
+        # plugins into an asm file
+        arg_list = []
         for plugin in manager.getAllPlugins():
-            _check = plugin.plugin_object.execute(core_yaml, isa_yaml)
-            _name = (str(plugin.plugin_object).split(".", 1))
-            _test_name = ((_name[1].split(" ", 1))[0])
-            if _check:
-                try:
-                    _sv = plugin.plugin_object.generate_covergroups(alias_dict)
-                    with open(sv_file, "a") as f:
-                        logger.info(
-                            f'Generating coverpoints SV file for {_test_name}')
-                        f.write(_sv)
+            arg_list.append(
+                (plugin, core_yaml, isa_yaml, alias_dict, cover_list))
 
-                except AttributeError:
-                    logger.warn(
-                        f'Skipping coverpoint generation for {_test_name} as '
-                        f'there is no gen_covergroup method ')
-                    pass
-
-            else:
-                logger.critical(f'Skipped {_test_name} as this test is not '
-                                f'created for the current DUT configuration ')
+        # multi processing process pool
+        process_pool = Pool()
+        # creating a map of processes
+        process_pool.map(sv_generation_process, arg_list)
+        process_pool.close()
 
         logger.debug(f'Finished Generating Coverpoints for {module}')
+
+    with open(sv_file, 'w') as f:
+        logger.info('Dumping the covergroups into SV file')
+        f.write('\n'.join(cover_list))
+
     logger.info('****** Finished Generating Covergroups ******')
 
 
