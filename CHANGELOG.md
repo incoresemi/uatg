@@ -2,10 +2,8 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.1] - 2021-11-24
-- Fix docs
-
 ## [1.3.0] - 2021-11-24
+- Fix docs
 - Add multi-processing support at the test plugin level.
 - Add Assembly Syntax checking feature through makefile.
 - Add illegal opcode generation functions.
