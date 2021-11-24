@@ -151,17 +151,17 @@ user passes. These template files can be edited by the user to meet his needs.
     $ uatg generate --help
     Usage: uatg generate [OPTIONS]
 
-      Generates tests, cover-groups for a list of modules corresponding to the
-      DUT parameters specified in the configuration yamls, inside the work_dir.
-      Can also generate the test_list needed to execute them on RiverCore.
+    Generates tests, cover-groups for a list of modules corresponding to the
+    DUT parameters specified in the configuration yamls, inside the work_dir.
+    Can also generate the test_list needed to execute them on RiverCore.
 
-      Requires: -cfg, --configuration, -md, --module_dir; -wd, --work_dir
+    Requires: -cfg, --configuration, -md, --module_dir; -wd, --work_dir
 
-      Depends : (-gc, --gen_cvg -> -af, --alias_file)
+    Depends : (-gc, --gen_cvg -> -af, --alias_file)
 
-      Optional: -gc, --gen_cvg; -t, --gen_test_list; -ld, --linker_dir;
+    Optional: -gc, --gen_cvg; -t, --gen_test_list; -ld, --linker_dir;
 
-                -m, --modules; -v, --verbose
+              -m, --modules; -v, --verbose
 
     Options:
       -v, --verbose [info|error|debug]

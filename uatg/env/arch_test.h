@@ -975,6 +975,46 @@ RVTEST_SIGUPD(swreg,destreg,offset)
       LI(reg2, MASK_XLEN(val2)); \
       inst destreg, reg1, reg2; \
     )
+//-------------------------------mbox macros-----------------------------------
+
+//Tests for Mbox instructions with reg reg operand(add-reg and shift-reg)
+#define MBOX_TEST_RR_OP(inst, inst1, reg1, reg2, reg3, destreg, correctval, val1, val2, val3, swreg, offset, testreg) \
+     TEST_CASE(testreg, destreg, correctval, swreg, offset, \
+        LI (reg1, MASK_XLEN(val1)); \
+        LI (reg2, MASK_XLEN(val2)); \
+        LI (reg3, MASK_XLEN(val3)); \
+        inst1 testreg, reg1, reg2; \
+        inst destreg, testreg, reg3; \
+     )
+
+//Tests for Mbox instructions with reg imm operand(add-imm and shift-imm)
+#define MBOX_TEST_RI_OP(inst, inst1, reg1, reg2, destreg, correctval, val1, val2, imm_val, swreg, offset, testreg) \
+     TEST_CASE(testreg, destreg, correctval, swreg, offset, \
+        LI (reg1, MASK_XLEN(val1)); \
+        LI (reg2, MASK_XLEN(val2)); \
+        inst destreg, reg1, SEXT_IMM(imm_val); \
+        inst1 testreg, destreg, reg2; \
+     )
+
+//Tests for Mbox instructions with load instructions
+#define MBOX_TEST_LD_OP(inst,inst1,rs1,rs2,destreg,testreg,correctval,rs2_val,imm_val,swreg,index,offset,adj) \
+  LA(rs1,rvtest_data+(index*4)+adj-imm_val);\
+  LI (rs2, MASK_XLEN(rs2_val)); \
+  inst testreg,imm_val(rs1);\
+  inst1 destreg, testreg, rs2;\
+  RVTEST_SIGUPD(swreg,destreg,offset)
+
+//Tests for Mbox instructions with store instructions
+#define MBOX_TEST_ST_OP(inst, inst1, rs1, rs2, destreg, testreg, correctval, rs2_val, imm_val, swreg, index, offset,adj) \
+  LI(rs2, MASK_XLEN(rs2_val));\
+  addi rs1, swreg, offset+adj;\
+  LI(testreg, imm_val);\
+  sub rs1, rs1, testreg;\
+  inst1 destreg, rs1, rs2;\
+  inst destreg, imm_val(rs1);\
+  RVTEST_SIGUPD(swreg,destreg,offset)
+
+//-----------------------------------------------------------------------------
 
 #define TEST_CNOP_OP( inst, testreg, imm_val, swreg, offset) \
     TEST_CASE(testreg, x0, 0, swreg, offset, \

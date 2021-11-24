@@ -36,7 +36,8 @@ class Log:
 
     def __init__(self, format=None):
         if not format:
-            format = "%(log_color)s%(levelname)8s%(reset)s | %(log_color)s%(message)s%(reset)s"
+            format = "%(log_color)s%(levelname)8s%(reset)s |" \
+                     " %(log_color)s%(message)s%(reset)s"
         self.format = format
         self.colors = {
             'DEBUG': 'purple',
@@ -46,6 +47,8 @@ class Log:
             'CRITICAL': 'bold_red',
         }
         self.logger = logging.getLogger()
+        self._lvl = None
+        self.stream = None
 
     # the magic happens here: we use the "extra" argument documented in
     # https://docs.python.org/2/library/logging.html#logging.Logger.debug
@@ -86,13 +89,12 @@ class Log:
         for log_level in self.aliases:
             if lvl == log_level or lvl in self.aliases[log_level]:
                 return log_level
-        print(
-            'Invalid log level passed. Please select from debug | info | warning | error'
-        )
+        print('Invalid log level passed. Please select from debug '
+              '| info | warning | error')
         raise ValueError("{}-Invalid log level.".format(lvl))
 
     def level(self, lvl=logging.CRITICAL):
-        '''Setup the Logger.'''
+        """Setup the Logger."""
 
         self._lvl = self._parse_level(lvl)
 

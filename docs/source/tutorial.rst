@@ -78,7 +78,7 @@ Let's start by generating the tests.
 .. code-block:: console
 
   $ uatg generate -v debug -m all -wd ~/myquickstart/work/ \
-    -ld ~/myquickstart/work/ -t -gc \ 
+    -ld ~/myquickstart/chromite_uatg_tests/target/ -t -gc\ 
     -md ~/myquickstart/chromite_uatg_tests/modules/ \ 
     -cfg ~/myquickstart/isa_config.yaml -cfg ~/myquickstart/core_config.yaml \
     -cfg ~/myquickstart/custom_config.yaml -cfg ~/myquickstart/csr_grouping.yaml \
@@ -108,10 +108,10 @@ Let's start by generating the tests.
 - ``-cfg`` takes multiple absolute paths. The path to the 4 YAML files 
   used to configure the core should be passed here. The yaml paths should be passed 
   in the following order, 
-    1. isa_config.yaml 
-    2. core_config.yaml 
-    3. custom_config.yaml
-    4. csr_grouping.yaml.
+      1. isa_config.yaml 
+      2. core_config.yaml 
+      3. custom_config.yaml
+      4. csr_grouping.yaml.
   Each path should be specified with a preceding ``-cfg`` as shown above.
 - ``-af`` is the path to the aliasing.yaml file generated using ``uatg setup``.
 
@@ -119,77 +119,97 @@ Running this command should generate this log in your terminal.
 
 .. code-block:: console
 
-          info  | ****** Micro Architectural Tests *******
-          info  | Version : dev-0.0.1
-          info  | Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.
-          info  | All Rights Reserved.
-          info  | uatg dir is /home/akrish/work/InCore/micro-arch-tests/uatg
-          info  | work_dir is /home/akrish/myquickstart/work
-         debug  | Checking /home/akrish/myquickstart/chromite_uatg_tests/modules for modules
-         debug  | The modules are ['branch_predictor', 'decoder', 'decompressor']
-          info  | ****** Generating Tests ******
-         debug  | Directory for branch_predictor is /home/akrish/myquickstart/chromite_uatg_tests/modules/branch_predictor
-          info  | Starting plugin Creation for branch_predictor
-          info  | Created plugins for branch_predictor
-         debug  | Generating assembly tests for branch_predictor
-         debug  | Generating test for uatg_gshare_fa_btb_fill_01
-         debug  | Generating test for uatg_gshare_fa_mispredict_loop_01
-         debug  | Generating test for uatg_gshare_fa_ghr_ones_01
-         debug  | Generating test for uatg_gshare_fa_ras_push_pop_01
-         debug  | Generating test for uatg_gshare_fa_ghr_alternating_01
-         debug  | Generating test for uatg_gshare_fa_ghr_zeros_01
-         debug  | Generating test for uatg_gshare_fa_fence_01
-         debug  | Generating test for uatg_gshare_fa_btb_selfmodifying_01
-         debug  | Finished Generating Assembly Tests for branch_predictor
-          info  | Creating test_list for the branch_predictor
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_btb_fill_01/uatg_gshare_fa_btb_fill_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_mispredict_loop_01/uatg_gshare_fa_mispredict_loop_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_ones_01/uatg_gshare_fa_ghr_ones_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ras_push_pop_01/uatg_gshare_fa_ras_push_pop_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_alternating_01/uatg_gshare_fa_ghr_alternating_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_zeros_01/uatg_gshare_fa_ghr_zeros_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_fence_01/uatg_gshare_fa_fence_01.S
-         debug  | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_btb_selfmodifying_01/uatg_gshare_fa_btb_selfmodifying_01.S
-         debug  | Directory for decoder is /home/akrish/myquickstart/chromite_uatg_tests/modules/decoder
-          info  | Starting plugin Creation for decoder
-          info  | Created plugins for decoder
-         debug  | Generating assembly tests for decoder
-         debug  | Generating test for uatg_decoder_i_ext_r_type
-         debug  | Finished Generating Assembly Tests for decoder
-          info  | Creating test_list for the decoder
-         debug  | Current test is /home/akrish/myquickstart/work/decoder/uatg_decoder_i_ext_r_type/uatg_decoder_i_ext_r_type.S
-         debug  | Directory for decompressor is /home/akrish/myquickstart/chromite_uatg_tests/modules/decompressor
-          info  | Starting plugin Creation for decompressor
-          info  | Created plugins for decompressor
-         debug  | Generating assembly tests for decompressor
-         debug  | Generating test for uatg_decompressor
-         debug  | Finished Generating Assembly Tests for decompressor
-          info  | Creating test_list for the decompressor
-         debug  | Current test is /home/akrish/myquickstart/work/decompressor/uatg_decompressor/uatg_decompressor.S
-          info  | ****** Finished Generating Tests ******
-         debug  | Creating a linker file at /home/akrish/myquickstart/work
-         debug  | Creating Model_test.h file at /home/akrish/myquickstart/work
-          info  | Test List was generated by uatg. You can find it in the work dir 
-         debug  | Checking /home/akrish/myquickstart/chromite_uatg_tests/modules for modules
-          info  | ****** Generating Covergroups ******
-         debug  | Generated tbtop, defines and interface files
-         debug  | Generating CoverPoints for branch_predictor
-          info  | Generating coverpoints SV file for uatg_gshare_fa_mispredict_loop_01
-       warning  | Skipping coverpoint generation for uatg_gshare_fa_ras_push_pop_01 as there is no gen_covergroup method 
-       warning  | Skipping coverpoint generation for uatg_gshare_fa_ghr_ones_01 as there is no gen_covergroup method 
-          info  | Generating coverpoints SV file for uatg_gshare_fa_ghr_zeros_01
-       warning  | Skipping coverpoint generation for uatg_gshare_fa_btb_selfmodifying_01 as there is no gen_covergroup method 
-       warning  | Skipping coverpoint generation for uatg_gshare_fa_ghr_alternating_01 as there is no gen_covergroup method 
-          info  | Generating coverpoints SV file for uatg_gshare_fa_btb_fill_01
-          info  | Generating coverpoints SV file for uatg_gshare_fa_fence_01
-         debug  | Finished Generating Coverpoints for branch_predictor
-         debug  | Generating CoverPoints for decoder
-          info  | Generating coverpoints SV file for uatg_decoder_i_ext_r_type
-         debug  | Finished Generating Coverpoints for decoder
-         debug  | Generating CoverPoints for decompressor
-       warning  | Skipping coverpoint generation for uatg_decompressor as there is no gen_covergroup method 
-         debug  | Finished Generating Coverpoints for decompressor
-          info  | ****** Finished Generating Covergroups ******
+        INFO | ****** Micro-Architectural Test Generator - UATG *******
+        INFO | Version : 1.2.1
+        INFO | Copyright (c) 2021, InCore Semiconductors Pvt. Ltd.
+        INFO | All Rights Reserved.
+        INFO | uatg dir is /home/akrish/work/InCore/uatg/uatg
+        INFO | work_dir is /home/akrish/myquickstart/work/
+       DEBUG | The modules are ['branch_predictor', 'decompressor']
+        INFO | ****** Generating Tests ******
+       DEBUG | Directory for branch_predictor is /home/akrish/myquickstart/chromite_uatg_tests/modules/branch_predictor
+        INFO | Starting plugin Creation for branch_predictor
+       DEBUG | Created plugin for uatg_gshare_fa_btb_fill_01
+       DEBUG | Created plugin for uatg_gshare_fa_btb_selfmodifying_01
+       DEBUG | Created plugin for uatg_gshare_fa_fence_01
+       DEBUG | Created plugin for uatg_gshare_fa_ghr_alternating_01
+       DEBUG | Created plugin for uatg_gshare_fa_ghr_ones_01
+       DEBUG | Created plugin for uatg_gshare_fa_ghr_zeros_01
+       DEBUG | Created plugin for uatg_gshare_fa_mispredict_loop_01
+       DEBUG | Created plugin for uatg_gshare_fa_ras_push_pop_01
+        INFO | Created plugins for branch_predictor
+       DEBUG | Generating assembly tests for branch_predictor
+       DEBUG | Selected test: uatg_gshare_fa_ghr_ones_01-001
+       DEBUG | Generating test for uatg_gshare_fa_ghr_ones_01-001
+        INFO | Syntax check passed for uatg_gshare_fa_ghr_ones_01-001
+       DEBUG | Selected test: uatg_gshare_fa_btb_fill_01-001
+       DEBUG | Generating test for uatg_gshare_fa_btb_fill_01-001
+        INFO | Syntax check passed for uatg_gshare_fa_btb_fill_01-001
+       DEBUG | Selected test: uatg_gshare_fa_ras_push_pop_01-001
+       DEBUG | Generating test for uatg_gshare_fa_ras_push_pop_01-001
+        INFO | Syntax check passed for uatg_gshare_fa_ras_push_pop_01-001
+       DEBUG | Selected test: uatg_gshare_fa_fence_01-001
+       DEBUG | Generating test for uatg_gshare_fa_fence_01-001
+        INFO | Syntax check passed for uatg_gshare_fa_fence_01-001
+       DEBUG | Selected test: uatg_gshare_fa_ghr_alternating_01-001
+       DEBUG | Generating test for uatg_gshare_fa_ghr_alternating_01-001
+        INFO | Syntax check passed for uatg_gshare_fa_ghr_alternating_01-001
+       DEBUG | Selected test: uatg_gshare_fa_btb_selfmodifying_01-001
+       DEBUG | Generating test for uatg_gshare_fa_btb_selfmodifying_01-001
+        INFO | Syntax check passed for uatg_gshare_fa_btb_selfmodifying_01-001
+       DEBUG | Selected test: uatg_gshare_fa_ghr_zeros_01-001
+       DEBUG | Generating test for uatg_gshare_fa_ghr_zeros_01-001
+        INFO | Syntax check passed for uatg_gshare_fa_ghr_zeros_01-001
+       DEBUG | Selected test: uatg_gshare_fa_mispredict_loop_01-001
+       DEBUG | Generating test for uatg_gshare_fa_mispredict_loop_01-001
+        INFO | Syntax check passed for uatg_gshare_fa_mispredict_loop_01-001
+       DEBUG | Finished Generating Assembly Tests for branch_predictor
+        INFO | Creating test_list for the branch_predictor
+       DEBUG | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_ones_01-001/uatg_gshare_fa_ghr_ones_01-001.S
+       DEBUG | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_btb_fill_01-001/uatg_gshare_fa_btb_fill_01-001.S
+       DEBUG | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ras_push_pop_01-001/uatg_gshare_fa_ras_push_pop_01-001.S
+       DEBUG | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_fence_01-001/uatg_gshare_fa_fence_01-001.S
+       DEBUG | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_alternating_01-001/uatg_gshare_fa_ghr_alternating_01-001.S
+       DEBUG | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_btb_selfmodifying_01-001/uatg_gshare_fa_btb_selfmodifying_01-001.S
+       DEBUG | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_ghr_zeros_01-001/uatg_gshare_fa_ghr_zeros_01-001.S
+       DEBUG | Current test is /home/akrish/myquickstart/work/branch_predictor/uatg_gshare_fa_mispredict_loop_01-001/uatg_gshare_fa_mispredict_loop_01-001.S
+       DEBUG | Directory for decompressor is /home/akrish/myquickstart/chromite_uatg_tests/modules/decompressor
+        INFO | Starting plugin Creation for decompressor
+       DEBUG | no plugin for uatg_decompressor_01 to remove
+     WARNING | Skippping test uatg_decompressor_01 as index yaml has False
+       DEBUG | Created plugin for uatg_decompressor_floating_01
+       DEBUG | Created plugin for uatg_decompressor_02
+        INFO | Created plugins for decompressor
+       DEBUG | Generating assembly tests for decompressor
+     WARNING | Skipped uatg_decompressor_floating_01
+       DEBUG | Selected test: uatg_decompressor_02-001
+       DEBUG | Generating test for uatg_decompressor_02-001
+        INFO | Syntax check passed for uatg_decompressor_02-001
+       DEBUG | Finished Generating Assembly Tests for decompressor
+        INFO | Creating test_list for the decompressor
+       DEBUG | Current test is /home/akrish/myquickstart/work/decompressor/uatg_decompressor_02-001/uatg_decompressor_02-001.S
+        INFO | ****** Finished Generating Tests ******
+       DEBUG | Using user specified linker: /home/akrish/myquickstart/chromite_uatg_tests/target/link.ld
+       DEBUG | Using user specified model_test file: /home/akrish/myquickstart/chromite_uatg_tests/target/model_test.h
+        INFO | Test List was generated by UATG. You can find it in the work dir 
+        INFO | ****** Generating Covergroups ******
+       DEBUG | Generated tbtop, defines and interface files
+       DEBUG | Removing Existing coverpoints SV file
+       DEBUG | Generating CoverPoints for branch_predictor
+        INFO | Generating coverpoints SV file for uatg_gshare_fa_mispredict_loop_01
+     WARNING | Skipping coverpoint generation for uatg_gshare_fa_btb_selfmodifying_01 as there is no gen_covergroup method 
+        INFO | Generating coverpoints SV file for uatg_gshare_fa_btb_fill_01
+     WARNING | Skipping coverpoint generation for uatg_gshare_fa_ghr_ones_01 as there is no gen_covergroup method 
+     WARNING | Skipping coverpoint generation for uatg_gshare_fa_ghr_alternating_01 as there is no gen_covergroup method 
+        INFO | Generating coverpoints SV file for uatg_gshare_fa_fence_01
+        INFO | Generating coverpoints SV file for uatg_gshare_fa_ghr_zeros_01
+     WARNING | Skipping coverpoint generation for uatg_gshare_fa_ras_push_pop_01 as there is no gen_covergroup method 
+       DEBUG | Finished Generating Coverpoints for branch_predictor
+       DEBUG | Generating CoverPoints for decompressor
+    CRITICAL | Skipped uatg_decompressor_floating_01 as this test is not created for the current DUT configuration 
+        INFO | Generating coverpoints SV file for uatg_decompressor_02
+       DEBUG | Finished Generating Coverpoints for decompressor
+        INFO | ****** Finished Generating Covergroups ******
 
 Your directory structure should be like this. 
 
@@ -251,28 +271,31 @@ Your directory structure should be like this.
     ├── csr_grouping.yaml
     ├── custom_config.yaml
     ├── isa_config.yaml
-    └── work
+    └── work/
         ├── branch_predictor
-        │   ├── uatg_gshare_fa_btb_fill_01
-        │   │   └── uatg_gshare_fa_btb_fill_01.S
-        │   ├── uatg_gshare_fa_btb_selfmodifying_01
-        │   │   └── uatg_gshare_fa_btb_selfmodifying_01.S
-        │   ├── uatg_gshare_fa_fence_01
-        │   │   └── uatg_gshare_fa_fence_01.S
-        │   ├── uatg_gshare_fa_ghr_alternating_01
-        │   │   └── uatg_gshare_fa_ghr_alternating_01.S
-        │   ├── uatg_gshare_fa_ghr_ones_01
-        │   │   └── uatg_gshare_fa_ghr_ones_01.S
-        │   ├── uatg_gshare_fa_ghr_zeros_01
-        │   │   └── uatg_gshare_fa_ghr_zeros_01.S
-        │   ├── uatg_gshare_fa_mispredict_loop_01
-        │   │   └── uatg_gshare_fa_mispredict_loop_01.S
-        │   └── uatg_gshare_fa_ras_push_pop_01
-        │       └── uatg_gshare_fa_ras_push_pop_01.S
-        ├── decoder
-        │   └── uatg_decoder_arith_tests
-        │       └── uatg_decoder_arith_tests.S
+        │   ├── uatg_gshare_fa_btb_fill_01-001
+        │   │   └── uatg_gshare_fa_btb_fill_01-001.S
+        │   ├── uatg_gshare_fa_btb_selfmodifying_01-001
+        │   │   └── uatg_gshare_fa_btb_selfmodifying_01-001.S
+        │   ├── uatg_gshare_fa_fence_01-001
+        │   │   └── uatg_gshare_fa_fence_01-001.S
+        │   ├── uatg_gshare_fa_ghr_alternating_01-001
+        │   │   └── uatg_gshare_fa_ghr_alternating_01-001.S
+        │   ├── uatg_gshare_fa_ghr_ones_01-001
+        │   │   └── uatg_gshare_fa_ghr_ones_01-001.S
+        │   ├── uatg_gshare_fa_ghr_zeros_01-001
+        │   │   └── uatg_gshare_fa_ghr_zeros_01-001.S
+        │   ├── uatg_gshare_fa_mispredict_loop_01-001
+        │   │   └── uatg_gshare_fa_mispredict_loop_01-001.S
+        │   └── uatg_gshare_fa_ras_push_pop_01-001
+        │       └── uatg_gshare_fa_ras_push_pop_01-001.S
+        ├── decompressor
+        │   ├── uatg_decompressor_01-001
+        │   │   └── uatg_decompressor_01-001.S
+        │   └── uatg_decompressor_02-001
+        │       └── uatg_decompressor_02-001.S
         ├── link.ld
+        ├── makefile
         ├── model_test.h
         ├── sv_top
         │   ├── coverpoints.sv
@@ -280,7 +303,7 @@ Your directory structure should be like this.
         │   ├── interface.sv
         │   └── tb_top.sv
         └── test_list.yaml
-    
+       
 
 You can find all the test files within the ``work`` directory. The test names 
 will be same as the test_class. The test will be located within the directory 
@@ -293,6 +316,34 @@ You can also find that the *link.ld* and *model_test.h* files have been
 generated by UATG. This is because the directory passed along with ``-ld`` option
 did not already contain a linker file. If it had, these files would have not 
 been generated.
+
+.. _make-reference:
+
+Assembly syntax check feature
+=============================
+
+By default, UATG generates a ``makefile`` within the ``work`` directory. This 
+makefile can be used to perform a syntax check of the Assembly code generated by 
+from the test plugins.
+
+In order to use this feature, the user can perform a ``make`` within the work 
+directory.
+
+The default target of the makefile is all. Hence, if the user wants to check a
+specific assembly file, they can mention the name of the assembly file as make's 
+target.
+
+.. code-block:: shell
+
+   $ make uatg_gshare_fa_btb_fill_01-001
+   riscv64-unknown-elf-gcc -mcmodel=medany -static -std=gnu99 -O2 -fno-common\
+   -fno-builtin-printf -fvisibility=hidden -static -nostdlib -nostartfiles -lm\
+   -lgcc -march=rv64imac -mabi=lp64 -lm -lgcc -T\
+   /home/akrish/work/InCore/chromite_uatg_tests//target//link.ld\
+   /home/akrish/myquickstart//uatg//work/branch_predictor/uatg_gshare_fa_btb_fill_01-001/uatg_gshare_fa_btb_fill_01-001.S\
+   -I /home/akrish/myquickstart/uatg/uatg/env\
+   -I /home/akrish/myquickstart//uatg//work/ -DXLEN=64 -o /dev/null
+      
 
 =============================
 Using RiVer Core to run tests
@@ -612,7 +663,7 @@ uatg to generate tests.
     csr_grouping_yaml = /home//user/myquickstart/csr_grouping.yaml
     modules_dir = /home/user/myquickstart/chromite_uatg_tests/modules/
     work_dir = /home/user/myquickstart/work/ 
-    linker_dir = /home/user/myquickstart/work/
+    linker_dir = /home/user/myquickstart/chromite_uatg_tests/target/
     modules = all
     generate_covergroups = True 
     alias_file = /home/user/myquickstart/aliasing.yaml

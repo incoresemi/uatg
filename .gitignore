@@ -8,6 +8,7 @@ uatg/modules/branch_predictor/tests/
 # Modules Directory and Repo
 config.ini
 *.yaml
+uatg/regex_formats.py
 
 
 # Build Directory

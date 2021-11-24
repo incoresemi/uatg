@@ -66,7 +66,8 @@ Configuration Options
   work_dir              The workdir where all of the files, reports and logs are 
                         generated.
   linker_dir            The directory where the user has stored his ``link.ld`` file.
-                        If not specified, UATG will generate a linker at the work_dir.
+                        By default, the user is required to point to the target
+                        directory within ``chromite_uatg_tests``
   configuration_files   The **absolute** paths, comma-separated to the 
                         ``isa_config.yaml``, ``core_config.yaml``, 
                         ``custom_config.yaml``, and ``csr_grouping.yaml`` 
@@ -83,7 +84,7 @@ Configuration Options
                         the DUT against known log patterns to obtain an intial 
                         report of test coverage.
   gen_cvg               [Boolean] When True, UATG will generate the covergroups for 
-                        the tests.
+                        the tests. 
   ===================== ==============================================================
 
 .. note:: The standard delimiter for options having multiple values is **,**
@@ -115,8 +116,8 @@ Sample ``config.ini``
     # Directory to dump assembly files and reports
     work_dir = /home/user/myquickstart/work/
 
-    # location to store the link.ld linker file. By default it's same as work_dir
-    linker_dir = /home/user/myquickstart/work/
+    # location to store the link.ld linker file. By default it's the target directory within chromite_uatg_tests
+    linker_dir = /home/user/myquickstart/chromite_uatg_tests/target
 
     # Path to the yaml files containing DUT Configuration.
     configuration_files = /home/user/myquickstart/isa_config.yaml,/home/user/myquickstart/core_config.yaml,/home/user/myquickstart/custom_config.yaml,/home/user/myquickstart/csr_grouping.yaml
@@ -133,7 +134,8 @@ Sample ``config.ini``
     val_test = False
     # [True, False] If the gen_cvg flag is True, System Verilog cover-groups are generated
     gen_cvg = True
-   
+       
+
 =======================================
 DUT Configuration YAML(s) Specification
 =======================================

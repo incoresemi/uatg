@@ -6,14 +6,13 @@ import re
 import glob
 import random as rnd
 from uatg.log import logger
-import ruamel
 from ruamel.yaml import YAML
 
 
 class sv_components:
     """
         This class contains the methods which will return the tb_top and
-        interface system verilog tests. This text will be written into 
+        interface system verilog tests. This text will be written into
         SV files.
     """
 
@@ -44,7 +43,7 @@ class sv_components:
     # function to generate interface string to be written as interface.sv
     def generate_interface(self):
         """
-           returns interface SV syntax. 
+           returns interface SV syntax.
         """
         interface = f"interface chromite_intf(input bit CLK,RST_N);\n\t" \
                     f"logic {self.rg_initialize};\n\tlogic [4:0" \
@@ -176,7 +175,7 @@ endmoduleNeeded to generate/validate tests
     # on the simulator.
     def generate_defines(self):
         """
-        creates the syntax for the defines file which will be used to select 
+        creates the syntax for the defines file which will be used to select
         tests.
         """
         defines = f"""/// All compile time macros will be defined here
@@ -215,7 +214,7 @@ def load_yaml(file):
     """
         Common function to load YAML Files.
         The function checks if the file is of YAML format else exits.
-        If the file is in YAML, it reads the file and returns the data from the 
+        If the file is in YAML, it reads the file and returns the data from the
         file as a dictionary.
     """
     if os.path.exists(file) and (file.endswith('.yaml') or
@@ -226,8 +225,8 @@ def load_yaml(file):
         try:
             with open(file, "r") as file:
                 return yaml.load(file)
-        except ruamel.yaml.constructor.DuplicateKeyError as msg:
-            logger.error(f'error: {msg}')
+        except KeyError:
+            logger.error(f'Error Loading YAML')
     else:
         logger.error(f'error: {file} is not a valid yaml file')
         exit('INVALID_FILE/PATH')
@@ -236,7 +235,7 @@ def load_yaml(file):
 def combine_config_yamls(configuration_path):
     """
         This function reads all the YAML file paths specified by the user.
-        Loads the data into a dictionary and then returns it to the invoking 
+        Loads the data into a dictionary and then returns it to the invoking
         method.
     """
     dut_dict = {}
@@ -268,7 +267,7 @@ def combine_config_yamls(configuration_path):
         logger.error('Path to csr_grouping.yaml is invalid.')
         raise Exception('MISSING_CSRGROUPING')
 
-    return (dut_dict)
+    return dut_dict
 
 
 def join_yaml_reports(work_dir='abs_path_here/', module='branch_predictor'):
@@ -296,8 +295,8 @@ def join_yaml_reports(work_dir='abs_path_here/', module='branch_predictor'):
 
 def create_linker(target_dir):
     """
-        Creates a template linker file in the target_directory specified by the 
-        user. 
+        Creates a template linker file in the target_directory specified by the
+        user.
     """
 
     out = '''OUTPUT_ARCH( "riscv" )
@@ -398,9 +397,9 @@ shakti_end:                                                             \
 def create_plugins(plugins_path, module):
     """
     This function is used to create Yapsy Plugin files.
-    The YAPSY plugins are required to be in a certain pattern. This function 
+    The YAPSY plugins are required to be in a certain pattern. This function
     will read the test classes and create files complying to the pattern.
-    Yapsy will ignore all other python file which does not have a 
+    Yapsy will ignore all other python file which does not have a
     .yapsy-plugin file associated with it.
     """
     # the index yaml is in the modules directory
@@ -415,11 +414,11 @@ def create_plugins(plugins_path, module):
 
             try:
                 val = index_yaml[module][test_name]
-            except KeyError as e:
+            except KeyError:
                 logger.critical(f'There is no entry for test - {test_name}')
                 exit(f'update the index.yaml with your new test')
 
-            if val == True:
+            if val:
                 f = open(
                     os.path.join(plugins_path, test_name + '.yapsy-plugin'),
                     'w')
@@ -433,7 +432,7 @@ def create_plugins(plugins_path, module):
                     logger.warn(
                         f'removing already existing plugin file for {test_name}'
                     )
-                except:
+                except FileNotFoundError:
                     logger.debug(f'no plugin for {test_name} to remove')
                     pass
                 logger.warn(
@@ -459,16 +458,16 @@ def create_config_file(config_path):
           '\n\n# Directory to dump assembly files and reports\n' \
           'work_dir = /home/user/myquickstart/work/' \
           '\n\n# location to store the link.ld linker file. By default it\'s ' \
-          'same as work_dir\n' \
-          'linker_dir = /home/user/myquickstart/work/' \
+          'the target directory within chromite_uatg_tests\n' \
+          'linker_dir = /home/user/myquickstart/chromite_uatg_tests/target' \
           '\n\n# Path to the yaml files containing DUT Configuration.\n' \
-          'configuration_files = /home/user/myquickstart/isa_config.yaml,'\
+          'configuration_files = /home/user/myquickstart/isa_config.yaml,' \
           '/home/user/myquickstart/core_config.yaml,' \
           '/home/user/myquickstart/custom_config.yaml,' \
           '/home/user/myquickstart/csr_grouping.yaml' \
           '\n\n# Absolute Path of the yaml file contain' \
           'ing the signal aliases of the DUT ' \
-          '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/'\
+          '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/' \
           'aliasing.yaml' \
           '\n\n# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
@@ -479,7 +478,7 @@ def create_config_file(config_path):
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = True'
+          'are generated\ngen_cvg = True\n'
 
     with open(os.path.join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
@@ -524,9 +523,9 @@ def create_dut_config_files(dut_config_path):
     rv64i_isa = f'hart_ids: [0]\nhart0:\n{s2}custom_exceptions:\n{s4}- cause' \
                 f'_val: 25\n{s4}  cause_name: halt_ebreak\n{s4}  priv_mode: M' \
                 f'\n{s4}- cause_val: 26\n{s4}  cause_name: halt_trigger\n{s4}' \
-                f'  priv_mode: M\n{s4}- cause_val: 28\n{s4}  cause_name: halt_'\
-                f'step\n{s4}  priv_mode: M\n{s4}- cause_val: 29\n' \
-                f'{s4}  cause_name: halt_reset\n'\
+                f'  priv_mode: M\n{s4}- cause_val: 28\n{s4}  cause_name: ' \
+                f'halt_step\n{s4}  priv_mode: M\n{s4}- cause_val: 29\n' \
+                f'{s4}  cause_name: halt_reset\n' \
                 f'{s4}  priv_mode: M\n{s2}custom_interrupts:' \
                 f'\n{s4}- cause_val: 16\n{s4}  cause_name: debug_interrupt' \
                 f'\n{s4}  on_reset_enable: 1\n{s4}  priv_mode : M\n{s2}ISA: ' \
@@ -599,12 +598,12 @@ def create_dut_config_files(dut_config_path):
         f.write(csr_grouping64)
 
 
-def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4)\
+def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
         -> str:
     """
-    
+
     Used to specify the data to be loaded into the test_data section of the
-    DUT memory. The user will specify the data he wants in this section of the 
+    DUT memory. The user will specify the data he wants in this section of the
     DUT memory.
     """
     size = {
@@ -648,7 +647,7 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4)\
 def clean_modules(module_dir, modules):
     """
     Function to read the modules specified by the user, check if they exist or
-    raise an error. 
+    raise an error.
     Returns a list of the modules for which tests will be generated.
     """
     module = None
@@ -687,20 +686,18 @@ def find_instances(string, character):
 
 def split_isa_string(isa_string):
     """
-    The function parses the ISA string, 
+    The function parses the ISA string,
     removes the 'S,U,H and N' characters from it.
     The updates ISA string is returned.
     """
 
     str_match = re.findall(r'([^\d]*?)(?!_)*(Z.*?)*(_|$)', isa_string, re.M)
     extension_list = []
-    standard_isa = ''
     for match in str_match:
         stdisa, z, ignore = match
         if stdisa != '':
             for e in stdisa:
                 extension_list.append(e)
-            standard_isa = stdisa
         if z != '':
             extension_list.append(z)
 
@@ -712,8 +709,8 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
       updates the test_list.yaml file with the location of the
       tests generated by test_generator as well the directory to dump the logs.
       Check the test_list format documentation present.
-      The test list generation is an optional feature which the user may choose 
-      to use. 
+      The test list generation is an optional feature which the user may choose
+      to use.
     """
     asm_test_list = glob.glob(asm_dir + '/**/*.S')
     env_dir = os.path.join(uarch_dir, 'env/')
@@ -784,7 +781,7 @@ def generate_sv_components(sv_dir, alias_file):
 
 def list_of_modules(module_dir):
     """
-    lists the tests modules available by reading the index.yaml file present 
+    lists the tests modules available by reading the index.yaml file present
     in the modules directory.
     """
     module_list = []
@@ -797,3 +794,25 @@ def list_of_modules(module_dir):
     else:
         logger.error(f"index.yaml not found in {module_dir}")
         exit("FILE_NOT_FOUND")
+
+
+def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
+                  compile_macros):
+    compiler = 'riscv64-unknown-elf-gcc'
+    mcmodel = 'medany'
+    mabi = 'lp64'
+    march = isa.lower()[:8]
+    macros = ''
+
+    if compile_macros:
+        macros = '-D' + ' -D'.join(compile_macros)
+
+    flags = '-static -std=gnu99 -O2 -fno-common -fno-builtin-printf ' \
+            '-fvisibility=hidden -static -nostdlib -nostartfiles -lm -lgcc'
+    cmd = f'{compiler} -mcmodel={mcmodel} {flags} -march={march} -mabi={mabi}' \
+          f' -lm -lgcc -T {os.path.join(link_path,"link.ld")} {test_path}' \
+          f' -I {env_path}' \
+          f' -I {work_dir} {macros}' \
+          f' -o /dev/null'
+
+    return cmd
