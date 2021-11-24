@@ -84,9 +84,7 @@ Configuration Options
                         the DUT against known log patterns to obtain an intial 
                         report of test coverage.
   gen_cvg               [Boolean] When True, UATG will generate the covergroups for 
-                        the tests.
-  dry_run               [Boolean] When True, UATG will perform a dry compilation of 
-                        the generated assembly files. 
+                        the tests. 
   ===================== ==============================================================
 
 .. note:: The standard delimiter for options having multiple values is **,**
@@ -136,9 +134,8 @@ Sample ``config.ini``
     val_test = False
     # [True, False] If the gen_cvg flag is True, System Verilog cover-groups are generated
     gen_cvg = True
-    # [True, False] If the dry_run flag is True, assembly files are checked for syntax errors.
-    dry_run = False
-   
+       
+
 =======================================
 DUT Configuration YAML(s) Specification
 =======================================

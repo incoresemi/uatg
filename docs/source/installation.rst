@@ -249,16 +249,12 @@ Details and further specification of the config file syntax is available at
     # Unless you want to run individual tests in river_core, set the flag to True
     gen_test_list = True
     # [True, False] If the gen_test flag is True, assembly files are generated/overwritten
-    gen_test = True
-    # [True, False] Perform a syntax check of the generated assembly files
-    dry_run = False
+    gen_test = True 
     # [True, False] If the val_test flag is True, Log from DUT are parsed and the modules are validated
     val_test = False
     # [True, False] If the gen_cvg flag is True, System Verilog cover-groups are generated
     gen_cvg = True
-    # [True, False] If the dry_run flag is True, assembly files are checked for syntax errors.
-    dry_run = False
-
+    
 Once you have changed the user field in the paths, save the file. 
 You can run UATG using the ``from-config`` subcommand.
 
@@ -394,6 +390,10 @@ design.
 
 The ``sv_top`` directory contains the system verilog coverpoints generated 
 using uatg.
+
+You can also perform a syntax check of the assembly generated using the makefile
+present in the work directory. Ypu can find additional in 
+:ref:`here <make-reference>`
 
 Finally, the ``test_list.yaml`` is used to make list of all the tests generated.
 Details about the test_list can be found here,  
