@@ -5,6 +5,9 @@ class instruction_templates:
     """
     A class object to store templates for instructions and methods to generate
     random/targeted instructions as required.
+
+    #todo: 1. fence $iorw, modifiers to be added
+           2. compressed instruction support
     """
 
     def __init__(self):
@@ -60,7 +63,7 @@ class instruction_templates:
             'lui': 'lui $rd',
             'auipc': 'auipc $rd',
 
-            'fence': 'fence $iorw, $iorw',
+            # 'fence': 'fence $iorw, $iorw',
             'fence.i': 'fence.i $imm12'
         }
 
