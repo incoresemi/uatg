@@ -264,14 +264,21 @@ class instruction_templates:
         return message
 
 
-a = instruction_templates()
+def main():
+    a = instruction_templates()
 
-insts_100 = a.i_inst_random(isa='RV64I',
-                            modifiers={'imm12_values': {100, 200, 300},
-                                       'rs1_values': {'x0', 'x1'}},
-                            no_of_insts=10)
-insts_10 = a.fill_m_insts(isa='RV64I', inst='mul',
-                          modifiers={'imm12_values': {120}},
-                          no_of_insts=10)
-for i in insts_10:
-    print(i)
+    insts_100 = a.i_inst_random(isa='RV64I',
+                                modifiers={'imm12_values': {100, 200, 300},
+                                           'rs1_values': {'x0', 'x1'}},
+                                no_of_insts=10)
+    insts_10 = a.fill_m_insts(isa='RV64I', inst='mul',
+                              modifiers={'imm12_values': {120}},
+                              no_of_insts=10)
+    for i in insts_100:
+        print(i)
+    for i in insts_10:
+        print(i)
+
+
+if __name__ == '__main__':
+    main()
