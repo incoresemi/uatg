@@ -135,6 +135,45 @@ class instruction_templates:
         }
         self.f_insts64.update(self.f_insts32)
 
+        self.d_insts32 = {
+            'fadd.d': 'fadd.d $rd $rs1 $rs2 $rm',
+            'fsub.d': 'fsub.d $rd $rs1 $rs2 $rm',
+            'fmul.d': 'fmul.d $rd $rs1 $rs2 $rm',
+            'fdiv.d': 'fdiv.d $rd $rs1 $rs2 $rm',
+            'fsgnj.d': 'fsgnj.d $rd $rs1 $rs2',
+            'fsgnjn.d': 'fsgnjn.d $rd $rs1 $rs2',
+            'fsgnjx.d': 'fsgnjx.d $rd $rs1 $rs2',
+            'fmin.d': 'fmin.d $rd $rs1 $rs2',
+            'fmax.d': 'fmax.d $rd $rs1 $rs2',
+            'fcvt.s.d': 'fcvt.s.d $rd $rs1 $rm',
+            'fcvt.d.s': 'fcvt.d.s $rd $rs1 $rm',
+            'fsqrt.d': 'fsqrt.d $rd $rs1 $rm',
+            'fle.d': 'fle.d $rd $rs1 $rs2',
+            'flt.d': 'flt.d $rd $rs1 $rs2',
+            'feq.d': 'feq.d $rd $rs1 $rs2',
+            'fcvt.w.d': 'fcvt.w.d $rd $rs1 $rm',
+            'fcvt.wu.d': 'fcvt.wu.d $rd $rs1 $rm',
+            'fclass.d': 'fclass.d $rd $rs1',
+            'fcvt.d.w': 'fcvt.d.w $rd $rs1 $rm',
+            'fcvt.d.wu': 'fcvt.d.wu $rd $rs1 $rm',
+            'fld': 'fld $rd $rs1 $imm12',
+            'fsd': 'fsd $rs1 $rs2 $imm12',
+            'fmadd.d': 'fmadd.d $rd $rs1 $rs2 rs3 $rm',
+            'fmsub.d': 'fmsub.d $rd $rs1 $rs2 rs3 $rm',
+            'fnmsub.d': 'fnmsub.d $rd $rs1 $rs2 rs3 $rm',
+            'fnmadd.d': 'fnmadd.d $rd $rs1 $rs2 rs3 $rm',
+        }
+
+        self.d_insts64 = {
+            'fcvt.l.d': 'fcvt.l.d rd rs1 rm',
+            'fcvt.lu.d': 'fcvt.lu.d rd rs1 rm',
+            'fmv.x.d': 'fmv.x.d rd rs1',
+            'fcvt.d.l': 'fcvt.d.l rd rs1 rm',
+            'fcvt.d.lu': 'fcvt.d.lu rd rs1 rm',
+            'fmv.d.x': 'fmv.d.x rd rs1',
+        }
+        self.d_insts64.update(self.d_insts32)
+
         self.c_insts32 = {
         }
 
@@ -155,7 +194,6 @@ class instruction_templates:
         r_inst = r_inst.replace('$imm12', str(
             random.sample(modifiers['imm12_values'], 1)[0])) \
             if '$imm12' in r_inst else r_inst
-
         return r_inst
 
     def i_inst_random(self, isa, modifiers, no_of_insts=5):
@@ -243,7 +281,7 @@ class instruction_templates:
 
     def fill_f_insts(self, isa, inst, modifiers, no_of_insts=5):
         assert isinstance(modifiers, dict)
-        if 'm' not in isa.lower():
+        if 'f' not in isa.lower():
             return []
         f_insts = self.f_insts32 if '32' in isa else self.f_insts64
         assert inst in f_insts.keys()
@@ -256,6 +294,41 @@ class instruction_templates:
             _ = f_insts[random.choice(
                 [ins for ins in f_insts.keys()])] if inst == 'any' else \
                 f_insts[inst]
+            _ = self.replace_fields(_, modifiers=modifiers)
+            asm.append(_)
+        return asm
+
+    def d_inst_random(self, isa, modifiers, no_of_insts=5):
+        assert isinstance(modifiers, dict)
+        if 'd' not in isa.lower():
+            return []
+        d_insts = self.d_insts32 if '32' in isa else self.d_insts64
+        for key, val in self.default_modifiers.items():
+            if key not in modifiers:
+                modifiers[key] = val
+        asm = []
+        for _ in range(no_of_insts):
+            _ = d_insts[
+                random.choice([_inst for _inst in d_insts.keys()])
+            ]
+            asm.append(self.replace_fields(_, modifiers=modifiers))
+        return asm
+
+    def fill_d_insts(self, isa, inst, modifiers, no_of_insts=5):
+        assert isinstance(modifiers, dict)
+        if 'd' not in isa.lower():
+            return []
+        d_insts = self.d_insts32 if '32' in isa else self.d_insts64
+        assert inst in d_insts.keys()
+        for key, val in self.default_modifiers.items():
+            if key not in modifiers:
+                modifiers[key] = val
+
+        asm = []
+        for _ in range(no_of_insts):
+            _ = d_insts[random.choice(
+                [ins for ins in d_insts.keys()])] if inst == 'any' else \
+                d_insts[inst]
             _ = self.replace_fields(_, modifiers=modifiers)
             asm.append(_)
         return asm
