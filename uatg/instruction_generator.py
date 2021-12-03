@@ -175,6 +175,22 @@ class instruction_templates:
         self.d_insts64.update(self.d_insts32)
 
         self.c_insts32 = {
+            'c.addi4spn': "c.addi4spn $c.rd, $nzuimm8",
+            'c.fld': "c.fld $c.rd, $c.rs1 $uimm5",
+            'c.lw': "c.lw $c.rd, $c.rs1 $uimm5",
+            'c.flw': "c.flw $c.rd, $c.rs1 $uimm5",
+            'c.fsd': "c.fsd $c.rs1, $c.rs2 $uimm5",
+            'c.sw': "c.sw $c.rs1, $c.rs2 $uimm5",
+            'c.fsw': "c.fsw $c.rs1, $c.rs2 $uimm5"
+        }
+        self.c_insts64 = {
+            'c.fld': "c.fld $c.rd, $c.rs1 $uimm5",
+            'c.ld': "c.ld $c.rd, $c.rs1 $uimm5",
+            'c.lw': "c.lw $c.rd, $c.rs1 $uimm5",
+            'c.fsd': "c.fsd $c.rs1, $c.rs2 $uimm5",
+            'c.sw': "c.sw $c.rs1, $c.rs2 $uimm5",
+            'c.sd': "c.sd $c.rs1, $c.rs2 $uimm5",
+
         }
 
     def replace_fields(self, inst, modifiers):
