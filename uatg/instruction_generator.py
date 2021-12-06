@@ -200,7 +200,10 @@ class instruction_templates:
             'c.and': 'c.and $c.rd, $c.rs2',
             'c.j': 'c.j $imm11',
             'c.beqz': 'c.beqz $c.rs1, $imm8',
-            'c.bnez': 'c.bnez $c.rs1, $imm8'
+            'c.bnez': 'c.bnez $c.rs1, $imm8',
+
+            'c.slli': 'c.slli $c.rd, $nzuimm6',
+            # 'c.slli64': 'c.slli64 $c.rd', HINT inst
         }
         self.c_insts64 = {
             'c.fld': "c.fld $c.rd, $c.rs1 $uimm5",
@@ -229,184 +232,187 @@ class instruction_templates:
             'c.bnez': 'c.bnez $c.rs1, $imm8'
         }
 
-        def replace_fields(self, inst, modifiers):
-            r_inst = inst.replace('$rs1',
-                                  random.sample(modifiers['rs1_values'], 1)[
-                                      0]) if '$rs1' in inst else inst
-            r_inst = r_inst.replace('$rs2',
-                                    random.sample(modifiers['rs2_values'], 1)[
-                                        0]) if '$rs2' in r_inst else r_inst
-            r_inst = r_inst.replace('$rs3',
-                                    random.sample(modifiers['rs3_values'], 1)[
-                                        0]) if '$rs3' in r_inst else r_inst
-            r_inst = r_inst.replace('$rd',
-                                    random.sample(modifiers['rd_values'], 1)[
-                                        0]) if '$rd' in r_inst else r_inst
-            r_inst = r_inst.replace('$rm',
-                                    random.sample(modifiers['rm_values'], 1)[
-                                        0]) if '$rm' in r_inst else r_inst
-            r_inst = r_inst.replace('$imm12', str(
-                random.sample(modifiers['imm12_values'], 1)[0])) \
-                if '$imm12' in r_inst else r_inst
-            return r_inst
+    def replace_fields(self, inst, modifiers):
+        r_inst = inst.replace('$rs1',
+                              random.sample(modifiers['rs1_values'], 1)[
+                                  0]) if '$rs1' in inst else inst
+        r_inst = r_inst.replace('$rs2',
+                                random.sample(modifiers['rs2_values'], 1)[
+                                    0]) if '$rs2' in r_inst else r_inst
+        r_inst = r_inst.replace('$rs3',
+                                random.sample(modifiers['rs3_values'], 1)[
+                                    0]) if '$rs3' in r_inst else r_inst
+        r_inst = r_inst.replace('$rd',
+                                random.sample(modifiers['rd_values'], 1)[
+                                    0]) if '$rd' in r_inst else r_inst
+        r_inst = r_inst.replace('$rm',
+                                random.sample(modifiers['rm_values'], 1)[
+                                    0]) if '$rm' in r_inst else r_inst
+        r_inst = r_inst.replace('$imm12', str(
+            random.sample(modifiers['imm12_values'], 1)[0])) \
+            if '$imm12' in r_inst else r_inst
+        return r_inst
 
-        def i_inst_random(self, isa, modifiers, no_of_insts=5):
-            assert isinstance(modifiers, dict)
-            i_insts = self.i_insts32 if '32' in isa else self.i_insts64
-            for key, val in self.default_modifiers.items():
-                if key not in modifiers:
-                    modifiers[key] = val
-            asm = []
-            for _ in range(no_of_insts):
-                _ = i_insts[
-                    random.choice([_inst for _inst in i_insts.keys()])
-                ]
-                asm.append(self.replace_fields(_, modifiers=modifiers))
-            return asm
+    def i_inst_random(self, isa, modifiers, no_of_insts=5):
+        assert isinstance(modifiers, dict)
+        i_insts = self.i_insts32 if '32' in isa else self.i_insts64
+        for key, val in self.default_modifiers.items():
+            if key not in modifiers:
+                modifiers[key] = val
+        asm = []
+        for _ in range(no_of_insts):
+            _ = i_insts[
+                random.choice([_inst for _inst in i_insts.keys()])
+            ]
+            asm.append(self.replace_fields(_, modifiers=modifiers))
+        return asm
 
-        def fill_i_insts(self, isa, inst, modifiers, no_of_insts=5):
-            assert isinstance(modifiers, dict)
-            i_insts = self.i_insts32 if '32' in isa else self.i_insts64
-            assert inst in i_insts.keys()
+    def fill_i_insts(self, isa, inst, modifiers, no_of_insts=5):
+        assert isinstance(modifiers, dict)
+        i_insts = self.i_insts32 if '32' in isa else self.i_insts64
+        assert inst in i_insts.keys()
 
-            for key, val in self.default_modifiers.items():
-                if key not in modifiers:
-                    modifiers[key] = val
+        for key, val in self.default_modifiers.items():
+            if key not in modifiers:
+                modifiers[key] = val
 
-            asm = []
-            for _ in range(no_of_insts):
-                _ = i_insts[random.choice(
-                    [ins for ins in i_insts.keys()])] if inst == 'any' else \
-                    i_insts[inst]
-                _ = self.replace_fields(_, modifiers=modifiers)
-                asm.append(_)
-            return asm
+        asm = []
+        for _ in range(no_of_insts):
+            _ = i_insts[random.choice(
+                [ins for ins in i_insts.keys()])] if inst == 'any' else \
+                i_insts[inst]
+            _ = self.replace_fields(_, modifiers=modifiers)
+            asm.append(_)
+        return asm
 
-        def m_inst_random(self, isa, modifiers, no_of_insts=5):
-            assert isinstance(modifiers, dict)
-            if 'm' not in isa.lower():
-                return []
-            m_insts = self.m_insts32 if '32' in isa else self.m_insts64
-            for key, val in self.default_modifiers.items():
-                if key not in modifiers:
-                    modifiers[key] = val
-            asm = []
-            for _ in range(no_of_insts):
-                _ = m_insts[
-                    random.choice([_inst for _inst in m_insts.keys()])
-                ]
-                asm.append(self.replace_fields(_, modifiers=modifiers))
-            return asm
+    def m_inst_random(self, isa, modifiers, no_of_insts=5):
+        assert isinstance(modifiers, dict)
+        if 'm' not in isa.lower():
+            return []
+        m_insts = self.m_insts32 if '32' in isa else self.m_insts64
+        for key, val in self.default_modifiers.items():
+            if key not in modifiers:
+                modifiers[key] = val
+        asm = []
+        for _ in range(no_of_insts):
+            _ = m_insts[
+                random.choice([_inst for _inst in m_insts.keys()])
+            ]
+            asm.append(self.replace_fields(_, modifiers=modifiers))
+        return asm
 
-        def fill_m_insts(self, isa, inst, modifiers, no_of_insts=5):
-            assert isinstance(modifiers, dict)
-            if 'm' not in isa.lower():
-                return []
-            m_insts = self.m_insts32 if '32' in isa else self.m_insts64
-            assert inst in m_insts.keys()
-            for key, val in self.default_modifiers.items():
-                if key not in modifiers:
-                    modifiers[key] = val
+    def fill_m_insts(self, isa, inst, modifiers, no_of_insts=5):
+        assert isinstance(modifiers, dict)
+        if 'm' not in isa.lower():
+            return []
+        m_insts = self.m_insts32 if '32' in isa else self.m_insts64
+        assert inst in m_insts.keys()
+        for key, val in self.default_modifiers.items():
+            if key not in modifiers:
+                modifiers[key] = val
 
-            asm = []
-            for _ in range(no_of_insts):
-                _ = m_insts[random.choice(
-                    [ins for ins in m_insts.keys()])] if inst == 'any' else \
-                    m_insts[inst]
-                _ = self.replace_fields(_, modifiers=modifiers)
-                asm.append(_)
-            return asm
+        asm = []
+        for _ in range(no_of_insts):
+            _ = m_insts[random.choice(
+                [ins for ins in m_insts.keys()])] if inst == 'any' else \
+                m_insts[inst]
+            _ = self.replace_fields(_, modifiers=modifiers)
+            asm.append(_)
+        return asm
 
-        def f_inst_random(self, isa, modifiers, no_of_insts=5):
-            assert isinstance(modifiers, dict)
-            if 'f' not in isa.lower():
-                return []
-            f_insts = self.f_insts32 if '32' in isa else self.f_insts64
-            for key, val in self.default_modifiers.items():
-                if key not in modifiers:
-                    modifiers[key] = val
-            asm = []
-            for _ in range(no_of_insts):
-                _ = f_insts[
-                    random.choice([_inst for _inst in f_insts.keys()])
-                ]
-                asm.append(self.replace_fields(_, modifiers=modifiers))
-            return asm
+    def f_inst_random(self, isa, modifiers, no_of_insts=5):
+        assert isinstance(modifiers, dict)
+        if 'f' not in isa.lower():
+            return []
+        f_insts = self.f_insts32 if '32' in isa else self.f_insts64
+        for key, val in self.default_modifiers.items():
+            if key not in modifiers:
+                modifiers[key] = val
+        asm = []
+        for _ in range(no_of_insts):
+            _ = f_insts[
+                random.choice([_inst for _inst in f_insts.keys()])
+            ]
+            asm.append(self.replace_fields(_, modifiers=modifiers))
+        return asm
 
-        def fill_f_insts(self, isa, inst, modifiers, no_of_insts=5):
-            assert isinstance(modifiers, dict)
-            if 'f' not in isa.lower():
-                return []
-            f_insts = self.f_insts32 if '32' in isa else self.f_insts64
-            assert inst in f_insts.keys()
-            for key, val in self.default_modifiers.items():
-                if key not in modifiers:
-                    modifiers[key] = val
+    def fill_f_insts(self, isa, inst, modifiers, no_of_insts=5):
+        assert isinstance(modifiers, dict)
+        if 'f' not in isa.lower():
+            return []
+        f_insts = self.f_insts32 if '32' in isa else self.f_insts64
+        assert inst in f_insts.keys()
+        for key, val in self.default_modifiers.items():
+            if key not in modifiers:
+                modifiers[key] = val
 
-            asm = []
-            for _ in range(no_of_insts):
-                _ = f_insts[random.choice(
-                    [ins for ins in f_insts.keys()])] if inst == 'any' else \
-                    f_insts[inst]
-                _ = self.replace_fields(_, modifiers=modifiers)
-                asm.append(_)
-            return asm
+        asm = []
+        for _ in range(no_of_insts):
+            _ = f_insts[random.choice(
+                [ins for ins in f_insts.keys()])] if inst == 'any' else \
+                f_insts[inst]
+            _ = self.replace_fields(_, modifiers=modifiers)
+            asm.append(_)
+        return asm
 
-        def d_inst_random(self, isa, modifiers, no_of_insts=5):
-            assert isinstance(modifiers, dict)
-            if 'd' not in isa.lower():
-                return []
-            d_insts = self.d_insts32 if '32' in isa else self.d_insts64
-            for key, val in self.default_modifiers.items():
-                if key not in modifiers:
-                    modifiers[key] = val
-            asm = []
-            for _ in range(no_of_insts):
-                _ = d_insts[
-                    random.choice([_inst for _inst in d_insts.keys()])
-                ]
-                asm.append(self.replace_fields(_, modifiers=modifiers))
-            return asm
+    def d_inst_random(self, isa, modifiers, no_of_insts=5):
+        assert isinstance(modifiers, dict)
+        if 'd' not in isa.lower():
+            return []
+        d_insts = self.d_insts32 if '32' in isa else self.d_insts64
+        for key, val in self.default_modifiers.items():
+            if key not in modifiers:
+                modifiers[key] = val
+        asm = []
+        for _ in range(no_of_insts):
+            _ = d_insts[
+                random.choice([_inst for _inst in d_insts.keys()])
+            ]
+            asm.append(self.replace_fields(_, modifiers=modifiers))
+        return asm
 
-        def fill_d_insts(self, isa, inst, modifiers, no_of_insts=5):
-            assert isinstance(modifiers, dict)
-            if 'd' not in isa.lower():
-                return []
-            d_insts = self.d_insts32 if '32' in isa else self.d_insts64
-            assert inst in d_insts.keys()
-            for key, val in self.default_modifiers.items():
-                if key not in modifiers:
-                    modifiers[key] = val
+    def fill_d_insts(self, isa, inst, modifiers, no_of_insts=5):
+        assert isinstance(modifiers, dict)
+        if 'd' not in isa.lower():
+            return []
+        d_insts = self.d_insts32 if '32' in isa else self.d_insts64
+        assert inst in d_insts.keys()
+        for key, val in self.default_modifiers.items():
+            if key not in modifiers:
+                modifiers[key] = val
 
-            asm = []
-            for _ in range(no_of_insts):
-                _ = d_insts[random.choice(
-                    [ins for ins in d_insts.keys()])] if inst == 'any' else \
-                    d_insts[inst]
-                _ = self.replace_fields(_, modifiers=modifiers)
-                asm.append(_)
-            return asm
+        asm = []
+        for _ in range(no_of_insts):
+            _ = d_insts[random.choice(
+                [ins for ins in d_insts.keys()])] if inst == 'any' else \
+                d_insts[inst]
+            _ = self.replace_fields(_, modifiers=modifiers)
+            asm.append(_)
+        return asm
 
-        def __repr__(self):
-            message = 'I extension:\n\t' + '\n\t'.join(
-                str(ind + 1) + ': ' + str(inst) for ind, inst in
-                enumerate(self.i_insts32))
-            return message
+    def __repr__(self):
+        message = 'I extension:\n\t' + '\n\t'.join(
+            str(ind + 1) + ': ' + str(inst) for ind, inst in
+            enumerate(self.i_insts32))
+        return message
 
-    def main():
-        a = instruction_templates()
 
-        insts_100 = a.i_inst_random(isa='RV64I',
-                                    modifiers={'imm12_values': {100, 200, 300},
-                                               'rs1_values': {'x0', 'x1'}},
-                                    no_of_insts=10)
-        insts_10 = a.fill_m_insts(isa='RV64I', inst='mul',
-                                  modifiers={'imm12_values': {120}},
-                                  no_of_insts=10)
-        for i in insts_100:
-            print(i)
-        for i in insts_10:
-            print(i)
+def main():
+    a = instruction_templates()
 
-    if __name__ == '__main__':
-        main()
+    insts_100 = a.i_inst_random(isa='RV64I',
+                                modifiers={'imm12_values': {100, 200, 300},
+                                       'rs1_values': {'x0', 'x1'}},
+                                no_of_insts=10)
+    insts_10 = a.fill_m_insts(isa='RV64I', inst='mul',
+                              modifiers={'imm12_values': {120}},
+                              no_of_insts=10)
+
+    for i in insts_100:
+        print(i)
+    for i in insts_10:
+        print(i)
+
+
+if __name__ == '__main__':
+    main()
