@@ -39,17 +39,20 @@ class instruction_templates:
             'sltiu': 'sltiu $rd, $rs1, $imm12',
             'xori': 'xori $rd, $rs1, $imm12',
             'ori': 'ori $rd, $rs1, $imm12',
-            'anddi': 'anddi $rd, $rs1, $imm12',
+            'andi': 'anddi $rd, $rs1, $imm12',
+            'slli': 'slli $rd, $rs1, $shamt',
+            'srli': 'srli $rd, $rs1, $shamt',
+            'srai': 'srai $rd, $rs1, $shamt',
 
-            'lb': 'lb $rd, $rs1, $imm12',
-            'lh': 'lh $rd, $rs1, $imm12',
-            'lw': 'lw $rd, $rs1, $imm12',
-            'lbu': 'lbu $rd, $rs1, $imm12',
-            'lhu': 'lhu $rd, $rs1, $imm12',
+            'lb': 'lb $rd, $imm12($rs1)',
+            'lh': 'lh $rd, $imm12($rs1)',
+            'lw': 'lw $rd, $imm12($rs1)',
+            'lbu': 'lbu $rd, $imm12($rs1)',
+            'lhu': 'lhu $rd, $imm12($rs1)',
 
-            'sb': 'sb $rs1, $rs2, $imm12',
-            'sh': 'sh $rs1, $rs2, $imm12',
-            'sw': 'sw $rs1, $rs2, $imm12',
+            'sb': 'sb $rs2, $imm12($rs1)',
+            'sh': 'sh $rs2, $imm12($rs1)',
+            'sw': 'sw $rs2, $imm12($rs1)',
 
             'beq': 'beq $rs1, $rs2, $imm12',
             'bne': 'bne $rs1, $rs2, $imm12',
@@ -60,21 +63,26 @@ class instruction_templates:
 
             'jalr': 'jalr $rd, $rs1, $imm12',
             'jal': 'jal $rd, $imm12',
-            'lui': 'lui $rd',
-            'auipc': 'auipc $rd',
+            'lui': 'lui $rd, $imm20',
+            'auipc': 'auipc $rd, $imm20',
 
-            # 'fence': 'fence $iorw, $iorw',
-            'fence.i': 'fence.i $imm12'
+            # 'fence': 'fence $pred, $succ',
+            'fence.i': 'fence.i'
         }
 
         self.i_insts64 = {
             'addiw': 'addiw $rd, $rs1, $imm12',
-            'slliw': 'slliw $rd, $rs1, $shamtw',
-            'srliw': 'srliw $rd, $rs1, $shamtw',
-            'sraiw': 'sraiw $rd, $rs1, $shamtw',
-            'ld': 'ld $rd $rs1 $imm12',
-            'lwu': 'lwu $rd $rs1 $imm12',
-            'sd': 'sd $rs1 $rs2 imm12',
+            'slliw': 'slliw $rd, $rs1, $shamt',
+            'srliw': 'srliw $rd, $rs1, $shamt',
+            'sraiw': 'sraiw $rd, $rs1, $shamt',
+            'addw': 'addw $rd, $rs1, $rs2',
+            'subw': 'subw $rd, $rs1, $rs2',
+            'sllw': 'sllw rd,rs1,rs2',
+            'srlw': 'srlw rd,rs1,rs2',
+            'sraw': 'sraw rd,rs1,rs2',
+            'ld': 'ld $rd $imm12($rs1)',
+            'lwu': 'lwu $rd $imm12($rs1)',
+            'sd': 'sd $rs2 imm12($rs1)',
         }
         self.i_insts64.update(self.i_insts32)
 
