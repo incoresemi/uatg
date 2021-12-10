@@ -1014,6 +1014,20 @@ RVTEST_SIGUPD(swreg,destreg,offset)
   inst destreg, imm_val(rs1);\
   RVTEST_SIGUPD(swreg,destreg,offset)
 
+// macro to check load dependenncies
+#define MBOX_DEPENDENCIES_LOAD(rand_inst,inst,imm,reg1,reg2, val2, destreg1,destreg2, swreg,offset,code...) \
+        LA(reg1,rvtest_data+64);\
+        sra reg1, reg1, imm; \
+        li reg2, val2; \
+        code;\
+        RVTEST_SIGUPD(swreg,destreg1,offset)
+
+// macro to check dependency
+#define MBOX_DEPENDENCIES_RR_OP(rand_inst, inst, reg1, reg2, destreg1, destreg2, correctval, val1, val2, swreg, offset, code...) \
+        LI (reg1, val1); \
+        LI (reg2, val2); \
+        code ; \
+        RVTEST_SIGUPD(swreg,destreg1,offset)
 //-----------------------------------------------------------------------------
 
 #define TEST_CNOP_OP( inst, testreg, imm_val, swreg, offset) \
