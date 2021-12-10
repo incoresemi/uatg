@@ -20,9 +20,11 @@ class instruction_templates:
             'rd_values': {'x' + str(num) for num in range(32)},
             'rm_values': {'x' + str(num) for num in range(32)},
             'imm12_values': {num for num in range(-2 ** 11, 2 ** 11)},
+            'shamt': {num for num in range(0, 32)},
         }
 
         self.i_insts32 = {
+            # RV32I instructions excluding CSR instructions
             'add': 'add $rd, $rs1, $rs2',
             'sub': 'sub $rd, $rs1, $rs2',
             'sll': 'sll $rd, $rs1, $rs2',
@@ -71,6 +73,7 @@ class instruction_templates:
         }
 
         self.i_insts64 = {
+            # RV64I instructions
             'addiw': 'addiw $rd, $rs1, $imm12',
             'slliw': 'slliw $rd, $rs1, $shamt',
             'srliw': 'srliw $rd, $rs1, $shamt',
@@ -87,6 +90,7 @@ class instruction_templates:
         self.i_insts64.update(self.i_insts32)
 
         self.m_insts32 = {
+            # RV32M instructions
             'mul': 'mul $rd, $rs1, $rs2',
             'mulh': 'mulh $rd, $rs1, $rs2',
             'mulhsu': 'mulhsu	$rd, $rs1, $rs2',
@@ -98,6 +102,7 @@ class instruction_templates:
         }
 
         self.m_insts64 = {
+            # RV64M instructions
             'mulw': 'mulw $rd $rs1 $rs2',
             'divw': 'divw $rd $rs1 $rs2',
             'divuw': 'divuw $rd $rs1 $rs2',
@@ -107,6 +112,7 @@ class instruction_templates:
         self.m_insts64.update(self.m_insts32)
 
         self.f_insts32 = {
+            # RV32F instructions
             'fsgnj.s': 'fsgnj.s $rd, $rs1, $rs2',
             'fnmsub.s': 'fnmsub.s $rd, $rs1, $rs2, $rs3, $rm',
             'fmul.s': 'fmul.s $rd, $rs1, $rs2, $rm',
@@ -258,6 +264,7 @@ class instruction_templates:
         }
 
     def replace_fields(self, inst, modifiers):
+        # Utility function to replace relevant fields in the instruction
         r_inst = inst.replace('$rs1',
                               random.sample(modifiers['rs1_values'], 1)[
                                   0]) if '$rs1' in inst else inst
@@ -276,6 +283,9 @@ class instruction_templates:
         r_inst = r_inst.replace('$imm12', str(
             random.sample(modifiers['imm12_values'], 1)[0])) \
             if '$imm12' in r_inst else r_inst
+        r_inst = r_inst.replace('$shamt', str(
+            random.sample(modifiers['shamt_values'], 1)[0])) \
+            if '$shamt' in r_inst else r_inst
         return r_inst
 
     def i_inst_random(self, isa, modifiers, no_of_insts=5):
@@ -293,6 +303,7 @@ class instruction_templates:
         return asm
 
     def fill_i_insts(self, isa, inst, modifiers, no_of_insts=5):
+        # Function to generate specific I-insts with random/determined values
         assert isinstance(modifiers, dict)
         i_insts = self.i_insts32 if '32' in isa else self.i_insts64
         assert inst in i_insts.keys()
