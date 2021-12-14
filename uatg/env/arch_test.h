@@ -1022,12 +1022,29 @@ RVTEST_SIGUPD(swreg,destreg,offset)
         code;\
         RVTEST_SIGUPD(swreg,destreg1,offset)
 
-// macro to check dependency
+//Tests for Mbox instructios for (RAW reg reg/imm operand)
 #define MBOX_DEPENDENCIES_RR_OP(rand_inst, inst, reg1, reg2, destreg1, destreg2, correctval, val1, val2, swreg, offset, code...) \
         LI (reg1, val1); \
         LI (reg2, val2); \
         code ; \
         RVTEST_SIGUPD(swreg,destreg1,offset)
+
+//Tests for Mbox instructions for (WAR reg reg operand, WAW reg reg operand)
+#define MBOX_DEPENDENCIES_WAW_RR_OP(rand_inst, inst, reg1, reg2, reg3, reg4, destreg1, correctval, val1, val2, val3, val4, swreg, offset, testreg, code...) \
+        LI (reg1, val1); \
+        LI (reg2, val2); \
+        LI (reg3, val3); \
+        LI (reg4, val4); \
+        code ; \
+        RVTEST_SIGUPD(swreg,destreg1,offset)
+
+// Tests for Mbox instructions for (WAR reg reg imm, WAW reg reg imm)
+#define MBOX_DEPENDENCIES_WAR_RI_OP(rand_inst, inst, reg1, reg2, destreg1, correctval, val1, val2, swreg, offset, code...) \
+        LI (reg1, val1); \
+        LI (reg2, val2); \
+        code ; \
+        RVTEST_SIGUPD(swreg,destreg1,offset)
+
 //-----------------------------------------------------------------------------
 
 #define TEST_CNOP_OP( inst, testreg, imm_val, swreg, offset) \
