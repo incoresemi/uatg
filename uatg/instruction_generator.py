@@ -262,7 +262,34 @@ class instruction_templates:
             'c.swsp': 'c.swsp $rs2, $uimm6',
             'c.xor': 'c.xor $rd, $rd'
         }
+        
+        self.a_insts32 = {
+            'lr.w': 'lr.w $rd, $rs1',
+            'sc.w': 'sc.w $rd, $rs1, $rs2',
+            'amoswap.w': 'amoswap.w $rd, $rs2, ($rs1)',
+            'amoadd.w': 'amoadd.w $rd, $rs2, ($rs1)',
+            'amoxor.w': 'amoxor.w $rd, $rs2, ($rs1)',
+            'amoand.w': 'amoand.w $rd, $rs2, ($rs1)',
+            'amoor.w': 'amoor.w $rd, $rs2, ($rs1)',
+            'amomin.w': 'amomin.w $rd, $rs2, ($rs1)',
+            'amomax.w': 'amomax.w $rd, $rs2, ($rs1)',
+            'amominu.w': 'amominu.w $rd, $rs2, ($rs1)',
+            'amomaxu.w': 'amomaxu.w $rd, $rs2, ($rs1)'
+        }
 
+        self.a_insts64 = {
+            'lr.d': 'lr.d $rd, $rs1',
+            'sc.d': 'sc.d $rd, $rs1, $rs2',
+            'amoswap.d': 'amoswap.d $rd, $rs2, ($rs1)',
+            'amoadd.d': 'amoadd.d $rd, $rs2, ($rs1)',
+            'amoxor.d': 'amoxor.d $rd, $rs2, ($rs1)',
+            'amoand.d': 'amoand.d $rd, $rs2, ($rs1)',
+            'amoor.d': 'amoor.d $rd, $rs2, ($rs1)',
+            'amomin.d': 'amomin.d $rd, $rs2, ($rs1)',
+            'amomax.d': 'amomax.d $rd, $rs2, ($rs1)',
+            'amominu.d': 'amominu.d $rd, $rs2, ($rs1)',
+            'amomaxu.d': 'amomaxu.d $rd, $rs2, ($rs1)'
+        }
     def replace_fields(self, inst, modifiers):
         # Utility function to replace relevant fields in the instruction
         r_inst = inst.replace('$rs1',
