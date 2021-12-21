@@ -111,6 +111,34 @@ class instruction_templates:
         }
         self.m_insts64.update(self.m_insts32)
 
+        self.a_insts32 = {
+            'lr.w': 'lr.w $rd, $rs1',
+            'sc.w': 'sc.w $rd, $rs1, $rs2',
+            'amoswap.w': 'amoswap.w $rd, $rs2, ($rs1)',
+            'amoadd.w': 'amoadd.w $rd, $rs2, ($rs1)',
+            'amoxor.w': 'amoxor.w $rd, $rs2, ($rs1)',
+            'amoand.w': 'amoand.w $rd, $rs2, ($rs1)',
+            'amoor.w': 'amoor.w $rd, $rs2, ($rs1)',
+            'amomin.w': 'amomin.w $rd, $rs2, ($rs1)',
+            'amomax.w': 'amomax.w $rd, $rs2, ($rs1)',
+            'amominu.w': 'amominu.w $rd, $rs2, ($rs1)',
+            'amomaxu.w': 'amomaxu.w $rd, $rs2, ($rs1)'
+        }
+        self.a_insts64 = {
+            'lr.d': 'lr.d $rd, $rs1',
+            'sc.d': 'sc.d $rd, $rs1, $rs2',
+            'amoswap.d': 'amoswap.d $rd, $rs2, ($rs1)',
+            'amoadd.d': 'amoadd.d $rd, $rs2, ($rs1)',
+            'amoxor.d': 'amoxor.d $rd, $rs2, ($rs1)',
+            'amoand.d': 'amoand.d $rd, $rs2, ($rs1)',
+            'amoor.d': 'amoor.d $rd, $rs2, ($rs1)',
+            'amomin.d': 'amomin.d $rd, $rs2, ($rs1)',
+            'amomax.d': 'amomax.d $rd, $rs2, ($rs1)',
+            'amominu.d': 'amominu.d $rd, $rs2, ($rs1)',
+            'amomaxu.d': 'amomaxu.d $rd, $rs2, ($rs1)'
+        }
+        self.a_insts64.update(self.a_insts32)
+
         self.f_insts32 = {
             # RV32F instructions
             'fsgnj.s': 'fsgnj.s $rd, $rs1, $rs2',
@@ -140,7 +168,6 @@ class instruction_templates:
             'fmin.s': 'fmin.s $rd, $rs1, $rs2',
             'fle.s': 'fle.s $rd, $rs1, $rs2',
         }
-
         self.f_insts64 = {
             'fcvt.l.s': 'fcvt.l.s $rd $rs1 $rm',
             'fcvt.lu.s': 'fcvt.lu.s $rd $rs1 $rm',
@@ -177,7 +204,6 @@ class instruction_templates:
             'fnmsub.d': 'fnmsub.d $rd $rs1 $rs2 rs3 $rm',
             'fnmadd.d': 'fnmadd.d $rd $rs1 $rs2 rs3 $rm',
         }
-
         self.d_insts64 = {
             'fcvt.l.d': 'fcvt.l.d rd rs1 rm',
             'fcvt.lu.d': 'fcvt.lu.d rd rs1 rm',
@@ -261,33 +287,6 @@ class instruction_templates:
             'c.sw': 'c.sw $c.rd, $uimm5($c.rs1)',
             'c.swsp': 'c.swsp $rs2, $uimm6',
             'c.xor': 'c.xor $rd, $rd'
-        }
-
-        self.a_insts32 = {
-            'lr.w': 'lr.w $rd, $rs1',
-            'sc.w': 'sc.w $rd, $rs1, $rs2',
-            'amoswap.w': 'amoswap.w $rd, $rs2, ($rs1)',
-            'amoadd.w': 'amoadd.w $rd, $rs2, ($rs1)',
-            'amoxor.w': 'amoxor.w $rd, $rs2, ($rs1)',
-            'amoand.w': 'amoand.w $rd, $rs2, ($rs1)',
-            'amoor.w': 'amoor.w $rd, $rs2, ($rs1)',
-            'amomin.w': 'amomin.w $rd, $rs2, ($rs1)',
-            'amomax.w': 'amomax.w $rd, $rs2, ($rs1)',
-            'amominu.w': 'amominu.w $rd, $rs2, ($rs1)',
-            'amomaxu.w': 'amomaxu.w $rd, $rs2, ($rs1)'
-        }
-        self.a_insts64 = {
-            'lr.d': 'lr.d $rd, $rs1',
-            'sc.d': 'sc.d $rd, $rs1, $rs2',
-            'amoswap.d': 'amoswap.d $rd, $rs2, ($rs1)',
-            'amoadd.d': 'amoadd.d $rd, $rs2, ($rs1)',
-            'amoxor.d': 'amoxor.d $rd, $rs2, ($rs1)',
-            'amoand.d': 'amoand.d $rd, $rs2, ($rs1)',
-            'amoor.d': 'amoor.d $rd, $rs2, ($rs1)',
-            'amomin.d': 'amomin.d $rd, $rs2, ($rs1)',
-            'amomax.d': 'amomax.d $rd, $rs2, ($rs1)',
-            'amominu.d': 'amominu.d $rd, $rs2, ($rs1)',
-            'amomaxu.d': 'amomaxu.d $rd, $rs2, ($rs1)'
         }
 
         self.b_insts32 = {'clz': 'clz $rd, $rs1',

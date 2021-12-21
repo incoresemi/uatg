@@ -542,10 +542,10 @@ different values.
                         # if signature register needs to be used for operations
                         # then first choose a new signature pointer and move the
                         # value to it.
-                        if swreg in [rd, rs1, rs2]:
+                        if swreg in (rd, rs1, rs2):
                             newswreg = random.choice([
                                 x for x in reg_file
-                                if x not in [rd, rs1, rs2, 'x0']
+                                if x not in (rd, rs1, rs2, 'x0')
                             ])
                             asm_code += f'mv {newswreg}, {swreg}\n'
                             swreg = newswreg
