@@ -7,7 +7,6 @@ import glob
 import random as rnd
 from uatg.log import logger
 from ruamel.yaml import YAML
-from math import log
 
 
 class sv_components:
@@ -826,23 +825,14 @@ def setup_pages(size=4096):
         Currently works with the sv39 virtual memory addressing.
     """
     
-    entries = int(size/8)
+    entries = size // 8
     # assuming that the size will always be a power of 2
-    power = len(bin(size)[2:])-1
+    power = len(bin(size)[2:]) - 1
     # data section 
     pre = f"\n.align {8}\n"
-    level_1 = f"l1_pt:\n"
-    level_1 += f".rept {entries}\n"
-    level_1 += f".dword 0x0\n"
-    level_1 += f".endr\n"
-    level_2 = f"l2_pt:\n"
-    level_2 += f".rept {entries}\n"
-    level_2 += f".dword 0x0\n"
-    level_2 += f".endr\n"
-    level_3 = f"l3_pt:\n"
-    level_3 += f".rept {entries}\n"
-    level_3 += f".dword 0x0\n"
-    level_3 += f".endr\n"
+    level_1 = f"l1_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
+    level_2 = f"l2_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
+    level_3 = f"l3_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
 
     out_data_string = pre + level_1 + level_2 + level_3
 
@@ -857,4 +847,4 @@ def setup_pages(size=4096):
     out_code_string += f"# value to be stored into the SATP Register\n"
     out_code_string += f"\tadd t6, t2, t5\n\tcsrw CSR_SATP, t6\n"
      
-    return(out_code_string, out_data_string)
+    return out_code_string, out_data_string
