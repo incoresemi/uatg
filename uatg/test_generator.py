@@ -10,7 +10,7 @@ import uatg
 from uatg.log import logger
 from uatg.utils import create_plugins, generate_test_list, create_linker, \
     create_model_test_h, join_yaml_reports, generate_sv_components, \
-    list_of_modules, rvtest_data, dump_makefile
+    list_of_modules, rvtest_data, dump_makefile, setup_pages
 from yapsy.PluginManager import PluginManager
 
 from multiprocessing import Pool, Manager
@@ -37,12 +37,20 @@ def asm_generation_process(args):
     uarch_dir = args[9]
     work_dir = args[10]
     compile_macros_dict = args[11]
+    privileged = args[12]
+    page_size = args[13]
     #process_manager = args[12]
 
     # actual generation process
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
     name = (str(plugin.plugin_object).split(".", 1))
     t_name = ((name[1].split(" ", 1))[0])
+
+    # hardcoded for 4kiB pages
+    priv_asm_code = ""
+    priv_asm_data = ""
+    if privileged:
+        priv_asm_code, priv_asm_data = setup_pages(page_size)
 
     if check:
         test_seq = plugin.plugin_object.generate_asm()
@@ -99,17 +107,17 @@ def asm_generation_process(args):
 
             # Appending Coding Macros & Instructions
             # asm += rvcode_begin + asm_code + rvcode_end
-            asm += (test_format_string[3] + asm_code +\
+            asm += (test_format_string[3] + asm_code + priv_asm_code +\
                     test_format_string[4])
 
             # Appending RVTEST_DATA macros and data values
             # asm += rvtest_data_begin + asm_data + rvtest_data_end
-            asm += (test_format_string[5] + asm_data+\
+            asm += (test_format_string[5] + asm_data + priv_asm_data +\
                     test_format_string[6])
 
             # Appending RVMODEL macros
             # asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
-            asm += (test_format_string[7] + asm_sig+\
+            asm += (test_format_string[7] + asm_sig +\
                     test_format_string[8])
 
             os.mkdir(os.path.join(work_tests_dir, test_name))
@@ -178,7 +186,7 @@ def sv_generation_process(args):
 
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
-                   modules_dir):
+                   modules_dir, privileged, page_size):
     """
     The function generates ASM files for all the test classes specified within
     the module_dir. The user can also select the modules for which he would want
@@ -296,7 +304,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
-                 work_dir, compile_macros_dict))
+                 work_dir, compile_macros_dict, privileged, page_size))
 
         # multi processing process pool
         process_pool = Pool()

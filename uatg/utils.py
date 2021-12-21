@@ -7,6 +7,7 @@ import glob
 import random as rnd
 from uatg.log import logger
 from ruamel.yaml import YAML
+from math import log
 
 
 class sv_components:
@@ -478,7 +479,8 @@ def create_config_file(config_path):
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = True\n'
+          'are generated\ngen_cvg = True\n# for privileged tests\n' \
+          'privileged = True\n# Page table size\npage_size = 4096'
 
     with open(os.path.join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
@@ -816,3 +818,43 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
           f' -o /dev/null'
 
     return cmd
+
+
+def setup_pages(size=4096):
+    """
+        creates a pagetable with 'size' number of entries.
+        Currently works with the sv39 virtual memory addressing.
+    """
+    
+    entries = int(size/8)
+    # assuming that the size will always be a power of 2
+    power = len(bin(size)[2:])-1
+    # data section 
+    pre = f"\n.align {8}\n"
+    level_1 = f"l1_pt:\n"
+    level_1 += f".rept {entries}\n"
+    level_1 += f".dword 0x0\n"
+    level_1 += f".endr\n"
+    level_2 = f"l2_pt:\n"
+    level_2 += f".rept {entries}\n"
+    level_2 += f".dword 0x0\n"
+    level_2 += f".endr\n"
+    level_3 = f"l3_pt:\n"
+    level_3 += f".rept {entries}\n"
+    level_3 += f".dword 0x0\n"
+    level_3 += f".endr\n"
+
+    out_data_string = pre + level_1 + level_2 + level_3
+
+    # code section
+    out_code_string = f"# hardcoded for SV39 paging setup\n"
+    out_code_string += f"\taddi t1, x0, 1\n\tslli t2, t1, 63 # for mode\n"
+    out_code_string += f"\tslli t3, t1, {power} # for {size} page\n"
+
+    out_code_string += f"# setting up the SATP register\n\tla t4, l1_pt\n"
+    out_code_string += f"\tdivu t5, t4, t3\n"
+
+    out_code_string += f"# value to be stored into the SATP Register\n"
+    out_code_string += f"\tadd t6, t2, t5\n\tcsrw CSR_SATP, t6\n"
+     
+    return(out_code_string, out_data_string)
