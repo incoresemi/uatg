@@ -102,6 +102,39 @@ atomic_mem_ops = {
     ]
 }
 
+# compressed instructions
+compressed_instructions = {
+    # stack load/store instructions
+    'rv32-loads-stack': ['c.lwsp', 'c.flwsp', 'c.fldsp'],
+    'rv64-loads-stack': ['c.ldsp', 'c.fldsp'],
+    'rv128-loads-stack': ['c.lqsp'],
+    'rv32-stores-stack': ['c.swsp', 'c.fswsp', 'c.fdsp'],
+    'rv64-stores-stack': ['c.sdsp', 'c.fsdsp'],
+    'rv128-stores-stack': ['c.sqsp'],
+
+    # register based load and store
+    'rv32-loads': ['c.lw', 'c.flw', 'c.fld'],
+    'rv64-loads': ['c.ld', 'c.fld'],
+    'rv128-loads': ['c.lq'],
+    'rv32-stores': ['c.sw', 'c.fsw', 'c.fsd'],
+    'rv64-stores': ['c.sd', 'c.fsd'],
+    'rv128-stores': ['c.sq'],
+    # control Transfers instructions
+    'rv32-jal': ['c.jal'],
+    'control_trans': ['c.j', 'c.jr', 'c.jalr', 'c.beqz', 'c.bnez'],
+    # integer constant generation instructions
+    'reg-const': ['c.li', 'c.lui'],
+    # integer register immediate instructions
+    'reg-imm': ['c.addi'],
+    'rv64-reg-imm': ['c.addiw'],
+    'rv128-reg-imm': ['c.addiw'],
+    # integer register register operations
+    'reg-reg': ['c.mv', 'c.add'],
+    'reg-regCA': ['c.and', 'c.or', 'c.xor', 'c.sub'],
+    'rv64-regCA': ['c.addw', 'c.subw'],
+    'rv128-regCA': ['c.addw', 'c.subw']
+}
+
 # Instruction encodings for illegals generation
 
 # 32bit instructions
