@@ -46,11 +46,9 @@ def asm_generation_process(args):
     name = (str(plugin.plugin_object).split(".", 1))
     t_name = ((name[1].split(" ", 1))[0])
 
-    # hardcoded for 4kiB pages
+    # data section for paging pages
     priv_asm_code = ""
     priv_asm_data = ""
-    if privileged:
-        priv_asm_code, priv_asm_data = setup_pages(page_size)
 
     if check:
         test_seq = plugin.plugin_object.generate_asm()
@@ -99,6 +97,19 @@ def asm_generation_process(args):
             except KeyError:
                 logger.debug(f'No custom Compile macros specified for '
                              f'{test_name}')
+
+            # generate and setup page tables based on info from plugin
+            try:
+                privileged_dict = ret_list_of_dicts['supervisor_mode']
+            except KeyError:
+                privileged_dict['enable'] = False
+
+            if privileged_dict['enable']:
+                priv_asm_code, priv_asm_data = setup_pages(
+                    page_size=privileged_dict['page_size'],
+                    paging_mode=privileged_dict['paging_mode'],
+                    ll_pages=privileged_dict['ll_pages'],
+                    user=privileged_dict['u_bit'])
 
             # Adding License, includes and macros
             # asm = license_str + includes + test_entry

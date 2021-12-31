@@ -819,32 +819,59 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
     return cmd
 
 
-def setup_pages(size=4096, levels=3, last_level_count=64):
+def setup_pages(page_size=4096, paging_mode='sv39', ll_pages=64, user=False):
     """
         creates a pagetable with 'size' number of entries.
         Currently works with the sv39 virtual memory addressing.
     """
-    
-    entries = size // 8
+
+    entries = page_size // 8
     # assuming that the size will always be a power of 2
-    power = len(bin(size)[2:]) - 1
-    # data section 
+    power = len(bin(page_size)[2:]) - 1
+    # data section
     pre = f"\n.align {8}\n\n"
     level_1 = f"l1_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
     level_2 = f"l2_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
-    level_3 = f"l3_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
 
-    final_level_pages = ''
-    for i in range (last_level_count):
-        final_level_pages += f'll_{i}_page:\n.rept {entries}\n.dword 0x0\n'\
-                             f'.endr\n'
+    # assumption that the l3 pt entry 0 will point to 80000000
 
-    out_data_string = pre + level_1 + level_2 + level_3 + final_level_pages
+    base_address = 0x80000000
+
+    # all bits other than U bit will be set by default
+    valid_bit = 0x01
+    read_bit = 0x02
+    write_bit = 0x04
+    execute_bit = 0x08
+    u_bit = 0x10 if user else 0x00
+    global_bit = 0x20
+    access_bit = 0x40
+    dirty_bit = 0x80
+
+    l3_entries = ''
+    base_address_new = base_address
+    for i in range(ll_pages):
+        base_address_new += page_size
+        PTE_address = base_address_new >> power
+        PTE_address = PTE_address << 10
+        PTE_entry = base_address_new | dirty_bit | access_bit |\
+                           global_bit | u_bit | execute_bit | write_bit |\
+                           read_bit | valid_bit
+        l3_entries += '.dword {0} # entry_{1}\n'.format(hex(PTE_entry), i)
+
+    level_3 = f'l3_pt:\n{l3_entries}.rept {entries-ll_pages}\n'\
+              f'.dword 0x0\n.endr\n'
+
+    #final_level_pages = ''
+    #for i in range (last_level_count):
+    #    final_level_pages += f'll_{i}_page:\n.rept {entries}\n.dword 0x0\n'\
+    #                         f'.endr\n'
+
+    out_data_string = pre + level_1 + level_2 + level_3
 
     # code section
     out_code_string = f'\npaging:\n# hardcoded for SV39 paging setup\n'
     out_code_string += f'\taddi t0, x0, 1\n\tslli t1, t0, 63 # for mode\n'
-    out_code_string += f'\tslli t2, t0, {power} # for {size} page\n'
+    out_code_string += f'\tslli t2, t0, {power} # for {page_size} page\n'
 
     out_code_string += f'# setting up the SATP register\n\tla t3, l1_pt\n'
     out_code_string += f'\tsrli t4, t3, {power}\n'
@@ -852,41 +879,42 @@ def setup_pages(size=4096, levels=3, last_level_count=64):
     out_code_string += f'# value to be stored into the SATP Register\n'
     out_code_string += f'\tadd t5, t1, t4\n\tcsrw CSR_SATP, t5\n'
 
+    # calculation
     # variable for entry calculation
-    next_level_pt_reg = 't3'
+    #next_level_pt_reg = 't3'
 
-    pt_entry_calculation = f'# t5 = address of curr_lvl_pt + page table size\n'\
-                           f'\tsrli t4, t5, 13 # t3 is divided by page size\n'\
-                           f'\tslli t4, t4, 10 # shifting left for PTE\n'\
-                           f'\tadd  t4, t4, t1 # setting the valid bit\n'\
-                           f'# loading the address of the next_lvl_page into '\
-                           f'current page first entry\n'\
-                           f'\tld t4, 0(t3)\n'
+    #pt_entry_calculation = f'# t5 = address of curr_lvl_pt + page table size\n'\
+    #                       f'\tsrli t4, t5, 13 # t3 is divided by page size\n'\
+    #                       f'\tslli t4, t4, 10 # shifting left for PTE\n'\
+    #                       f'\tadd  t4, t4, t1 # setting the valid bit\n'\
+    #                       f'# loading the address of the next_lvl_page into '\
+    #                       f'current page first entry\n'\
+    #                       f'\tsd t4, 0(t3)\n'
 
-    for i in range (levels):
-        if (i>=1):
-            out_code_string += f'\n#copy the address of next page into t3\n'\
-                               f'\taddi t3, t5, 0\n'\
-                               f'entry_updation_l{i+1}:\n'\
-                               f'\tadd t5, {next_level_pt_reg}, t2 '\
-                               f'{pt_entry_calculation}'
-        else:
-            out_code_string += f'\nentry_updation_l{i+1}:\n'\
-                               f'\tadd t5, {next_level_pt_reg}, t2 '\
-                               f'{pt_entry_calculation}'
+    #for i in range (levels):
+    #    if (i>=1):
+    #        out_code_string += f'\n#copy the address of next page into t3\n'\
+    #                           f'\taddi t3, t5, 0\n'\
+    #                           f'entry_updation_l{i+1}:\n'\
+    #                           f'\tadd t5, {next_level_pt_reg}, t2 '\
+    #                           f'{pt_entry_calculation}'
+    #    else:
+    #        out_code_string += f'\nentry_updation_l{i+1}:\n'\
+    #                           f'\tadd t5, {next_level_pt_reg}, t2 '\
+    #                           f'{pt_entry_calculation}'
 
-    next_level_pt_reg = 't5'
+    #next_level_pt_reg = 't5'
 
-    out_code_string += f'\n# updating the {last_level_count} entries in '\
-                       f'll page\n' 
+    #out_code_string += f'\n# updating the {last_level_count} entries in '\
+    #                   f'll page\n'
 
-    for i in range (1,last_level_count):
-        out_code_string += f'\nll_entry_updation_{i}:\n'\
-                           f'#increment t3 to point to the next entry in'\
-                           f'll_page\n'\
-                           f'\taddi t3, t3, 64\n'\
-                           f'# calculation and updation\n'\
-                           f'\tadd t5, {next_level_pt_reg}, t2 '\
-                           f'{pt_entry_calculation}'
+    #for i in range (1,last_level_count):
+    #    out_code_string += f'\nll_entry_updation_{i}:\n'\
+    #                       f'#increment t3 to point to the next entry in'\
+    #                       f'll_page\n'\
+    #                       f'\taddi t3, t3, 64\n'\
+    #                       f'# calculation and updation\n'\
+    #                       f'\tadd t5, {next_level_pt_reg}, t2 '\
+    #                       f'{pt_entry_calculation}'
 
     return out_code_string, out_data_string
