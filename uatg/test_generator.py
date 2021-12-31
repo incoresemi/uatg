@@ -99,6 +99,7 @@ def asm_generation_process(args):
                              f'{test_name}')
 
             # generate and setup page tables based on info from plugin
+            privileged_dict = {}
             try:
                 privileged_dict = ret_list_of_dicts['supervisor_mode']
             except KeyError:
