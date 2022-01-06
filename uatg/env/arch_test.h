@@ -753,7 +753,26 @@ rvtest_data_end:
     or x2, x3, x2;\
     csrrw x0,mstatus,x2;
 
-
+//--------------------------------Supervisor Test Macros------------------------------------------//
+#define RVTEST_SUPERVISOR_ENABLE(pg_size_exp, mode)\
+  /*setting up SATP*/\
+  addi t0, t0, mode;\
+  slli t1, t0, 60;\
+  slli t2, t0, pg_size_exp;\
+  la t3, l1_pt;\
+  srli t4, t3, pg_size_exp;\
+  addi t5, t1, 1;\
+  csrw CSR_SATP, t5;\
+  /*update MPP*/\
+  addi t6, x0, 1;\
+  slli t6, t6, 11;\
+  csrs CSR_MSTATUS, t6;\
+  /*update mepc*/\
+  la t1, rvtest_code_begin;\
+  csrw CSR_MEPC, t1;\
+  /*mret*/\
+  mret;
+  
 //------------------------------ BORROWED FROM ANDREW's RISC-V TEST MACROS -----------------------//
 #define MASK_XLEN(x) ((x) & ((1 << (__riscv_xlen - 1) << 1) - 1))
 
