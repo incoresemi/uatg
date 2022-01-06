@@ -819,7 +819,10 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
     return cmd
 
 
-def setup_pages(page_size=4096, paging_mode='sv39', ll_pages=64, user=False):
+def setup_pages(page_size=4096,
+                paging_mode='sv39',
+                valid_ll_pages=64,
+                user=False):
     """
         creates a pagetable with 'size' number of entries.
         Currently works with the sv39 virtual memory addressing.
@@ -828,10 +831,27 @@ def setup_pages(page_size=4096, paging_mode='sv39', ll_pages=64, user=False):
     entries = page_size // 8
     # assuming that the size will always be a power of 2
     power = len(bin(page_size)[2:]) - 1
+
+    if paging_mode == 'sv32':
+        mode_val = 1  # paging mode for the SATP register
+        levels = 2
+    elif paging_mode == 'sv39':
+        mode_val = 8  # paging mode to be used in the SATP register
+        levels = 3
+    elif paging_mode == 'sv48':
+        mode_val = 9  # paging mode
+        levels = 4
+    elif paging_mode == 'sv57':
+        mode_val = 10
+        levels = 5
+
     # data section
     pre = f"\n.align {8}\n\n"
-    level_1 = f"l1_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
-    level_2 = f"l2_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
+    initial_level_pages = ''
+    for level in range(levels - 1):
+        initial_level_pages += f"l{level}_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
+    #level_1 = f"l1_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
+    #level_2 = f"l2_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
 
     # assumption that the l3 pt entry 0 will point to 80000000
 
@@ -847,37 +867,41 @@ def setup_pages(page_size=4096, paging_mode='sv39', ll_pages=64, user=False):
     access_bit = 0x40
     dirty_bit = 0x80
 
-    l3_entries = ''
+    ll_entries = ''
     base_address_new = base_address
-    for i in range(ll_pages):
+    for i in range(valid_ll_pages):
         base_address_new += page_size
         PTE_address = base_address_new >> power
         PTE_address = PTE_address << 10
         PTE_entry = base_address_new | dirty_bit | access_bit |\
                            global_bit | u_bit | execute_bit | write_bit |\
                            read_bit | valid_bit
-        l3_entries += '.dword {0} # entry_{1}\n'.format(hex(PTE_entry), i)
+        ll_entries += '.dword {0} # entry_{1}\n'.format(hex(PTE_entry), i)
 
-    level_3 = f'l3_pt:\n{l3_entries}.rept {entries-ll_pages}\n'\
-              f'.dword 0x0\n.endr\n'
+    ll_page = f'l{levels-1}_pt:\n{ll_entries}.rept {entries-valid_ll_pages}\n'\
+               f'.dword 0x0\n.endr\n'
 
     #final_level_pages = ''
     #for i in range (last_level_count):
     #    final_level_pages += f'll_{i}_page:\n.rept {entries}\n.dword 0x0\n'\
     #                         f'.endr\n'
 
-    out_data_string = pre + level_1 + level_2 + level_3
+    out_data_string = pre + initial_level_pages + ll_page
 
     # code section
-    out_code_string = f'\npaging:\n# hardcoded for SV39 paging setup\n'
-    out_code_string += f'\taddi t0, x0, 1\n\tslli t1, t0, 63 # for mode\n'
-    out_code_string += f'\tslli t2, t0, {power} # for {page_size} page\n'
+    # using the macro
+    out_code_string = f"\nRVTEST_SUPERVISOR_ENABLE({power}, {mode_val})\n"
 
-    out_code_string += f'# setting up the SATP register\n\tla t3, l1_pt\n'
-    out_code_string += f'\tsrli t4, t3, {power}\n'
+    # setting up SATP using assembly
+    #out_code_string = f'\npaging:\n# hardcoded for SV39 paging setup\n'
+    #out_code_string += f'\taddi t0, x0, 1\n\tslli t1, t0, 63 # for mode\n'
+    #out_code_string += f'\tslli t2, t0, {power} # for {page_size} page\n'
 
-    out_code_string += f'# value to be stored into the SATP Register\n'
-    out_code_string += f'\tadd t5, t1, t4\n\tcsrw CSR_SATP, t5\n'
+    #out_code_string += f'# setting up the SATP register\n\tla t3, l1_pt\n'
+    #out_code_string += f'\tsrli t4, t3, {power}\n'
+
+    #out_code_string += f'# value to be stored into the SATP Register\n'
+    #out_code_string += f'\tadd t5, t1, t4\n\tcsrw CSR_SATP, t5\n'
 
     # calculation
     # variable for entry calculation

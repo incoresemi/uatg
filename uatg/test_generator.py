@@ -109,7 +109,7 @@ def asm_generation_process(args):
                 priv_asm_code, priv_asm_data = setup_pages(
                     page_size=privileged_dict['page_size'],
                     paging_mode=privileged_dict['paging_mode'],
-                    ll_pages=privileged_dict['ll_pages'],
+                    valid_ll_pages=privileged_dict['ll_pages'],
                     user=privileged_dict['u_bit'])
 
             # Adding License, includes and macros
@@ -119,7 +119,7 @@ def asm_generation_process(args):
 
             # Appending Coding Macros & Instructions
             # asm += rvcode_begin + asm_code + rvcode_end
-            asm += (test_format_string[3] + asm_code + priv_asm_code +\
+            asm += (test_format_string[3] + priv_asm_code + asm_code +\
                     test_format_string[4])
 
             # Appending RVTEST_DATA macros and data values
