@@ -10,6 +10,7 @@ from uatg.__init__ import __version__
 from uatg.utils import list_of_modules, info, clean_modules, load_yaml
 from uatg.utils import create_dut_config_files, create_config_file
 from uatg.utils import combine_config_yamls, create_alias_file
+import logging
 
 
 @click.group()
@@ -240,6 +241,7 @@ def from_config(config_file, verbose):
     # Uncomment to overwrite verbosity from config file.
     # verbose = config['uatg']['verbose']
     logger.level(verbose)
+    logging.getLogger('yapsy').setLevel(logging.ERROR)
     module = clean_modules(module_dir, modules)
 
     info(__version__)
