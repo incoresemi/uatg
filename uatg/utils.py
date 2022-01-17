@@ -831,10 +831,12 @@ def setup_pages(page_size=4096,
     entries = page_size // 8
     # assuming that the size will always be a power of 2
     power = len(bin(page_size)[2:]) - 1
+    align = power
 
     if paging_mode == 'sv32':
         mode_val = 1  # paging mode for the SATP register
         levels = 2
+        entries = entries * 2
     elif paging_mode == 'sv39':
         mode_val = 8  # paging mode to be used in the SATP register
         levels = 3
@@ -846,12 +848,10 @@ def setup_pages(page_size=4096,
         levels = 5
 
     # data section
-    pre = f"\n.align {8}\n\n"
+    pre = f"\n.align {align}\n\n"
     initial_level_pages = ''
     for level in range(levels - 1):
         initial_level_pages += f"l{level}_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
-    #level_1 = f"l1_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
-    #level_2 = f"l2_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
 
     # assumption that the l3 pt entry 0 will point to 80000000
 
@@ -870,75 +870,53 @@ def setup_pages(page_size=4096,
     ll_entries = ''
     base_address_new = base_address
     for i in range(valid_ll_pages):
-        base_address_new += page_size
         PTE_address = base_address_new >> power
         PTE_address = PTE_address << 10
-        PTE_entry = base_address_new | dirty_bit | access_bit |\
+        PTE_entry = PTE_address | dirty_bit | access_bit |\
                            global_bit | u_bit | execute_bit | write_bit |\
                            read_bit | valid_bit
         ll_entries += '.dword {0} # entry_{1}\n'.format(hex(PTE_entry), i)
+        base_address_new += page_size
 
     ll_page = f'l{levels-1}_pt:\n{ll_entries}.rept {entries-valid_ll_pages}\n'\
                f'.dword 0x0\n.endr\n'
-
-    #final_level_pages = ''
-    #for i in range (last_level_count):
-    #    final_level_pages += f'll_{i}_page:\n.rept {entries}\n.dword 0x0\n'\
-    #                         f'.endr\n'
 
     out_data_string = pre + initial_level_pages + ll_page
 
     # code section
     # using the macro
-    out_code_string = f"\nRVTEST_SUPERVISOR_ENABLE({power}, {mode_val})\n"
+    offset = 0
+    out_code_string = []
 
-    # setting up SATP using assembly
-    #out_code_string = f'\npaging:\n# hardcoded for SV39 paging setup\n'
-    #out_code_string += f'\taddi t0, x0, 1\n\tslli t1, t0, 63 # for mode\n'
-    #out_code_string += f'\tslli t2, t0, {power} # for {page_size} page\n'
+    # calcualtion to set up root level pages
+    pte_updation = f"\n\t# setting up root PTEs\n"\
+                   f"\tla t0, l0_pt # load address of root page\n\n"
 
-    #out_code_string += f'# setting up the SATP register\n\tla t3, l1_pt\n'
-    #out_code_string += f'\tsrli t4, t3, {power}\n'
+    for i in range(levels - 1):
+        offset = 16 if i == 0 else 0
+        pte_updation += f"\t# setting up l{i} table to point l{i+1} table\n"\
+                        f"\taddi t1, x0, 1 # add value 1 to reg\n"\
+                        f"\tslli t2, t1, {power} # left shift to create a page"\
+                        f"with value == page size\n"\
+                        f"\tadd t3, t2, t0 # add with the existing "\
+                        f"address to get address of level l page\n"\
+                        f"\tsrli t4, t3, {power} # divide that address with "\
+                        f"page size\n"\
+                        f"\tslli t4, t4, 10 # left shift for PTE format\n"\
+                        f"\tadd t4, t4, t1 # set valid bit to 1\n"\
+                        f"\tsd t4, {offset}(t0) "\
+                        f"# store l{i+1} first entry address "\
+                        f"into the first entry of l{i}\n\n"
+        if (i < levels - 2):
+            pte_updation += f"\t#address updation\n"\
+                            f"\tadd t0, t3, 0 # move the address of "\
+                            f"level {i+1} page to t0\n\n"
 
-    #out_code_string += f'# value to be stored into the SATP Register\n'
-    #out_code_string += f'\tadd t5, t1, t4\n\tcsrw CSR_SATP, t5\n'
+    out_code_string.append(pte_updation)
 
-    # calculation
-    # variable for entry calculation
-    #next_level_pt_reg = 't3'
-
-    #pt_entry_calculation = f'# t5 = address of curr_lvl_pt + page table size\n'\
-    #                       f'\tsrli t4, t5, 13 # t3 is divided by page size\n'\
-    #                       f'\tslli t4, t4, 10 # shifting left for PTE\n'\
-    #                       f'\tadd  t4, t4, t1 # setting the valid bit\n'\
-    #                       f'# loading the address of the next_lvl_page into '\
-    #                       f'current page first entry\n'\
-    #                       f'\tsd t4, 0(t3)\n'
-
-    #for i in range (levels):
-    #    if (i>=1):
-    #        out_code_string += f'\n#copy the address of next page into t3\n'\
-    #                           f'\taddi t3, t5, 0\n'\
-    #                           f'entry_updation_l{i+1}:\n'\
-    #                           f'\tadd t5, {next_level_pt_reg}, t2 '\
-    #                           f'{pt_entry_calculation}'
-    #    else:
-    #        out_code_string += f'\nentry_updation_l{i+1}:\n'\
-    #                           f'\tadd t5, {next_level_pt_reg}, t2 '\
-    #                           f'{pt_entry_calculation}'
-
-    #next_level_pt_reg = 't5'
-
-    #out_code_string += f'\n# updating the {last_level_count} entries in '\
-    #                   f'll page\n'
-
-    #for i in range (1,last_level_count):
-    #    out_code_string += f'\nll_entry_updation_{i}:\n'\
-    #                       f'#increment t3 to point to the next entry in'\
-    #                       f'll_page\n'\
-    #                       f'\taddi t3, t3, 64\n'\
-    #                       f'# calculation and updation\n'\
-    #                       f'\tadd t5, {next_level_pt_reg}, t2 '\
-    #                       f'{pt_entry_calculation}'
+    out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val})\n"\
+                           f"supervisor_entry_label:\n")
+    out_code_string.append(f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va==pa\n"\
+                           f"supervisor_exit_label:\n")
 
     return out_code_string, out_data_string
