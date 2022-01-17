@@ -167,6 +167,29 @@ trap_handler_entry:
   addi t4, t4, 3*REGWIDTH
   SREG t4, 0(t3)
 
+  // ecall from Supervisor Mode
+  li t3, 9
+  bne t3, t0, not_s_ecall //if t3 == 9, the trap is not due to an ecall from S
+
+  // checking if the error code matches the S exit macro
+  // if it does not match, we increment MEPC by 4.
+  // Ideally, this would require a Software PT walk. 
+  // But, currently we assume VA == PA, hence incrementing MEPC should work.
+  li t3, 173
+  bne t3, a0, illegal_handler
+  // if the error code matches 173, we proceed to loading the final label
+  // load the final label in the ASM into MEPC
+  la t5, supervisor_exit_label
+  csrw CSR_MEPC, t5
+  // update MPP in mstatus to perform an MRET
+  addi t6, x0, 3
+  slli t6, t6, 11
+  csrs CSR_MSTATUS, t6
+  
+  // jump to restoring registers and exiting trap handler
+  j restore_and_exit_trap
+
+not_s_ecall:
   // mcause value of illegal initialized in t3
   li t3, 2 
   beq t3, t0, illegal_handler
@@ -754,24 +777,30 @@ rvtest_data_end:
     csrrw x0,mstatus,x2;
 
 //--------------------------------Supervisor Test Macros------------------------------------------//
-#define RVTEST_SUPERVISOR_ENABLE(pg_size_exp, mode)\
+#define RVTEST_SUPERVISOR_ENTRY(pg_size_exp, mode)\
   /*setting up SATP*/\
-  addi t0, t0, mode;\
-  slli t1, t0, 60;\
-  slli t2, t0, pg_size_exp;\
-  la t3, l1_pt;\
-  srli t4, t3, pg_size_exp;\
-  addi t5, t1, 1;\
-  csrw CSR_SATP, t5;\
-  /*update MPP*/\
+  addi t0, x0, mode;/*mode field value based on paging mode in SATP*/\
+  slli t1, t0, 60;/*left shift to move it to the mode field of SATP*/\
+  /*slli t2, t0, pg_size_exp;*/\
+  la t3, l0_pt;/*load the address of the root page*/\
+  srli t4, t3, pg_size_exp;/*divide the address by the page size*/\
+  add t5, t1, t4;/*add the t1 reg with mode value with the t3 reg*/\
+  csrw CSR_SATP, t5;/*load the value into SATP*/\
+  /*update MPP with 1 to go into supervisor mode*/\
   addi t6, x0, 1;\
   slli t6, t6, 11;\
-  csrs CSR_MSTATUS, t6;\
-  /*update mepc*/\
-  la t1, rvtest_code_begin;\
-  csrw CSR_MEPC, t1;\
+  csrs CSR_MSTATUS, t6;/*set MPP bits in MSTATUS*/\
+  /*update MEPC*/\
+  la t1, supervisor_entry_label;/*label for loading MEPC*/\
+  csrw CSR_MEPC, t1;/*update MEPC*/\
   /*mret*/\
   mret;
+
+#define RVTEST_SUPERVISOR_EXIT()\
+  /*loading an error code to indicate exit*/\
+  li a0, 173;\
+  /*performing an ecall to exit*/\
+  ecall
   
 //------------------------------ BORROWED FROM ANDREW's RISC-V TEST MACROS -----------------------//
 #define MASK_XLEN(x) ((x) & ((1 << (__riscv_xlen - 1) << 1) - 1))
