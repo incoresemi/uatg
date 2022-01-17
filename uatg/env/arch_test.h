@@ -777,10 +777,10 @@ rvtest_data_end:
     csrrw x0,mstatus,x2;
 
 //--------------------------------Supervisor Test Macros------------------------------------------//
-#define RVTEST_SUPERVISOR_ENTRY(pg_size_exp, mode)\
+#define RVTEST_SUPERVISOR_ENTRY(pg_size_exp, mode, shift_amount)\
   /*setting up SATP*/\
   addi t0, x0, mode;/*mode field value based on paging mode in SATP*/\
-  slli t1, t0, 60;/*left shift to move it to the mode field of SATP*/\
+  slli t1, t0, shift_amount;/*left shift to move it to the mode field of SATP*/\
   /*slli t2, t0, pg_size_exp;*/\
   la t3, l0_pt;/*load the address of the root page*/\
   srli t4, t3, pg_size_exp;/*divide the address by the page size*/\

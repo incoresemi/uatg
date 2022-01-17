@@ -832,11 +832,13 @@ def setup_pages(page_size=4096,
     # assuming that the size will always be a power of 2
     power = len(bin(page_size)[2:]) - 1
     align = power
+    shift_amount = 60
 
     if paging_mode == 'sv32':
         mode_val = 1  # paging mode for the SATP register
         levels = 2
         entries = entries * 2
+        shift_amount = 31
     elif paging_mode == 'sv39':
         mode_val = 8  # paging mode to be used in the SATP register
         levels = 3
@@ -914,7 +916,8 @@ def setup_pages(page_size=4096,
 
     out_code_string.append(pte_updation)
 
-    out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val})\n"\
+    out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "\
+                           f"{shift_amount})\n"\
                            f"supervisor_entry_label:\n")
     out_code_string.append(f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va==pa\n"\
                            f"supervisor_exit_label:\n")
