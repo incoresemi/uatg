@@ -47,7 +47,7 @@ def asm_generation_process(args):
     t_name = ((name[1].split(" ", 1))[0])
 
     # data section for paging pages
-    priv_asm_code = ""
+    priv_asm_code = ['', '', '']
     priv_asm_data = ""
 
     if check:
@@ -119,8 +119,9 @@ def asm_generation_process(args):
 
             # Appending Coding Macros & Instructions
             # asm += rvcode_begin + asm_code + rvcode_end
-            asm += (test_format_string[3] + priv_asm_code + asm_code +\
-                    test_format_string[4])
+            asm += (test_format_string[3] + priv_asm_code[0] +\
+                    priv_asm_code[1] + asm_code +\
+                    priv_asm_code[2] + test_format_string[4])
 
             # Appending RVTEST_DATA macros and data values
             # asm += rvtest_data_begin + asm_data + rvtest_data_end
