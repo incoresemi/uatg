@@ -209,6 +209,68 @@ Details and further specification of the config file syntax is available at
    works. The user must start using the actual YAMLs once they understand the 
    UATG flow by following this quickstart or the tutorial.
 
+.. warning:: When generating tests for **CHROMITE**, the user should make use
+   of the checked YAMLs generated while configuring the core. The checked YAMLs
+   can be found in the ``build`` directory of chromite.
+
+Steps to generate the checked YAMLs of Chromite
+-----------------------------------------------
+
+The steps to clone and build your own copy of Chromite are as follows,
+
+.. code-block:: shell-session
+
+  $ cd ~/myquickstart/
+  $ git clone https://gitlab.com/incoresemi/core-generators/chromite.git
+
+If you are cloning the chromite repo for the first time it would be best to 
+install the dependencies first:
+
+.. code-block:: shell-session
+
+  $ cd chromite/
+  $ pyenv activate venv # ignore this is you are not using pyenv
+  $ pip install -U -r requirements.txt
+
+The Chromite core generator takes a specific YAML files as input. 
+It makes specific checks to validate if the user has entered 
+valid data and none of the parameters conflict with each other. For e.g., 
+mentioning the 'D' extension without the 'F' will get captured by the generator 
+as an invalid spec. More information on the exact parameters and constraints on 
+each field are discussed here.
+
+Once the input YAML has been validated, the generator then clones all the 
+dependent repositories which enable building a test-soc, simulating it and 
+performing verification of the core. This is an alternative to maintaining the 
+repositories as submodules, which typically pollutes the commit history with 
+bump commits.
+
+At the end, the generator outputs a single ``makefile.inc`` in the same folder 
+that it was run, which contains definitions of paths where relevant bluespec 
+files are present, bsc command with macro definitions, verilator simulation 
+commands, etc.
+
+A sample yaml input YAML (`default.yaml`) is available in the ``sample_config`` 
+directory of the repository. 
+
+To build the core with a sample test-soc using the default config do the 
+following:
+
+.. code-block:: shell-session
+
+  $ python -m configure.main -ispec sample_config/c64/rv64i_isa.yaml\
+    -customspec sample_config/c64/rv64i_custom.yaml -cspec sample_config/c64/core64.yaml\
+    -gspec sample_config/c64/csr_grouping64.yaml\
+    -dspec sample_config/c64/rv64i_debug.yaml --verbose debug
+
+The above step generates a ``makefile.inc`` file in the same folder and also
+clones other dependent repositories to build a test-soc and carry out
+verification.
+
+.. note:: The most up-to-date documentation to build the core can be found 
+   `here <https://chromite.readthedocs.io/en/using-csrbox/getting_started.html#building-the-core>`_ 
+   in the ``Chromite`` core's documentation.
+
 .. warning:: You will need to change ``user`` to your username in the below file.
 
 .. warning:: All paths should be absolute.
@@ -236,11 +298,16 @@ Details and further specification of the config file syntax is available at
     # Directory to dump assembly files and reports
     work_dir = /home/user/myquickstart/work/
 
-    # location to store the link.ld linker file. By default it's same as work_dir
+    # location to store the link.ld linker file. By default it's the target directory within chromite_uatg_tests
     linker_dir = /home/user/myquickstart/chromite_uatg_tests/target
 
     # Path to the yaml files containing DUT Configuration.
-    configuration_files = /home/user/myquickstart/isa_config.yaml,/home/user/myquickstart/core_config.yaml,/home/user/myquickstart/custom_config.yaml,/home/user/myquickstart/csr_grouping.yaml
+    # If you are using the CHROMITE core, uncomment the following line by removing the '#'.
+    # By doing this, UATG will use the checked YAMLs of Chromite
+    # configuration_files = /home/user/myquickstart/chromite/build/rv64i_isa_checked.yaml,/home/user/myquickstart/chromite/build/core64_checked.yaml,/home/user/myquickstart/chromite/build/rv64i_custom_checked.yaml,/home/user/myquickstart/chromite/sample_config/c64/csr_grouping64.yaml,/home/user/myquickstart/chromite/build/rv64i_debug_checked.yaml
+
+    # comment the following line by adding a '#' in front if you are using the checked YAMLs from CHROMITE
+    configuration_files = /home/user/myquickstart/isa_config.yaml,/home/user/myquickstart/core_config.yaml,/home/user/myquickstart/custom_config.yaml,/home/user/myquickstart/csr_grouping.yaml,/home/user/myquickstart/rv_debug.yaml
 
     # Absolute Path of the yaml file containing the signal aliases of the DUT 
     alias_file = /home/user/myquickstart/chromite_uatg_tests/aliasing.yaml
@@ -249,7 +316,7 @@ Details and further specification of the config file syntax is available at
     # Unless you want to run individual tests in river_core, set the flag to True
     gen_test_list = True
     # [True, False] If the gen_test flag is True, assembly files are generated/overwritten
-    gen_test = True 
+    gen_test = True
     # [True, False] If the val_test flag is True, Log from DUT are parsed and the modules are validated
     val_test = False
     # [True, False] If the gen_cvg flag is True, System Verilog cover-groups are generated

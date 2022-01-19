@@ -555,6 +555,7 @@ We will next create a ``river_core.ini`` under the ``myquickstart`` directory.
 You can use the setup to create this file:
 
 In addition to the
+
 .. code-block:: console
 
    $ cd ~/myquickstart
