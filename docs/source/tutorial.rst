@@ -82,6 +82,7 @@ Let's start by generating the tests.
     -md ~/myquickstart/chromite_uatg_tests/modules/ \ 
     -cfg ~/myquickstart/isa_config.yaml -cfg ~/myquickstart/core_config.yaml \
     -cfg ~/myquickstart/custom_config.yaml -cfg ~/myquickstart/csr_grouping.yaml \
+    -cfg ~/myquickstart/rv_debug.yaml \
     -af ~/myquickstart/chromite_uatg_tests/aliasing.yaml
 
 - Here the ``-v`` option is used to control the verbosity of the log. Debug logs
@@ -105,7 +106,7 @@ Let's start by generating the tests.
   directory.
 - ``-md`` is the path to the modules directory containing the test_classes. The
   test_classes will be sorted into directories based on the module being tested.
-- ``-cfg`` takes multiple absolute paths. The path to the 4 YAML files 
+- ``-cfg`` takes multiple absolute paths. The path to the 5 YAML files 
   used to configure the core should be passed here. The yaml paths should be passed 
   in the following order, 
       1. isa_config.yaml 

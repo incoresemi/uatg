@@ -267,6 +267,13 @@ def combine_config_yamls(configuration_path):
         logger.error('Path to csr_grouping.yaml is invalid.')
         raise Exception('MISSING_CSRGROUPING')
 
+    try:
+        dut_dict['rv64_debug'] = load_yaml(
+            configuration_path[4])  # YAML for CSRs
+    except IndexError:
+        logger.error('Path to rv_debug.yaml is invalid.')
+        raise Exception('MISSING_RV_DEBUG')
+    
     return dut_dict
 
 

@@ -82,6 +82,7 @@ def clean(module_dir, work_dir, verbose):
           "2. core_config.yaml "
           "3. custom_config.yaml "
           "4. csr_grouping.yaml "
+          "5. rv_debug.yaml"
           "The ordering should be strictly followed and any deviation will "
           "result in UATG erroring out. This Parameter is needed to "
           "generate/validate tests and also generate "
@@ -342,6 +343,7 @@ def setup(config_path, alias_path, dut_path):
           "2. core_config.yaml "
           "3. custom_config.yaml "
           "4. csr_grouping.yaml "
+          "5. rv_debug.yaml"
           "The ordering should be strictly followed and any deviation will "
           "result in  UATG erroring out. This Parameter is needed to "
           "generate/validate tests and also generate covergroups"))

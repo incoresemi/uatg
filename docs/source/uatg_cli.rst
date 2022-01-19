@@ -91,7 +91,8 @@ support said option. It is followed by the description in the third column.
                                                         The yaml paths should be provided individually with a -cfg for
                                                         every path and should be passed in the following order, 
                                                         1. isa_config.yaml 2. core_config.yaml 3. custom_config.yaml
-                                                        4. csr_grouping.yaml. (The names here represent the functionality of
+                                                        4. csr_grouping.yaml. 5. rv_debug.yaml
+                                                        (The names here represent the functionality of
                                                         the and not the actual name required by UATG. 
                                                         The user can name his files as they wish.)
   -af, \\-\\-alias_file     generate         Required   The **absolute/relative** path to the ``aliasing.yaml`` file of 
@@ -186,12 +187,13 @@ user passes. These template files can be edited by the user to meet his needs.
                                       The YAML files should be specified (space
                                       separated) in the following  order 1.
                                       isa_config.yaml 2. core_config.yaml 3.
-                                      custom_config.yaml 4. csr_grouping.yaml The
-                                      ordering should be strictly followed and any
-                                      deviation will result in UATG erroring out.
-                                      This Parameter is needed to
-                                      generate/validate tests and also generate
-                                      covergroups  [required]
+                                      custom_config.yaml 4. csr_grouping.yaml
+                                      5. rv_debug The ordering should be 
+                                      strictly followed and any deviation will 
+                                      result in UATG erroring out. This 
+                                      Parameter is needed to generate/validate 
+                                      tests and also generate covergroups  
+                                      [required]
       -af, --alias_file PATH          Path to the aliasing file containing
                                       containing BSV alias names.
       --version                       Show the version and exit.
@@ -275,12 +277,13 @@ point to the configured *config.ini*.
                                       The YAML files should be specified (space
                                       separated) in the following  order 1.
                                       isa_config.yaml 2. core_config.yaml 3.
-                                      custom_config.yaml 4. csr_grouping.yaml The
-                                      ordering should be strictly followed and any
-                                      deviation will result in UATG erroring out.
-                                      This Parameter is needed to
-                                      generate/validate tests and also generate
-                                      covergroups  [required]
+                                      custom_config.yaml 4. csr_grouping.yaml 
+                                      5. rv_debug.yaml The ordering should be 
+                                      strictly followed and any deviation will 
+                                      result in UATG erroring out. This 
+                                      parameter is needed to generate/validate 
+                                      tests and also generate covergroups  
+                                      [required]
       --version                       Show the version and exit.
       --help                          Show this message and exit.
     
