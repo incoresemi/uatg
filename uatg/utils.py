@@ -461,10 +461,23 @@ def create_config_file(config_path):
           'the target directory within chromite_uatg_tests\n' \
           'linker_dir = /home/user/myquickstart/chromite_uatg_tests/target' \
           '\n\n# Path to the yaml files containing DUT Configuration.\n' \
+          '# If you are using the CHROMITE core, uncomment the following line'\
+          ' by removing the \'#\'.\n# By doing this, UATG will use the '\
+          'checked YAMLs of Chromite\n'\
+          '# configuration_files = /home/user/myquickstart/chromite/build/'\
+          'rv64i_isa_checked.yaml,'\
+          '/home/user/myquickstart/chromite/build/core64_checked.yaml,' \
+          '/home/user/myquickstart/chromite/build/rv64i_custom_checked.yaml,' \
+          '/home/user/myquickstart/chromite/sample_config/c64/'\
+          'csr_grouping64.yaml,' \
+          '/home/user/myquickstart/chromite/build/rv64i_debug_checked.yaml\n\n'\
+          '# comment the following line by adding a \'#\' in front if you are' \
+          ' using the checked YAMLs from CHROMITE\n'\
           'configuration_files = /home/user/myquickstart/isa_config.yaml,' \
           '/home/user/myquickstart/core_config.yaml,' \
           '/home/user/myquickstart/custom_config.yaml,' \
-          '/home/user/myquickstart/csr_grouping.yaml' \
+          '/home/user/myquickstart/csr_grouping.yaml,' \
+          '/home/user/myquickstart/rv_debug.yaml' \
           '\n\n# Absolute Path of the yaml file contain' \
           'ing the signal aliases of the DUT ' \
           '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/' \
@@ -596,6 +609,11 @@ def create_dut_config_files(dut_config_path):
                      f'- CUSTOMCONTROL'
     with open(os.path.join(dut_config_path, 'csr_grouping.yaml'), 'w') as f:
         f.write(csr_grouping64)
+
+    rv_debug = f''
+
+    with open(os.path.join(dut_config_path, 'rv_debug.yaml'), 'w') as f:
+        f.write(rv_debug)
 
 
 def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
