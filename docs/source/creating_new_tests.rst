@@ -866,6 +866,122 @@ chromite's configuration file.
 .. hint:: User can make use of the `YAPF <https://github.com/google/yapf>`_ 
    formatter to format their test files.
 
+Using the UATG's ``instruction_generator`` to generate random instructions
+--------------------------------------------------------------------------
+
+UATG has an in-built random instruction generator function which can be used for
+filling the test with random instruction if the user desires to. 
+
+In order to use this feature, the user will have to import the 
+``instruction_generator`` class from the **instruction_generator** file.
+In addition to uatg, the user will have to import ``os`` package for resolving
+the path to the isem.yaml file.
+
+This is done by,
+
+.. code-block:: Python
+
+   from uatg.instruction_generator import instruction_generator, __file__
+   from os.path import dirname, join
+
+The instruction_generator class should be first intialized with the 
+``ISA string`` (Extensions from which random instructions should be generated) 
+and ``instruction_semantics`` (*isem.yaml*) file (present within UATG).
+
+This is done as follows,
+
+.. code-block:: Python
+
+   # some place within the test_plugin
+   isem_dir = dirname(__file__)
+
+   isa_string = 'RV64I'# the isa_string can specify any extensions for which
+                       # random instructions are to be generated
+                       # for example isa_string = 'RV64IMAFDC' 
+   genrator = instruction_generator(join(isem_dir, 'isem.yaml'), isa_string)
+   
+The instruction generator has multiple inbuilt function to generate instructions
+based on the extension. Documentation about these functions can be found
+:ref:`here<instruction_generator_docs>`.
+
+Let us take the example of ``generate_i_inst`` function within instruction 
+generator. This method would generate instructions which are part of the **I** 
+extension.
+
+.. code-block:: Python
+
+   random_i_instructions = generator.generate_i_inst(instructions='random',
+                                                  modifiers={'xrs1': {'x0'},
+                                                             'xrs2': {'x0'},
+                                                             'xrd': {'x0'},
+                                                             },
+                                                  no_of_insts=10)
+
+The ``modifiers`` parameter of the function helps control the operands, 
+immediate value range.
+
+Using the ``illegal generator`` and ``instruction constants``
+-------------------------------------------------------------
+
+Similiar to **instruction generator**, one can use the ``illegal generator`` in 
+UATG to generate illegal instructions for negative testing purposes. 
+
+This is done by importing the ``illegal_generator`` method into the test plugin
+
+.. code-block:: Python
+
+   from uatg.instruction_constants import illegal_generator
+   
+   # within the python program
+   isa_string = 'RV32IMAFD' # the isa_string can specify any extensions for which
+                            # illegal instructions are to be generated
+                            # for example isa_string = 'RV64IMAFDC' 
+   illegal_list = illegal_generator(isa_string)
+
+``Instruction Constants`` dictionaries within the same file have all the 
+instructions present in the ISA listed based on their types, like *load-store*,
+*arithmetic*, etc.
+
+The instruction constants are useful when the test makes use of all instructions
+of a specific type. Like ``illegal_generator``, ``instruction_constants`` should
+be imported into the python program.
+
+.. code-block:: Python
+
+   from uatg.instruction_constants import arithmetic_instructions
+
+   # here aruthmetic instructions is a dictionary with variables listed 
+   # based on the XLEN, i.e 32,64.
+   # arithmetic_instructions = {
+   #  'rv32-add-reg': ['add', 'sub'],
+   #  'rv64-add-reg': ['add', 'addw', 'sub', 'subw'],
+   #  'rv128-add-reg': ['add', 'addw', 'addd', 'sub', 'subw', 'subd'],
+   #  'rv32-add-imm': ['addi'],
+   #  'rv64-add-imm': ['addi', 'addiw'],
+   #  'rv128-add-imm': ['addi', 'addiw', 'addid'],
+   #  'rv32-shift-reg': ['sll', 'sra', 'srl'],
+   #  'rv64-shift-reg': ['sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'],
+   #  'rv128-shift-reg': [
+   #       'sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'
+   #       'slld', 'srad', 'srld'
+   #  ],
+   #  'rv32-shift-imm': ['slli', 'srli', 'srai'],
+   #  'rv64-shift-imm': ['slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw'],
+   #  'rv128-shift-imm': [
+   #       'slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw', 'sllid', 'srlid',
+   #       'sraid'
+   #  ],
+   #  'rv32-ui': ['auipc', 'lui'],
+   #  'rv64-ui': ['auipc', 'lui'],
+   #  'rv128-ui': ['auipc', 'lui']
+   #  }
+
+In order to understand the usage, the user can take a look at the ``decoder`` tests
+in `chromite_uatg_tests <https://github.com/incoresemi/chromite_uatg_tests.git>`_
+where these dictionaries are exetensively used.
+
+Documenatation about the other functions present within the instruction_constants
+module can be found :ref:`here<instruction_constants_docs>`.
 
 Using the ``rvtest_data`` function
 ----------------------------------

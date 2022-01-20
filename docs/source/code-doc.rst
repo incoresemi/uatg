@@ -6,7 +6,9 @@
 Code Documentation
 ##################
 
-Test_Generator
+.. _test_generator_docs:
+
+Test Generator
 ^^^^^^^^^^^^^^
 
 .. automodule:: uatg.test_generator
@@ -14,10 +16,32 @@ Test_Generator
    :special-members:
    :private-members:
 
+.. _utils_docs:
+
 Utils
 ^^^^^
 
 .. automodule:: uatg.utils
+   :members:
+   :special-members:
+   :private-members:
+
+.. _instruction_constants_docs:
+
+Instruction Constants
+^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: uatg.instruction_constants
+   :members:
+   :special-members:
+   :private-members:
+
+.. _instruction_generator_docs:
+
+Instruction Generator
+^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: uatg.instruction_generator.instruction_generator
    :members:
    :special-members:
    :private-members:
