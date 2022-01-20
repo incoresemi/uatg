@@ -8,25 +8,38 @@ random.seed(101)
 
 
 class instruction_generator:
+    
     """
-    This class reads the isem.yaml file and based upon the ISA specification, it
-    generates random/specific instructions with random/specific range of
-    replacements. Presently supports RV[32|64]IMAFDCB extensions. It does not
-    generate Branch/Jump/Load/Store instructions to avoid unpredictive
+        This class reads the isem.yaml file and based upon the ISA specification, it
+        generates random/specific instructions with random/specific range of
+        replacements. Presently supports RV[32|64]IMAFDCB extensions.
+        It does not generate Branch/Jump/Load/Store instructions to avoid unpredictive
+        
+        :Usage:
 
-    Usage:
+        .. code-block:: Python
 
-    import uatg.instruction_generator
-
-    generator = instruction_generator('uatg/isem.yaml', 'RV64IMAFDC')
-    random_i_instructions = generator.generate_i_inst(instructions='random',
-                                                      modifiers={'xrs1': {'x0'},
-                                                                 'xrs2': {'x0'},
-                                                                  'xrd': {'x0'},
-                                                                 },
-                                                      no_of_insts=10)
+            import uatg.instruction_generator
+    
+            generator = instruction_generator('uatg/isem.yaml', 'RV64IMAFDC')
+            random_i_instructions = generator.generate_i_inst(instructions='random',
+                                                              modifiers={'xrs1': {'x0'},
+                                                                         'xrs2': {'x0'},
+                                                                         'xrd': {'x0'},
+                                                                         },
+                                                              no_of_insts=10)
+    
     """
+    
     def __init__(self, instruction_file, isa):
+
+        """
+            Constructor of the class.
+
+            :param instruction_file: Instruction Semantics YAML file
+            :param isa: string containing the ISA for which instructions should
+                        be generated.
+        """
         assert (re.search(r'RV\d+I', isa) is not None)
 
         integer_reg_file = {'x' + str(num) for num in range(32)}
@@ -111,10 +124,13 @@ class instruction_generator:
 
     def __replace_fields(self, instruction: str, modifiers: dict) -> str:
         """
-        Private function to replace the variable fields in a given instruction
-        @param instruction: str containing the asm-syntax of an instruction
-        @return: str with the variable fields are replaced with random choice of
-        registers/values
+            Private function to replace the variable fields in a given instruction
+        
+            :param instruction: str containing the asm-syntax of an instruction
+        
+            :return: str with the variable fields are replaced with random choice of
+                     registers/values
+        
         """
         r_inst = instruction
 
@@ -178,10 +194,12 @@ class instruction_generator:
 
     def __modifier_update(self, modifiers: Union[dict, None]) -> dict:
         """
-        An utility function to clean/update the modifiers from user-input
-        @param modifiers: input modifiers from generate_x_inst function
-        @return: sanitized modifiers containing default entries for
-        unmentioned fields
+            An private utility function to clean/update the modifiers from user-input
+            
+            :param modifiers: input modifiers from generate_x_inst function
+            
+            :return: sanitized modifiers containing default entries for
+                     unmentioned fields
         """
         if modifiers is None:
             return self.default_modifiers
@@ -195,17 +213,19 @@ class instruction_generator:
                         modifiers: Union[None, dict] = None,
                         no_of_insts: int = 5) -> List[str]:
         """
-        Function to generate I-instructions. Does not generate
-        branch/jump/load/store instructions. Can generate both random selection
-        of instructions or a specified list of instructions. The modifiers can
-        be used to specify specific value/range of values for variable fields
+            Function to generate I-instructions. Does not generate
+            branch/jump/load/store instructions. Can generate both random selection
+            of instructions or a specified list of instructions. The modifiers can
+            be used to specify specific value/range of values for variable fields
 
-        @param instructions: 'random' or a list of instructions for which you
-        wish to generate instructions
-        @param modifiers: None or dictionary containing custom replacement
-        options.
-        @param no_of_insts: number of instructions to be generated
-        @return: a list containing generated asm instructions
+            :param instructions: 'random' or a list of instructions for which you
+                            wish to generate instructions
+            :param modifiers: None or dictionary containing custom replacement
+                          options.
+            :param no_of_insts: number of instructions to be generated
+        
+            :return: a list containing generated asm instructions
+        
         """
         modifiers = self.__modifier_update(modifiers)
 
@@ -233,19 +253,20 @@ class instruction_generator:
 
     def generate_m_inst(self, instructions: Union[str, list] = 'random',
                         modifiers: Union[None, dict] = None,
-                        no_of_insts: int = 5):
+                        no_of_insts: int = 5) -> List[str]:
         """
-        Function to generate M-instructions. Generates all Mul/Div instructions.
-        Can generate both random selection of instructions or a specified
-        list of instructions. The modifiers can be used to specify specific
-        value/range of values for variable fields
+            Function to generate M-instructions. Generates all Mul/Div instructions.
+            Can generate both random selection of instructions or a specified
+            list of instructions. The modifiers can be used to specify specific
+            value/range of values for variable fields
 
-        @param instructions: 'random' or a list of instructions for which you
-        wish to generate instructions
-        @param modifiers: None or dictionary containing custom replacement
-        options.
-        @param no_of_insts: number of instructions to be generated
-        @return: a list containing generated asm instructions.
+            :param instructions: 'random' or a list of instructions for which you
+                                wish to generate instructions
+        
+            :param modifiers: None or dictionary containing custom replacement
+                            options.
+            :param no_of_insts: number of instructions to be generated
+            :return: a list containing generated asm instructions.
         """
         modifiers = self.__modifier_update(modifiers)
 
@@ -267,18 +288,21 @@ class instruction_generator:
 
     def generate_a_inst(self, instructions: Union[str, list] = 'random',
                         modifiers: Union[None, dict] = None,
-                        no_of_insts: int = 5):
+                        no_of_insts: int = 5) -> List[str]:
         """
-        Function to generate A-instructions. Can generate both random selection
-        of instructions or a specified list of instructions. The modifiers can
-        be used to specify specific value/range of values for variable fields.
+            Function to generate A-instructions. Can generate both random selection
+            of instructions or a specified list of instructions. The modifiers can
+            be used to specify specific value/range of values for variable fields.
 
-        @param instructions: 'random' or a list of instructions for which you
-        wish to generate instructions
-        @param modifiers: None or dictionary containing custom replacement
-        options.
-        @param no_of_insts: number of instructions to be generated
-        @return: a list containing generated asm instructions
+            :param instructions: 'random' or a list of instructions for which you
+                            wish to generate instructions
+            
+            :param modifiers: None or dictionary containing custom replacement
+                            options.
+            
+            :param no_of_insts: number of instructions to be generated
+            
+            :return: a list containing generated asm instructions
         """
         modifiers = self.__modifier_update(modifiers)
 
@@ -300,19 +324,19 @@ class instruction_generator:
 
     def generate_f_inst(self, instructions: Union[str, list] = 'random',
                         modifiers: Union[None, dict] = None,
-                        no_of_insts: int = 5):
+                        no_of_insts: int = 5) -> List[str]:
         """
-        Function to generate F-instructions. Does not generate float
-        branch/jump/load/store instructions. Can generate both random selection
-        of instructions or a specified list of instructions. The modifiers can
-        be used to specify specific value/range of values for variable fields
+            Function to generate F-instructions. Does not generate float
+            branch/jump/load/store instructions. Can generate both random selection
+            of instructions or a specified list of instructions. The modifiers can
+            be used to specify specific value/range of values for variable fields
 
-        @param instructions: 'random' or a list of instructions for which you
-        wish to generate instructions
-        @param modifiers: None or dictionary containing custom replacement
-        options.
-        @param no_of_insts: number of instructions to be generated
-        @return: a list containing generated asm instructions
+            :param instructions: 'random' or a list of instructions for which you
+                wish to generate instructions
+            :param modifiers: None or dictionary containing custom replacement
+                options.
+            :param no_of_insts: number of instructions to be generated
+            :return: a list containing generated asm instructions
         """
         modifiers = self.__modifier_update(modifiers)
 
@@ -334,19 +358,21 @@ class instruction_generator:
 
     def generate_d_inst(self, instructions: Union[str, list] = 'random',
                         modifiers: Union[None, dict] = None,
-                        no_of_insts: int = 5):
+                        no_of_insts: int = 5) -> List[str]:
+        
         """
-        Function to generate D-instructions. Does not generate float
-        branch/jump/load/store instructions. Can generate both random selection
-        of instructions or a specified list of instructions. The modifiers can
-        be used to specify specific value/range of values for variable fields
+            Function to generate D-instructions. Does not generate float
+            branch/jump/load/store instructions. Can generate both random selection
+            of instructions or a specified list of instructions. The modifiers can
+            be used to specify specific value/range of values for variable fields
 
-        @param instructions: 'random' or a list of instructions for which you
-        wish to generate instructions
-        @param modifiers: None or dictionary containing custom replacement
-        options.
-        @param no_of_insts: number of instructions to be generated
-        @return: a list containing generated asm instructions
+            :param instructions: 'random' or a list of instructions for which you
+                wish to generate instructions
+            :param modifiers: None or dictionary containing custom replacement
+                options.
+            :param no_of_insts: number of instructions to be generated
+            :return: a list containing generated asm instructions
+        
         """
         modifiers = self.__modifier_update(modifiers)
 
@@ -368,20 +394,20 @@ class instruction_generator:
 
     def generate_c_inst(self, instructions: Union[str, list] = 'random',
                         modifiers: Union[None, dict] = None,
-                        no_of_insts: int = 5):
+                        no_of_insts: int = 5) -> List[str]:
         """
-        Function to generate C-instructions. Does not generate compressed
-        branch/jump/load/store instructions. Can generate both random selection
-        of instructions or a specified list of instructions.
-        The modifiers can be used to specify specific value/range of values for
-        variable fields
+            Function to generate C-instructions. Does not generate compressed
+            branch/jump/load/store instructions. Can generate both random selection
+            of instructions or a specified list of instructions.
+            The modifiers can be used to specify specific value/range of values for
+            variable fields
 
-        @param instructions: 'random' or a list of instructions for which you
-        wish to generate instructions
-        @param modifiers: None or dictionary containing custom replacement
-        options.
-        @param no_of_insts: number of instructions to be generated
-        @return: a list containing generated asm instructions
+            :param instructions: 'random' or a list of instructions for which you
+                wish to generate instructions
+            :param modifiers: None or dictionary containing custom replacement
+                options.
+            :param no_of_insts: number of instructions to be generated
+            :return: a list containing generated asm instructions
         """
         modifiers = self.__modifier_update(modifiers)
 
@@ -410,18 +436,19 @@ class instruction_generator:
 
     def generate_b_inst(self, instructions: Union[str, list] = 'random',
                         modifiers: Union[None, dict] = None,
-                        no_of_insts: int = 5):
+                        no_of_insts: int = 5) -> List[str]:
         """
-        Function to generate B-instructions. Can generate both random selection
-        of instructions or a specified list of instructions. The modifiers can
-        be used to specify specific value/range of values for variable fields
+            Function to generate B-instructions. Can generate both random selection
+            of instructions or a specified list of instructions. The modifiers can
+            be used to specify specific value/range of values for variable fields
 
-        @param instructions: 'random' or a list of instructions for which you
-        wish to generate instructions
-        @param modifiers: None or dictionary containing custom replacement
-        options.
-        @param no_of_insts: number of instructions to be generated
-        @return: a list containing generated asm instructions
+            :param instructions: 'random' or a list of instructions for which you
+                wish to generate instructions
+            :param modifiers: None or dictionary containing custom replacement
+                options.
+            :param no_of_insts: number of instructions to be generated
+            :return: a list containing generated asm instructions
+
         """
         modifiers = self.__modifier_update(modifiers)
 
@@ -440,19 +467,3 @@ class instruction_generator:
                 r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
                 ret_list.append(r_inst)
         return ret_list
-
-
-def main():
-    generator = instruction_generator('isem.yaml', 'RV32IMAFC')
-    a = generator.generate_i_inst(instructions='random',
-                                  modifiers={'xrs1': {'x0'},
-                                             'xrs2': {'x0'},
-                                             'xrd': {'x0'},
-                                             }, no_of_insts=10)
-    b = generator.generate_c_inst(instructions='random', modifiers=None,
-                                  no_of_insts=20)
-    print(a, '\n', b)
-
-
-if __name__ == '__main__':
-    main()

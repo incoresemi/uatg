@@ -354,14 +354,15 @@ rv64_encodings = {
 
 def twos(val, bits):
     """
-    Finds the twos complement of the number
-    :param val: input to be complemented
-    :param bits: size of the input
+        Finds the twos complement of the number
+    
+        :param val: input to be complemented
+        :param bits: size of the input
 
-    :type val: str or int
-    :type bits: int
+        :type val: str or int
+        :type bits: int
 
-    :result: two's complement version of the input
+        :result: two's complement version of the input
 
     """
     if isinstance(val, str):
@@ -376,15 +377,15 @@ def twos(val, bits):
 
 def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
     """
-    Returns a list of binary values each with a width of bit_width that
-    walks with n_ones walking from lsb to msb. If invert is True, then list
-    contains bits inverted in binary.
+        Returns a list of binary values each with a width of bit_width that
+        walks with n_ones walking from lsb to msb. If invert is True, then list
+        contains bits inverted in binary.
 
-    :param bit_width: bit-width of register/value to fill.
-    :param n_ones: number of ones to walk.
-    :param invert: whether to walk one's or zeros
-    :param signed: whether to generate signed values
-    :return: list of strings
+        :param bit_width: bit-width of register/value to fill.
+        :param n_ones: number of ones to walk.
+        :param invert: whether to walk one's or zeros
+        :param signed: whether to generate signed values
+        :return: list of strings
     """
     if n_ones < 1:
         raise Exception('n_ones can not be less than 1')
@@ -413,18 +414,32 @@ def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
         return walked
 
 
-def illegal_generator(isa='RV32I'):
+def illegal_generator(isa='RV32I')-> list:
     """ 
-    @str isa: RV[32|64]{IMAFD}
+        :param isa: RV[32|64]{IMAFD}
 
-    Provide the ISA string and obtain the list of illegal opcodes
-    as integers. It uses the riscv-opcodes repository's instruction encoding
-    data and are stored above as rv32_encodings and rv64_encodings variables.
+        :return: list of illegal instructions for given ISA configuration
 
-    This function parses the instructions and initially finds all illegal
-    opcodes. Then for the variable encoding fields in each instruction, it makes
-    one/more/all of them to contain illegal values and appends such combination
-    into a list and returns it.
+        Provide the ISA string and obtain the list of illegal opcodes
+        as integers. It uses the riscv-opcodes repository's instruction encoding
+        data and are stored above as rv32_encodings and rv64_encodings variables.
+
+        This function parses the instructions and initially finds all illegal
+        opcodes. Then for the variable encoding fields in each instruction, it makes
+        one/more/all of them to contain illegal values and appends such combination
+        into a list and returns it.
+
+        :Usage:
+    
+            .. code-block:: Python
+                
+                from uatg.instruction_constant import illegal_generator
+    
+                illegal_list = illegal_generator("RV32IMAF")
+
+        illegal list would contain decimal value of illegal instructions
+        user should convert it into hex and dump into memory using ``.word``
+    
     """
 
     # Declaring the variable that will store all of the parsed data
