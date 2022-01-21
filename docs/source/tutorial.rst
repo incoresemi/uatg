@@ -53,6 +53,7 @@ something like this
     ├── csr_grouping.yaml
     ├── custom_config.yaml
     ├── isa_config.yaml
+    ├── rv_debug.yaml 
     └── work
    
 If you had gone through the quickstart, you may find some more ``.yapsy_plugin``
@@ -112,7 +113,8 @@ Let's start by generating the tests.
       1. isa_config.yaml 
       2. core_config.yaml 
       3. custom_config.yaml
-      4. csr_grouping.yaml.
+      4. csr_grouping.yaml
+      5. rv_debug.yaml.
   Each path should be specified with a preceding ``-cfg`` as shown above.
 - ``-af`` is the path to the aliasing.yaml file generated using ``uatg setup``.
 
@@ -271,7 +273,9 @@ Your directory structure should be like this.
     ├── core_config.yaml
     ├── csr_grouping.yaml
     ├── custom_config.yaml
-    ├── isa_config.yaml
+    ├── isa_config.yaml 
+    ├── rv_debug.yaml
+    ├── config.ini
     └── work/
         ├── branch_predictor
         │   ├── uatg_gshare_fa_btb_fill_01-001

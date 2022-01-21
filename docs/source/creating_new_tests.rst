@@ -136,7 +136,7 @@ name mismatch.
    yapsy-plugin generation for multiple modules becomes easier.
 
 Organizing your own directory for storing tests
------------------------------------------------
+===============================================
 
 As an example, let us assume you want to create a test for a module ``stack``.
 Let us assume you are in your ``home`` directory. 
@@ -217,7 +217,7 @@ attempts to throw some light about writing such tests which comply with the
 requirements of UATG.
 
 Naming Convention and Coding Guidelines
----------------------------------------
+=======================================
 
 Test naming convention:
     The name of the test file is strictly required to comply the following 
@@ -252,7 +252,7 @@ Coding Guidelines:
     Further guidelines about specific variable naming conventions will be added. **TO-DO**
 
 Python packages imported by the test file
------------------------------------------
+=========================================
 Required Packages:
   1. **Yapsy: for plugin management**.
      
@@ -287,7 +287,7 @@ Optional Packages:
     import re                          # inbuilt package for regular expression matching
 
 Python Class Name
------------------  
+=================
 The test the user wishes to generate should be returned by a method of the test
 class. 
 
@@ -336,7 +336,7 @@ The purpose of the aforementioned functions are elucidated in the following
 sections.
 
 __init__(self): 
----------------
+===============
 
 .. hint:: **PYTHON-HINT**: The self variable is used to represent the instance 
    of the class which is often used in object-oriented programming. It works as 
@@ -363,7 +363,7 @@ methods of their class. In such case the user may declare a *xyz* as
         self.parameter_name2 = None # The self variable, like any variable, can be of any type.
 
 execute(self, core_yaml, isa_yaml):
------------------------------------
+===================================
 The execute method of the test class requires two dictionary (possibly extracted 
 from yaml files) as an input. The user can parse and select from this 
 dictionary the parameters which would make their current test valid to be run on 
@@ -415,7 +415,7 @@ methods.
    no other methods in the class which receives these dictionaries as an input.
 
 generate_asm(self):
--------------------
+===================
 
 This function should be written in a way that it returns a well formatted 
 string, which complies with the RISC-V assembly format. We make use of the 
@@ -598,7 +598,7 @@ the ASM files.
    generate_asm() method.
 
 generate_covergroups(self, alias_dict):
----------------------------------------
+=======================================
 This function takes in a dictionary which the user specifies. This alias_dict is 
 obtained from a *yaml* file in which the user may prefer to alias the names of 
 the registers, wires, inputs and outputs from the DUT whose status need to be 
@@ -866,11 +866,27 @@ chromite's configuration file.
 .. hint:: User can make use of the `YAPF <https://github.com/google/yapf>`_ 
    formatter to format their test files.
 
+=====================================
+Test-Plugin Utility Functions in UATG
+=====================================
+
+UATG has several classes which can be used to perform random instruction generation.
+random data generation. These utility functions are defined as follows.
+
+
 Using the UATG's ``instruction_generator`` to generate random instructions
---------------------------------------------------------------------------
+==========================================================================
 
 UATG has an in-built random instruction generator function which can be used for
-filling the test with random instruction if the user desires to. 
+filling the test with random instruction if the user desires to. This feature 
+can be used to get a specified number of instructions. Instructions of the 
+RV[32|64]IMAFDCB ISA can be generated using this utility. 
+Presently, it does not generate Branch, Jump, Call and Return instructions.
+Users can optionally specify their set of constraints on the instructions 
+using input parameters called as modifiers. 
+
+Importing ``instruction_generator``
+-----------------------------------
 
 In order to use this feature, the user will have to import the 
 ``instruction_generator`` class from the **instruction_generator** file.
@@ -883,6 +899,9 @@ This is done by,
 
    from uatg.instruction_generator import instruction_generator, __file__
    from os.path import dirname, join
+
+Initialization and Usage
+------------------------
 
 The instruction_generator class should be first intialized with the 
 ``ISA string`` (Extensions from which random instructions should be generated) 
@@ -918,10 +937,62 @@ extension.
                                                   no_of_insts=10)
 
 The ``modifiers`` parameter of the function helps control the operands, 
-immediate value range.
+immediate value range. Below is the list of modifiers alongside their default 
+values. If no modifiers are specified, the default values will be chosen.
+
++---------------------------------+------------+---------------------------------+
+| Modifier                        | Label      | Default Value                   |
++=================================+============+=================================+
+| Compressed Destination Register | `c.rd`     |                                 |
++---------------------------------+------------+                                 +
+| Compressed Source Register 1    | `c.rs1`    | `{'x0', 'x1', 'x2'... 'x7'}`    |
++---------------------------------+------------+                                 +
+| Compressed Source Register 2    | `c.rs2`    |                                 |
++---------------------------------+------------+---------------------------------+
+| Integer Destination Register    | `xrd`      |                                 |
++---------------------------------+------------+                                 +
+| Integer Source Register 1       | `xrs1`     | `{'x0', 'x1', 'x2'... 'x31'}`   |
++---------------------------------+------------+                                 +
+| Integer Source Register 2       | `xrs2`     |                                 |
++---------------------------------+------------+---------------------------------+
+| Integer Source Register 2       | `xrs2`     |                                 |
++---------------------------------+------------+---------------------------------+
+| Float Destination Register      | `frd`      |                                 |
++---------------------------------+------------+                                 +
+| Float Source Register 1         | `frs1`     | `{'f0', 'f1', 'f2'... 'f31'}`   |
++---------------------------------+------------+                                 +
+| Float Source Register 2         | `frs2`     |                                 |
++---------------------------------+------------+                                 +
+| Float Source Register 3         | `frs3`     |                                 |
++---------------------------------+------------+---------------------------------+
+| `Pred`, `Succ` in Fence         | `pred`,    |   `{0b1111}`,                   |
+| Instruction                     | `succ`     |   `{0b1111}`,                   |
++---------------------------------+------------+---------------------------------+
+| 5-bit shift field               | `shamt5`   | `{0, 1, 2... 31}`               |
++---------------------------------+------------+---------------------------------+
+| 5-bit shift field               | `shamt6`   | `{0, 1, 2... 63}`               |
++---------------------------------+------------+---------------------------------+
+| Signed 11-bit immediate         | `imm11`    | `{-1024, -1023, ... 1022, 1023}`|
++---------------------------------+------------+---------------------------------+
+| Signed 12-bit immediate         | `imm12`    | `{-2048, -2047, ... 2046, 2047}`|
++---------------------------------+------------+---------------------------------+
+| Unsigned 20-bit immediate       | `imm11`    | `{0, 1, 2, ... 1048576}`        |
++---------------------------------+------------+---------------------------------+
+| Signed 6-bit immediate          | `imm6`     | `{-32, -31, ... 30, 31}`        |
++---------------------------------+------------+---------------------------------+
+| Unsigned 6-bit immediate        | `uimm6`    | `{0, 1, ... 62, 63}`            |
++---------------------------------+------------+---------------------------------+
+| Non-zero Unsigned 6-bit         | `nzuimm6`  | `{1, 2, ... 62, 63}`            |
+| immediate                       |            |                                 |
++---------------------------------+------------+---------------------------------+
+| Signed 8-bit immediate          | `imm8`     | `{-128, -127, ... 126, 127}`    |
++---------------------------------+------------+---------------------------------+
+| Unsigned 8-bit immediate        | `uimm8`    | `{0, 1, ... 254, 255}`          |
++---------------------------------+------------+---------------------------------+
+
 
 Using the ``illegal generator`` and ``instruction constants``
--------------------------------------------------------------
+=============================================================
 
 Similiar to **instruction generator**, one can use the ``illegal generator`` in 
 UATG to generate illegal instructions for negative testing purposes. 
@@ -984,7 +1055,7 @@ Documenatation about the other functions present within the instruction_constant
 module can be found :ref:`here<instruction_constants_docs>`.
 
 Using the ``rvtest_data`` function
-----------------------------------
+==================================
 [UNDER DEVELOPMENT]
 
 The rvtest_data function in uatg.utils assists in writing automated assembly file by populating the ``RVTEST_DATA`` section with either random values or algorithmically computed values.
@@ -1017,4 +1088,3 @@ The function returns a string that contains the ``RVTEST_DATA`` section populate
     #     .half	0x5571
     # sample_data:
     #     .word	0xbabecafe
-
