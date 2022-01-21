@@ -51,18 +51,22 @@ class instruction_generator:
         self.imm_fields = {
             '$imm11': {str(num) for num in range(-1024, 1024)},
             '$imm12': {str(num) for num in range(-2048, 2048)},
-            '$uimm20': {str(num) for num in range(0, 2 ** 20)},
+            '$uimm20': {str(num) for num in range(0, 2**20)},
             '$imm6': {str(num) for num in range(-32, 32)},
             '$imm8': {str(num) for num in range(-128, 128)},
-            '$nzuimm6': {str(num) for num in range(1, 2 ** 6)},
-            '$uimm6': {str(num) for num in range(0, 2 ** 6)},
-            '$uimm8': {str(num) for num in range(0, 256)}
+            '$nzuimm6': {str(num) for num in range(1, 2**6)},
+            '$uimm6': {str(num) for num in range(0, 2**6)},
+            '$uimm8': {str(num) for num in range(0, 256)},
+            '$pred': {15},
+            '$succ': {15},
         }
 
         self.default_modifiers = dict.fromkeys(
             ['xrs1', 'xrs2', 'xrs3', 'xrd', 'rm'], integer_reg_file)
         self.default_modifiers.update(
-            {'shamt': {str(num) for num in range(0, 32)}})
+            {'shamt5': {str(num) for num in range(0, 2**5)},
+             'shamt6': {str(num) for num in range(0, 2**6)}}
+        )
         self.default_modifiers.update(self.imm_fields)
 
         self.instructions = load_yaml(instruction_file)
