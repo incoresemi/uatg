@@ -239,9 +239,7 @@ def from_config(config_file, verbose):
     modules = config['uatg']['modules']
     # Uncomment to overwrite verbosity from config file.
     # verbose = config['uatg']['verbose']
-    privileged = config['uatg']['privileged']
-    page_size = int(config['uatg']['page_size'])
-
+ 
     logger.level(verbose)
     module = clean_modules(module_dir, modules)
 
@@ -259,9 +257,7 @@ def from_config(config_file, verbose):
                        modules_dir=module_dir,
                        modules=module,
                        config_dict=dut_dict,
-                       test_list=config['uatg']['gen_test_list'],
-                       privileged=privileged,
-                       page_size=page_size)
+                       test_list=config['uatg']['gen_test_list'])
 
     if config['uatg']['gen_cvg'].lower() == 'true':
         alias_dict = load_yaml(config['uatg']['alias_file'])

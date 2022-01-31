@@ -37,8 +37,6 @@ def asm_generation_process(args):
     uarch_dir = args[9]
     work_dir = args[10]
     compile_macros_dict = args[11]
-    privileged = args[12]
-    page_size = args[13]
     #process_manager = args[12]
 
     # actual generation process
@@ -199,7 +197,7 @@ def sv_generation_process(args):
 
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
-                   modules_dir, privileged, page_size):
+                   modules_dir):
     """
     The function generates ASM files for all the test classes specified within
     the module_dir. The user can also select the modules for which he would want
@@ -317,7 +315,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
-                 work_dir, compile_macros_dict, privileged, page_size))
+                 work_dir, compile_macros_dict))
 
         # multi processing process pool
         process_pool = Pool()
