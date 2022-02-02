@@ -787,12 +787,16 @@ rvtest_data_end:
   add t5, t1, t4;/*add the t1 reg with mode value with the t3 reg*/\
   csrw CSR_SATP, t5;/*load the value into SATP*/\
   /*update MPP with 1 to go into supervisor mode*/\
-  addi t6, x0, 1;\
+  addi t6, x0, 1;/*supervisor*/\
   slli t6, t6, 11;\
   csrs CSR_MSTATUS, t6;/*set MPP bits in MSTATUS*/\
+  /*value to convert the Physical address to Virtual address*/\
+  li t6, 0xF0000000/*for supervisor*/;\
   /*update MEPC*/\
+  /*supervisor virtula address is F000000..*/\
   la t1, supervisor_entry_label;/*label for loading MEPC*/\
-  csrw CSR_MEPC, t1;/*update MEPC*/\
+  or t5, t1, t6;/*for supervisor*/\
+  csrw CSR_MEPC, t5;/*update MEPC*/\
   /*mret*/\
   mret;
 
@@ -801,7 +805,36 @@ rvtest_data_end:
   li a0, 173;\
   /*performing an ecall to exit*/\
   ecall
-  
+
+//--------------------------------User Test Macros------------------------------------------//
+#define RVTEST_USER_ENTRY(pg_size_exp, mode, shift_amount)\
+  /*setting up SATP*/\
+  /*addi t0, x0, mode;*mode field value based on paging mode in SATP*/\
+  /*slli t1, t0, shift_amount;*left shift to move it to the mode field of SATP*/\
+  /*slli t2, t0, pg_size_exp;*/\
+  /*la t3, l0_pt;*load the address of the root page*/\
+  /*srli t4, t3, pg_size_exp;*divide the address by the page size*/\
+  /*add t5, t1, t4;*add the t1 reg with mode value with the t3 reg*/\
+  /*csrw CSR_SATP, t5;*load the value into SATP*/\
+  /*update SPP with 1 to go into user mode*/\
+  addi t6, x0, 1;\
+  slli t6, t6, 8;\
+  csrs CSR_SSTATUS, t6;/*set MPP bits in MSTATUS*/\
+  /*li t6, 0x0fffffff;*/\
+  /*user address is 00000000*/\
+  /*update MEPC*/\
+  la t1, user_entry_label;/*label for loading MEPC*/\
+  /*and t5, t1, t6;*//*for user*/\
+  csrw CSR_MEPC, t1;/*update MEPC*/\
+  /*mret*/\
+  mret;
+
+#define RVTEST_USER_EXIT()\
+  /*loading an error code to indicate exit*/\
+  li a0, 173;\
+  /*performing an ecall to exit*/\
+  ecall
+
 //------------------------------ BORROWED FROM ANDREW's RISC-V TEST MACROS -----------------------//
 #define MASK_XLEN(x) ((x) & ((1 << (__riscv_xlen - 1) << 1) - 1))
 
