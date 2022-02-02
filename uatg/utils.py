@@ -893,9 +893,13 @@ def setup_pages(page_size=4096,
     # calcualtion to set up root level pages
     pte_updation = f"\n\t# setting up root PTEs\n"\
                    f"\tla t0, l0_pt # load address of root page\n\n"
+    
+    shift_string = f"\t# calculation for offset\n"\
+                   f"\taddi t6, x0, 3\n\tslli t6, t6, 10\n\tadd t0, t0, t6\n"
 
     for i in range(levels - 1):
-        offset = 16 if i == 0 else 0
+        offset = 24 if i == (levels - 3) else 0
+        offset_calc = shift_string if i == (levels -2) else ""
         pte_updation += f"\t# setting up l{i} table to point l{i+1} table\n"\
                         f"\taddi t1, x0, 1 # add value 1 to reg\n"\
                         f"\tslli t2, t1, {power} # left shift to create a page"\
@@ -906,6 +910,7 @@ def setup_pages(page_size=4096,
                         f"page size\n"\
                         f"\tslli t4, t4, 10 # left shift for PTE format\n"\
                         f"\tadd t4, t4, t1 # set valid bit to 1\n"\
+                        f"{offset_calc}"\
                         f"\tsd t4, {offset}(t0) "\
                         f"# store l{i+1} first entry address "\
                         f"into the first entry of l{i}\n\n"
@@ -919,7 +924,7 @@ def setup_pages(page_size=4096,
     out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "\
                            f"{shift_amount})\n"\
                            f"supervisor_entry_label:\n")
-    out_code_string.append(f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va==pa\n"\
+    out_code_string.append(f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"\
                            f"supervisor_exit_label:\n")
 
     return out_code_string, out_data_string
