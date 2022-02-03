@@ -498,7 +498,7 @@ def create_config_file(config_path):
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = True\n'
+          'are generated\ngen_cvg = False\n'
 
     with open(os.path.join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
