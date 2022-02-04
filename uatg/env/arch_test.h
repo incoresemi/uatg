@@ -169,27 +169,46 @@ trap_handler_entry:
 
   // ecall from Supervisor Mode
   li t3, 9
-  bne t3, t0, not_s_ecall //if t3 == 9, the trap is not due to an ecall from S
+  beq t3, t0, ecall_handler // if t0 == 9, the trap is due to an ecall from S
+  li t3, 8
+  beq t3, t0, ecall_handler // if t0 == 8, the trap is due to an ecall from U
+  j not_ecall
 
+ecall_handler:
   // checking if the error code matches the S exit macro
-  // if it does not match, we increment MEPC by 4.
-  // Ideally, this would require a Software PT walk. 
-  // But, currently we assume VA == PA, hence incrementing MEPC should work.
   li t3, 173
+  // illegal handler would increment the PC, this should work eventhough va!=pa
   bne t3, a0, illegal_handler
   // if the error code matches 173, we proceed to loading the final label
   // load the final label in the ASM into MEPC
+  bne t3, a1, supervisor_to_machine
+
+user_to_supervisor:
+  la t5, user_exit_label
+  // update MPP to perform MRET into Supervisor
+  li t6, 0xF0000000/*for supervisor*/;\
+  /*update MEPC*/\
+  /*supervisor virtula address is F000000..*/\
+  or t5, t5, t6;/*for supervisor*/\
+  addi t6, x0, 1
+  slli t6, t6, 11
+  csrs CSR_MSTATUS, t6
+  j mepc_updation
+
+supervisor_to_machine:
   la t5, supervisor_exit_label
-  csrw CSR_MEPC, t5
   // update MPP in mstatus to perform an MRET
   addi t6, x0, 3
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
+
+mepc_updation:
+  csrw CSR_MEPC, t5
   
   // jump to restoring registers and exiting trap handler
   j restore_and_exit_trap
 
-not_s_ecall:
+not_ecall:
   // mcause value of illegal initialized in t3
   li t3, 2 
   beq t3, t0, illegal_handler
@@ -802,12 +821,13 @@ rvtest_data_end:
 
 #define RVTEST_SUPERVISOR_EXIT()\
   /*loading an error code to indicate exit*/\
+  li a1, 0;\
   li a0, 173;\
   /*performing an ecall to exit*/\
   ecall
 
 //--------------------------------User Test Macros------------------------------------------//
-#define RVTEST_USER_ENTRY(pg_size_exp, mode, shift_amount)\
+#define RVTEST_USER_ENTRY()\
   /*setting up SATP*/\
   /*addi t0, x0, mode;*mode field value based on paging mode in SATP*/\
   /*slli t1, t0, shift_amount;*left shift to move it to the mode field of SATP*/\
@@ -816,22 +836,26 @@ rvtest_data_end:
   /*srli t4, t3, pg_size_exp;*divide the address by the page size*/\
   /*add t5, t1, t4;*add the t1 reg with mode value with the t3 reg*/\
   /*csrw CSR_SATP, t5;*load the value into SATP*/\
-  /*update SPP with 1 to go into user mode*/\
-  addi t6, x0, 1;\
-  slli t6, t6, 8;\
-  csrs CSR_SSTATUS, t6;/*set MPP bits in MSTATUS*/\
-  /*li t6, 0x0fffffff;*/\
+  /*update SPP with 0 to go into user mode*/\
+  addi t6, x0, 0;\
+  /*set SUM bit in STATUS*/\
+  addi t5, x0, 1;\
+  slli t5, t5, 18;\
+  add t6, t6,t5;\
+  csrs CSR_SSTATUS, t6;/*set SPP bits in SSTATUS*/\
+  li t6, 0x0fffffff;\
   /*user address is 00000000*/\
   /*update MEPC*/\
-  la t1, user_entry_label;/*label for loading MEPC*/\
-  /*and t5, t1, t6;*//*for user*/\
-  csrw CSR_MEPC, t1;/*update MEPC*/\
+  la t1, user_entry_label;/*label for loading SEPC*/\
+  and t5, t1, t6;/*for user*/\
+  csrw CSR_SEPC, t5;/*update MEPC*/\
   /*mret*/\
-  mret;
+  sret;
 
 #define RVTEST_USER_EXIT()\
   /*loading an error code to indicate exit*/\
   li a0, 173;\
+  li a1, 173;\
   /*performing an ecall to exit*/\
   ecall
 
