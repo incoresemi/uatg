@@ -184,7 +184,7 @@ ecall_handler:
   bne t3, a1, supervisor_to_machine
 
 user_to_supervisor:
-  la t5, user_exit_label
+  la t5, test_exit
   // update MPP to perform MRET into Supervisor
   li t6, 0xF0000000/*for supervisor*/;\
   /*update MEPC*/\
@@ -824,18 +824,10 @@ rvtest_data_end:
   li a1, 0;\
   li a0, 173;\
   /*performing an ecall to exit*/\
-  ecall
+  ecall;
 
 //--------------------------------User Test Macros------------------------------------------//
 #define RVTEST_USER_ENTRY()\
-  /*setting up SATP*/\
-  /*addi t0, x0, mode;*mode field value based on paging mode in SATP*/\
-  /*slli t1, t0, shift_amount;*left shift to move it to the mode field of SATP*/\
-  /*slli t2, t0, pg_size_exp;*/\
-  /*la t3, l0_pt;*load the address of the root page*/\
-  /*srli t4, t3, pg_size_exp;*divide the address by the page size*/\
-  /*add t5, t1, t4;*add the t1 reg with mode value with the t3 reg*/\
-  /*csrw CSR_SATP, t5;*load the value into SATP*/\
   /*update SPP with 0 to go into user mode*/\
   addi t6, x0, 0;\
   /*set SUM bit in STATUS*/\
@@ -846,7 +838,7 @@ rvtest_data_end:
   li t6, 0x0fffffff;\
   /*user address is 00000000*/\
   /*update MEPC*/\
-  la t1, user_entry_label;/*label for loading SEPC*/\
+  la t1, test_entry;/*label for loading SEPC*/\
   and t5, t1, t6;/*for user*/\
   csrw CSR_SEPC, t5;/*update MEPC*/\
   /*mret*/\
@@ -857,7 +849,7 @@ rvtest_data_end:
   li a0, 173;\
   li a1, 173;\
   /*performing an ecall to exit*/\
-  ecall
+  ecall;
 
 //------------------------------ BORROWED FROM ANDREW's RISC-V TEST MACROS -----------------------//
 #define MASK_XLEN(x) ((x) & ((1 << (__riscv_xlen - 1) << 1) - 1))
