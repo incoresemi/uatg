@@ -822,11 +822,16 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
 def setup_pages(page_size=4096,
                 paging_mode='sv39',
                 valid_ll_pages=64,
-                user=False):
+                mode='machine'):
     """
         creates a pagetable with 'size' number of entries.
         Currently works with the sv39 virtual memory addressing.
     """
+
+    if mode == 'machine':
+        # machine mode tests don't have anything to do with pages.
+        # so, we return a list of empty strings.
+        return (['', '', ''], '')
 
     entries = page_size // 8
     # assuming that the size will always be a power of 2
@@ -851,9 +856,15 @@ def setup_pages(page_size=4096,
 
     # data section
     pre = f"\n.align {align}\n\n"
-    initial_level_pages = ''
+
+    initial_level_pages_s = ''
     for level in range(levels - 1):
-        initial_level_pages += f"l{level}_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
+        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
+
+    initial_level_pages_u = ''
+    if mode == 'user':
+        for level in range(1, levels - 1):
+            initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
 
     # assumption that the l3 pt entry 0 will point to 80000000
 
@@ -864,26 +875,47 @@ def setup_pages(page_size=4096,
     read_bit = 0x02
     write_bit = 0x04
     execute_bit = 0x08
-    u_bit = 0x10 if user else 0x00
+    u_bit_s = 0x00
+    u_bit_u = 0x10
     global_bit = 0x20
     access_bit = 0x40
     dirty_bit = 0x80
 
-    ll_entries = ''
+    ll_entries_s = ''
+    ll_entries_u = ''
+    ll_page_s = ''
+    ll_page_u = ''
+    base_address_new = base_address
+
+    if mode == 'user':
+        for i in range(valid_ll_pages):
+            pte_address_u = base_address_new >> power
+            pte_address_u = pte_address_u << 10
+            pte_entry_u = pte_address_u | dirty_bit | access_bit |\
+                               global_bit | u_bit_u | execute_bit | write_bit |\
+                               read_bit | valid_bit
+            ll_entries_u += '.dword {0} # entry_{1}\n'.format(
+                hex(pte_entry_u), i)
+            base_address_new += page_size
+
     base_address_new = base_address
     for i in range(valid_ll_pages):
-        PTE_address = base_address_new >> power
-        PTE_address = PTE_address << 10
-        PTE_entry = PTE_address | dirty_bit | access_bit |\
-                           global_bit | u_bit | execute_bit | write_bit |\
+        pte_address_s = base_address_new >> power
+        pte_address_s = pte_address_s << 10
+        pte_entry_s = pte_address_s | dirty_bit | access_bit |\
+                           global_bit | u_bit_s | execute_bit | write_bit |\
                            read_bit | valid_bit
-        ll_entries += '.dword {0} # entry_{1}\n'.format(hex(PTE_entry), i)
+        ll_entries_s += '.dword {0} # entry_{1}\n'.format(hex(pte_entry_s), i)
         base_address_new += page_size
 
-    ll_page = f'l{levels-1}_pt:\n{ll_entries}.rept {entries-valid_ll_pages}\n'\
-               f'.dword 0x0\n.endr\n'
+    ll_page_s = f'l{levels-1}_pt:\n{ll_entries_s}.rept {entries-valid_ll_pages}\n'\
+              f'.dword 0x0\n.endr\n'
 
-    out_data_string = pre + initial_level_pages + ll_page
+    ll_page_u = f'l{levels-1}_u_pt:\n{ll_entries_u}.rept {entries-valid_ll_pages}\n'\
+              f'.dword 0x0\n.endr\n'
+
+    out_data_string = pre + initial_level_pages_s + ll_page_s +\
+                      initial_level_pages_u + ll_page_u
 
     # code section
     # using the macro
@@ -893,13 +925,13 @@ def setup_pages(page_size=4096,
     # calcualtion to set up root level pages
     pte_updation = f"\n\t# setting up root PTEs\n"\
                    f"\tla t0, l0_pt # load address of root page\n\n"
-    
+
     shift_string = f"\t# calculation for offset\n"\
                    f"\taddi t6, x0, 3\n\tslli t6, t6, 10\n\tadd t0, t0, t6\n"
 
     for i in range(levels - 1):
         offset = 24 if i == (levels - 3) else 0
-        offset_calc = shift_string if i == (levels -2) else ""
+        offset_calc = shift_string if i == (levels - 2) else ""
         pte_updation += f"\t# setting up l{i} table to point l{i+1} table\n"\
                         f"\taddi t1, x0, 1 # add value 1 to reg\n"\
                         f"\tslli t2, t1, {power} # left shift to create a page"\
@@ -919,12 +951,43 @@ def setup_pages(page_size=4096,
                             f"\tadd t0, t3, 0 # move the address of "\
                             f"level {i+1} page to t0\n\n"
 
+    pte_updation += "\n"
+
+    if mode == 'user':
+        pte_updation += f"\t# user page table set up\n"
+        pte_updation += f"\tla t0, l0_pt # load address of root page\n\n"
+        pte_updation += f"\tla t3, l1_u_pt # load address of l1 user page\n\n"
+        common_setup = f"\tsrli t5, t3, 12\n"\
+                       f"\tslli t5, t5, 10\n"\
+                       f"\tli t4, 1\n"\
+                       f"\tadd t5, t5, t4\n"\
+                       f"\tsd t5, (t0)\n"
+        for i in range(levels - 1):
+            pte_updation += f"\t# update l{i} page entry with address of l{i+1} page\n"
+            if i != 0:
+                pte_updation += f"\taddi t2, x0, 1\n"\
+                                f"\tslli t2, t2, 12\n"\
+                                f"\tadd t3, t0, t2\n"
+            pte_updation += f"{common_setup}\n"
+
+            if (i < levels - 2):
+                pte_updation += f"\t# address updation\n"\
+                                f"\tadd t0, t3, 0 # move address of \n"\
+                                f"\t\t\t\t #l{i+1} page into t0"
+
+    user_entry = "RVTEST_USER_ENTRY()" if mode == 'user' else ""
+    user_exit = "RVTEST_USER_EXIT()" if mode == 'user' else ""
+
     out_code_string.append(pte_updation)
 
     out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "\
                            f"{shift_amount})\n"\
-                           f"supervisor_entry_label:\n")
-    out_code_string.append(f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"\
+                           f"supervisor_entry_label:\n"\
+                           f"\n{user_entry}"\
+                           f"test_entry:\n")
+    out_code_string.append(f"\n{user_exit}\n"\
+                           f"test_exit:\n"\
+                           f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"\
                            f"supervisor_exit_label:\n")
 
     return out_code_string, out_data_string

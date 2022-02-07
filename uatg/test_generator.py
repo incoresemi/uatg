@@ -99,7 +99,7 @@ def asm_generation_process(args):
             # generate and setup page tables based on info from plugin
             privileged_dict = {}
             try:
-                privileged_dict = ret_list_of_dicts['supervisor_mode']
+                privileged_dict = ret_list_of_dicts['privileged_test']
             except KeyError:
                 privileged_dict['enable'] = False
 
@@ -108,7 +108,7 @@ def asm_generation_process(args):
                     page_size=privileged_dict['page_size'],
                     paging_mode=privileged_dict['paging_mode'],
                     valid_ll_pages=privileged_dict['ll_pages'],
-                    user=privileged_dict['u_bit'])
+                    mode=privileged_dict['mode'])
 
             # Adding License, includes and macros
             # asm = license_str + includes + test_entry
@@ -317,6 +317,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
                  work_dir, compile_macros_dict))
 
+        
         # multi processing process pool
         process_pool = Pool()
         # creating a map of processes
