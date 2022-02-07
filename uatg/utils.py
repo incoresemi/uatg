@@ -273,7 +273,7 @@ def combine_config_yamls(configuration_path):
     except IndexError:
         logger.error('Path to rv_debug.yaml is invalid.')
         raise Exception('MISSING_RV_DEBUG')
-    
+
     return dut_dict
 
 
@@ -739,7 +739,7 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
     """
     asm_test_list = glob.glob(asm_dir + '/**/*.S')
     env_dir = os.path.join(uarch_dir, 'env/')
-    target_dir = asm_dir + '/../'
+    target_dir = os.path.abspath(asm_dir + '/../')
 
     extension_list = split_isa_string(isa)
     march = ''
@@ -773,7 +773,8 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
                          '-fno-builtin-printf -fvisibility=hidden '
         test_list[base_key][
             'linker_args'] = '-static -nostdlib -nostartfiles -lm -lgcc -T'
-        test_list[base_key]['linker_file'] = os.path.join(target_dir, 'link.ld')
+        test_list[base_key]['linker_file'] = os.path.abspath(
+            os.path.join(target_dir, 'link.ld'))
         test_list[base_key]['asm_file'] = os.path.join(asm_dir, base_key,
                                                        base_key + '.S')
         test_list[base_key]['include'] = [env_dir, target_dir]
