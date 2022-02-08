@@ -899,17 +899,17 @@ c_extension:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.slli $xrd, $uimm6'
+    asm_syntax: 'c.slli $xrd, $shamt'
   c.srai:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.srai $c.rd, $uimm6'
+    asm_syntax: 'c.srai $c.rd, $shamt'
   c.srli:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.srli $c.rd, $uimm6'
+    asm_syntax: 'c.srli $c.rd, $shamt'
   c.sub:
     xlen: [ 32, 64 ]
     std_extension: 'C'

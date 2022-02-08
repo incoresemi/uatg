@@ -206,6 +206,10 @@ class instruction_generator:
             for i in ('slliw', 'srliw', 'sraiw'):
                 if i in r_inst and '64' in self.isa:
                     shamt = modifiers['shamt5']
+            for i in ('c.slli', 'c.srli', 'c.srai'):
+                if i in r_inst and '64' in self.isa:
+                    shamt = modifiers['shamt6']
+
             r_inst = r_inst.replace('$shamt', sample(shamt, 1)[0])
 
         if 'imm' in r_inst:
