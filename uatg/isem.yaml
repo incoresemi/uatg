@@ -49,7 +49,7 @@ i_extension:
     xlen: [ 32, 64 ]
     std_extension: 'I'
     ialign: 32
-    asm_syntax: 'and $xrd $xrs1, $xrs2'
+    asm_syntax: 'and $xrd, $xrs1, $xrs2'
   addi:
     xlen: [ 32, 64 ]
     std_extension: 'I'
@@ -332,12 +332,12 @@ a_extension:
     xlen: [ 32, 64 ]
     std_extension: 'A'
     ialign: 32
-    asm_syntax: 'lr.w $xrd, $xrs1'
+    asm_syntax: 'lr.w $xrd, ($xrs1)'
   sc.w:
     xlen: [ 32, 64 ]
     std_extension: 'A'
     ialign: 32
-    asm_syntax: 'sc.w $xrd, $xrs1, $xrs2'
+    asm_syntax: 'sc.w $xrd, $xrs2, ($xrs1)'
   amoswap.w:
     xlen: [ 32, 64 ]
     std_extension: 'A'
@@ -388,12 +388,12 @@ a_extension:
     xlen: [ 64 ]
     std_extension: 'A'
     ialign: 32
-    asm_syntax: 'lr.d $xrd, $xrs1'
+    asm_syntax: 'lr.d $xrd, ($xrs1)'
   sc.d:
     xlen: [ 64 ]
     std_extension: 'A'
     ialign: 32
-    asm_syntax: 'sc.d $xrd, $xrs1, $xrs2'
+    asm_syntax: 'sc.d $xrd, $xrs2, ($xrs1)'
   amoswap.d:
     xlen: [ 64 ]
     std_extension: 'A'
@@ -769,17 +769,17 @@ c_extension:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.addi $xrd, $nzuimm6'
+    asm_syntax: 'c.addi $xrd, $nzimm6'
   c.addi16sp:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.addi16sp $imm6'
+    asm_syntax: 'c.addi16sp sp, $nzimm6'
   c.addi4spn:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.addi4spn $c.rd, $uimm8'
+    asm_syntax: 'c.addi4spn $c.rd, sp, $nzuimm8'
   c.and:
     xlen: [ 32, 64 ]
     std_extension: 'C'
@@ -789,7 +789,7 @@ c_extension:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.andi $c.rd, $uimm6'
+    asm_syntax: 'c.andi $c.rd, $imm6'
   c.beqz:
     xlen: [ 32, 64 ]
     std_extension: 'C'
@@ -814,9 +814,9 @@ c_extension:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.fldsp $xrd, $uimm6(x2)'
+    asm_syntax: 'c.fldsp $frd, $uimm6(x2)'
   c.flw:
-    xlen: [ 32 ]
+    xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
     asm_syntax: 'c.flw $c.rd, $uimm5($c.rs1)'
@@ -836,7 +836,7 @@ c_extension:
     ialign: 16
     asm_syntax: 'c.fsdsp $xrs2, $uimm6(x2)'
   c.fsw:
-    xlen: [ 32 ]
+    xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
     asm_syntax: 'c.fsw $c.rd, $uimm5($c.rs1)'
@@ -869,12 +869,12 @@ c_extension:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.li $xrd, $uimm6'
+    asm_syntax: 'c.li $xrd, $imm6'
   c.lui:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.lui $xrd, $uimm6'
+    asm_syntax: 'c.lui $xrd, $nzuimm6'
   c.lw:
     xlen: [ 32, 64 ]
     std_extension: 'C'
@@ -884,7 +884,7 @@ c_extension:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.lwsp $xrd, $uimm6'
+    asm_syntax: 'c.lwsp $xrd, $uimm6(sp)'
   c.mv:
     xlen: [ 32, 64 ]
     std_extension: 'C'
@@ -894,7 +894,7 @@ c_extension:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.or $xrd, $xrd'
+    asm_syntax: 'c.or $c.rd, $c.rs1'
   c.slli:
     xlen: [ 32, 64 ]
     std_extension: 'C'
@@ -914,7 +914,7 @@ c_extension:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.sub $xrd, $xrd'
+    asm_syntax: 'c.sub $c.rd, $c.rs1'
   c.sw:
     xlen: [ 32, 64 ]
     std_extension: 'C'
@@ -924,12 +924,12 @@ c_extension:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.swsp $xrs2, $uimm6'
+    asm_syntax: 'c.swsp $xrs2, $uimm6(sp)'
   c.xor:
     xlen: [ 32, 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.xor $xrd, $xrd'
+    asm_syntax: 'c.xor $c.rd, $c.rs1'
   c.nop:
     xlen: [ 32, 64 ]
     std_extension: C
@@ -946,7 +946,7 @@ c_extension:
     xlen: [ 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.addw $xrd, $xrs2'
+    asm_syntax: 'c.addw $c.rd, $c.rs1'
   c.ld:
     xlen: [ 64 ]
     std_extension: 'C'
@@ -966,12 +966,12 @@ c_extension:
     xlen: [ 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.sdsp $xrs2, $uimm6'
+    asm_syntax: 'c.sdsp $xrs2, $uimm6(sp)'
   c.subw:
     xlen: [ 64 ]
     std_extension: 'C'
     ialign: 16
-    asm_syntax: 'c.subw $xrd, $xrs2'
+    asm_syntax: 'c.subw $c.rd, $c.rs2'
 
 b_extension:
   # RV[32|64]B Instructions

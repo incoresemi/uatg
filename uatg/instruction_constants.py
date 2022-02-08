@@ -3,6 +3,7 @@ from itertools import combinations
 from typing import Dict
 
 base_reg_file = ['x' + str(reg_no) for reg_no in range(32)]
+float_reg_file = ['f' + str(reg_no) for reg_no in range(32)]
 
 # Instructions classified based on the extension and further on function
 
@@ -20,7 +21,7 @@ arithmetic_instructions = {
     'rv64-shift-reg': ['sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'],
     'rv128-shift-reg': [
         'sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'
-        'slld', 'srad', 'srld'
+                                             'slld', 'srad', 'srld'
     ],
     'rv32-shift-imm': ['slli', 'srli', 'srai'],
     'rv64-shift-imm': ['slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw'],
@@ -349,13 +350,14 @@ rv64_encodings = {
         ],
 }
 
+
 # Utility functions for data generation
 
 
 def twos(val, bits):
     """
         Finds the twos complement of the number
-    
+
         :param val: input to be complemented
         :param bits: size of the input
 
@@ -414,8 +416,8 @@ def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
         return walked
 
 
-def illegal_generator(isa='RV32I')-> list:
-    """ 
+def illegal_generator(isa='RV32I') -> list:
+    """
         :param isa: RV[32|64]{IMAFD}
 
         :return: list of illegal instructions for given ISA configuration
@@ -430,16 +432,16 @@ def illegal_generator(isa='RV32I')-> list:
         into a list and returns it.
 
         :Usage:
-    
+
             .. code-block:: Python
-                
+
                 from uatg.instruction_constant import illegal_generator
-    
+
                 illegal_list = illegal_generator("RV32IMAF")
 
         illegal list would contain decimal value of illegal instructions
         user should convert it into hex and dump into memory using ``.word``
-    
+
     """
 
     # Declaring the variable that will store all of the parsed data
@@ -492,7 +494,7 @@ def illegal_generator(isa='RV32I')-> list:
             instructions[opcode] = consts
     # illegal_list variable contains all the illegal values for a particular isa
     # extension. it's initialized to store all illegal opcodes in the 7bit range
-    illegal_list = [i for i in range(2**7) if i not in instructions.keys()]
+    illegal_list = [i for i in range(2 ** 7) if i not in instructions.keys()]
 
     # Choosing illegals that DO NOT get interpreted as Compressed instructions.
     # i.e now the list has instructions with opcode[1:0] == 0b11
@@ -507,7 +509,8 @@ def illegal_generator(isa='RV32I')-> list:
         # Variable to store the illegal values for each range in legal values
         illegal_values = {
             (beg, end):
-            set(range(2**(end - beg + 1))) - instructions[opcode][(beg, end)]
+                set(range(2 ** (end - beg + 1))) - instructions[opcode][
+                    (beg, end)]
             for (beg, end) in instructions[opcode].keys()
         }
         # Finding all permutations for illegal fields in an instruction
