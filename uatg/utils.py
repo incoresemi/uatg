@@ -975,8 +975,8 @@ def setup_pages(page_size=4096,
                                 f"\tadd t0, t3, 0 # move address of \n"\
                                 f"\t\t\t\t #l{i+1} page into t0"
 
-    user_entry = "RVTEST_USER_ENTRY()" if mode == 'user' else ""
-    user_exit = "RVTEST_USER_EXIT()" if mode == 'user' else ""
+    user_entry = "RVTEST_USER_ENTRY()\n" if mode == 'user' else ""
+    user_exit = "RVTEST_USER_EXIT()\n" if mode == 'user' else ""
 
     out_code_string.append(pte_updation)
 
@@ -984,8 +984,8 @@ def setup_pages(page_size=4096,
                            f"{shift_amount})\n"\
                            f"supervisor_entry_label:\n"\
                            f"\n{user_entry}"\
-                           f"test_entry:\n")
-    out_code_string.append(f"\n{user_exit}\n"\
+                           f"test_entry:\n\n")
+    out_code_string.append(f"\n\n{user_exit}"\
                            f"test_exit:\n"\
                            f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"\
                            f"supervisor_exit_label:\n")
