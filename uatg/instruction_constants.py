@@ -3,6 +3,7 @@ from itertools import combinations
 from typing import Dict
 
 base_reg_file = ['x' + str(reg_no) for reg_no in range(32)]
+float_reg_file = ['f' + str(reg_no) for reg_no in range(32)]
 
 # Instructions classified based on the extension and further on function
 
@@ -20,7 +21,7 @@ arithmetic_instructions = {
     'rv64-shift-reg': ['sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'],
     'rv128-shift-reg': [
         'sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'
-        'slld', 'srad', 'srld'
+                                             'slld', 'srad', 'srld'
     ],
     'rv32-shift-imm': ['slli', 'srli', 'srai'],
     'rv64-shift-imm': ['slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw'],
@@ -100,6 +101,39 @@ atomic_mem_ops = {
         'amoxor.d', 'amoand.d', 'amoor.d', 'amomin.d', 'amomax.d', 'amominu.d',
         'amomaxu.d'
     ]
+}
+
+# compressed instructions
+compressed_instructions = {
+    # stack load/store instructions
+    'rv32-loads-stack': ['c.lwsp', 'c.flwsp', 'c.fldsp'],
+    'rv64-loads-stack': ['c.ldsp', 'c.fldsp'],
+    'rv128-loads-stack': ['c.lqsp'],
+    'rv32-stores-stack': ['c.swsp', 'c.fswsp', 'c.fdsp'],
+    'rv64-stores-stack': ['c.sdsp', 'c.fsdsp'],
+    'rv128-stores-stack': ['c.sqsp'],
+
+    # register based load and store
+    'rv32-loads': ['c.lw', 'c.flw', 'c.fld'],
+    'rv64-loads': ['c.ld', 'c.fld'],
+    'rv128-loads': ['c.lq'],
+    'rv32-stores': ['c.sw', 'c.fsw', 'c.fsd'],
+    'rv64-stores': ['c.sd', 'c.fsd'],
+    'rv128-stores': ['c.sq'],
+    # control Transfers instructions
+    'rv32-jal': ['c.jal'],
+    'control_trans': ['c.j', 'c.jr', 'c.jalr', 'c.beqz', 'c.bnez'],
+    # integer constant generation instructions
+    'reg-const': ['c.li', 'c.lui'],
+    # integer register immediate instructions
+    'reg-imm': ['c.addi'],
+    'rv64-reg-imm': ['c.addiw'],
+    'rv128-reg-imm': ['c.addiw'],
+    # integer register register operations
+    'reg-reg': ['c.mv', 'c.add'],
+    'reg-regCA': ['c.and', 'c.or', 'c.xor', 'c.sub'],
+    'rv64-regCA': ['c.addw', 'c.subw'],
+    'rv128-regCA': ['c.addw', 'c.subw']
 }
 
 # Instruction encodings for illegals generation
@@ -316,19 +350,21 @@ rv64_encodings = {
         ],
 }
 
+
 # Utility functions for data generation
 
 
 def twos(val, bits):
     """
-    Finds the twos complement of the number
-    :param val: input to be complemented
-    :param bits: size of the input
+        Finds the twos complement of the number
 
-    :type val: str or int
-    :type bits: int
+        :param val: input to be complemented
+        :param bits: size of the input
 
-    :result: two's complement version of the input
+        :type val: str or int
+        :type bits: int
+
+        :result: two's complement version of the input
 
     """
     if isinstance(val, str):
@@ -343,15 +379,15 @@ def twos(val, bits):
 
 def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
     """
-    Returns a list of binary values each with a width of bit_width that
-    walks with n_ones walking from lsb to msb. If invert is True, then list
-    contains bits inverted in binary.
+        Returns a list of binary values each with a width of bit_width that
+        walks with n_ones walking from lsb to msb. If invert is True, then list
+        contains bits inverted in binary.
 
-    :param bit_width: bit-width of register/value to fill.
-    :param n_ones: number of ones to walk.
-    :param invert: whether to walk one's or zeros
-    :param signed: whether to generate signed values
-    :return: list of strings
+        :param bit_width: bit-width of register/value to fill.
+        :param n_ones: number of ones to walk.
+        :param invert: whether to walk one's or zeros
+        :param signed: whether to generate signed values
+        :return: list of strings
     """
     if n_ones < 1:
         raise Exception('n_ones can not be less than 1')
@@ -380,18 +416,32 @@ def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
         return walked
 
 
-def illegal_generator(isa='RV32I'):
-    """ 
-    @str isa: RV[32|64]{IMAFD}
+def illegal_generator(isa='RV32I') -> list:
+    """
+        :param isa: RV[32|64]{IMAFD}
 
-    Provide the ISA string and obtain the list of illegal opcodes
-    as integers. It uses the riscv-opcodes repository's instruction encoding
-    data and are stored above as rv32_encodings and rv64_encodings variables.
+        :return: list of illegal instructions for given ISA configuration
 
-    This function parses the instructions and initially finds all illegal
-    opcodes. Then for the variable encoding fields in each instruction, it makes
-    one/more/all of them to contain illegal values and appends such combination
-    into a list and returns it.
+        Provide the ISA string and obtain the list of illegal opcodes
+        as integers. It uses the riscv-opcodes repository's instruction encoding
+        data and are stored above as rv32_encodings and rv64_encodings variables.
+
+        This function parses the instructions and initially finds all illegal
+        opcodes. Then for the variable encoding fields in each instruction, it makes
+        one/more/all of them to contain illegal values and appends such combination
+        into a list and returns it.
+
+        :Usage:
+
+            .. code-block:: Python
+
+                from uatg.instruction_constant import illegal_generator
+
+                illegal_list = illegal_generator("RV32IMAF")
+
+        illegal list would contain decimal value of illegal instructions
+        user should convert it into hex and dump into memory using ``.word``
+
     """
 
     # Declaring the variable that will store all of the parsed data
@@ -444,7 +494,7 @@ def illegal_generator(isa='RV32I'):
             instructions[opcode] = consts
     # illegal_list variable contains all the illegal values for a particular isa
     # extension. it's initialized to store all illegal opcodes in the 7bit range
-    illegal_list = [i for i in range(2**7) if i not in instructions.keys()]
+    illegal_list = [i for i in range(2 ** 7) if i not in instructions.keys()]
 
     # Choosing illegals that DO NOT get interpreted as Compressed instructions.
     # i.e now the list has instructions with opcode[1:0] == 0b11
@@ -459,7 +509,8 @@ def illegal_generator(isa='RV32I'):
         # Variable to store the illegal values for each range in legal values
         illegal_values = {
             (beg, end):
-            set(range(2**(end - beg + 1))) - instructions[opcode][(beg, end)]
+                set(range(2 ** (end - beg + 1))) - instructions[opcode][
+                    (beg, end)]
             for (beg, end) in instructions[opcode].keys()
         }
         # Finding all permutations for illegal fields in an instruction
@@ -527,7 +578,7 @@ def illegal_generator(isa='RV32I'):
                 illegal_list[i] += rs << 15  # rs != x0
             if opcode == 35 and (illegal_list[i] >> 15) % 32 == 0:
                 illegal_list[i] += rs << 15  # rs1 != x0
-            if opcode in (47) and (illegal_list[i] >> 12) % 8 in (2, 3):
+            if opcode == 47 and (illegal_list[i] >> 12) % 8 in (2, 3):
                 # TODO: Temporary fix for AMO instructions
                 illegal_list[i] -= 2 << 12  # converting illegal 2,3 to 0,1
 

@@ -267,6 +267,13 @@ def combine_config_yamls(configuration_path):
         logger.error('Path to csr_grouping.yaml is invalid.')
         raise Exception('MISSING_CSRGROUPING')
 
+    try:
+        dut_dict['rv64_debug'] = load_yaml(
+            configuration_path[4])  # YAML for CSRs
+    except IndexError:
+        logger.error('Path to rv_debug.yaml is invalid.')
+        raise Exception('MISSING_RV_DEBUG')
+
     return dut_dict
 
 
@@ -461,10 +468,23 @@ def create_config_file(config_path):
           'the target directory within chromite_uatg_tests\n' \
           'linker_dir = /home/user/myquickstart/chromite_uatg_tests/target' \
           '\n\n# Path to the yaml files containing DUT Configuration.\n' \
+          '# If you are using the CHROMITE core, uncomment the following line'\
+          ' by removing the \'#\'.\n# By doing this, UATG will use the '\
+          'checked YAMLs of Chromite\n'\
+          '# configuration_files = /home/user/myquickstart/chromite/build/'\
+          'rv64i_isa_checked.yaml,'\
+          '/home/user/myquickstart/chromite/build/core64_checked.yaml,' \
+          '/home/user/myquickstart/chromite/build/rv64i_custom_checked.yaml,' \
+          '/home/user/myquickstart/chromite/sample_config/c64/'\
+          'csr_grouping64.yaml,' \
+          '/home/user/myquickstart/chromite/build/rv64i_debug_checked.yaml\n\n'\
+          '# comment the following line by adding a \'#\' in front if you are' \
+          ' using the checked YAMLs from CHROMITE\n'\
           'configuration_files = /home/user/myquickstart/isa_config.yaml,' \
           '/home/user/myquickstart/core_config.yaml,' \
           '/home/user/myquickstart/custom_config.yaml,' \
-          '/home/user/myquickstart/csr_grouping.yaml' \
+          '/home/user/myquickstart/csr_grouping.yaml,' \
+          '/home/user/myquickstart/rv_debug.yaml' \
           '\n\n# Absolute Path of the yaml file contain' \
           'ing the signal aliases of the DUT ' \
           '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/' \
@@ -478,8 +498,7 @@ def create_config_file(config_path):
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = True\n# for privileged tests\n' \
-          'privileged = True\n# Page table size\npage_size = 4096'
+          'are generated\ngen_cvg = False\n'
 
     with open(os.path.join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
@@ -598,6 +617,11 @@ def create_dut_config_files(dut_config_path):
     with open(os.path.join(dut_config_path, 'csr_grouping.yaml'), 'w') as f:
         f.write(csr_grouping64)
 
+    rv_debug = f''
+
+    with open(os.path.join(dut_config_path, 'rv_debug.yaml'), 'w') as f:
+        f.write(rv_debug)
+
 
 def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
         -> str:
@@ -715,7 +739,7 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
     """
     asm_test_list = glob.glob(asm_dir + '/**/*.S')
     env_dir = os.path.join(uarch_dir, 'env/')
-    target_dir = asm_dir + '/../'
+    target_dir = os.path.abspath(asm_dir + '/../')
 
     extension_list = split_isa_string(isa)
     march = ''
@@ -749,7 +773,8 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
                          '-fno-builtin-printf -fvisibility=hidden '
         test_list[base_key][
             'linker_args'] = '-static -nostdlib -nostartfiles -lm -lgcc -T'
-        test_list[base_key]['linker_file'] = os.path.join(target_dir, 'link.ld')
+        test_list[base_key]['linker_file'] = os.path.abspath(
+            os.path.join(target_dir, 'link.ld'))
         test_list[base_key]['asm_file'] = os.path.join(asm_dir, base_key,
                                                        base_key + '.S')
         test_list[base_key]['include'] = [env_dir, target_dir]

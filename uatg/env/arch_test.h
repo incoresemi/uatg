@@ -140,7 +140,8 @@ trap_handler_entry:
   SREG t3, 4*REGWIDTH(sp)
   SREG t4, 5*REGWIDTH(sp)
   SREG t5, 6*REGWIDTH(sp)
- 
+  SREG t6, 7*REGWIDTH(sp)
+  
   // copy the exception cause into t0
   csrr t0, CSR_MCAUSE
 
@@ -229,6 +230,13 @@ illegal_handler:
   andi t1, t1, 0x3
   addi t4, x0, 3
   beq t4, t1, four_byte
+  
+  // checks if C is enabled in MISA
+  csrr t6, CSR_MISA
+  slli t6, t6, (XLEN-4)
+  srli t6, t6, (XLEN-1)
+  beq t6, x0, four_byte
+  
   j two_byte
 
   four_byte:
@@ -252,6 +260,7 @@ restore_and_exit_trap:
   LREG t3, 4*REGWIDTH(sp)
   LREG t4, 5*REGWIDTH(sp)
   LREG t5, 6*REGWIDTH(sp)
+  LREG t6, 7*REGWIDTH(sp)
   csrrw sp, mscratch, sp
 
 trap_handler_exit:

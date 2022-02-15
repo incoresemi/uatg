@@ -19,7 +19,9 @@ tests.
   4. ``custon_config.yaml`` - Custom configuration file.
   5. ``csr_grouping.yaml`` - Contains information about the CSRs required in the
      implementation.
-  6. ``aliasing.yaml`` - File with alias for verilog signal names. (used
+  6. ``rv_debug.yaml`` - Contains information pertaining to the debug spec of 
+                         RISC-V
+  7. ``aliasing.yaml`` - File with alias for verilog signal names. (used
      when generating covergroups)
 
 When specified, UATG also generates a ``test_list.yaml`` file along with the tests.

@@ -10,6 +10,7 @@ from uatg.__init__ import __version__
 from uatg.utils import list_of_modules, info, clean_modules, load_yaml
 from uatg.utils import create_dut_config_files, create_config_file
 from uatg.utils import combine_config_yamls, create_alias_file
+import logging
 
 
 @click.group()
@@ -81,6 +82,7 @@ def clean(module_dir, work_dir, verbose):
           "2. core_config.yaml "
           "3. custom_config.yaml "
           "4. csr_grouping.yaml "
+          "5. rv_debug.yaml"
           "The ordering should be strictly followed and any deviation will "
           "result in UATG erroring out. This Parameter is needed to "
           "generate/validate tests and also generate "
@@ -241,6 +243,7 @@ def from_config(config_file, verbose):
     # verbose = config['uatg']['verbose']
  
     logger.level(verbose)
+    logging.getLogger('yapsy').setLevel(logging.ERROR)
     module = clean_modules(module_dir, modules)
 
     info(__version__)
@@ -341,6 +344,7 @@ def setup(config_path, alias_path, dut_path):
           "2. core_config.yaml "
           "3. custom_config.yaml "
           "4. csr_grouping.yaml "
+          "5. rv_debug.yaml"
           "The ordering should be strictly followed and any deviation will "
           "result in  UATG erroring out. This Parameter is needed to "
           "generate/validate tests and also generate covergroups"))

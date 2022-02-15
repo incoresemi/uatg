@@ -1,589 +1,748 @@
+import os
 import random
+import re
+import string
+from random import sample
+from typing import Union, List
+
+import uatg
+from uatg.utils import load_yaml
+
+random.seed(101)
 
 
-class instruction_templates:
+class instruction_generator:
     """
-    A class object to store templates for instructions and methods to generate
-    random/targeted instructions as required.
+        This class reads the isem.yaml file and based upon the ISA specification
+        , it generates random/specific instructions with random/specific range
+        of replacements. Presently supports RV[32|64]IMAFDCB extensions.
+        It does not generate Branch/Jump/Load/Store instructions to avoid
+        unpredictable control flow.
 
-    #todo: 1. fence $iorw, modifiers to be added
-           2. compressed instruction support
+        :Usage:
+
+        .. code-block:: Python
+
+            import uatg.instruction_generator
+
+            generator = instruction_generator('uatg/isem.yaml', 'RV64IMAFDC')
+            random_i_instructions = generator.generate_i_inst(
+                                                    instructions='random',
+                                                    modifiers={'xrs1': {'x0'},
+                                                             'xrs2': {'x0'},
+                                                             'xrd': {'x0'},
+                                                    },
+                                                    no_of_insts=10)
+
     """
 
-    def __init__(self):
-        # modifiers are the values that the user needs to be placed in the
-        # generated instructions. default values are stored here.
-        self.default_modifiers = {
-            'rs1_values': {'x' + str(num) for num in range(32)},
-            'rs2_values': {'x' + str(num) for num in range(32)},
-            'rs3_values': {'x' + str(num) for num in range(32)},
-            'rd_values': {'x' + str(num) for num in range(32)},
-            'rm_values': {'x' + str(num) for num in range(32)},
-            'imm12_values': {num for num in range(-2 ** 11, 2 ** 11)},
-            'shamt': {num for num in range(0, 32)},
+    def __init__(self, isa='RV64I'):
+        """
+            Constructor of the class.
+            :param isa: string containing the ISA for which instructions should
+                        be generated.
+        """
+        assert (re.search(r'RV\d+I', isa) is not None)
+        instruction_file = os.path.join(os.path.dirname(uatg.__file__),
+                                        'isem.yaml')
+        integer_reg_file = {'x' + str(num) for num in range(32)}
+        float_reg_file = {'f' + str(num) for num in range(32)}
+        compressed_reg_file = {'x' + str(num) for num in range(8, 15)}
+
+        self.isa = isa
+        self.xlen = re.search(r'\d+', isa).group(0)
+        self.imm_fields = {
+            '$imm11': {str(num) for num in range(-1024, 1024)},
+            '$imm12': {str(num) for num in range(-2048, 2048)},
+            '$uimm20': {str(num) for num in range(0, 2 ** 20)},
+            '$imm6': {str(num) for num in range(-32, 32)},
+            '$imm8': {str(num) for num in range(-128, 128)},
+            '$nzimm6': {str(num) for num in range(-2 ** 5, 2 ** 5, 16) if
+                        num != 0},
+            '$nzuimm6': {str(num) for num in range(1, 2 ** 6)},
+            '$uimm6': {str(num) for num in range(0, 2 ** 6)},
+            '$uimm8': {str(num) for num in range(0, 256)},
+            '$nzuimm8': {str(num) for num in range(0, 2 ** 8, 16) if
+                         num != 0},
+            '$pred': {'r', 'rw', 'w'},
+            '$succ': {'r', 'rw', 'w'},
+        }
+        self.prog_labels = []
+        self.default_modifiers = dict.fromkeys(
+            ['xrs1', 'xrs2', 'xrs3', 'xrd', 'rm'], integer_reg_file)
+        self.default_modifiers.update({
+            'shamt5': {str(num) for num in range(0, 2 ** 5)},
+            'shamt6': {str(num) for num in range(0, 2 ** 6)}
+        })
+        self.default_modifiers.update(self.imm_fields)
+
+        self.instructions = load_yaml(instruction_file)
+        self.i_insts = {
+            k: self.instructions['i_extension'][k]['asm_syntax']
+            for k in self.instructions['i_extension'].keys()
+            if self.xlen in str(self.instructions['i_extension'][k]['xlen'])
         }
 
-        self.i_insts32 = {
-            # RV32I instructions excluding CSR instructions
-            'add': 'add $rd, $rs1, $rs2',
-            'sub': 'sub $rd, $rs1, $rs2',
-            'sll': 'sll $rd, $rs1, $rs2',
-            'slt': 'slt $rd, $rs1, $rs2',
-            'sltu': 'sltu $rd, $rs1, $rs2',
-            'xor': 'xor $rd, $rs1, $rs2',
-            'srl': 'srl $rd, $rs1, $rs2',
-            'sra': 'sra $rd, $rs1, $rs2',
-            'or': 'or $rd, $rs1, $rs2',
-            'and': 'and $reg $rs1, $rs2',
+        self.m_insts, self.a_insts, self.f_insts = {}, {}, {}
+        self.d_insts, self.b_insts, self.c_insts = {}, {}, {}
 
-            'addi': 'addi $rd, $rs1, $imm12',
-            'slti': 'slti $rd, $rs1, $imm12',
-            'sltiu': 'sltiu $rd, $rs1, $imm12',
-            'xori': 'xori $rd, $rs1, $imm12',
-            'ori': 'ori $rd, $rs1, $imm12',
-            'andi': 'anddi $rd, $rs1, $imm12',
-            'slli': 'slli $rd, $rs1, $shamt',
-            'srli': 'srli $rd, $rs1, $shamt',
-            'srai': 'srai $rd, $rs1, $shamt',
+        if re.search(r'RV\d+IM', isa) is not None:
+            self.m_insts = {
+                k: self.instructions['m_extension'][k]['asm_syntax']
+                for k in self.instructions['m_extension'].keys()
+                if self.xlen in str(self.instructions['m_extension'][k]['xlen'])
+            }
+        if re.search(r'RV\d+I\w+A', isa) is not None:
+            self.a_insts = {
+                k: self.instructions['a_extension'][k]['asm_syntax']
+                for k in self.instructions['a_extension'].keys()
+                if self.xlen in str(self.instructions['a_extension'][k]['xlen'])
+            }
+        if re.search(r'RV\d+I\w+F', isa) is not None:
+            self.default_modifiers.update(
+                dict.fromkeys(['frs1', 'frs2', 'frs3'], float_reg_file))
+            self.f_insts = {
+                k: self.instructions['f_extension'][k]['asm_syntax']
+                for k in self.instructions['f_extension'].keys()
+                if self.xlen in str(self.instructions['f_extension'][k]['xlen'])
+            }
+        if re.search(r'RV\d+I\w+FD', isa) is not None:
+            self.d_insts = {
+                k: self.instructions['f_extension'][k]['asm_syntax']
+                for k in self.instructions['f_extension'].keys()
+                if self.xlen in str(self.instructions['f_extension'][k]['xlen'])
+            }
+        if re.search(r'RV\d+I\w+B', isa) is not None:
+            self.b_insts = {
+                k: self.instructions['b_extension'][k]['asm_syntax']
+                for k in self.instructions['b_extension'].keys()
+                if self.xlen in str(self.instructions['b_extension'][k]['xlen'])
+            }
+        if re.search(r'RV\d+I\w+C', isa) is not None:
+            self.default_modifiers.update(
+                dict.fromkeys(['c.rs1', 'c.rs2', 'c.rd'], compressed_reg_file))
+            self.c_insts = {
+                k: self.instructions['c_extension'][k]['asm_syntax']
+                for k in self.instructions['c_extension'].keys()
+                if self.xlen in str(self.instructions['c_extension'][k]['xlen'])
+            }
+            if re.search(r'RV\d+I\w+F', isa) is None:
+                self.c_insts.pop('c.flw')
+                self.c_insts.pop('c.fsw')
+                if '32' in isa:
+                    self.c_insts.pop('c.flwsp')
+                    self.c_insts.pop('c.fswsp')
+                if re.search(r'RV\d+I\w+FD', isa) is None:
+                    self.c_insts.pop('c.fld')
+                    self.c_insts.pop('c.fldsp')
+                    self.c_insts.pop('c.fsd')
+                    self.c_insts.pop('c.fsdsp')
 
-            'lb': 'lb $rd, $imm12($rs1)',
-            'lh': 'lh $rd, $imm12($rs1)',
-            'lw': 'lw $rd, $imm12($rs1)',
-            'lbu': 'lbu $rd, $imm12($rs1)',
-            'lhu': 'lhu $rd, $imm12($rs1)',
+    def __replace_fields(self, instruction: str, modifiers: dict) -> str:
+        """
+            Private function to replace the variable fields in a given
+            instruction
 
-            'sb': 'sb $rs2, $imm12($rs1)',
-            'sh': 'sh $rs2, $imm12($rs1)',
-            'sw': 'sw $rs2, $imm12($rs1)',
+            :param instruction: str containing the asm-syntax of an instruction
 
-            'beq': 'beq $rs1, $rs2, $imm12',
-            'bne': 'bne $rs1, $rs2, $imm12',
-            'blt': 'blt $rs1, $rs2, $imm12',
-            'bge': 'bge $rs1, $rs2, $imm12',
-            'bltu': 'bltu $rs1, $rs2, $imm12',
-            'bgeu': 'bgeu $rs1, $rs2, $imm12',
+            :return: str with the variable fields are replaced with random
+            choice of registers/values
 
-            'jalr': 'jalr $rd, $rs1, $imm12',
-            'jal': 'jal $rd, $imm12',
-            'lui': 'lui $rd, $imm20',
-            'auipc': 'auipc $rd, $imm20',
+        """
+        r_inst = instruction
+        if '$c.r' in r_inst:
+            # modifiers for compressed instruction registers
+            r_inst = r_inst.replace('$c.rd', sample(modifiers['c.rd'], 1)[0]) \
+                if '$c.rd' in r_inst else r_inst
+            r_inst = r_inst.replace('$c.rs1',
+                                    sample(modifiers['c.rs1'], 1)[0]) \
+                if '$c.rs1' in r_inst else r_inst
+            r_inst = r_inst.replace('$c.rs2',
+                                    sample(modifiers['c.rs2'], 1)[0]) \
+                if '$c.rs2' in r_inst else r_inst
 
-            # 'fence': 'fence $pred, $succ',
-            'fence.i': 'fence.i'
-        }
+        if '$xr' in r_inst:
+            # modifiers for integer file registers
+            r_inst = r_inst.replace('$xrd',
+                                    sample(modifiers['xrd'], 1)[0]) \
+                if '$xrd' in r_inst else r_inst
+            r_inst = r_inst.replace('$xrs1',
+                                    sample(modifiers['xrs1'], 1)[0]) \
+                if '$xrs1' in r_inst else r_inst
+            r_inst = r_inst.replace('$xrs2',
+                                    sample(modifiers['xrs2'], 1)[0]) \
+                if '$xrs2' in r_inst else r_inst
 
-        self.i_insts64 = {
-            # RV64I instructions
-            'addiw': 'addiw $rd, $rs1, $imm12',
-            'slliw': 'slliw $rd, $rs1, $shamt',
-            'srliw': 'srliw $rd, $rs1, $shamt',
-            'sraiw': 'sraiw $rd, $rs1, $shamt',
-            'addw': 'addw $rd, $rs1, $rs2',
-            'subw': 'subw $rd, $rs1, $rs2',
-            'sllw': 'sllw rd,rs1,rs2',
-            'srlw': 'srlw rd,rs1,rs2',
-            'sraw': 'sraw rd,rs1,rs2',
-            'ld': 'ld $rd $imm12($rs1)',
-            'lwu': 'lwu $rd $imm12($rs1)',
-            'sd': 'sd $rs2 imm12($rs1)',
-        }
-        self.i_insts64.update(self.i_insts32)
+        if '$fr' in r_inst:
+            # modifiers for floating registers
+            r_inst = r_inst.replace('$frd',
+                                    sample(modifiers['frd'], 1)[0]) \
+                if '$frd' in r_inst else r_inst
+            r_inst = r_inst.replace('$frs1',
+                                    sample(modifiers['frs1'], 1)[0]) \
+                if '$frs1' in r_inst else r_inst
+            r_inst = r_inst.replace('$frs2',
+                                    sample(modifiers['frs2'], 1)[0]) \
+                if '$frs2' in r_inst else r_inst
 
-        self.m_insts32 = {
-            # RV32M instructions
-            'mul': 'mul $rd, $rs1, $rs2',
-            'mulh': 'mulh $rd, $rs1, $rs2',
-            'mulhsu': 'mulhsu	$rd, $rs1, $rs2',
-            'mulhu': 'mulhu $rd, $rs1, $rs2',
-            'div': 'div $rd, $rs1, $rs2',
-            'divu': 'divu $rd, $rs1, $rs2',
-            'rem': 'rem $rd, $rs1, $rs2',
-            'remu': 'remu $rd, $rs1, $rs2'
-        }
+        if '$pred' in instruction or '$succ' in instruction:
+            r_inst = r_inst.replace('$pred',
+                                    sample(modifiers['$pred'], 1)[0]) \
+                if '$pred' in r_inst else r_inst
+            r_inst = r_inst.replace('$succ',
+                                    sample(modifiers['$succ'], 1)[0]) \
+                if '$succ' in r_inst else r_inst
 
-        self.m_insts64 = {
-            # RV64M instructions
-            'mulw': 'mulw $rd $rs1 $rs2',
-            'divw': 'divw $rd $rs1 $rs2',
-            'divuw': 'divuw $rd $rs1 $rs2',
-            'remw': 'remw $rd $rs1 $rs2',
-            'remuw': 'remuw $rd $rs1 $rs2',
-        }
-        self.m_insts64.update(self.m_insts32)
-
-        self.a_insts32 = {
-            'lr.w': 'lr.w $rd, $rs1',
-            'sc.w': 'sc.w $rd, $rs1, $rs2',
-            'amoswap.w': 'amoswap.w $rd, $rs2, ($rs1)',
-            'amoadd.w': 'amoadd.w $rd, $rs2, ($rs1)',
-            'amoxor.w': 'amoxor.w $rd, $rs2, ($rs1)',
-            'amoand.w': 'amoand.w $rd, $rs2, ($rs1)',
-            'amoor.w': 'amoor.w $rd, $rs2, ($rs1)',
-            'amomin.w': 'amomin.w $rd, $rs2, ($rs1)',
-            'amomax.w': 'amomax.w $rd, $rs2, ($rs1)',
-            'amominu.w': 'amominu.w $rd, $rs2, ($rs1)',
-            'amomaxu.w': 'amomaxu.w $rd, $rs2, ($rs1)'
-        }
-        self.a_insts64 = {
-            'lr.d': 'lr.d $rd, $rs1',
-            'sc.d': 'sc.d $rd, $rs1, $rs2',
-            'amoswap.d': 'amoswap.d $rd, $rs2, ($rs1)',
-            'amoadd.d': 'amoadd.d $rd, $rs2, ($rs1)',
-            'amoxor.d': 'amoxor.d $rd, $rs2, ($rs1)',
-            'amoand.d': 'amoand.d $rd, $rs2, ($rs1)',
-            'amoor.d': 'amoor.d $rd, $rs2, ($rs1)',
-            'amomin.d': 'amomin.d $rd, $rs2, ($rs1)',
-            'amomax.d': 'amomax.d $rd, $rs2, ($rs1)',
-            'amominu.d': 'amominu.d $rd, $rs2, ($rs1)',
-            'amomaxu.d': 'amomaxu.d $rd, $rs2, ($rs1)'
-        }
-        self.a_insts64.update(self.a_insts32)
-
-        self.f_insts32 = {
-            # RV32F instructions
-            'fsgnj.s': 'fsgnj.s $rd, $rs1, $rs2',
-            'fnmsub.s': 'fnmsub.s $rd, $rs1, $rs2, $rs3, $rm',
-            'fmul.s': 'fmul.s $rd, $rs1, $rs2, $rm',
-            'fmsub.s': 'fmsub.s $rd, $rs1, $rs2, $rs3, $rm',
-            'fsgnjn.s': 'fsgnjn.s $rd, $rs1, $rs2',
-            'fcvt.wu.s': 'fcvt.wu.s $rd, $rs1, $rm',
-            'fcvt.w.s': 'fcvt.w.s $rd, $rs1, $rm',
-            'fsqrt.s': 'fsqrt.s $rd, $rs1, $rm',
-            'fmv.x.w': 'fmv.x.w $rd, $rs1',
-            'flw': 'flw $rd, $rs1, imm12',
-            'fmadd.s': 'fmadd.s $rd, $rs1, $rs2, $rs3, $rm',
-            'fclass.s': 'fclass.s $rd, $rs1',
-            'fsw': 'fsw $rs1, $rs2, imm12',
-            'fcvt.s.w': 'fcvt.s.w $rd, $rs1, $rm',
-            'fadd.s': 'fadd.s $rd, $rs1, $rs2, $rm',
-            'fmax.s': 'fmax.s $rd, $rs1, $rs2',
-            'flt.s': 'flt.s $rd, $rs1, $rs2',
-            'fsub.s': 'fsub.s $rd, $rs1, $rs2, $rm',
-            'fnmadd.s': 'fnmadd.s $rd, $rs1, $rs2, $rs3, $rm',
-            'fmv.w.x': 'fmv.w.x $rd, $rs1',
-            'fdiv.s': 'fdiv.s $rd, $rs1, $rs2, $rm',
-            'fcvt.s.wu': 'fcvt.s.wu $rd, $rs1, $rm',
-            'fsgnjx.s': 'fsgnjx.s $rd, $rs1, $rs2',
-            'feq.s': 'feq.s $rd, $rs1, $rs2',
-            'fmin.s': 'fmin.s $rd, $rs1, $rs2',
-            'fle.s': 'fle.s $rd, $rs1, $rs2',
-        }
-        self.f_insts64 = {
-            'fcvt.l.s': 'fcvt.l.s $rd $rs1 $rm',
-            'fcvt.lu.s': 'fcvt.lu.s $rd $rs1 $rm',
-            'fcvt.s.l': 'fcvt.s.l $rd $rs1 $rm',
-            'fcvt.s.lu': 'fcvt.s.lu $rd $rs1 $rm',
-        }
-        self.f_insts64.update(self.f_insts32)
-
-        self.d_insts32 = {
-            'fadd.d': 'fadd.d $rd $rs1 $rs2 $rm',
-            'fsub.d': 'fsub.d $rd $rs1 $rs2 $rm',
-            'fmul.d': 'fmul.d $rd $rs1 $rs2 $rm',
-            'fdiv.d': 'fdiv.d $rd $rs1 $rs2 $rm',
-            'fsgnj.d': 'fsgnj.d $rd $rs1 $rs2',
-            'fsgnjn.d': 'fsgnjn.d $rd $rs1 $rs2',
-            'fsgnjx.d': 'fsgnjx.d $rd $rs1 $rs2',
-            'fmin.d': 'fmin.d $rd $rs1 $rs2',
-            'fmax.d': 'fmax.d $rd $rs1 $rs2',
-            'fcvt.s.d': 'fcvt.s.d $rd $rs1 $rm',
-            'fcvt.d.s': 'fcvt.d.s $rd $rs1 $rm',
-            'fsqrt.d': 'fsqrt.d $rd $rs1 $rm',
-            'fle.d': 'fle.d $rd $rs1 $rs2',
-            'flt.d': 'flt.d $rd $rs1 $rs2',
-            'feq.d': 'feq.d $rd $rs1 $rs2',
-            'fcvt.w.d': 'fcvt.w.d $rd $rs1 $rm',
-            'fcvt.wu.d': 'fcvt.wu.d $rd $rs1 $rm',
-            'fclass.d': 'fclass.d $rd $rs1',
-            'fcvt.d.w': 'fcvt.d.w $rd $rs1 $rm',
-            'fcvt.d.wu': 'fcvt.d.wu $rd $rs1 $rm',
-            'fld': 'fld $rd $rs1 $imm12',
-            'fsd': 'fsd $rs1 $rs2 $imm12',
-            'fmadd.d': 'fmadd.d $rd $rs1 $rs2 rs3 $rm',
-            'fmsub.d': 'fmsub.d $rd $rs1 $rs2 rs3 $rm',
-            'fnmsub.d': 'fnmsub.d $rd $rs1 $rs2 rs3 $rm',
-            'fnmadd.d': 'fnmadd.d $rd $rs1 $rs2 rs3 $rm',
-        }
-        self.d_insts64 = {
-            'fcvt.l.d': 'fcvt.l.d rd rs1 rm',
-            'fcvt.lu.d': 'fcvt.lu.d rd rs1 rm',
-            'fmv.x.d': 'fmv.x.d rd rs1',
-            'fcvt.d.l': 'fcvt.d.l rd rs1 rm',
-            'fcvt.d.lu': 'fcvt.d.lu rd rs1 rm',
-            'fmv.d.x': 'fmv.d.x rd rs1',
-        }
-        self.d_insts64.update(self.d_insts32)
-
-        self.c_insts32 = {
-            'c.add': 'c.add $rd, $c.rs2',
-            'c.addi': 'c.addi $rd, $nzuimm6',
-            'c.addi16sp': 'c.addi16sp $imm6',
-            'c.addi4spn': 'c.addi4spn $c.rd, $uimm8',
-            'c.and': 'c.and $c.rd, $c.rs2',
-            'c.andi': 'c.andi $c.rd, $uimm6',
-            'c.beqz': 'c.beqz $c.rs1, $imm8',
-            'c.bnez': 'c.bnez $c.rs1, $imm8',
-            'c.ebreak': 'c.ebreak',
-            'c.fld': 'c.fld $c.rd, $uimm5($c.rs1)',
-            'c.fldsp': 'c.fldsp $rd, $uimm6(x2)',
-            'c.flw': 'c.flw $c.rd, $uimm5($c.rs1)',
-            'c.flwsp': 'c.flwsp $rd, $uimm6(x2)',
-            'c.fsd': 'c.fsd $c.rd, $uimm5($c.rs1)',
-            'c.fsdsp': 'c.fsdsp $rs2, $uimm6(x2)',
-            'c.fsw': 'c.fsw $c.rd, $uimm5($c.rs1)',
-            'c.fswsp': 'c.fswsp $rs2, $uimm6($rs2)',
-            'c.j': 'c.j $imm11',
-            'c.jal': 'c.jal $imm11',
-            'c.jalr': 'c.jalr $rd',
-            'c.jr': 'c.jr $rs1',
-            'c.li': 'c.li $rd,$uimm6',
-            'c.lui': 'c.lui $rd, $uimm6',
-            'c.lw': 'c.lw $c.rd, $uimm5($c.rs1) ',
-            'c.lwsp': 'c.lwsp $rd, $uimm6',
-            'c.mv': 'c.mv $rd, $c.rs2',
-            'c.or': 'c.or $rd, $rd',
-            'c.slli': 'c.slli $rd, $uimm6',
-            'c.srai': 'c.srai $c.rd, $uimm6',
-            'c.srli': 'c.srli $c.rd, $uimm6',
-            'c.sub': 'c.sub $rd, $rd',
-            'c.sw': 'c.sw $c.rd, $uimm5($c.rs1)',
-            'c.swsp': 'c.swsp $rs2, $uimm6',
-            'c.xor': 'c.xor $rd, $rd',
-        }
-        self.c_insts64 = {
-            'c.add': 'c.add $rd, $c.rs2',
-            'c.addi': 'c.addi $rd, $nzuimm6',
-            'c.addi16sp': 'c.addi16sp $imm6',
-            'c.addi4spn': 'c.addi4spn $c.rd, $uimm8',
-            'c.addiw': 'c.addiw $rd, $imm6',
-            'c.addw': 'c.addw $rd, $rs2',
-            'c.and': 'c.and $c.rd, $c.rs2',
-            'c.andi': 'c.andi $c.rd, $uimm6',
-            'c.beqz': 'c.beqz $c.rs1, $imm8',
-            'c.bnez': 'c.bnez $c.rs1, $imm8',
-            'c.ebreak': 'c.ebreak',
-            'c.fld': 'c.fld $c.rd, $uimm5($c.rs1)',
-            'c.fldsp': 'c.fldsp $rd, $uimm6(x2)',
-            'c.fsd': 'c.fsd $c.rd, $uimm5($c.rs1)',
-            'c.fsdsp': 'c.fsdsp $rs2, $uimm6(x2)',
-            'c.j': 'c.j $imm11',
-            'c.jalr': 'c.jalr $rd',
-            'c.jr': 'c.jr $rs1',
-            'c.ld': 'c.ld $c.rd, $uimm5($c.rs1)',
-            'c.ldsp': 'c.ldsp $rd, $uimm6',
-            'c.li': 'c.li $rd,$uimm6',
-            'c.lui': 'c.lui $rd, $uimm6',
-            'c.lw': 'c.lw $c.rd, $uimm5($c.rs1) ',
-            'c.lwsp': 'c.lwsp $rd, $uimm6',
-            'c.mv': 'c.mv $rd, $c.rs2',
-            'c.or': 'c.or $rd, $rd',
-            'c.sd': 'c.sd c$.rd, $uimm5($c.rs1)',
-            'c.sdsp': 'c.sdsp $rs2, $uimm6',
-            'c.slli': 'c.slli $rd, $uimm6',
-            'c.srai': 'c.srai $c.rd, $uimm6',
-            'c.srli': 'c.srli $c.rd, $uimm6',
-            'c.sub': 'c.sub $rd, $rd',
-            'c.subw': 'c.subw $rd, $rs2',
-            'c.sw': 'c.sw $c.rd, $uimm5($c.rs1)',
-            'c.swsp': 'c.swsp $rs2, $uimm6',
-            'c.xor': 'c.xor $rd, $rd'
-        }
-
-        self.b_insts32 = {'clz': 'clz $rd, $rs1',
-                          'ctz': 'ctz $rd, $rs1',
-                          'cpop': 'cpop $rd, $rs1',
-                          'andn': 'andn $rd, $rs1, $rs2',
-                          'orn': 'orn $rd, $rs1, $rs2',
-                          'xnorn': 'xnorn $rd, $rs1, $rs2',
-                          'pack': 'pack $rd, $rs1, $rs2',
-                          'packu': 'packu $rd, $rs1, $rs2',
-                          'packh': 'packh $rd, $rs1, $rs2',
-                          'min': 'min $rd, $rs1, $rs2',
-                          'max': 'max $rd, $rs1, $rs2',
-                          'minu': 'minu $rd, $rs1, $rs2',
-                          'maxu': 'maxu $rd, $rs1, $rs2',
-                          'sext.b': 'sext.b $rd, $rs1',
-                          'sext.h': 'sext.h $rd, $rs1',
-                          'bset': 'bset $rd, $rs1, $rs2',
-                          'bclr': 'bclr $rd, $rs1, $rs2',
-                          'binv': 'binv $rd, $rs1, $rs2',
-                          'bext': 'bext $rd, $rs1, $rs2',
-                          'bseti': 'bseti $rd, $rs1, $shamt',
-                          'bclri': 'bclri $rd, $rs1, $shamt',
-                          'binvi': 'binvi $rd, $rs1, $shamt',
-                          'bexti': 'bexti $rd, $rs1, $shamt',
-                          'slo': 'slo $rd, $rs1, $rs2',
-                          'sro': 'sro $rd, $rs1, $rs2',
-                          'sloi': 'sloi $rd, $rs1, $shamt',
-                          'sroi': 'sroi $rd, $rs1, $shamt',
-                          'ror': 'ror $rd, $rs1, $rs2',
-                          'rol': 'rol $rd, $rs1, $rs2',
-                          'rori': 'rori $rd, $rs1, $shamt',
-                          'grev': 'grev $rd, $rs1, $rs2',
-                          'grevi': 'grevi $rd, $rs1, $shamt',
-                          'shfl': 'shfl $rd, $rs1, $rs2',
-                          'unshfl': 'unshfl $rd, $rs1, $rs2',
-                          'shfli': 'shfli $rd, $rs1, $shamt',
-                          'unshfli': 'unshfli $rd, $rs1, $shamt',
-                          'xperm.n': 'xperm.n $rd, $rs1, $rs2',
-                          'xperm.b': 'xperm.b $rd, $rs1, $rs2',
-                          'xperm.h': 'xperm.h $rd, $rs1, $rs2',
-                          'gorc': 'gorc $rd, $rs1, $rs2',
-                          'gorci': 'gorci $rd, $rs1, $shamt',
-                          'bfp': 'bfp $rd, $rs1, $rs2',
-                          'bcompress': 'bcompress $rd, $rs1, $rs2',
-                          'bdecompress': 'bdecompress $rd, $rs1, $rs2',
-                          'clmul': 'clmul $rd, $rs1, $rs2',
-                          'clmuh': 'clmuh $rd, $rs1, $rs2',
-                          'clmur': 'clmur $rd, $rs1, $rs2',
-                          'crc32.b': 'crc32.b $rd, $rs1',
-                          'crc32.h': 'crc32.h $rd, $rs1',
-                          'crc32.w': 'crc32.w $rd, $rs1',
-                          'crc32c.b': 'crc32c.b $rd, $rs1',
-                          'crc32c.h': 'crc32c.h $rd, $rs1',
-                          'crc32c.w': 'crc32c.w $rd, $rs1',
-                          'cmix': 'cmix $rd, $rs1, $rs2, $rs3',
-                          'cmov': 'cmov $rd, $rs1, $rs2, $rs3',
-                          'fsl': 'fsl $rd, $rs1, $rs2, $rs3',
-                          'fsr': 'fsr $rd, $rs1, $rs2, $rs3',
-                          'fsri': 'fsri $rd, $rs1, $rs2, $shamt',
-                          'sh1add': 'sh1add $rd, $rs1, $rs2',
-                          'sh2add': 'sh2add $rd, $rs1, $rs2',
-                          'sh3add': 'sh3add $rd, $rs1, $rs2',
-                          }
-        self.b_insts64 = {
-            'clzw': 'clzw $rd, $rs1',
-            'ctzw': 'ctzw $rd, $rs1',
-            'cpopw': 'cpopw $rd, $rs1',
-            'packw': 'packw $rd, $rs1, $rs2',
-            'packuw': 'packuw $rd, $rs1, $rs2',
-            'slow': 'slow $rd, $rs1, $rs2',
-            'srow': 'srow $rd, $rs1, $rs2',
-            'sloiw': 'sloiw $rd, $rs1, $shamt',
-            'sroiw': 'sroiw $rd, $rs1, $shamt',
-            'rorw': 'rorw $rd, $rs1, $rs2',
-            'rolw': 'rolw $rd, $rs1, $rs2',
-            'roriw': 'roriw $rd, $rs1, $shamt',
-            'grevw': 'grevw $rd, $rs1, $rs2',
-            'greviw': 'greviw $rd, $rs1, $shamt',
-            'shflw': 'shflw $rd, $rs1, $rs2',
-            'unshflw': 'unshflw $rd, $rs1, $rs2',
-            'xperm.w': 'xperm.w $rd, $rs1, $rs2',
-            'gorcw': 'gorcw $rd, $rs1, $rs2',
-            'gorciw': 'gorciw $rd, $rs1, $shamt',
-            'bfpw': 'bfpw $rd, $rs1, $rs2',
-            'bcompressw': 'bcompressw $rd, $rs1, $rs2',
-            'bdecompressw': 'bdecompressw $rd, $rs1, $rs2',
-            'crc32.d': 'crc32.d $rd, $rs1',
-            'crc32c.d': 'crc32c.d $rd, $rs1',
-            'bmator': 'bmator $rd, $rs1, $rs2',
-            'bmatxor': 'bmatxor $rd, $rs1, $rs2',
-            'bmatflip': 'bmatflip $rd, $rs',
-            'fslw': 'fslw $rd, $rs1, $rs2, $rs3',
-            'fsrw': 'fsrw $rd, $rs1, $rs2, $rs3',
-            'fsriw': 'fsriw $rd, $rs1, $rs2, $shamt',
-            'sh1add.uw': 'sh1add.uw $rd, $rs1, $rs2',
-            'sh2add.uw': 'sh2add.uw $rd, $rs1, $rs2',
-            'sh3add.uw': 'sh3add.uw $rd, $rs1, $rs2',
-            'add.uw': 'add.uw $rd, $rs1, $rs2',
-            'slli.uw': 'slli.uw $rd, $rs1, $shamt',
-            # Not present in draft 0.94
-            # 'sbclriw': 'sbclriw $rd, $rs1, $shamt',
-            # 'sbclrw': 'sbclrw $rd, $rs1, $rs2',
-            # 'sbextw': 'sbextw $rd, $rs1, $rs2',
-            # 'sbinviw': 'sbinviw $rd, $rs1, $shamt',
-            # 'sbinvw': 'sbinvw $rd, $rs1, $rs2',
-            # 'sbsetiw': 'sbsetiw $rd, $rs1, $shamt',
-            # 'sbsetw': 'sbsetw $rd, $rs1, $rs2',
-        }
-        self.b_insts64.update(self.b_insts32)
-
-    def replace_fields(self, inst, modifiers):
-        # Utility function to replace relevant fields in the instruction
-        r_inst = inst.replace('$rs1',
-                              random.sample(modifiers['rs1_values'], 1)[
-                                  0]) if '$rs1' in inst else inst
-        r_inst = r_inst.replace('$rs2',
-                                random.sample(modifiers['rs2_values'], 1)[
-                                    0]) if '$rs2' in r_inst else r_inst
-        r_inst = r_inst.replace('$rs3',
-                                random.sample(modifiers['rs3_values'], 1)[
-                                    0]) if '$rs3' in r_inst else r_inst
-        r_inst = r_inst.replace('$rd',
-                                random.sample(modifiers['rd_values'], 1)[
-                                    0]) if '$rd' in r_inst else r_inst
         r_inst = r_inst.replace('$rm',
-                                random.sample(modifiers['rm_values'], 1)[
-                                    0]) if '$rm' in r_inst else r_inst
-        r_inst = r_inst.replace('$imm12', str(
-            random.sample(modifiers['imm12_values'], 1)[0])) \
-            if '$imm12' in r_inst else r_inst
-        r_inst = r_inst.replace('$shamt', str(
-            random.sample(modifiers['shamt_values'], 1)[0])) \
-            if '$shamt' in r_inst else r_inst
+                                sample(modifiers['rm'], 1)[0]) \
+            if '$rm' in r_inst else r_inst
+        shamt = None
+        if '$shamt' in r_inst:
+            for i in ('slli', 'srli', 'srai'):
+                if i in r_inst and '32' in self.isa:
+                    shamt = modifiers['shamt5']
+                elif i in r_inst and '64' in self.isa:
+                    shamt = modifiers['shamt6']
+            for i in ('slliw', 'srliw', 'sraiw'):
+                if i in r_inst and '64' in self.isa:
+                    shamt = modifiers['shamt5']
+            for i in ('c.slli', 'c.srli', 'c.srai'):
+                if i in r_inst and '64' in self.isa:
+                    shamt = modifiers['shamt6']
+
+            r_inst = r_inst.replace('$shamt', sample(shamt, 1)[0])
+
+        if 'imm' in r_inst:
+            # modifiers for immediate fields
+            for imm in self.imm_fields.keys():
+                r_inst = r_inst.replace(
+                    imm,
+                    sample(modifiers[imm], 1)[0]) if imm in r_inst else r_inst
+
         return r_inst
 
-    def i_inst_random(self, isa, modifiers, no_of_insts=5):
-        assert isinstance(modifiers, dict)
-        i_insts = self.i_insts32 if '32' in isa else self.i_insts64
-        for key, val in self.default_modifiers.items():
-            if key not in modifiers:
-                modifiers[key] = val
-        asm = []
+    def __modifier_update(self, modifiers: Union[dict, None]) -> dict:
+        """
+            An private utility function to clean/update the modifiers from
+            user-input
+
+            :param modifiers: input modifiers from generate_x_inst function
+
+            :return: sanitized modifiers containing default entries for
+                     unmentioned fields
+        """
+        if modifiers is None:
+            return self.default_modifiers
+        else:
+            for key, val in self.default_modifiers.items():
+                if key not in modifiers:
+                    modifiers[key] = val
+            return modifiers
+
+    def __generate_labels(self, prefix='', no_of_chars=15):
+        label = f'label_{prefix}_' + ''.join(
+            random.choices(string.ascii_letters, k=no_of_chars))
+        if label not in self.prog_labels:
+            self.prog_labels.append(label)
+        else:
+            while label in self.prog_labels:
+                label = 'label_' + ''.join(
+                    random.choices(string.ascii_letters + string.digits,
+                                   k=no_of_chars))
+            self.prog_labels.append(label)
+        return label
+
+    def __handle_branch_load_store(self, inst):
+        rt = 'nop'
+        _lab = self.__generate_labels(prefix=inst)
+
+        if inst in ('beq', 'bne', 'blt', 'bge', 'bltu', 'bgeu'):
+            rt = f'{inst} x0, x0, {_lab}\n' \
+                 f'{_lab}:\n\tnop\n'
+        elif inst in ('c.beqz', 'c.bnez'):
+            rt = f'{inst} x8, {_lab}\n' \
+                 f'{_lab}:\n\tc.nop\n'
+        elif inst == 'jal':
+            rt = f'jal x0, {_lab}\n{_lab}:\n\tnop\n'
+        elif inst in ('c.jal', 'c.j'):
+            rt = f'{inst} {_lab}\n{_lab}:\n\tnop\n'
+        elif inst in ('c.jr', 'c.jalr'):
+            rt = f'\nla x1, {_lab}\n{inst} x1\n{_lab}:\n\tc.nop\n'
+        elif inst == 'jalr':
+            rt = f'\nla x1, {_lab}\njalr x0, 0(x1)\n' \
+                 f'{_lab}:\n\tnop\n'
+        elif inst in ('lb', 'lh', 'lw', 'ld', 'lbu', 'lhu', 'lwu'):
+            if inst in ('lb', 'lbu'):
+                rt = f'\n{_lab}:\n\tnop\nla x8, {_lab}\n{inst} x9, 0(x8)\n'
+            elif inst in ('lh', 'lhu'):
+                rt = f'\n.align 1\n{_lab}:\n\tnop\n' \
+                     f'la x8, {_lab}\n{inst} x9, 0(x8)\n'
+            elif inst in ('lw', 'lwu'):
+                rt = f'\n.align 2\n{_lab}:\n\tnop\n' \
+                     f'la x8, {_lab}\n{inst} x9, 0(x8)\n'
+            else:
+                rt = f'\n.align 3\n{_lab}:\n\tnop\n' \
+                     f'la x8, {_lab}\n{inst} x9, 0(x8)\n'
+        elif inst in ('c.ld', 'c.lw', 'c.fld', 'c.flw', 'c.lwsp', 'c.ldsp'):
+            if inst == 'c.lw':
+                rt = f'\n.align 2\n{_lab}:\n\tnop\nla x8, {_lab}\n{inst} ' \
+                     f'x9, 0(x8)\n'
+            elif inst == 'c.ld':
+                rt = f'\n.align 3\n{_lab}:\n\tnop\nnop\nla x8, {_lab}' \
+                     f'\n{inst} x9, 0(x8)\n'
+            elif inst == 'c.flw':
+                rt = f'\n.align 2\n{_lab}:\n\tnop\nla x8, {_lab}' \
+                     f'\n{inst} f8, 0(x8)\n'
+            elif inst == 'c.fld':
+                rt = f'\n.align 3\n{_lab}:\n\tnop\nnop\nla x8, {_lab}' \
+                     f'\n{inst} f8, 0(x8)\n'
+            elif inst in ('c.lwsp', 'c.ldsp'):
+                _align = 2 if 'lwsp' in inst else 3
+                _nop = '\n\tnop' * (_align - 1)
+                rt = f'\n.align {_align}\n{_lab}:{_nop}\nla sp, {_lab}' \
+                     f'\n{inst} x8, 0(sp)\n'
+
+        elif inst in ('sw', 'sd', 'sb', 'sh', 'c.swsp', 'c.sdsp',):
+            if inst == 'sb':
+                rt = f'\n{_lab}:\n\tnop\nla x1, {_lab}\n' \
+                     f'li x2, {0x13}\n{inst} x2, 0(x1)\n'
+            elif inst == 'sh':
+                rt = f'\n.align 1\n{_lab}:\n\tnop\nla x1, {_lab}\n' \
+                     f'li x2, {0x0013}\n{inst} x2, 0(x1)\n'
+            elif inst == 'sw':
+                rt = f'\n.align 2\n{_lab}:\n\tnop\nla x1, {_lab}\n' \
+                     f'li x2, {0x00000013}\n{inst} x2, 0(x1)\n'
+            elif inst == 'sd':
+                # assuming we fetch/write 4 byte words
+                # (over) writing the two nops under the label
+                rt = f'\n.align 3\n{_lab}:\n\tnop\n\tnop\nla x1, {_lab}\n' \
+                     f'li x2, {0x00000013_00000013}\n{inst} x2, 0(x1)\n'
+        # Handling Compressed jumps: 'c.j', 'c.jal', 'c.jalr', 'c.jr'
+        elif inst in ('c.sw', 'c.sd', 'c.fsd', 'c.fsw'):
+            # TODO: add fsd and fsw
+            if inst == 'c.sw':
+                rt = f'\n.align 2\n{_lab}:\n\tnop\nla x8, {_lab}\n' \
+                     f'li x9, {0x00000013}\n{inst} x9, 0(x8)\n'
+            elif inst == 'c.sd':
+                # assuming we fetch/write 4 byte words
+                # (over) writing the two nops under the label
+                rt = f'\n.align 3\n{_lab}:\n\tnop\n\tnop\nla x8, {_lab}\n' \
+                     f'li x9, {0x00000013_00000013}\n{inst} x9, 0(x8)\n'
+            elif inst in ('c.swsp', 'c.sdsp'):
+                _align = 2 if 'swsp' in inst else 3
+                _nop = '\n\tnop' * (_align - 1)
+                _val = 0x00000013_00000013 if 'sdsp' in inst else 0x13
+                rt = f'\n.align {_align}\n{_lab}:{_nop}\nla sp, {_lab}\n' \
+                     f'\nli x8, {_val}\n{inst} x8, 0(sp)\n'
+        return rt
+
+    def generate_i_inst(self,
+                        instructions: Union[str, list] = 'random',
+                        modifiers: Union[None, dict] = None,
+                        no_of_insts: int = 5) -> List[str]:
+        """
+            Function to generate I-instructions. Does not generate
+            branch/jump/load/store instructions. Can generate both random
+            selection of instructions or a specified list of instructions. The
+            modifiers can be used to specify specific value/range of values for
+            variable fields
+
+            :param instructions: 'random' or a list of instructions for which
+            you wish to generate instructions
+            :param modifiers: None or dictionary containing custom replacement
+            options.
+            :param no_of_insts: number of instructions to be generated
+
+            :return: a list containing generated asm instructions
+
+        """
+        modifiers = self.__modifier_update(modifiers)
+
+        ret_list = []
+        if instructions == 'random':
+            random_insts = random.choices(list(self.i_insts.keys()),
+                                          k=no_of_insts)
+            for key in random_insts:
+                if key in ('beq', 'bne', 'blt', 'bge', 'bltu', 'bgeu', 'jal',
+                           'jalr', 'lb', 'lh', 'lw', 'ld', 'lbu', 'lhu', 'lwu',
+                           'sb', 'sh', 'sw', 'sd'):
+                    ret_list.append(self.__handle_branch_load_store(key))
+                else:
+                    asm_syntax = self.i_insts[key]
+                    r_inst = self.__replace_fields(asm_syntax, modifiers)
+                    ret_list.append(r_inst)
+        elif type(instructions) == list:
+            for i in instructions:
+                assert (i in self.i_insts.keys())
+
+            for _ in range(no_of_insts):
+                if len(instructions) <= 0:
+                    ret_list.append('nop')
+                else:
+                    inst = random.choice(instructions)
+                    if inst in ('beq', 'bne', 'blt', 'bge', 'bltu', 'bgeu',
+                                'jal', 'jalr', 'lb', 'lh', 'lw', 'ld', 'lbu',
+                                'lhu', 'lwu', 'sb', 'sh', 'sw', 'sd'):
+                        ret_list.append(self.__handle_branch_load_store(inst))
+                    else:
+                        asm_syntax = self.i_insts[inst]
+                        r_inst = self.__replace_fields(asm_syntax,
+                                                       modifiers=modifiers)
+                        ret_list.append(r_inst)
+        return ret_list
+
+    def generate_all_i_inst(self, modifiers: Union[None, dict] = None):
+        ret_list = []
+        for i_inst in self.i_insts.keys():
+            ret_list.append(
+                self.generate_i_inst([i_inst],
+                                     modifiers=modifiers,
+                                     no_of_insts=1)[0])
+        return ret_list
+
+    def generate_m_inst(self,
+                        instructions: Union[str, list] = 'random',
+                        modifiers: Union[None, dict] = None,
+                        no_of_insts: int = 5) -> List[str]:
+        """
+            Function to generate M-instructions. Generates all Mul/Div
+            instructions. Can generate both random selection of instructions or
+            a specified list of instructions. The modifiers can be used to
+            specify specific value/range of values for variable fields
+
+            :param instructions: 'random' or a list of instructions for which
+            you wish to generate instructions
+
+            :param modifiers: None or dictionary containing custom replacement
+            options.
+            :param no_of_insts: number of instructions to be generated
+            :return: a list containing generated asm instructions.
+        """
+        modifiers = self.__modifier_update(modifiers)
+
+        ret_list = []
+        if instructions == 'random':
+            random_insts = random.choices(list(self.m_insts.keys()),
+                                          k=no_of_insts)
+            for key in random_insts:
+                asm_syntax = self.m_insts[key]
+                r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
+                ret_list.append(r_inst)
+        elif type(instructions) == list:
+            for _ in range(no_of_insts):
+                inst = random.choice(instructions)
+                asm_syntax = self.m_insts[inst]
+                r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
+                ret_list.append(r_inst)
+        return ret_list
+
+    def generate_all_m_inst(self, modifiers: Union[None, dict] = None):
+        ret_list = []
+        for m_inst in self.m_insts.keys():
+            ret_list.append(
+                self.generate_m_inst([m_inst],
+                                     modifiers=modifiers,
+                                     no_of_insts=1)[0])
+        return ret_list
+
+    def generate_a_inst(self,
+                        instructions: Union[str, list] = 'random',
+                        modifiers: Union[None, dict] = None,
+                        no_of_insts: int = 5) -> List[str]:
+        """
+        Function to generate A-instructions. Can generate both random
+        selection of instructions or a specified list of instructions. The
+        modifiers can be used to specify specific value/range of values for
+        variable fields.
+
+        :param instructions: 'random' or a list of instructions for which you
+                        wish to generate instructions
+
+        :param modifiers: None or dictionary containing custom replacement
+                        options.
+
+        :param no_of_insts: number of instructions to be generated
+
+        :return: a list containing generated asm instructions
+        """
+        modifiers = self.__modifier_update(modifiers)
+
+        ret_list = []
+        if instructions == 'random':
+            instructions = random.choices(list(self.a_insts.keys()),
+                                          k=no_of_insts)
         for _ in range(no_of_insts):
-            _ = i_insts[
-                random.choice([_inst for _inst in i_insts.keys()])
-            ]
-            asm.append(self.replace_fields(_, modifiers=modifiers))
-        return asm
+            inst = random.choice(instructions)
+            asm_syntax = self.a_insts[inst]
+            rt = 'nop'
+            _align = 3 if '.d' in inst else 2
+            _lab = self.__generate_labels(prefix=inst)
+            _nop = '\tnop\n\tnop' if _align == 3 else '\tnop'
+            _s_nop = 0x1300000013 if self.xlen == 64 else 0x13
+            ([xrs1, temp], xrs2, xrd) = (sample(modifiers['xrs1'], 2),
+                                         sample(modifiers['xrs2'], 1)[0],
+                                         sample(modifiers['xrd'], 1)[0])
+            _ = 0
+            while len({xrs1, temp, xrs2,
+                       xrd}) != 4 or xrs2 == 'x0' or xrs1 == 'x0':
+                # making sure that register dependencies are met
+                ([xrs1, temp], xrs2, xrd) = (sample(modifiers['xrs1'], 2),
+                                             sample(modifiers['xrs2'], 1)[0],
+                                             sample(modifiers['xrd'], 1)[0])
+                _ += 1
+                if _ == 100:
+                    raise Exception('Cant Solve Register Dependency Constraint')
 
-    def fill_i_insts(self, isa, inst, modifiers, no_of_insts=5):
-        # Function to generate specific I-insts with random/determined values
-        assert isinstance(modifiers, dict)
-        i_insts = self.i_insts32 if '32' in isa else self.i_insts64
-        assert inst in i_insts.keys()
+            asm_syntax = asm_syntax.replace('$xrd', xrd)
+            asm_syntax = asm_syntax.replace('$xrs1', xrs1)
+            asm_syntax = asm_syntax.replace('$xrs2', xrs2)
 
-        for key, val in self.default_modifiers.items():
-            if key not in modifiers:
-                modifiers[key] = val
+            if 'lr' in inst:
+                rt = f'\n.align {_align}\n{_lab}:\n{_nop}\n' \
+                     f'la {xrs1}, {_lab}\n{asm_syntax}\n'
+                if '.w' in inst:
+                    rt += f'li {temp}, {_s_nop}\nsw {temp}, 0({xrs1})\n'
+                else:
+                    rt += f'li {temp}, {_s_nop}\nsw {temp}, 0({xrs1})\n'
+            elif 'sc' in inst:
+                rt = f'\n.align {_align}\n{_lab}:\n{_nop}\n' \
+                     f'la {xrs1}, {_lab}\nli {xrs2}, {_s_nop}\n' \
+                     f'{asm_syntax}\n'
+            elif 'amoswap' in inst:
+                rt = f'\n.align {_align}\n{_lab}:\n{_nop}\n' \
+                     f'la {xrs1}, {_lab}\nli {xrs2}, {_s_nop}\n' \
+                     f'{asm_syntax}\n'
+            elif inst in ('amoadd.w', 'amoadd.d', 'amoxor.w', 'amoxor.d',
+                          'amoor.w', 'amoor.d', 'amomax.w', 'amomax.d',
+                          'amomaxu.w', 'amomaxu.d'):
+                rt = f'\n.align {_align}\n{_lab}:\n{_nop}\n' \
+                     f'la {xrs1}, {_lab}\nli {xrs2}, 0x0\n' \
+                     f'{asm_syntax}\n'
+            elif inst in ('amoand.w', 'amoand.d', 'amomin.w', 'amomin.d',
+                          'amominu.w', 'amominu.d'):
+                rt = f'\n.align {_align}\n{_lab}:\n{_nop}\n' \
+                     f'la {xrs1}, {_lab}\n' \
+                     f'li {xrs2}, {hex(2 ** int(self.xlen) - 1)}\n{asm_syntax}\n'
+            ret_list.append(rt)
+        return ret_list
 
-        asm = []
-        for _ in range(no_of_insts):
-            _ = i_insts[random.choice(
-                [ins for ins in i_insts.keys()])] if inst == 'any' else \
-                i_insts[inst]
-            _ = self.replace_fields(_, modifiers=modifiers)
-            asm.append(_)
-        return asm
+    def generate_all_a_inst(self, modifiers: Union[None, dict] = None):
+        ret_list = []
+        for a_inst in self.a_insts.keys():
+            ret_list.append(
+                self.generate_a_inst([a_inst],
+                                     modifiers=modifiers,
+                                     no_of_insts=1)[0])
+        return ret_list
 
-    def m_inst_random(self, isa, modifiers, no_of_insts=5):
-        assert isinstance(modifiers, dict)
-        if 'm' not in isa.lower():
-            return []
-        m_insts = self.m_insts32 if '32' in isa else self.m_insts64
-        for key, val in self.default_modifiers.items():
-            if key not in modifiers:
-                modifiers[key] = val
-        asm = []
-        for _ in range(no_of_insts):
-            _ = m_insts[
-                random.choice([_inst for _inst in m_insts.keys()])
-            ]
-            asm.append(self.replace_fields(_, modifiers=modifiers))
-        return asm
+    def generate_f_inst(self,
+                        instructions: Union[str, list] = 'random',
+                        modifiers: Union[None, dict] = None,
+                        no_of_insts: int = 5) -> List[str]:
+        """
+        Function to generate F-instructions. Does not generate float
+        branch/jump/load/store instructions. Can generate both random
+        selection of instructions or a specified list of instructions. The
+        modifiers can be used to specify specific value/range of values for
+        variable fields
+        :param instructions: 'random' or a list of
+        instructions for which you wish to generate instructions
+        :param modifiers: None or dictionary containing custom replacement
+        options.
+        :param no_of_insts: number of instructions to be generated :return: a
+        list containing generated asm instructions
+        """
+        modifiers = self.__modifier_update(modifiers)
 
-    def fill_m_insts(self, isa, inst, modifiers, no_of_insts=5):
-        assert isinstance(modifiers, dict)
-        if 'm' not in isa.lower():
-            return []
-        m_insts = self.m_insts32 if '32' in isa else self.m_insts64
-        assert inst in m_insts.keys()
-        for key, val in self.default_modifiers.items():
-            if key not in modifiers:
-                modifiers[key] = val
+        ret_list = []
+        if instructions == 'random':
+            random_insts = random.choices(list(self.f_insts.keys()),
+                                          k=no_of_insts)
+            for key in random_insts:
+                asm_syntax = self.f_insts[key]
+                r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
+                ret_list.append(r_inst)
+        elif type(instructions) == list:
+            for _ in range(no_of_insts):
+                inst = random.choice(instructions)
+                asm_syntax = self.f_insts[inst]
+                r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
+                ret_list.append(r_inst)
+        return ret_list
 
-        asm = []
-        for _ in range(no_of_insts):
-            _ = m_insts[random.choice(
-                [ins for ins in m_insts.keys()])] if inst == 'any' else \
-                m_insts[inst]
-            _ = self.replace_fields(_, modifiers=modifiers)
-            asm.append(_)
-        return asm
+    def generate_all_f_inst(self, modifiers: Union[None, dict] = None):
+        ret_list = []
+        for f_inst in self.f_insts.keys():
+            ret_list.append(
+                self.generate_i_inst([f_inst],
+                                     modifiers=modifiers,
+                                     no_of_insts=1)[0])
+        return ret_list
 
-    def f_inst_random(self, isa, modifiers, no_of_insts=5):
-        assert isinstance(modifiers, dict)
-        if 'f' not in isa.lower():
-            return []
-        f_insts = self.f_insts32 if '32' in isa else self.f_insts64
-        for key, val in self.default_modifiers.items():
-            if key not in modifiers:
-                modifiers[key] = val
-        asm = []
-        for _ in range(no_of_insts):
-            _ = f_insts[
-                random.choice([_inst for _inst in f_insts.keys()])
-            ]
-            asm.append(self.replace_fields(_, modifiers=modifiers))
-        return asm
+    def generate_d_inst(self,
+                        instructions: Union[str, list] = 'random',
+                        modifiers: Union[None, dict] = None,
+                        no_of_insts: int = 5) -> List[str]:
+        """
+        Function to generate D-instructions. Does not generate float
+        branch/jump/load/store instructions. Can generate both random
+        selection of instructions or a specified list of instructions. The
+        modifiers can be used to specify specific value/range of values for
+        variable fields
 
-    def fill_f_insts(self, isa, inst, modifiers, no_of_insts=5):
-        assert isinstance(modifiers, dict)
-        if 'f' not in isa.lower():
-            return []
-        f_insts = self.f_insts32 if '32' in isa else self.f_insts64
-        assert inst in f_insts.keys()
-        for key, val in self.default_modifiers.items():
-            if key not in modifiers:
-                modifiers[key] = val
+        :param instructions: 'random' or a list of instructions for which you
+            wish to generate instructions
+        :param modifiers: None or dictionary containing custom replacement
+            options.
+        :param no_of_insts: number of instructions to be generated
+        :return: a list containing generated asm instructions
 
-        asm = []
-        for _ in range(no_of_insts):
-            _ = f_insts[random.choice(
-                [ins for ins in f_insts.keys()])] if inst == 'any' else \
-                f_insts[inst]
-            _ = self.replace_fields(_, modifiers=modifiers)
-            asm.append(_)
-        return asm
+        """
+        modifiers = self.__modifier_update(modifiers)
 
-    def d_inst_random(self, isa, modifiers, no_of_insts=5):
-        assert isinstance(modifiers, dict)
-        if 'd' not in isa.lower():
-            return []
-        d_insts = self.d_insts32 if '32' in isa else self.d_insts64
-        for key, val in self.default_modifiers.items():
-            if key not in modifiers:
-                modifiers[key] = val
-        asm = []
-        for _ in range(no_of_insts):
-            _ = d_insts[
-                random.choice([_inst for _inst in d_insts.keys()])
-            ]
-            asm.append(self.replace_fields(_, modifiers=modifiers))
-        return asm
+        ret_list = []
+        if instructions == 'random':
+            random_insts = random.choices(list(self.d_insts.keys()),
+                                          k=no_of_insts)
+            for key in random_insts:
+                asm_syntax = self.d_insts[key]
+                r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
+                ret_list.append(r_inst)
+        elif type(instructions) == list:
+            for _ in range(no_of_insts):
+                inst = random.choice(instructions)
+                asm_syntax = self.d_insts[inst]
+                r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
+                ret_list.append(r_inst)
+        return ret_list
 
-    def fill_d_insts(self, isa, inst, modifiers, no_of_insts=5):
-        assert isinstance(modifiers, dict)
-        if 'd' not in isa.lower():
-            return []
-        d_insts = self.d_insts32 if '32' in isa else self.d_insts64
-        assert inst in d_insts.keys()
-        for key, val in self.default_modifiers.items():
-            if key not in modifiers:
-                modifiers[key] = val
+    def generate_all_d_inst(self, modifiers: Union[None, dict] = None):
+        ret_list = []
+        for d_inst in self.d_insts.keys():
+            ret_list.append(
+                self.generate_i_inst([d_inst],
+                                     modifiers=modifiers,
+                                     no_of_insts=1)[0])
+        return ret_list
 
-        asm = []
-        for _ in range(no_of_insts):
-            _ = d_insts[random.choice(
-                [ins for ins in d_insts.keys()])] if inst == 'any' else \
-                d_insts[inst]
-            _ = self.replace_fields(_, modifiers=modifiers)
-            asm.append(_)
-        return asm
+    def generate_c_inst(self,
+                        instructions: Union[str, list] = 'random',
+                        modifiers: Union[None, dict] = None,
+                        no_of_insts: int = 5) -> List[str]:
+        """
+        Function to generate C-instructions. Does not generate compressed
+        branch/jump/load/store instructions. Can generate both random
+        selection of instructions or a specified list of instructions. The
+        modifiers can be used to specify specific value/range of values for
+        variable fields
 
-    def __repr__(self):
-        message = 'I extension:\n\t' + '\n\t'.join(
-            str(ind + 1) + ': ' + str(inst) for ind, inst in
-            enumerate(self.i_insts32))
-        return message
+        :param instructions: 'random' or a list of instructions for which you
+            wish to generate instructions
+        :param modifiers: None or dictionary containing custom replacement
+            options.
+        :param no_of_insts: number of instructions to be generated
+        :return: a list containing generated asm instructions
+        """
+        modifiers = self.__modifier_update(modifiers)
 
+        ret_list = []
+        if instructions == 'random':
+            random_insts = random.choices(list(self.c_insts.keys()),
+                                          k=no_of_insts)
+            for key in random_insts:
+                if key in (
+                        'c.beqz', 'c.bnez', 'c.j', 'c.jal', 'c.jalr', 'c.jr',
+                        'c.ld', 'c.sd',
+                        'c.lw', 'c.sw'
+                                'c.fld', 'c.flw',
+                        'c.fsd', 'c.fsw',
+                        'c.fldsp', 'c.fsdsp',
+                        'c.lwsp', 'c.ldsp', 'c.swsp', 'c.sdsp',
+                ):
+                    ret_list.append(self.__handle_branch_load_store(key))
+                elif key == 'c.lui':
+                    r = random.randint(1, 32)
+                    ret_list.append(f'{key} x8, {r}')
+                elif key == 'c.ebreak':
+                    ret_list.append('c.nop')
+                else:
+                    asm_syntax = self.c_insts[key]
+                    r_inst = self.__replace_fields(asm_syntax, modifiers)
+                    ret_list.append(r_inst)
+        elif type(instructions) == list:
+            for _ in range(no_of_insts):
+                if len(instructions) <= 0:
+                    ret_list.append('nop')
+                else:
+                    inst = random.choice(instructions)
+                    if inst in ('c.beqz', 'c.bnez', 'c.j', 'c.jal', 'c.jalr',
+                                'c.jr', 'c.ld', 'c.sd', 'c.lw', 'c.sw', 'c.fld',
+                                'c.flw', 'c.fsd', 'c.fsw', 'c.fldsp', 'c.fsdsp',
+                                'c.lwsp', 'c.ldsp', 'c.swsp', 'c.sdsp',
+                                ):
+                        ret_list.append(self.__handle_branch_load_store(inst))
+                    elif inst == 'c.lui':
+                        r = random.randint(1, 32)
+                        ret_list.append(f'{inst} x8, {r}')
+                    elif inst == 'c.ebreak':
+                        ret_list.append('c.nop')
+                    else:
+                        asm_syntax = self.c_insts[inst]
+                        r_inst = self.__replace_fields(asm_syntax,
+                                                       modifiers=modifiers)
+                        ret_list.append(r_inst)
+        return ret_list
 
-def main():
-    a = instruction_templates()
+    def generate_all_c_inst(self, modifiers: Union[None, dict] = None):
+        ret_list = []
+        for c_inst in self.c_insts.keys():
+            ret_list.append(
+                self.generate_c_inst([c_inst],
+                                     modifiers=modifiers,
+                                     no_of_insts=1)[0])
+        return ret_list
 
-    insts_100 = a.i_inst_random(isa='RV64I',
-                                modifiers={'imm12_values': {100, 200, 300},
-                                           'rs1_values': {'x0', 'x1'}},
-                                no_of_insts=10)
-    insts_10 = a.fill_m_insts(isa='RV64I', inst='mul',
-                              modifiers={'imm12_values': {120}},
-                              no_of_insts=10)
+    def generate_b_inst(self,
+                        instructions: Union[str, list] = 'random',
+                        modifiers: Union[None, dict] = None,
+                        no_of_insts: int = 5) -> List[str]:
+        """
+        Function to generate B-instructions. Can generate both random
+        selection of instructions or a specified list of instructions. The
+        modifiers can be used to specify specific value/range of values for
+        variable fields
 
-    for i in insts_100:
-        print(i)
-    for i in insts_10:
-        print(i)
+        :param instructions: 'random' or a list of instructions for which you
+            wish to generate instructions
+        :param modifiers: None or dictionary containing custom replacement
+            options.
+        :param no_of_insts: number of instructions to be generated
+        :return: a list containing generated asm instructions
 
+        """
+        modifiers = self.__modifier_update(modifiers)
 
-if __name__ == '__main__':
-    main()
+        ret_list = []
+        if instructions == 'random':
+            random_insts = random.choices(list(self.b_insts.keys()),
+                                          k=no_of_insts)
+            for key in random_insts:
+                asm_syntax = self.b_insts[key]
+                r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
+                ret_list.append(r_inst)
+        elif type(instructions) == list:
+            for _ in range(no_of_insts):
+                inst = random.choice(instructions)
+                asm_syntax = self.b_insts[inst]
+                r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
+                ret_list.append(r_inst)
+        return ret_list
+
+    def generate_all_b_inst(self, modifiers: Union[None, dict] = None):
+        ret_list = []
+        for m_inst in self.m_insts.keys():
+            ret_list.append(
+                self.generate_i_inst([m_inst],
+                                     modifiers=modifiers,
+                                     no_of_insts=1)[0])
+        return ret_list

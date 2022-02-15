@@ -9,6 +9,7 @@ uatg/modules/branch_predictor/tests/
 config.ini
 *.yaml
 uatg/regex_formats.py
+!uatg/isem.yaml
 
 
 # Build Directory
