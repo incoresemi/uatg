@@ -15,7 +15,9 @@ import uatg
 from uatg.log import logger
 from uatg.utils import create_plugins, generate_test_list, create_linker, \
     create_model_test_h, join_yaml_reports, generate_sv_components, \
-    list_of_modules, rvtest_data, dump_makefile
+    list_of_modules, rvtest_data, dump_makefile, setup_pages
+from yapsy.PluginManager import PluginManager
+from multiprocessing import Pool, Manager
 
 # create a manager for shared resources
 process_manager = Manager()
@@ -35,6 +37,10 @@ def asm_generation_process(args):
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
     name = (str(plugin.plugin_object).split(".", 1))
     t_name = ((name[1].split(" ", 1))[0])
+
+    # data section for paging pages
+    priv_asm_code = ['', '', '']
+    priv_asm_data = ""
 
     if check:
         test_seq = plugin.plugin_object.generate_asm()
@@ -84,6 +90,20 @@ def asm_generation_process(args):
                 logger.debug(f'No custom Compile macros specified for '
                              f'{test_name}')
 
+            # generate and setup page tables based on info from plugin
+            privileged_dict = {}
+            try:
+                privileged_dict = ret_list_of_dicts['privileged_test']
+            except KeyError:
+                privileged_dict['enable'] = False
+
+            if privileged_dict['enable']:
+                priv_asm_code, priv_asm_data = setup_pages(
+                    page_size=privileged_dict['page_size'],
+                    paging_mode=privileged_dict['paging_mode'],
+                    valid_ll_pages=privileged_dict['ll_pages'],
+                    mode=privileged_dict['mode'])
+
             # Adding License, includes and macros
             # asm = license_str + includes + test_entry
             asm = (test_format_string[0] + test_format_string[1] +
@@ -91,17 +111,20 @@ def asm_generation_process(args):
 
             # Appending Coding Macros & Instructions
             # asm += rvcode_begin + asm_code + rvcode_end
-            asm += (test_format_string[3] + asm_code +
-                    test_format_string[4])
+
+            asm += (test_format_string[3] + priv_asm_code[0] +\
+                    priv_asm_code[1] + asm_code +\
+                    priv_asm_code[2] + test_format_string[4])
 
             # Appending RVTEST_DATA macros and data values
             # asm += rvtest_data_begin + asm_data + rvtest_data_end
-            asm += (test_format_string[5] + asm_data +
+            asm += (test_format_string[5] + asm_data + priv_asm_data +\
                     test_format_string[6])
 
             # Appending RVMODEL macros
             # asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
-            asm += (test_format_string[7] + asm_sig +
+
+            asm += (test_format_string[7] + asm_sig +\
                     test_format_string[8])
 
             os.mkdir(os.path.join(work_tests_dir, test_name))
@@ -295,6 +318,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
                  work_dir, compile_macros_dict))
 
+        
         # multi processing process pool
         process_pool = Pool()
         # creating a map of processes

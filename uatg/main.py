@@ -241,6 +241,7 @@ def from_config(config_file, verbose):
     modules = config['uatg']['modules']
     # Uncomment to overwrite verbosity from config file.
     # verbose = config['uatg']['verbose']
+ 
     logger.level(verbose)
     logging.getLogger('yapsy').setLevel(logging.ERROR)
     module = clean_modules(module_dir, modules)
