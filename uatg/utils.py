@@ -884,12 +884,14 @@ def setup_pages(page_size=4096,
 
     initial_level_pages_s = ''
     for level in range(levels - 1):
-        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
+        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n.dword 0x0\n"\
+                                 f".endr\n"
 
     initial_level_pages_u = ''
     if mode == 'user':
         for level in range(1, levels - 1):
-            initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n.dword 0x0\n.endr\n"
+            initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n"\
+                                     f".dword 0x0\n.endr\n"
 
     # assumption that the l3 pt entry 0 will point to 80000000
 
@@ -933,11 +935,13 @@ def setup_pages(page_size=4096,
         ll_entries_s += '.dword {0} # entry_{1}\n'.format(hex(pte_entry_s), i)
         base_address_new += page_size
 
-    ll_page_s = f'l{levels-1}_pt:\n{ll_entries_s}.rept {entries-valid_ll_pages}\n'\
-              f'.dword 0x0\n.endr\n'
+    ll_page_s = f'l{levels-1}_pt:\n'\
+                f'{ll_entries_s}.rept {entries-valid_ll_pages}\n'\
+                f'.dword 0x0\n.endr\n'
 
-    ll_page_u = f'l{levels-1}_u_pt:\n{ll_entries_u}.rept {entries-valid_ll_pages}\n'\
-              f'.dword 0x0\n.endr\n'
+    ll_page_u = f'l{levels-1}_u_pt:\n'\
+                f'{ll_entries_u}.rept {entries-valid_ll_pages}\n'\
+                f'.dword 0x0\n.endr\n'
 
     out_data_string = pre + initial_level_pages_s + ll_page_s +\
                       initial_level_pages_u + ll_page_u
@@ -948,7 +952,8 @@ def setup_pages(page_size=4096,
     out_code_string = []
 
     # calcualtion to set up root level pages
-    pte_updation = f"\n\t# setting up root PTEs\n"\
+    pte_updation = f"\n.option norvc"\
+                   f"\n\t# setting up root PTEs\n"\
                    f"\tla t0, l0_pt # load address of root page\n\n"
 
     shift_string = f"\t# calculation for offset\n"\
@@ -988,7 +993,8 @@ def setup_pages(page_size=4096,
                        f"\tadd t5, t5, t4\n"\
                        f"\tsd t5, (t0)\n"
         for i in range(levels - 1):
-            pte_updation += f"\t# update l{i} page entry with address of l{i+1} page\n"
+            pte_updation += f"\t# update l{i} page entry with address "\
+                            f"of l{i+1} page\n"
             if i != 0:
                 pte_updation += f"\taddi t2, x0, 1\n"\
                                 f"\tslli t2, t2, 12\n"\
@@ -1009,8 +1015,8 @@ def setup_pages(page_size=4096,
                            f"{shift_amount})\n"\
                            f"supervisor_entry_label:\n"\
                            f"\n{user_entry}"\
-                           f"test_entry:\n\n")
-    out_code_string.append(f"\n\n{user_exit}"\
+                           f"test_entry:\n.option rvc\n\n")
+    out_code_string.append(f"\n\n.option norvc\n{user_exit}"\
                            f"test_exit:\n"\
                            f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"\
                            f"supervisor_exit_label:\n")
