@@ -168,23 +168,18 @@ trap_handler_entry:
   addi t4, t4, 3*REGWIDTH
   SREG t4, 0(t3)
 
+  li t3, 173
+  bne t3, a0, unintended_trap_handler
+
+intended_trap_handler:
   // ecall from Supervisor Mode
   li t3, 9
-  beq t3, t0, ecall_handler // if t0 == 9, the trap is due to an ecall from S
+  beq t3, t0, supervisor_to_machine_ecall_handler // if t0 == 9, the trap is due to an ecall from S
   li t3, 8
-  beq t3, t0, ecall_handler // if t0 == 8, the trap is due to an ecall from U
-  j not_ecall
+  beq t3, t0, user_to_supervisor_ecall_handler // if t0 == 8, the trap is due to an ecall from U
+  j unintended_trap_handler
 
-ecall_handler:
-  // checking if the error code matches the S exit macro
-  li t3, 173
-  // illegal handler would increment the PC, this should work eventhough va!=pa
-  bne t3, a0, illegal_handler
-  // if the error code matches 173, we proceed to loading the final label
-  // load the final label in the ASM into MEPC
-  bne t3, a1, supervisor_to_machine
-
-user_to_supervisor:
+user_to_supervisor_ecall_handler:
   la t5, test_exit
   // update MPP to perform MRET into Supervisor
   li t6, 0xF0000000/*for supervisor*/;\
@@ -196,7 +191,7 @@ user_to_supervisor:
   csrs CSR_MSTATUS, t6
   j mepc_updation
 
-supervisor_to_machine:
+supervisor_to_machine_ecall_handler:
   la t5, supervisor_exit_label
   // update MPP in mstatus to perform an MRET
   addi t6, x0, 3
@@ -209,7 +204,7 @@ mepc_updation:
   // jump to restoring registers and exiting trap handler
   j restore_and_exit_trap
 
-not_ecall:
+unintended_trap_handler:
   // mcause value of illegal initialized in t3
   li t3, 2 
   beq t3, t0, illegal_handler
@@ -218,7 +213,6 @@ not_ecall:
 
   // for all other cause values restore and exit handler
   j restore_and_exit_trap
-
 
 load_misaligned_handler:
   // load the lowest byte of the instruction into t3. address of instruction in 
@@ -325,441 +319,6 @@ trapreg_sv:
 rvtest_data_end:
 .endm
 
-// ----------------------------------- CODE BEGIN w/ TRAP HANDLER START ------------------------ //
-//
-//  .macro RVTEST_CODE_BEGIN
-//  .align UNROLLSZ
-//  .section .text.init;
-//  .globl rvtest_init;                                                  \
-//  rvtest_init:
-//#ifdef rvtest_mtrap_routine
-//  LA(x1, rvtest_trap_prolog );
-//  jalr ra, x1
-//  rvtest_prolog_done:
-//#endif
-//     LI (x1,  (0xFEEDBEADFEEDBEAD & MASK));
-//     LI (x2,  (0xFF76DF56FF76DF56 & MASK));
-//     LI (x3,  (0x7FBB6FAB7FBB6FAB & MASK));
-//     LI (x4,  (0xBFDDB7D5BFDDB7D5 & MASK));
-//     LA (x5, rvtest_code_begin);
-//     LA (x6, rvtest_data_begin);
-//     LI (x7,  (0xB7FBB6FAB7FBB6FA & MASK));
-//     LI (x8,  (0x5BFDDB7D5BFDDB7D & MASK));
-//     LI (x9,  (0xADFEEDBEADFEEDBE & MASK));
-//     LI (x10, (0x56FF76DF56FF76DF & MASK));
-//     LI (x11, (0xAB7FBB6FAB7FBB6F & MASK));
-//     LI (x12, (0xD5BFDDB7D5BFDDB7 & MASK));
-//     LI (x13, (0xEADFEEDBEADFEEDB & MASK));
-//     LI (x14, (0xF56FF76DF56FF76D & MASK));
-//     LI (x15, (0xFAB7FBB6FAB7FBB6 & MASK));
-//     LI (x16, (0x7D5BFDDB7D5BFDDB & MASK));
-//     LI (x17, (0xBEADFEEDBEADFEED & MASK));
-//     LI (x18, (0xDF56FF76DF56FF76 & MASK));
-//     LI (x19, (0x6FAB7FBB6FAB7FBB & MASK));
-//     LI (x20, (0xB7D5BFDDB7D5BFDD & MASK));
-//     LI (x21, (0xDBEADFEEDBEADFEE & MASK));
-//     LI (x22, (0x6DF56FF76DF56FF7 & MASK));
-//     LI (x23, (0xB6FAB7FBB6FAB7FB & MASK));
-//     LI (x24, (0xDB7D5BFDDB7D5BFD & MASK));
-//     LI (x25, (0xEDBEADFEEDBEADFE & MASK));
-//     LI (x26, (0x76DF56FF76DF56FF & MASK));
-//     LI (x27, (0xBB6FAB7FBB6FAB7F & MASK));
-//     LI (x28, (0xDDB7D5BFDDB7D5BF & MASK));
-//     LI (x29, (0xEEDBEADFEEDBEADF & MASK));
-//     LI (x30, (0xF76DF56FF76DF56F & MASK));
-//     LI (x31, (0xFBB6FAB7FBB6FAB7 & MASK));
-//  .globl rvtest_code_begin
-//  rvtest_code_begin:
-//.endm
-//
-// --------------------------------- CODE BEGIN w/ TRAP HANDLER END -----------------------------//
-
-//.macro RVTEST_CODE_END
-//  .align 4; 
-//  .global rvtest_code_end
-//  rvtest_code_end:
-//#ifdef rvtest_mtrap_routine
-//  .option push
-//  .option norvc 
-//  j exit_cleanup
-//
-//  rvtest_trap_prolog:
-//  /******************************************************************************/
-//  /****                 Prolog, to be run before any tests                   ****/
-//  /****       #include 1 copy of this per mode in rvmodel_boot code?         ****/
-//  /**** -------------------------------------------------------------------  ****/
-//  /**** if xTVEC isn't completely RW, then we need to change the code at its ****/
-//  /**** target. The entire trap trampoline and mtrap handler replaces the    ****/
-//  /**** area pointed to by mtvec, after saving its original contents first.  ****/
-//  /**** If it isn't possible to fully write that area, restore and fail.     ****/
-//  /******************************************************************************/
-//
-//  //trap_handler_prolog; enter with t1..t6 available
-//  
-//  init_mscratch:
-//  	la	t1, trapreg_sv
-//  	csrrw	t1, CSR_MSCRATCH, t1	// swap old mscratch. mscratch not points to trapreg_sv
-//  	la	t2, mscratch_save    
-//  	SREG	t1, 0(t2)		        // save old mscratch in mscratch_save region
-//    csrr t1, CSR_MSCRATCH       // read the trapreg_sv address
-//    LA( t2, mtrap_sigptr   ) // locate the start of the trap signature
-//    SREG  t2, 0(t1)           // save mtrap_sigptr at first location of trapreg_sv
-//  init_mtvec:	
-//  	la	t1, mtrampoline    
-//  	la	t4, mtvec_save
-//  	csrrw	t2, CSR_MTVEC, t1		          // swap mtvec and trap_trampoline
-//  	SREG	t2, 0(t4)		              // save orig mtvec
-//  	csrr	t3, CSR_MTVEC		              // now read new_mtval back
-//  	beq	t3, t1, rvtest_prolog_done // if mtvec==trap_trampoline, mtvec is writable, continue
-//  	
-//  /****************************************************************/
-//  /**** fixed mtvec, can't move it so move trampoline instead  ****/
-//  /**** t1=trampoline, t2=oldmtvec, t3=save area, t4=save end  ****/
-//  /****************************************************************/
-//  
-//  // t2 = dut's original mtvec setting
-//  // t1 = mtrampoline address
-//  init_tramp:	/**** copy trampoline at mtvec tgt ****/
-//  
-//  	csrw	CSR_MTVEC, t2		// restore orig mtvec, will now attemp to copy trampoline to it
-//  	la	t3, tramptbl_sv		// addr of save area
-//  	addi	t4, t3, NUM_SPECD_INTCAUSES*4 // end of save area
-//  
-//  overwrite_tt:			            // now build new trampoline table with offsets base from curr mtvec
-//  	lw	t6, 0(t2)		            // get original mtvec target
-//  	sw	t6, 0(t3)		            // save it
-//  	lw	t5, 0(t1)		            // get trampoline src
-//  	sw	t5, 0(t2)		            // overwrite mtvec target
-//  	lw	t6, 0(t2)		            // rd it back to make sure it was written
-//  	bne	t6, t5, resto_tramp		  // table isn't fully writable, restore and give up
-//  	addi	t1, t1, 4		          // next src  index
-//  	addi	t2, t2, 4		          // next tgt  index
-//  	addi	t3, t3, 4		          // next save index
-//  	bne	t3, t4, overwrite_tt		// not done,  loop
-//  	j rvtest_prolog_done 
-//  
-//  resto_tramp:			                      // vector table not writeable, restore
-//  	LREG	t1, 16(t4)            // load mscratch_SAVE at fixed offset from table end
-//  	csrw	CSR_MSCRATCH, t1		                // restore mscratch
-//  	LREG	t4, 8(t4)             // load mtvec_SAVE (used as end of loop marker)
-//  
-//  
-//  resto_loop:	              // goes backwards, t2= dest vec tbl ptr, t3=src save area ptr, t4=vec tbl begin
-//  	lw	t6, 0(t3)		        // read saved tgt entry
-//  	sw	t6, 0(t2)		        // restore original tgt
-//  	addi	t2, t2, -4		    // prev tgt  index
-//  	addi	t3, t3, -4		    // prev save index
-//  	bne	t2, t4, resto_loop  // didn't restore to begining yet,  loop
-//  	
-//  	j	rvtest_end // failure to replace trampoline
-//  
-//
-//  #define mhandler			\
-//    csrrw   sp, CSR_MSCRATCH, sp;	\
-//    SREG      t6, 6*REGWIDTH(sp);	\
-//    jal t6, common_prolog;
-//  
-//  /**********************************************************************/
-//  /**** This is the entry point for all m-modetraps, vectored or not.****/
-//  /**** At entry, mscratch will contain a pointer to a scratch area. ****/
-//  /**** This is an array of branches at 4B intevals that spreads out ****/
-//  /**** to an array of 32B mhandler macros for specd int causes, and ****/
-//  /**** to a return for anything above that (which causes a mismatch)****/
-//  /**********************************************************************/
-//  mtrampoline:		// 64 or 32 entry table
-//  value = 0
-//  .rept NUM_SPECD_INTCAUSES     	  // located at each possible int vectors
-//     j	mtrap_handler + 12*(value)  //offset < +/- 1MB
-//     value = value + 1
-//  .endr
-//  .rept RLENG-NUM_SPECD_INTCAUSES   // fill at each impossible entry
-//  	mret
-//  .endr
-//  
-//  mtrap_handler:		/* after executing, sp points to temp save area, t4 is PC */
-//  .rept NUM_SPECD_INTCAUSES
-//    mhandler
-//  .endr
-//
-//  common_prolog:
-//    la t5, common_mhandler
-//    jr t5
-//  /*********************************************************************/
-//  /**** common code for all ints & exceptions, will fork to handle  ****/ 
-//  /**** each separately. The common handler first stores trap mode+ ****/ 
-//  /**** vector, and mcause signatures. All traps have 4wd sigs, but ****/
-//  /**** sw and timer ints only store 3 of the 4.                    ****/
-//  /**** sig offset Exception    ExtInt       SWInt        TimerInt  ****/
-//  /****         0: tval         IntID        -1           -1        ****/
-//  /****         4: mepc         mip          mip          mip       ****/
-//  /****         8: <----------------------  mcause ------------->   ****/
-//  /****        12: <---------------------  Vect+mode  ---------->   ****/
-//  /*********************************************************************/
-//  /*   in general, CSRs loaded in t2, addresses into t3                */
-//  
-//  common_mhandler:                 /* enter with link in t6 */
-//          SREG      t5, 5*REGWIDTH(sp)
-//          SREG      t4, 4*REGWIDTH(sp)
-//          SREG      t3, 3*REGWIDTH(sp)
-//          SREG      t2, 2*REGWIDTH(sp)
-//          SREG      t1, 1*REGWIDTH(sp)  /* save other temporaries */
-//  
-//          LREG      t1, 0(sp)        /* load trap sig pointer (runs backwards from DATA_END) */
-//          
-//          LA(     t3, mtrampoline)
-//          sub     t2, t6, t3       /* reloc “link” to 0..63 to show which int vector was taken */
-//          addi    t2, t2, MMODE_SIG   /* insert mode# into 1:0  */
-//          SREG      t2, 0*REGWIDTH(t1)        /* save 1st sig value, (vect, trapmode) */
-//  sv_mcause:	
-//          csrr   t2, CSR_MCAUSE
-//          SREG      t2, 1*REGWIDTH(t1) /* save 2nd sig value, (mcause)  */
-//  
-//          bltz    t2, common_mint_handler /* this is a interrupt, not a trap */
-//  
-//  /********************************************************************/ 
-//  /**** This is the exceptions specific code, storing relative mepc****/ 
-//  /**** & relative tval signatures. tval is relocated by code or   ****/ 
-//  /**** data start, or 0 depending on mcause. mepc signature value ****/ 
-//  /**** is relocated by code start, and restored adjusted depending****/ 
-//  /**** on op alignment so trapped op isn't re-executed.           ****/ 
-//  /********************************************************************/ 
-//  common_mexcpt_handler:
-//          csrr   t2, CSR_MEPC
-//  sv_mepc:	
-//          LA(     t3, rvtest_prolog_done) /* offset to compensate for different loader offsets */
-//          sub     t4, t2, t3      /* convert mepc to rel offset of beginning of test*/
-//          SREG      t4, 2*REGWIDTH(t1) /* save 3rd sig value, (rel mepc) into trap signature area */
-//  adj_mepc:   		//adj mepc so there is padding after op, and its 8B aligned
-//        andi    t4, t2, 0x2     /* set to 2 if mepc was misaligned */
-//        sub     t2, t2, t4      /* adjust mepc to prev 4B alignment */
-//        addi    t2, t2, 0x8     /* adjust mepc, so it skips past the op, has padding & is 4B aligned */
-//        csrw    CSR_MEPC, t2	/* restore adjusted value, has 1,2, or 3 bytes of padding */
-//  
-//  
-//  /* calculate relative mtval if it’s an address  (by code_begin or data_begin amt)  */
-//  /* note that masks that determine this are implementation specific from YAML */
-//  
-//  /* masks are bit reversed, so mcause==0 bit is in MSB (so different for RV32 and RV64) */
-//  
-//  adj_mtval:
-//        	csrr   t2, CSR_MCAUSE  /* code begin adjustment amount already in t3 */
-//  
-//          LI(t4, CODE_REL_TVAL_MSK)   /* trap#s 12, 3,1,0, -- adjust w/ code_begin */
-//          sll     t4, t4, t2		          /* put bit# in MSB */
-//          bltz    t4, sv_mtval		        /* correct adjustment is code_begin in t3 */
-//  
-//          LA(     t3, mtrap_sigptr) /* adjustment assuming access is to signature region */
-//          LI(t4, DATA_REL_TVAL_MSK)       /* trap#s not 14, 11..8, 2 adjust w/ data_begin */
-//          sll     t4, t4, t2		          /* put bit# in MSB */
-//          bgez    t4, no_adj		          /* correct adjustment is data_begin in t3 */
-//  sigbound_chk:
-//          csrr t4, CSR_MTVAL                  /* do a bounds check on mtval */
-//          bge   t3, t4, sv_mtval          /* if mtval is greater than the rvmodel_data_begin then use that as anchor */
-//          LA( t3, rvtest_data_begin)      /* else change anchor to rvtest_data_begin  */
-//          blt   t3, t4, sv_mtval          /* before the signature, use data_begin adj */
-//          mv t4, t3                       /* use sig relative adjust */
-//  no_adj: 
-//          LI(t3, 0)			/* else zero adjustment amt */
-//
-//  // For Illegal op handling
-//          addi    t2, t2, -2            /* check if mcause==2 (illegal op) */
-//          bnez    t2, sv_mtval          /* not illegal op, no special treatment */
-//          csrr    t2, CSR_MTVAL
-//          bnez    t2, sv_mtval          /* mtval isn’t zero, no special treatment */
-//  illop:
-//          LI(t5, 0x20000)           /* get mprv mask */
-//          csrrs   t5, CSR_MSTATUS, t5       /* set mprv while saving the old value */
-//          csrr    t3, CSR_MEPC
-//          lhu     t2, 0(t3)             /* load 1st 16b of opc w/ old priv, endianess*/
-//          andi    t4, t2,  0x3
-//          addi    t4, t4, -0x3          /* does opcode[1:0]==0b11? (Meaning >16b op) */
-//          bnez    t4, sv_mtval          /* entire mtval is in tt2, adj amt will be set to zero */
-//          lhu     t4, 2(t3)           
-//          sll     t4, t4, 16
-//          or      t3, t2, t4            /* get 2nd  hwd, align it & insert it into opcode */
-//          csrw    CSR_MSTATUS, t5           /* restore mstatus */
-//
-///*******FIXME: this will not handle 48 or 64b opcodes in an RV64) ********/
-//
-//  sv_mtval:
-//          csrr   t2, CSR_MTVAL
-//          sub    t2, t2, t3		/* perform mtval adjust by either code or data position or zero*/
-//          SREG   t2, 3*REGWIDTH(t1)	/* save 4th sig value, (rel mtval) into trap signature area */
-//  
-//  resto_rtn:		/* restore and return */
-//          addi    t1, t1,4*REGWIDTH		/* adjust trap signature ptr (traps always save 4 words) */
-//          SREG      t1, 0*REGWIDTH(sp) 	/* save updated trap sig pointer (pts to trap_sigptr */
-//  
-//          LREG      t1, 1*REGWIDTH(sp)
-//          LREG      t2, 2*REGWIDTH(sp)
-//          LREG      t3, 3*REGWIDTH(sp)
-//          LREG      t4, 4*REGWIDTH(sp)
-//          LREG      t5, 5*REGWIDTH(sp)
-//          LREG      t6, 6*REGWIDTH(sp)  /* restore temporaries */
-//  
-//          csrrw   sp, CSR_MSCRATCH, sp /* restore sp from scratch */
-//          mret
-//  
-//  common_mint_handler:    /* t1 has sig ptr, t2 has mcause */
-//  
-//          LI(t3, 1)
-//          sll     t3, t3, t2      /* create mask 1<<mcause */
-//          csrrc   t4, CSR_MIP, t3     /* read, then attempt to clear int pend bit */
-//          csrrc   t4, CSR_MIE, t3     /* read, then attempt to clear int pend bit */
-//  sv_mip:	/* note: clear has no effect on MxIP */
-//          SREG      t4, 2*REGWIDTH(t1) /* save 3rd sig value, (mip)  */
-//  
-//  /* case table branch to interrupt clearing code, depending on mcause */
-//  	slli	t2, t2, 3       /* convert mcause to 8B offset */
-//  	LA(	t3, clrint_tbl ) /* load jump table address */
-//  	add	t3, t3, t2      /* index into to it, load vector, then jump to it */
-//  	LREG	t3, 0(t3)       
-//  	jr	t3
-//  
-//  clr_sw_int:
-//          RVMODEL_CLEAR_MSW_INT
-//          j       resto_rtn   
-//  
-//  clr_tmr_int:
-//          RVMODEL_CLEAR_MTIMER_INT
-//          j       resto_rtn   
-//  
-//  clr_ext_int:
-//          RVMODEL_CLEAR_MEXT_INT
-//          SREG      t3, -3*REGWIDTH(t1) /* save 4rd sig value, (intID)  */
-//          j       resto_rtn   
-//  .align 3	
-//  clrint_tbl:
-//  	.dword	resto_rtn	/* int cause 0 is reserved, just return */
-//  	.dword	clr_sw_int	/* int cause 1  Smode SW int            */
-//  	.dword	resto_rtn	/* int cause 2 is reserved, just return */
-//  	.dword	clr_sw_int	/* int cause 3  Mmode SW int            */
-//  	.dword	resto_rtn	/* int cause 4 is reserved, just return */
-//  	.dword	clr_tmr_int	/* int cause 5  Smode Tmr int           */
-//  	.dword	resto_rtn	/* int cause 6 is reserved, just return */
-//  	.dword	clr_tmr_int	/* int cause 7  Mmode Tmr int           */
-//  	.dword	resto_rtn	/* int cause 8 is reserved, just return */
-//  	.dword	clr_ext_int	/* int cause 9  Smode Ext int           */
-//  	.dword	resto_rtn	/* int cause A is reserved, just return */
-//  	.dword	clr_ext_int	/* int cause B  Mmode Ext int           */
-//  	.dword	resto_rtn	/* int cause C is reserved, just return */
-//  	.dword	resto_rtn	/* int cause D is reserved, just return */
-//  	.dword	resto_rtn	/* int cause E is reserved, just return */
-//  	.dword	resto_rtn	/* int cause F is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 10 is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 11 is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 12 is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 13 is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 14 is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 15 is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 16 is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 17 is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 18 is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 19 is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 1A is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 1B is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 1C is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 1D is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 1E is reserved, just return */
-//  	.dword	resto_rtn	/* int cause 1F is reserved, just return */
-//  	
-//  1:	// xtvec_installed:
-//  ret
-//
-//  // ----------------------------------------------------------------------------------------------
-//  // ----------------------------------------------------------------------------------------------
-//  // ----------------------------------------------------------------------------------------------
-//  // ----------------------------------------------------------------------------------------------
-//
-//  exit_cleanup://COMPLIANCE_HALT should get here
-//  	la	t3, tramptbl_sv+ NUM_SPECD_INTCAUSES*4	// end of save area
-//  
-//  	la	t5, mtvec_save
-//  	LREG	t1, 8(t5)
-//  	csrw	 CSR_MSCRATCH, t1		        // restore mscratch
-//  	LREG	t4, 0(t5)		              // load orig mtvec
-//  	csrrw	t2, CSR_MTVEC, t4		        // restore mtvec (not redundant)
-//  	bne	t4, t2, 1f// if saved!=mtvec, done, else need to restore
-//  	
-//  	addi	t2, t4, NUM_SPECD_INTCAUSES*4  // start pt is end of vect area
-//  resto_vec:	                              // goes backwards, t2= dest vec tbl ptr, 
-//                                            // t3=src save area ptr, t4=vec tbl begin
-//  	lw	t6, 0(t3)		                        // read saved tgt entry
-//  	sw	t6, 0(t2)		                        // restore original tgt
-//  	addi	t2, t2, -4		                    // prev tgt  index
-//  	addi	t3, t3, -4		                    // prev save index
-//  	bne	t2, t4, resto_vec	                  // didn't get to end, continue
-//  1: 
-//  rvtest_end:
-//  .option pop
-//#endif
-//#ifdef rvtest_gpr_save
-//  csrw CSR_MSCRATCH, x31       //save x31, get temp pointer
-//  LA(x31, gpr_save) 
-//  SREG x0, 0*REGWIDTH(x31)
-//  SREG x1, 1*REGWIDTH(x31)
-//  SREG x2, 2*REGWIDTH(x31)
-//  SREG x3, 3*REGWIDTH(x31)
-//  SREG x4, 4*REGWIDTH(x31)
-//  SREG x5, 5*REGWIDTH(x31)
-//  SREG x6, 6*REGWIDTH(x31)
-//  SREG x7, 7*REGWIDTH(x31)
-//  SREG x8, 8*REGWIDTH(x31)
-//  SREG x9, 9*REGWIDTH(x31)
-//  SREG x10, 10*REGWIDTH(x31)
-//  SREG x11, 11*REGWIDTH(x31)
-//  SREG x12, 12*REGWIDTH(x31)
-//  SREG x13, 13*REGWIDTH(x31)
-//  SREG x14, 14*REGWIDTH(x31)
-//  SREG x15, 15*REGWIDTH(x31)
-//  SREG x16, 16*REGWIDTH(x31)
-//  SREG x17, 17*REGWIDTH(x31)
-//  SREG x18, 18*REGWIDTH(x31)
-//  SREG x19, 19*REGWIDTH(x31)
-//  SREG x20, 20*REGWIDTH(x31)
-//  SREG x21, 21*REGWIDTH(x31)
-//  SREG x22, 22*REGWIDTH(x31)
-//  SREG x23, 23*REGWIDTH(x31)
-//  SREG x24, 24*REGWIDTH(x31)
-//  SREG x25, 25*REGWIDTH(x31)
-//  SREG x26, 26*REGWIDTH(x31)
-//  SREG x27, 27*REGWIDTH(x31)
-//  SREG x28, 28*REGWIDTH(x31)
-//  SREG x29, 29*REGWIDTH(x31)
-//  SREG x30, 30*REGWIDTH(x31)
-//  addi x30, x31, 0                // mv gpr pointer to x30
-//  csrr x31, CSR_MSCRATCH              // restore value of x31
-//  SREG x31, 31*REGWIDTH(x30)      // store x31
-//#endif
-//.endm
-//
-//
-//.macro RVTEST_DATA_BEGIN
-//.data
-//.align 4
-//.global rvtest_data_begin
-//rvtest_data_begin:
-//#ifdef rvtest_mtrap_routine
-//trapreg_sv:	
-//      .fill    7, REGWIDTH, 0xdeadbeef     /* handler reg save area, 1 extra wd just in case */
-//tramptbl_sv:	// save area of existing trampoline table
-//.rept NUM_SPECD_INTCAUSES
-//	J	.+0		  /* prototype jump instruction, offset to be filled in */
-//.endr
-//mtvec_save:
-//	.dword	0		  /* save area for incoming mtvec */
-//mscratch_save:	
-//	.dword  0		  /* save area for incoming mscratch */
-//#endif
-//
-//.endm
-//
-//.macro RVTEST_DATA_END
-//.global rvtest_data_end
-//rvtest_data_end:
-//.endm
-//
-
 #define RVTEST_CASE(_PNAME,_DSTR,...)                               
 
 #define RVTEST_SIGBASE(_R,_TAG) \
@@ -830,7 +389,6 @@ rvtest_data_end:
 
 #define RVTEST_SUPERVISOR_EXIT()\
   /*loading an error code to indicate exit*/\
-  li a1, 0;\
   li a0, 173;\
   /*performing an ecall to exit*/\
   ecall;
@@ -856,7 +414,6 @@ rvtest_data_end:
 #define RVTEST_USER_EXIT()\
   /*loading an error code to indicate exit*/\
   li a0, 173;\
-  li a1, 173;\
   /*performing an ecall to exit*/\
   ecall;
 
