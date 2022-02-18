@@ -214,10 +214,12 @@ unintended_trap_handler:
   beq t3, t0, illegal_handler
   li t3, 4
   beq t3, t0, load_misaligned_handler
-
+  li t3, 6
+  beq t3, t0, store_misaligned_handler
   // for all other cause values restore and exit handler
   j restore_and_exit_trap
 
+store_misaligned_handler:
 load_misaligned_handler:
   // load the lowest byte of the instruction into t3. address of instruction in 
   lb t1, 0(t2)
