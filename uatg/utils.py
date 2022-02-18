@@ -232,7 +232,7 @@ def load_yaml(file):
         exit('INVALID_FILE/PATH')
 
 
-def combine_config_yamls(configuration_path):
+def combine_config_yamls(configuration):
     """
         This function reads all the YAML file paths specified by the user.
         Loads the data into a dictionary and then returns it to the invoking
@@ -240,37 +240,37 @@ def combine_config_yamls(configuration_path):
     """
     dut_dict = {}
     try:
-        dut_dict['isa_dict'] = load_yaml(configuration_path[0])  # Yaml for ISA
-    except IndexError:
+        dut_dict['isa_dict'] = load_yaml(configuration['isa'])  # Yaml for ISA
+    except KeyError:
         logger.error('isa configuration yaml is missing. '
                      'UATG cannot proceed without '
                      'providing a path to the valid YAML file')
         raise Exception('MISSING_ISA_CONFIG_YAML')
     try:
         dut_dict['core_config'] = load_yaml(
-            configuration_path[1])  # Yaml for DUT configuration
-    except IndexError:
+            configuration['core'])  # Yaml for DUT configuration
+    except KeyError:
         logger.error('core config yaml is missing. UATG cannot proceed without '
                      'providing a path to the valid YAML file')
         raise Exception('MISSING_CORE_CONFIGURATION_YAML')
     try:
         dut_dict['rv64i_custom'] = load_yaml(
-            configuration_path[2])  # Yaml for Modules
-    except IndexError:
+            configuration['custom'])  # Yaml for Modules
+    except KeyError:
         logger.error('custom_config.yaml path is missing. UATG cannot proceed '
                      'without providing a path to the YAMLfile')
         raise Exception('MISSING_CUSTOM_CONFIGURATION_YAML')
     try:
         dut_dict['csr_grouping'] = load_yaml(
-            configuration_path[3])  # YAML for CSRs
-    except IndexError:
+            configuration['csr_grouping'])  # YAML for CSRs
+    except KeyError:
         logger.error('Path to csr_grouping.yaml is invalid.')
         raise Exception('MISSING_CSRGROUPING')
 
     try:
         dut_dict['rv64_debug'] = load_yaml(
-            configuration_path[4])  # YAML for CSRs
-    except IndexError:
+            configuration['debug'])  # YAML for CSRs
+    except KeyError:
         logger.error('Path to rv_debug.yaml is invalid.')
         raise Exception('MISSING_RV_DEBUG')
 
@@ -467,24 +467,6 @@ def create_config_file(config_path):
           '\n\n# location to store the link.ld linker file. By default it\'s ' \
           'the target directory within chromite_uatg_tests\n' \
           'linker_dir = /home/user/myquickstart/chromite_uatg_tests/target' \
-          '\n\n# Path to the yaml files containing DUT Configuration.\n' \
-          '# If you are using the CHROMITE core, uncomment the following line'\
-          ' by removing the \'#\'.\n# By doing this, UATG will use the '\
-          'checked YAMLs of Chromite\n'\
-          '# configuration_files = /home/user/myquickstart/chromite/build/'\
-          'rv64i_isa_checked.yaml,'\
-          '/home/user/myquickstart/chromite/build/core64_checked.yaml,' \
-          '/home/user/myquickstart/chromite/build/rv64i_custom_checked.yaml,' \
-          '/home/user/myquickstart/chromite/sample_config/c64/'\
-          'csr_grouping64.yaml,' \
-          '/home/user/myquickstart/chromite/build/rv64i_debug_checked.yaml\n\n'\
-          '# comment the following line by adding a \'#\' in front if you are' \
-          ' using the checked YAMLs from CHROMITE\n'\
-          'configuration_files = /home/user/myquickstart/isa_config.yaml,' \
-          '/home/user/myquickstart/core_config.yaml,' \
-          '/home/user/myquickstart/custom_config.yaml,' \
-          '/home/user/myquickstart/csr_grouping.yaml,' \
-          '/home/user/myquickstart/rv_debug.yaml' \
           '\n\n# Absolute Path of the yaml file contain' \
           'ing the signal aliases of the DUT ' \
           '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/' \
@@ -498,7 +480,26 @@ def create_config_file(config_path):
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = False\n'
+          'are generated\ngen_cvg = False\n'\
+          '\n\n# Path to the yaml files containing DUT Configuration.\n' \
+          '# If you are using the CHROMITE core, uncomment the following line'\
+          ' by removing the \'#\'.\n# By doing this, UATG will use the '\
+          'checked YAMLs of Chromite\n'\
+          '#[uatg.configuration_files]\n'\
+          '#isa = /home/user/myquickstart/chromite/build/'\
+          'rv64i_isa_checked.yaml \n'\
+          '#core = /home/user/myquickstart/chromite/build/core64_checked.yaml\n'\
+          '#custom = /home/user/myquickstart/chromite/build/rv64i_custom_checked.yaml\n'\
+          '#csr_grouping = /home/user/myquickstart/chromite/sample_config/c64/csr_grouping64.yaml\n'\
+          '#debug = /home/user/myquickstart/chromite/build/rv64i_debug_checked.yaml\n\n'\
+          '# comment the following line by adding a \'#\' in front if you are' \
+          ' using the checked YAMLs from CHROMITE\n\n'\
+          '[uatg.configuration_files]\n'\
+          'isa = /home/user/myquickstart/isa_config.yaml\n' \
+          'core = /home/user/myquickstart/core_config.yaml\n' \
+          'custom = /home/user/myquickstart/custom_config.yaml\n' \
+          'csr_grouping = /home/user/myquickstart/csr_grouping.yaml\n' \
+          'debug = /home/user/myquickstart/rv_debug.yaml' \
 
     with open(os.path.join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)

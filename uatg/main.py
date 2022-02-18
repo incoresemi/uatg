@@ -241,7 +241,7 @@ def from_config(config_file, verbose):
     modules = config['uatg']['modules']
     # Uncomment to overwrite verbosity from config file.
     # verbose = config['uatg']['verbose']
- 
+
     logger.level(verbose)
     logging.getLogger('yapsy').setLevel(logging.ERROR)
     module = clean_modules(module_dir, modules)
@@ -251,7 +251,7 @@ def from_config(config_file, verbose):
     if config['uatg']['gen_test'].lower() == 'true' or \
             config['uatg']['gen_cvg'].lower() == 'true' or \
             config['uatg']['val_test'].lower() == 'true':
-        configuration = config['uatg']['configuration_files'].split(',')
+        configuration = config['uatg.configuration_files']
         dut_dict = combine_config_yamls(configuration)
 
     if config['uatg']['gen_test'].lower() == 'true':
