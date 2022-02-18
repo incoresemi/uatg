@@ -452,8 +452,12 @@ def create_config_file(config_path):
         Invoked by running uatg setup.
     """
     cfg = '# See LICENSE.incore for license details\n\n' \
-          '[uatg]\n\n# [info, error, debug] set verbosity level to view ' \
-          'different levels of messages.\nverbose = info\n# [True, False] ' \
+          '[uatg]\n\n'\
+          '# number of processes to spawn. Default = 1\n'\
+          'jobs = 1\n'\
+          '\n# [info, error, debug] set verbosity level to view ' \
+          'different levels of messages. '\
+          '\nverbose = info\n\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
           ' tests are to be generated/validated in comma separated format.\n' \
@@ -764,7 +768,8 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
         base_key = os.path.basename(test)[:-2]
         test_list[base_key] = {}
         test_list[base_key]['generator'] = 'uatg'
-        test_list[base_key]['work_dir'] = asm_dir + '/' + base_key
+        test_list[base_key]['work_dir'] = os.path.abspath(asm_dir + '/' +
+                                                          base_key)
         test_list[base_key]['isa'] = isa
         test_list[base_key]['march'] = march
         test_list[base_key]['mabi'] = 'lp64'
@@ -776,8 +781,8 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
             'linker_args'] = '-static -nostdlib -nostartfiles -lm -lgcc -T'
         test_list[base_key]['linker_file'] = os.path.abspath(
             os.path.join(target_dir, 'link.ld'))
-        test_list[base_key]['asm_file'] = os.path.join(asm_dir, base_key,
-                                                       base_key + '.S')
+        test_list[base_key]['asm_file'] = os.path.abspath(
+            os.path.join(asm_dir, base_key, base_key + '.S'))
         test_list[base_key]['include'] = [env_dir, target_dir]
         test_list[base_key]['compile_macros'] = compile_macros_dict[base_key]
         test_list[base_key]['extra_compile'] = []

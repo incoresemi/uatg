@@ -136,6 +136,11 @@ def clean(module_dir, work_dir, verbose):
               help='Set verbose level for debugging',
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
+@click.option('--jobs',
+              '-j',
+              default=1,
+              help='Number of Jobs for UATG to spawn',
+              type=click.INT)
 @cli.command()
 def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
              gen_test_list, work_dir, modules, verbose):
@@ -161,7 +166,8 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
                    modules_dir=module_dir,
                    modules=module,
                    config_dict=dut_dict,
-                   test_list=str(gen_test_list))
+                   test_list=str(gen_test_list),
+                   jobs=jobs)
     if gen_cvg:
         if alias_file is not None:
             alias_dict = load_yaml(alias_file)
@@ -169,7 +175,8 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
                         config_dict=dut_dict,
                         modules_dir=module_dir,
                         modules=module,
-                        alias_dict=alias_dict)
+                        alias_dict=alias_dict,
+                        jobs=jobs)
         else:
             logger.error('Can not generate covergroups without alias_file.')
             exit('GEN_CVG WITHOUT ALIAS_FILE')
@@ -245,6 +252,10 @@ def from_config(config_file, verbose):
     logger.level(verbose)
     logging.getLogger('yapsy').setLevel(logging.ERROR)
     module = clean_modules(module_dir, modules)
+    try:
+        jobs = int(config['uatg']['jobs'])
+    except ValueError:
+        jobs = 1
 
     info(__version__)
     dut_dict = None
@@ -260,7 +271,8 @@ def from_config(config_file, verbose):
                        modules_dir=module_dir,
                        modules=module,
                        config_dict=dut_dict,
-                       test_list=config['uatg']['gen_test_list'])
+                       test_list=config['uatg']['gen_test_list'],
+                       jobs=jobs)
 
     if config['uatg']['gen_cvg'].lower() == 'true':
         alias_dict = load_yaml(config['uatg']['alias_file'])
@@ -268,7 +280,8 @@ def from_config(config_file, verbose):
                     modules=module,
                     modules_dir=module_dir,
                     config_dict=dut_dict,
-                    alias_dict=alias_dict)
+                    alias_dict=alias_dict,
+                    jobs=jobs)
 
     if config['uatg']['val_test'].lower() == 'true':
         validate_tests(modules=module,

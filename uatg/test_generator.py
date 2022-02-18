@@ -193,7 +193,7 @@ def sv_generation_process(args):
 
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
-                   modules_dir):
+                   modules_dir, jobs):
     """
     The function generates ASM files for all the test classes specified within
     the module_dir. The user can also select the modules for which he would want
@@ -318,9 +318,9 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
                  work_dir, compile_macros_dict))
 
-        
         # multi processing process pool
-        process_pool = Pool()
+        logger.debug(f"Spawning {jobs} processes")
+        process_pool = Pool(jobs)
         # creating a map of processes
         process_pool.map(asm_generation_process, arg_list)
         process_pool.close()
@@ -382,7 +382,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             yaml.dump(test_list_dict, outfile)
 
 
-def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
+def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict, jobs):
     """
     The generate_sv function dumps the covergroups written by the user into a
     'coverpoints.sv' file present within the 'sv_top' directory within the work
@@ -450,7 +450,8 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict):
                 (plugin, core_yaml, isa_yaml, alias_dict, cover_list))
 
         # multi processing process pool
-        process_pool = Pool()
+        logger.debug(f"Spawning {jobs} processes")
+        process_pool = Pool(jobs)
         # creating a map of processes
         process_pool.map(sv_generation_process, arg_list)
         process_pool.close()
