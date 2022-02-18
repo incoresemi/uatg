@@ -39,6 +39,7 @@ class instruction_generator:
     def __init__(self, isa='RV64I'):
         """
             Constructor of the class.
+            
             :param isa: string containing the ISA for which instructions should
                         be generated.
         """
@@ -54,16 +55,14 @@ class instruction_generator:
         self.imm_fields = {
             '$imm11': {str(num) for num in range(-1024, 1024)},
             '$imm12': {str(num) for num in range(-2048, 2048)},
-            '$uimm20': {str(num) for num in range(0, 2 ** 20)},
+            '$uimm20': {str(num) for num in range(0, 2**20)},
             '$imm6': {str(num) for num in range(-32, 32)},
             '$imm8': {str(num) for num in range(-128, 128)},
-            '$nzimm6': {str(num) for num in range(-2 ** 5, 2 ** 5, 16) if
-                        num != 0},
-            '$nzuimm6': {str(num) for num in range(1, 2 ** 6)},
-            '$uimm6': {str(num) for num in range(0, 2 ** 6)},
+            '$nzimm6': {str(num) for num in range(-2**5, 2**5, 16) if num != 0},
+            '$nzuimm6': {str(num) for num in range(1, 2**6)},
+            '$uimm6': {str(num) for num in range(0, 2**6)},
             '$uimm8': {str(num) for num in range(0, 256)},
-            '$nzuimm8': {str(num) for num in range(0, 2 ** 8, 16) if
-                         num != 0},
+            '$nzuimm8': {str(num) for num in range(0, 2**8, 16) if num != 0},
             '$pred': {'r', 'rw', 'w'},
             '$succ': {'r', 'rw', 'w'},
         }
@@ -71,8 +70,8 @@ class instruction_generator:
         self.default_modifiers = dict.fromkeys(
             ['xrs1', 'xrs2', 'xrs3', 'xrd', 'rm'], integer_reg_file)
         self.default_modifiers.update({
-            'shamt5': {str(num) for num in range(0, 2 ** 5)},
-            'shamt6': {str(num) for num in range(0, 2 ** 6)}
+            'shamt5': {str(num) for num in range(0, 2**5)},
+            'shamt6': {str(num) for num in range(0, 2**6)}
         })
         self.default_modifiers.update(self.imm_fields)
 
@@ -146,7 +145,7 @@ class instruction_generator:
             :param instruction: str containing the asm-syntax of an instruction
 
             :return: str with the variable fields are replaced with random
-            choice of registers/values
+                     choice of registers/values
 
         """
         r_inst = instruction
@@ -302,7 +301,14 @@ class instruction_generator:
                 rt = f'\n.align {_align}\n{_lab}:{_nop}\nla sp, {_lab}' \
                      f'\n{inst} x8, 0(sp)\n'
 
-        elif inst in ('sw', 'sd', 'sb', 'sh', 'c.swsp', 'c.sdsp',):
+        elif inst in (
+                'sw',
+                'sd',
+                'sb',
+                'sh',
+                'c.swsp',
+                'c.sdsp',
+        ):
             if inst == 'sb':
                 rt = f'\n{_lab}:\n\tnop\nla x1, {_lab}\n' \
                      f'li x2, {0x13}\n{inst} x2, 0(x1)\n'
@@ -348,9 +354,9 @@ class instruction_generator:
             variable fields
 
             :param instructions: 'random' or a list of instructions for which
-            you wish to generate instructions
+                                 you wish to generate instructions
             :param modifiers: None or dictionary containing custom replacement
-            options.
+                              options.
             :param no_of_insts: number of instructions to be generated
 
             :return: a list containing generated asm instructions
@@ -411,10 +417,10 @@ class instruction_generator:
             specify specific value/range of values for variable fields
 
             :param instructions: 'random' or a list of instructions for which
-            you wish to generate instructions
+                                 you wish to generate instructions
 
             :param modifiers: None or dictionary containing custom replacement
-            options.
+                              options.
             :param no_of_insts: number of instructions to be generated
             :return: a list containing generated asm instructions.
         """
@@ -479,12 +485,13 @@ class instruction_generator:
             _lab = self.__generate_labels(prefix=inst)
             _nop = '\tnop\n\tnop' if _align == 3 else '\tnop'
             _s_nop = 0x1300000013 if self.xlen == 64 else 0x13
-            ([xrs1, temp], xrs2, xrd) = (sample(modifiers['xrs1'], 2),
-                                         sample(modifiers['xrs2'], 1)[0],
-                                         sample(modifiers['xrd'], 1)[0])
+            ([xrs1,
+              temp], xrs2, xrd) = (sample(modifiers['xrs1'],
+                                          2), sample(modifiers['xrs2'], 1)[0],
+                                   sample(modifiers['xrd'], 1)[0])
             _ = 0
-            while len({xrs1, temp, xrs2,
-                       xrd}) != 4 or xrs2 == 'x0' or xrs1 == 'x0':
+            while len({xrs1, temp, xrs2, xrd
+                      }) != 4 or xrs2 == 'x0' or xrs1 == 'x0':
                 # making sure that register dependencies are met
                 ([xrs1, temp], xrs2, xrd) = (sample(modifiers['xrs1'], 2),
                                              sample(modifiers['xrs2'], 1)[0],
@@ -545,12 +552,13 @@ class instruction_generator:
         selection of instructions or a specified list of instructions. The
         modifiers can be used to specify specific value/range of values for
         variable fields
-        :param instructions: 'random' or a list of
-        instructions for which you wish to generate instructions
+        
+        :param instructions: 'random' or a list of instructions for which you 
+                             wish to generate instructions
         :param modifiers: None or dictionary containing custom replacement
-        options.
-        :param no_of_insts: number of instructions to be generated :return: a
-        list containing generated asm instructions
+                          options.
+        :param no_of_insts: number of instructions to be generated 
+        :return: a list containing generated asm instructions
         """
         modifiers = self.__modifier_update(modifiers)
 
@@ -591,9 +599,9 @@ class instruction_generator:
         variable fields
 
         :param instructions: 'random' or a list of instructions for which you
-            wish to generate instructions
+                             wish to generate instructions
         :param modifiers: None or dictionary containing custom replacement
-            options.
+                          options.
         :param no_of_insts: number of instructions to be generated
         :return: a list containing generated asm instructions
 
@@ -637,9 +645,9 @@ class instruction_generator:
         variable fields
 
         :param instructions: 'random' or a list of instructions for which you
-            wish to generate instructions
+                             wish to generate instructions
         :param modifiers: None or dictionary containing custom replacement
-            options.
+                          options.
         :param no_of_insts: number of instructions to be generated
         :return: a list containing generated asm instructions
         """
@@ -651,13 +659,26 @@ class instruction_generator:
                                           k=no_of_insts)
             for key in random_insts:
                 if key in (
-                        'c.beqz', 'c.bnez', 'c.j', 'c.jal', 'c.jalr', 'c.jr',
-                        'c.ld', 'c.sd',
-                        'c.lw', 'c.sw'
-                                'c.fld', 'c.flw',
-                        'c.fsd', 'c.fsw',
-                        'c.fldsp', 'c.fsdsp',
-                        'c.lwsp', 'c.ldsp', 'c.swsp', 'c.sdsp',
+                        'c.beqz',
+                        'c.bnez',
+                        'c.j',
+                        'c.jal',
+                        'c.jalr',
+                        'c.jr',
+                        'c.ld',
+                        'c.sd',
+                        'c.lw',
+                        'c.sw'
+                        'c.fld',
+                        'c.flw',
+                        'c.fsd',
+                        'c.fsw',
+                        'c.fldsp',
+                        'c.fsdsp',
+                        'c.lwsp',
+                        'c.ldsp',
+                        'c.swsp',
+                        'c.sdsp',
                 ):
                     ret_list.append(self.__handle_branch_load_store(key))
                 elif key == 'c.lui':
@@ -675,11 +696,28 @@ class instruction_generator:
                     ret_list.append('nop')
                 else:
                     inst = random.choice(instructions)
-                    if inst in ('c.beqz', 'c.bnez', 'c.j', 'c.jal', 'c.jalr',
-                                'c.jr', 'c.ld', 'c.sd', 'c.lw', 'c.sw', 'c.fld',
-                                'c.flw', 'c.fsd', 'c.fsw', 'c.fldsp', 'c.fsdsp',
-                                'c.lwsp', 'c.ldsp', 'c.swsp', 'c.sdsp',
-                                ):
+                    if inst in (
+                            'c.beqz',
+                            'c.bnez',
+                            'c.j',
+                            'c.jal',
+                            'c.jalr',
+                            'c.jr',
+                            'c.ld',
+                            'c.sd',
+                            'c.lw',
+                            'c.sw',
+                            'c.fld',
+                            'c.flw',
+                            'c.fsd',
+                            'c.fsw',
+                            'c.fldsp',
+                            'c.fsdsp',
+                            'c.lwsp',
+                            'c.ldsp',
+                            'c.swsp',
+                            'c.sdsp',
+                    ):
                         ret_list.append(self.__handle_branch_load_store(inst))
                     elif inst == 'c.lui':
                         r = random.randint(1, 32)
@@ -713,9 +751,9 @@ class instruction_generator:
         variable fields
 
         :param instructions: 'random' or a list of instructions for which you
-            wish to generate instructions
+                              wish to generate instructions
         :param modifiers: None or dictionary containing custom replacement
-            options.
+                          options.
         :param no_of_insts: number of instructions to be generated
         :return: a list containing generated asm instructions
 
