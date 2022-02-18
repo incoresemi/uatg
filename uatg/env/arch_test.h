@@ -145,7 +145,7 @@ trap_handler_entry:
   // copy the exception cause into t0
   csrr t0, CSR_MCAUSE
 
-  // copy the mtbal into t1
+  // copy the mtval into t1
   csrr t1, CSR_MTVAL
 
   // copy the mepc into t2
@@ -172,13 +172,17 @@ trap_handler_entry:
   bne t3, a0, unintended_trap_handler
 
 intended_trap_handler:
+
+#ifdef s_u_mode_test
   // ecall from Supervisor Mode
   li t3, 9
   beq t3, t0, supervisor_to_machine_ecall_handler // if t0 == 9, the trap is due to an ecall from S
   li t3, 8
   beq t3, t0, user_to_supervisor_ecall_handler // if t0 == 8, the trap is due to an ecall from U
+#endif
   j unintended_trap_handler
 
+#ifdef s_u_mode_test
 user_to_supervisor_ecall_handler:
   la t5, test_exit
   // update MPP to perform MRET into Supervisor
@@ -197,7 +201,7 @@ supervisor_to_machine_ecall_handler:
   addi t6, x0, 3
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
-
+#endif
 mepc_updation:
   csrw CSR_MEPC, t5
   
@@ -363,6 +367,7 @@ rvtest_data_end:
     or x2, x3, x2;\
     csrrw x0,mstatus,x2;
 
+#ifdef s_u_mode_test
 //--------------------------------Supervisor Test Macros------------------------------------------//
 #define RVTEST_SUPERVISOR_ENTRY(pg_size_exp, mode, shift_amount)\
   /*setting up SATP*/\
@@ -416,6 +421,8 @@ rvtest_data_end:
   li a0, 173;\
   /*performing an ecall to exit*/\
   ecall;
+
+#endif
 
 //------------------------------ BORROWED FROM ANDREW's RISC-V TEST MACROS -----------------------//
 #define MASK_XLEN(x) ((x) & ((1 << (__riscv_xlen - 1) << 1) - 1))
