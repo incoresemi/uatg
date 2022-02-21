@@ -70,8 +70,8 @@ class instruction_generator:
         self.default_modifiers = dict.fromkeys(
             ['xrs1', 'xrs2', 'xrs3', 'xrd', 'rm'], integer_reg_file)
         self.default_modifiers.update({
-            'shamt5': {str(num) for num in range(0, 2**5)},
-            'shamt6': {str(num) for num in range(0, 2**6)}
+            'shamt5': {str(num) for num in range(1, 2**5)},
+            'shamt6': {str(num) for num in range(1, 2**6)}
         })
         self.default_modifiers.update(self.imm_fields)
 
