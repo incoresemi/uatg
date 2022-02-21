@@ -112,20 +112,20 @@ def asm_generation_process(args):
             # Appending Coding Macros & Instructions
             # asm += rvcode_begin + asm_code + rvcode_end
 
-            asm += (test_format_string[3] + priv_asm_code[0] +\
-                    priv_asm_code[1] + asm_code +\
-                    priv_asm_code[2] + test_format_string[4])
+            asm += test_format_string[3] + priv_asm_code[0] + \
+                priv_asm_code[1] + asm_code + \
+                priv_asm_code[2] + test_format_string[4]
 
             # Appending RVTEST_DATA macros and data values
             # asm += rvtest_data_begin + asm_data + rvtest_data_end
-            asm += (test_format_string[5] + asm_data + priv_asm_data +\
-                    test_format_string[6])
+            asm += test_format_string[5] + asm_data + priv_asm_data + \
+                test_format_string[6]
 
             # Appending RVMODEL macros
             # asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
 
-            asm += (test_format_string[7] + asm_sig +\
-                    test_format_string[8])
+            asm += test_format_string[7] + asm_sig + \
+                test_format_string[8]
 
             os.mkdir(os.path.join(work_tests_dir, test_name))
             with open(os.path.join(work_tests_dir, test_name, test_name + '.S'),

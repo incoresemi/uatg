@@ -143,7 +143,7 @@ def clean(module_dir, work_dir, verbose):
               type=click.INT)
 @cli.command()
 def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
-             gen_test_list, work_dir, modules, verbose):
+             gen_test_list, work_dir, modules, verbose, jobs):
     """
     Generates tests, cover-groups for a list of modules corresponding to the DUT
     parameters specified in the configuration yamls, inside the work_dir.
@@ -282,7 +282,7 @@ def from_config(config_file, verbose):
 
     if config['uatg']['test_compile'].lower() == 'true':
         logger.info(f'Empty Compilation is enabled')
-        logger.info(f'UATG will use RISCV-GCC to check if the generated '\
+        logger.info(f'UATG will use RISCV-GCC to check if the generated '
                     f'assembly tests are syntatically correct')
         run_make(work_dir=config_work_dir, jobs=jobs)
 
@@ -316,22 +316,84 @@ def from_config(config_file, verbose):
               '-cp',
               multiple=False,
               required=False,
+              default='./',
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Directory to store the config.ini file")
+@click.option('--jobs',
+              '-j',
+              multiple=False,
+              required=False,
+              default=1,
+              type=click.INT,
+              help="No. of jobs to be spawned by uatg")
+@click.option('--modules',
+              '-m',
+              multiple=False,
+              required=False,
+              default='all',
+              type=click.STRING,
+              help="Modules to generate code for...")
+@click.option('--module_dir',
+              '-md',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the modules directory")
+@click.option('--work_dir',
+              '-wd',
+              multiple=False,
+              required=False,
+              default='./',
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the working directory where generated files will be"
+              " stored.")
+@click.option('--linker_dir',
+              '-ld',
+              multiple=False,
+              required=False,
+              default='./',
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the linker directory")
+@click.option('--test_compile',
+              '-tc',
+              is_flag=True,
+              required=False,
+              default=False,
+              help='Set this flag to generate the Covergroups')
+@click.option(
+    '--configuration',
+    '-cfg',
+    multiple=True,
+    required=True,
+    type=click.Path(exists=True, resolve_path=True, readable=True),
+    help=("Path to the DUT configuration YAML Files. "
+          "The YAML files should be specified (space separated) in the "
+          "following  order "
+          "1. isa_config.yaml "
+          "2. core_config.yaml "
+          "3. custom_config.yaml "
+          "4. csr_grouping.yaml "
+          "5. rv_debug.yaml"
+          "The ordering should be strictly followed and any deviation will "
+          "result in  UATG erroring out. This Parameter is needed to "
+          "generate/validate tests and also generate covergroups"))
 @click.option('--alias_path',
               '-ap',
               multiple=False,
               required=False,
+              default='./',
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Directory to store the aliasing.yaml file")
 @click.option('--dut_path',
               '-dp',
               multiple=False,
               required=False,
+              default='./',
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Directory to store the DUT configuration yaml files")
 @cli.command()
-def setup(config_path, alias_path, dut_path):
+def setup(config_path, jobs, modules, module_dir, work_dir, linker_dir,
+          configuration, alias_path, test_compile, dut_path):
     """
         Creates template configuration files.
 
@@ -341,14 +403,12 @@ def setup(config_path, alias_path, dut_path):
         Optional: -dp, --dut_path;  -ap, --alias_path; -cp, --config_path
     """
 
-    if config_path is None:
-        config_path = './'
-    if alias_path is None:
-        alias_path = './'
-    if dut_path is None:
-        dut_path = './'
-
-    create_config_file(config_path=config_path)
+    create_config_file(config_path=config_path, jobs=jobs,
+                       modules=modules, module_dir=module_dir,
+                       work_dir=work_dir, linker_dir=linker_dir,
+                       alias_path=alias_path, test_compile=test_compile,
+                       cfg_files=configuration,
+                       )
     create_dut_config_files(dut_config_path=dut_path)
     create_alias_file(alias_path=alias_path)
 

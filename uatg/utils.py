@@ -448,15 +448,38 @@ def create_plugins(plugins_path, module):
                     f'Skippping test {test_name} as index yaml has False')
 
 
-def create_config_file(config_path):
+def create_config_file(config_path, jobs, modules, module_dir, work_dir,
+                       linker_dir, alias_path, test_compile, cfg_files):
     """
         Creates a template config.ini file at the config_path directory.
         Invoked by running uatg setup.
     """
+    work_dir = '/home/user/myquickstart/work/' if work_dir is None else work_dir
+
+    cfg_files = '[uatg.configuration_files]\nisa = ' \
+                '/home/user/myquickstart/isa_config.yaml\ncore = ' \
+                '/home/user/myquickstart/core_config.yaml\ncustom = ' \
+                '/home/user/myquickstart/custom_config.yaml\ncsr_grouping = ' \
+                '/home/user/myquickstart/csr_grouping.yaml\ndebug = ' \
+                '/home/user/myquickstart/rv_debug.yaml' if cfg_files is None \
+        else f'[uatg.configuration_files]\nisa = {cfg_files[0]}\n' \
+             f'core = {cfg_files[1]}\ncustom = {cfg_files[2]}\n' \
+             f'csr_grouping = {cfg_files[3]}\ndebug = {cfg_files[4]}'
+
+    modules = 'all' if modules is None else modules
+    module_dir = '/home/user/myquickstart/chromite_uatg_tests/modules/' \
+        if module_dir is None else module_dir
+
+    linker_dir = '/home/user/myquickstart/chromite_uatg_tests/target' \
+        if linker_dir is None else linker_dir
+
+    alias_path = '/home/user/myquickstart/chromite_uatg_tests/' \
+        if alias_path is None else alias_path
+
     cfg = '# See LICENSE.incore for license details\n\n' \
           '[uatg]\n\n'\
           '# number of processes to spawn. Default = 1\n'\
-          'jobs = 1\n'\
+          f'jobs = {jobs}\n'\
           '\n# [info, error, debug] set verbosity level to view ' \
           'different levels of messages. '\
           '\nverbose = info\n\n# [True, False] ' \
@@ -465,31 +488,26 @@ def create_config_file(config_path):
           ' tests are to be generated/validated in comma separated format.\n' \
           '# Run \'uatg --list-modules -md <path> \' to find all the modules ' \
           'that are supported.\n# Use \'all\' to generate/validate all ' \
-          'modules\nmodules = all\n\n# Absolute path to chromite_uatg_tests' \
-          '/modules Directory\n' \
-          'module_dir = /home/user/myquickstart/chromite_uatg_tests/modules/' \
+          f'modules\nmodules = {modules}\n' \
+          f'\n# Absolute path to chromite_uatg_tests/modules Directory\n' \
+          f'module_dir = {module_dir}' \
           '\n\n# Directory to dump assembly files and reports\n' \
-          'work_dir = /home/user/myquickstart/work/' \
+          f'work_dir = {work_dir}' \
           '\n\n# location to store the link.ld linker file. By default it\'s ' \
           'the target directory within chromite_uatg_tests\n' \
-          'linker_dir = /home/user/myquickstart/chromite_uatg_tests/target' \
-          '\n\n# Absolute Path of the yaml file contain' \
-          'ing the signal aliases of the DUT ' \
-          '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/' \
-          'aliasing.yaml' \
-          '\n\n# [True, False] If the gen_test_' \
+          f'linker_dir = {linker_dir}' \
+          '\n\n# Absolute Path of the yaml file containing the signal ' \
+          'aliases of the DUT ' \
+          f'\nalias_file = {alias_path}\n\n# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Unless you want to ' \
           'run individual tests in river_core, set the flag to True\n' \
           'gen_test_list = True\n# [True, False] If the gen_test flag is True' \
-          ', assembly files are generated/overwritten\ngen_test = True\n'\
-          '# [True, False] if test_compile flag is True, the generated '\
-          'assembly files are compiled to uncover syntax errors if any.\n'\
-          'test_compile = True\n# ' \
+          ', assembly files are generated/overwritten\ngen_test = True\n# ' \
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = False\n'\
+          f'are generated\ngen_cvg = False\n\ntest_compile = {test_compile}'\
           '\n\n# Path to the yaml files containing DUT Configuration.\n' \
           '# If you are using the CHROMITE core, uncomment the following line'\
           ' by removing the \'#\'.\n# By doing this, UATG will use the '\
@@ -497,18 +515,13 @@ def create_config_file(config_path):
           '#[uatg.configuration_files]\n'\
           '#isa = /home/user/myquickstart/chromite/build/'\
           'rv64i_isa_checked.yaml \n'\
-          '#core = /home/user/myquickstart/chromite/build/core64_checked.yaml\n'\
-          '#custom = /home/user/myquickstart/chromite/build/rv64i_custom_checked.yaml\n'\
-          '#csr_grouping = /home/user/myquickstart/chromite/sample_config/c64/csr_grouping64.yaml\n'\
-          '#debug = /home/user/myquickstart/chromite/build/rv64i_debug_checked.yaml\n\n'\
-          '# comment the following line by adding a \'#\' in front if you are' \
-          ' using the checked YAMLs from CHROMITE\n\n'\
-          '[uatg.configuration_files]\n'\
-          'isa = /home/user/myquickstart/isa_config.yaml\n' \
-          'core = /home/user/myquickstart/core_config.yaml\n' \
-          'custom = /home/user/myquickstart/custom_config.yaml\n' \
-          'csr_grouping = /home/user/myquickstart/csr_grouping.yaml\n' \
-          'debug = /home/user/myquickstart/rv_debug.yaml' \
+          '#core = /home/user/myquickstart/chromite/build/core64_checked.yaml' \
+          '\n#custom = /home/user/myquickstart/chromite/build/rv64i_custom_' \
+          'checked.yaml\n#csr_grouping = /home/user/myquickstart/chromite/' \
+          'sample_config/c64/csr_grouping64.yaml\n#debug = /home/user/myquick' \
+          'start/chromite/build/rv64i_debug_checked.yaml\n\n# comment the ' \
+          'following line by adding a \'#\' in front if you are using the ' \
+          f'checked YAMLs from CHROMITE\n\n{cfg_files}' \
 
     with open(os.path.join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
@@ -878,14 +891,14 @@ def setup_pages(page_size=4096,
     if mode == 'machine':
         # machine mode tests don't have anything to do with pages.
         # so, we return a list of empty strings.
-        return (['', '', ''], '')
+        return ['', '', ''], ''
 
     entries = page_size // 8
     # assuming that the size will always be a power of 2
     power = len(bin(page_size)[2:]) - 1
     align = power
     shift_amount = 60
-
+    levels, mode_val = None, None
     if paging_mode == 'sv32':
         mode_val = 1  # paging mode for the SATP register
         levels = 2
@@ -932,8 +945,8 @@ def setup_pages(page_size=4096,
 
     ll_entries_s = ''
     ll_entries_u = ''
-    ll_page_s = ''
-    ll_page_u = ''
+    # ll_page_s = ''
+    # ll_page_u = ''
     base_address_new = base_address
 
     if mode == 'user':
@@ -941,8 +954,8 @@ def setup_pages(page_size=4096,
             pte_address_u = base_address_new >> power
             pte_address_u = pte_address_u << 10
             pte_entry_u = pte_address_u | dirty_bit | access_bit |\
-                               global_bit | u_bit_u | execute_bit | write_bit |\
-                               read_bit | valid_bit
+                global_bit | u_bit_u | execute_bit | write_bit |\
+                read_bit | valid_bit
             ll_entries_u += '.dword {0} # entry_{1}\n'.format(
                 hex(pte_entry_u), i)
             base_address_new += page_size
@@ -952,8 +965,8 @@ def setup_pages(page_size=4096,
         pte_address_s = base_address_new >> power
         pte_address_s = pte_address_s << 10
         pte_entry_s = pte_address_s | dirty_bit | access_bit |\
-                           global_bit | u_bit_s | execute_bit | write_bit |\
-                           read_bit | valid_bit
+            global_bit | u_bit_s | execute_bit | write_bit |\
+            read_bit | valid_bit
         ll_entries_s += '.dword {0} # entry_{1}\n'.format(hex(pte_entry_s), i)
         base_address_new += page_size
 
@@ -965,15 +978,15 @@ def setup_pages(page_size=4096,
                 f'{ll_entries_u}.rept {entries-valid_ll_pages}\n'\
                 f'.dword 0x0\n.endr\n'
 
-    out_data_string = pre + initial_level_pages_s + ll_page_s +\
-                      initial_level_pages_u + ll_page_u
+    out_data_string = pre + initial_level_pages_s + ll_page_s + \
+        initial_level_pages_u + ll_page_u
 
     # code section
     # using the macro
-    offset = 0
+    # offset = 0
     out_code_string = []
 
-    # calcualtion to set up root level pages
+    # calculation to set up root level pages
     pte_updation = f"\n.option norvc"\
                    f"\n\t# setting up root PTEs\n"\
                    f"\tla t0, l0_pt # load address of root page\n\n"
@@ -998,7 +1011,7 @@ def setup_pages(page_size=4096,
                         f"\tsd t4, {offset}(t0) "\
                         f"# store l{i+1} first entry address "\
                         f"into the first entry of l{i}\n\n"
-        if (i < levels - 2):
+        if i < levels - 2:
             pte_updation += f"\t#address updation\n"\
                             f"\tadd t0, t3, 0 # move the address of "\
                             f"level {i+1} page to t0\n\n"
@@ -1023,7 +1036,7 @@ def setup_pages(page_size=4096,
                                 f"\tadd t3, t0, t2\n"
             pte_updation += f"{common_setup}\n"
 
-            if (i < levels - 2):
+            if i < levels - 2:
                 pte_updation += f"\t# address updation\n"\
                                 f"\tadd t0, t3, 0 # move address of \n"\
                                 f"\t\t\t\t #l{i+1} page into t0"
@@ -1033,14 +1046,14 @@ def setup_pages(page_size=4096,
 
     out_code_string.append(pte_updation)
 
-    out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "\
-                           f"{shift_amount})\n"\
-                           f"supervisor_entry_label:\n"\
-                           f"\n{user_entry}"\
+    out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "
+                           f"{shift_amount})\n"
+                           f"supervisor_entry_label:\n"
+                           f"\n{user_entry}"
                            f"test_entry:\n.option rvc\n\n")
-    out_code_string.append(f"\n\n.option norvc\n{user_exit}"\
-                           f"test_exit:\n"\
-                           f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"\
+    out_code_string.append(f"\n\n.option norvc\n{user_exit}"
+                           f"test_exit:\n"
+                           f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"
                            f"supervisor_exit_label:\n")
 
     return out_code_string, out_data_string
