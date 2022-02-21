@@ -7,6 +7,8 @@ import glob
 import random as rnd
 from uatg.log import logger
 from ruamel.yaml import YAML
+import subprocess
+import shlex
 
 
 class sv_components:
@@ -855,8 +857,19 @@ def setup_pages(page_size=4096,
                 valid_ll_pages=64,
                 mode='machine'):
     """
-        creates a pagetable with 'size' number of entries.
+        creates pagetables to run tests in User and Supervisor modes
         Currently works with the sv39 virtual memory addressing.
+
+        :param page_size: Size of the pages - 4kiB.
+        :param paging_mode: Paging mode used in the tests - sv39, for now.
+        :param valid_ll_pages: Valid last level pages to be created.
+        :param mode: Mode of execution for which the test is being generated.
+        :type page_size: int
+        :type paging_mode: string
+        :type valid_ll_pages: int
+        :type mode: string
+        :returns: ([out_code_string], out_data_string)
+        :rtype: tuple(list, string)
     """
 
     if mode == 'machine':
@@ -1028,3 +1041,38 @@ def setup_pages(page_size=4096,
                            f"supervisor_exit_label:\n")
 
     return out_code_string, out_data_string
+
+
+def run_make(work_dir, jobs):
+    """
+        function to invoke the empty compilation makefile
+
+        :param work_dir: path to the work directory
+        :param jobs: number of parallel processes for the make utility to spawn
+        :returns: placeholder int
+        :rtype: int
+    """
+    cwd = os.getcwd()
+    os.chdir(os.path.abspath(work_dir))
+    logger.debug(f'Current directory is: {work_dir}')
+    logger.info(f'Invoking makefile to perform an empty compilation')
+    logger.warning(f'Based on the number of tests and their size, '\
+                   f'this step might take a lot of time.')
+
+    try:
+        out = subprocess.run(shlex.split(f'make -j{jobs}'),
+                             check=True,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        logger.debug(out.stdout.decode('ascii'))
+        logger.info('All the generated Assmebly files are syntatically correct')
+        logger.info('Empty Syntax Check - Complete! No errors found.')
+
+    except subprocess.CalledProcessError as e:
+        logger.error(e.stderr.decode('ascii'))
+        logger.warning(f'Please fix the errors and re-generate the tests')
+        logger.info('Empty Syntax Check - Complete! Error found.')
+
+    os.chdir(cwd)
+    logger.debug(f'Current directory is: {os.getcwd()}')
+    return 1

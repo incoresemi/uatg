@@ -9,7 +9,7 @@ from uatg.test_generator import generate_sv
 from uatg.__init__ import __version__
 from uatg.utils import list_of_modules, info, clean_modules, load_yaml
 from uatg.utils import create_dut_config_files, create_config_file
-from uatg.utils import combine_config_yamls, create_alias_file
+from uatg.utils import combine_config_yamls, create_alias_file, run_make
 import logging
 
 
@@ -181,6 +181,9 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
             logger.error('Can not generate covergroups without alias_file.')
             exit('GEN_CVG WITHOUT ALIAS_FILE')
 
+    logger.info(f'Exiting UATG')
+    logger.info(f'Good day! Stay Hydrated.')
+
 
 # -------------------------
 
@@ -246,6 +249,9 @@ def from_config(config_file, verbose):
 
     module_dir = config['uatg']['module_dir']
     modules = config['uatg']['modules']
+    config_work_dir = config['uatg']['work_dir']
+    config_linker_dir = config['uatg']['linker_dir']
+    config_test_list_flag = config['uatg']['gen_test_list']
     # Uncomment to overwrite verbosity from config file.
     # verbose = config['uatg']['verbose']
 
@@ -266,17 +272,23 @@ def from_config(config_file, verbose):
         dut_dict = combine_config_yamls(configuration)
 
     if config['uatg']['gen_test'].lower() == 'true':
-        generate_tests(work_dir=config['uatg']['work_dir'],
-                       linker_dir=config['uatg']['linker_dir'],
+        generate_tests(work_dir=config_work_dir,
+                       linker_dir=config_linker_dir,
                        modules_dir=module_dir,
                        modules=module,
                        config_dict=dut_dict,
-                       test_list=config['uatg']['gen_test_list'],
+                       test_list=config_test_list_flag,
                        jobs=jobs)
+
+    if config['uatg']['test_compile'].lower() == 'true':
+        logger.info(f'Empty Compilation is enabled')
+        logger.info(f'UATG will use RISCV-GCC to check if the generated '\
+                    f'assembly tests are syntatically correct')
+        run_make(work_dir=config_work_dir, jobs=jobs)
 
     if config['uatg']['gen_cvg'].lower() == 'true':
         alias_dict = load_yaml(config['uatg']['alias_file'])
-        generate_sv(work_dir=config['uatg']['work_dir'],
+        generate_sv(work_dir=config_work_dir,
                     modules=module,
                     modules_dir=module_dir,
                     config_dict=dut_dict,
@@ -285,13 +297,16 @@ def from_config(config_file, verbose):
 
     if config['uatg']['val_test'].lower() == 'true':
         validate_tests(modules=module,
-                       work_dir=config['uatg']['work_dir'],
+                       work_dir=config_work_dir,
                        config_dict=dut_dict,
                        modules_dir=module_dir)
 
     if config['uatg']['clean'].lower() == 'true':
         logger.debug('Invoking clean_dirs')
-        clean_dirs(work_dir=config['uatg']['work_dir'], modules_dir=module_dir)
+        clean_dirs(work_dir=config_work_dir, modules_dir=module_dir)
+
+    logger.info(f'Exiting UATG')
+    logger.info(f'Good day! Stay Hydrated.')
 
 
 # -------------------------
@@ -412,3 +427,6 @@ def validate(configuration, module_dir, work_dir, modules, verbose):
                    work_dir=work_dir,
                    config_dict=dut_dict,
                    modules_dir=module_dir)
+
+    logger.info(f'Exiting UATG')
+    logger.info(f'Good day! Stay Hydrated.')
