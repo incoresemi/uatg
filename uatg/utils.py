@@ -482,7 +482,10 @@ def create_config_file(config_path):
           'river_core are generated automatically.\n# Unless you want to ' \
           'run individual tests in river_core, set the flag to True\n' \
           'gen_test_list = True\n# [True, False] If the gen_test flag is True' \
-          ', assembly files are generated/overwritten\ngen_test = True\n# ' \
+          ', assembly files are generated/overwritten\ngen_test = True\n'\
+          '# [True, False] if test_compile flag is True, the generated '\
+          'assembly files are compiled to uncover syntax errors if any.\n'\
+          'test_compile = True\n# ' \
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
