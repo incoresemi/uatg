@@ -1,7 +1,7 @@
 # See LICENSE.incore for details
 
-import logging
-import colorlog
+from logging import ERROR, CRITICAL, WARNING, INFO, DEBUG, getLogger, StreamHandler, root
+from colorlog import ColoredFormatter
 
 
 class Log:
@@ -12,11 +12,11 @@ class Log:
     """
 
     aliases = {
-        logging.CRITICAL: ("critical", "crit", "fatal"),
-        logging.ERROR: ("error", "err"),
-        logging.WARNING: ("warning", "warn"),
-        logging.INFO: ("info", "inf"),
-        logging.DEBUG: ("debug", "dbg")
+        CRITICAL: ("critical", "crit", "fatal"),
+        ERROR: ("error", "err"),
+        WARNING: ("warning", "warn"),
+        INFO: ("info", "inf"),
+        DEBUG: ("debug", "dbg")
     }
 
     def __init__(self, format=None):
@@ -33,7 +33,7 @@ class Log:
             'ERROR': 'bold_red',
             'CRITICAL': 'bold_red',
         }
-        self.logger = logging.getLogger("uatg")
+        self.logger = getLogger("uatg")
 
     # the magic happens here: we use the "extra" argument documented in
     # https://docs.python.org/2/library/logging.html#logging.Logger.debug
@@ -80,22 +80,22 @@ class Log:
         )
         raise ValueError("{}-Invalid log level.".format(lvl))
 
-    def level(self, lvl=logging.CRITICAL):
+    def level(self, lvl=CRITICAL):
         """Setup the Logger."""
 
         self._lvl = self._parse_level(lvl)
-        self.stream = logging.StreamHandler()
+        self.stream = StreamHandler()
         self.stream.setLevel(self._lvl)
 
         self.stream.setLevel(self._lvl)
 
         self.stream.setFormatter(
-            colorlog.ColoredFormatter(self.format, log_colors=self.colors))
+            ColoredFormatter(self.format, log_colors=self.colors))
 
         self.logger.setLevel(self._lvl)
 
         self.logger.addHandler(self.stream)
-        logging.root.setLevel(self._lvl)
+        root.setLevel(self._lvl)
 
 
 logger = Log()

@@ -1,15 +1,13 @@
-import os
-import random
-import re
-import string
-from random import sample
+from os.path import join, dirname
+from re import search
+from string import ascii_letters, digits
+from random import sample, choice, choices, seed, randint
 from typing import Union, List
 
-import uatg
+from uatg import __file__
 from uatg.utils import load_yaml
 
-random.seed(101)
-
+seed(101)
 
 class instruction_generator:
     """
@@ -43,15 +41,15 @@ class instruction_generator:
             :param isa: string containing the ISA for which instructions should
                         be generated.
         """
-        assert (re.search(r'RV\d+I', isa) is not None)
-        instruction_file = os.path.join(os.path.dirname(uatg.__file__),
+        assert (search(r'RV\d+I', isa) is not None)
+        instruction_file = join(dirname(__file__),
                                         'isem.yaml')
         integer_reg_file = {'x' + str(num) for num in range(32)}
         float_reg_file = {'f' + str(num) for num in range(32)}
         compressed_reg_file = {'x' + str(num) for num in range(8, 15)}
 
         self.isa = isa
-        self.xlen = re.search(r'\d+', isa).group(0)
+        self.xlen = search(r'\d+', isa).group(0)
         self.imm_fields = {
             '$imm11': {str(num) for num in range(-1024, 1024)},
             '$imm12': {str(num) for num in range(-2048, 2048)},
@@ -85,19 +83,19 @@ class instruction_generator:
         self.m_insts, self.a_insts, self.f_insts = {}, {}, {}
         self.d_insts, self.b_insts, self.c_insts = {}, {}, {}
 
-        if re.search(r'RV\d+IM', isa) is not None:
+        if search(r'RV\d+IM', isa) is not None:
             self.m_insts = {
                 k: self.instructions['m_extension'][k]['asm_syntax']
                 for k in self.instructions['m_extension'].keys()
                 if self.xlen in str(self.instructions['m_extension'][k]['xlen'])
             }
-        if re.search(r'RV\d+I\w+A', isa) is not None:
+        if search(r'RV\d+I\w+A', isa) is not None:
             self.a_insts = {
                 k: self.instructions['a_extension'][k]['asm_syntax']
                 for k in self.instructions['a_extension'].keys()
                 if self.xlen in str(self.instructions['a_extension'][k]['xlen'])
             }
-        if re.search(r'RV\d+I\w+F', isa) is not None:
+        if search(r'RV\d+I\w+F', isa) is not None:
             self.default_modifiers.update(
                 dict.fromkeys(['frs1', 'frs2', 'frs3'], float_reg_file))
             self.f_insts = {
@@ -105,19 +103,19 @@ class instruction_generator:
                 for k in self.instructions['f_extension'].keys()
                 if self.xlen in str(self.instructions['f_extension'][k]['xlen'])
             }
-        if re.search(r'RV\d+I\w+FD', isa) is not None:
+        if search(r'RV\d+I\w+FD', isa) is not None:
             self.d_insts = {
                 k: self.instructions['f_extension'][k]['asm_syntax']
                 for k in self.instructions['f_extension'].keys()
                 if self.xlen in str(self.instructions['f_extension'][k]['xlen'])
             }
-        if re.search(r'RV\d+I\w+B', isa) is not None:
+        if search(r'RV\d+I\w+B', isa) is not None:
             self.b_insts = {
                 k: self.instructions['b_extension'][k]['asm_syntax']
                 for k in self.instructions['b_extension'].keys()
                 if self.xlen in str(self.instructions['b_extension'][k]['xlen'])
             }
-        if re.search(r'RV\d+I\w+C', isa) is not None:
+        if search(r'RV\d+I\w+C', isa) is not None:
             self.default_modifiers.update(
                 dict.fromkeys(['c.rs1', 'c.rs2', 'c.rd'], compressed_reg_file))
             self.c_insts = {
@@ -125,13 +123,13 @@ class instruction_generator:
                 for k in self.instructions['c_extension'].keys()
                 if self.xlen in str(self.instructions['c_extension'][k]['xlen'])
             }
-            if re.search(r'RV\d+I\w+F', isa) is None:
+            if search(r'RV\d+I\w+F', isa) is None:
                 self.c_insts.pop('c.flw')
                 self.c_insts.pop('c.fsw')
                 if '32' in isa:
                     self.c_insts.pop('c.flwsp')
                     self.c_insts.pop('c.fswsp')
-                if re.search(r'RV\d+I\w+FD', isa) is None:
+                if search(r'RV\d+I\w+FD', isa) is None:
                     self.c_insts.pop('c.fld')
                     self.c_insts.pop('c.fldsp')
                     self.c_insts.pop('c.fsd')
@@ -240,13 +238,13 @@ class instruction_generator:
 
     def __generate_labels(self, prefix='', no_of_chars=15):
         label = f'label_{prefix}_' + ''.join(
-            random.choices(string.ascii_letters, k=no_of_chars))
+            choices(string.ascii_letters, k=no_of_chars))
         if label not in self.prog_labels:
             self.prog_labels.append(label)
         else:
             while label in self.prog_labels:
                 label = 'label_' + ''.join(
-                    random.choices(string.ascii_letters + string.digits,
+                    choices(string.ascii_letters + string.digits,
                                    k=no_of_chars))
             self.prog_labels.append(label)
         return label
@@ -366,7 +364,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = random.choices(list(self.i_insts.keys()),
+            random_insts = choices(list(self.i_insts.keys()),
                                           k=no_of_insts)
             for key in random_insts:
                 if key in ('beq', 'bne', 'blt', 'bge', 'bltu', 'bgeu', 'jal',
@@ -385,7 +383,7 @@ class instruction_generator:
                 if len(instructions) <= 0:
                     ret_list.append('nop')
                 else:
-                    inst = random.choice(instructions)
+                    inst = choice(instructions)
                     if inst in ('beq', 'bne', 'blt', 'bge', 'bltu', 'bgeu',
                                 'jal', 'jalr', 'lb', 'lh', 'lw', 'ld', 'lbu',
                                 'lhu', 'lwu', 'sb', 'sh', 'sw', 'sd'):
@@ -428,7 +426,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = random.choices(list(self.m_insts.keys()),
+            random_insts = choices(list(self.m_insts.keys()),
                                           k=no_of_insts)
             for key in random_insts:
                 asm_syntax = self.m_insts[key]
@@ -436,7 +434,7 @@ class instruction_generator:
                 ret_list.append(r_inst)
         elif type(instructions) == list:
             for _ in range(no_of_insts):
-                inst = random.choice(instructions)
+                inst = choice(instructions)
                 asm_syntax = self.m_insts[inst]
                 r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
                 ret_list.append(r_inst)
@@ -475,10 +473,10 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            instructions = random.choices(list(self.a_insts.keys()),
+            instructions = choices(list(self.a_insts.keys()),
                                           k=no_of_insts)
         for _ in range(no_of_insts):
-            inst = random.choice(instructions)
+            inst = choice(instructions)
             asm_syntax = self.a_insts[inst]
             rt = 'nop'
             _align = 3 if '.d' in inst else 2
@@ -564,7 +562,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = random.choices(list(self.f_insts.keys()),
+            random_insts = choices(list(self.f_insts.keys()),
                                           k=no_of_insts)
             for key in random_insts:
                 asm_syntax = self.f_insts[key]
@@ -572,7 +570,7 @@ class instruction_generator:
                 ret_list.append(r_inst)
         elif type(instructions) == list:
             for _ in range(no_of_insts):
-                inst = random.choice(instructions)
+                inst = choice(instructions)
                 asm_syntax = self.f_insts[inst]
                 r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
                 ret_list.append(r_inst)
@@ -610,7 +608,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = random.choices(list(self.d_insts.keys()),
+            random_insts = choices(list(self.d_insts.keys()),
                                           k=no_of_insts)
             for key in random_insts:
                 asm_syntax = self.d_insts[key]
@@ -618,7 +616,7 @@ class instruction_generator:
                 ret_list.append(r_inst)
         elif type(instructions) == list:
             for _ in range(no_of_insts):
-                inst = random.choice(instructions)
+                inst = choice(instructions)
                 asm_syntax = self.d_insts[inst]
                 r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
                 ret_list.append(r_inst)
@@ -655,7 +653,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = random.choices(list(self.c_insts.keys()),
+            random_insts = choices(list(self.c_insts.keys()),
                                           k=no_of_insts)
             for key in random_insts:
                 if key in (
@@ -682,7 +680,7 @@ class instruction_generator:
                 ):
                     ret_list.append(self.__handle_branch_load_store(key))
                 elif key == 'c.lui':
-                    r = random.randint(1, 32)
+                    r = randint(1, 32)
                     ret_list.append(f'{key} x8, {r}')
                 elif key == 'c.ebreak':
                     ret_list.append('c.nop')
@@ -695,7 +693,7 @@ class instruction_generator:
                 if len(instructions) <= 0:
                     ret_list.append('nop')
                 else:
-                    inst = random.choice(instructions)
+                    inst = choice(instructions)
                     if inst in (
                             'c.beqz',
                             'c.bnez',
@@ -720,7 +718,7 @@ class instruction_generator:
                     ):
                         ret_list.append(self.__handle_branch_load_store(inst))
                     elif inst == 'c.lui':
-                        r = random.randint(1, 32)
+                        r = randint(1, 32)
                         ret_list.append(f'{inst} x8, {r}')
                     elif inst == 'c.ebreak':
                         ret_list.append('c.nop')
@@ -762,7 +760,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = random.choices(list(self.b_insts.keys()),
+            random_insts = choices(list(self.b_insts.keys()),
                                           k=no_of_insts)
             for key in random_insts:
                 asm_syntax = self.b_insts[key]
@@ -770,7 +768,7 @@ class instruction_generator:
                 ret_list.append(r_inst)
         elif type(instructions) == list:
             for _ in range(no_of_insts):
-                inst = random.choice(instructions)
+                inst = choice(instructions)
                 asm_syntax = self.b_insts[inst]
                 r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
                 ret_list.append(r_inst)

@@ -10,7 +10,7 @@ from uatg.__init__ import __version__
 from uatg.utils import list_of_modules, info, clean_modules, load_yaml
 from uatg.utils import create_dut_config_files, create_config_file
 from uatg.utils import combine_config_yamls, create_alias_file, run_make
-import logging
+from logging import getLogger, ERROR
 
 
 @click.group()
@@ -256,7 +256,7 @@ def from_config(config_file, verbose):
     # verbose = config['uatg']['verbose']
 
     logger.level(verbose)
-    logging.getLogger('yapsy').setLevel(logging.ERROR)
+    getLogger('yapsy').setLevel(ERROR)
     module = clean_modules(module_dir, modules)
     try:
         jobs = int(config['uatg']['jobs'])
