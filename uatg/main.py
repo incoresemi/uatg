@@ -11,7 +11,7 @@ from uatg.utils import list_of_modules, info, clean_modules, load_yaml
 from uatg.utils import create_dut_config_files, create_config_file
 from uatg.utils import combine_config_yamls, create_alias_file, run_make
 from logging import getLogger, ERROR
-
+from time import perf_counter
 
 @click.group()
 @click.version_option(version=__version__)
@@ -243,6 +243,7 @@ def from_config(config_file, verbose):
     Reads config.ini and invokes uatg with read paramaters.\n
     Optional: -c, --config
     """
+    start_time = perf_counter()
 
     config = ConfigParser()
     config.read(config_file)
@@ -252,18 +253,22 @@ def from_config(config_file, verbose):
     config_work_dir = config['uatg']['work_dir']
     config_linker_dir = config['uatg']['linker_dir']
     config_test_list_flag = config['uatg']['gen_test_list']
+    excluded_modules = config['uatg']['excluded_modules'] 
     # Uncomment to overwrite verbosity from config file.
     # verbose = config['uatg']['verbose']
 
     logger.level(verbose)
     getLogger('yapsy').setLevel(ERROR)
-    module = clean_modules(module_dir, modules)
+
+    info(__version__)
+
+    module = clean_modules(module_dir, modules, excluded_modules)
+
     try:
         jobs = int(config['uatg']['jobs'])
     except ValueError:
         jobs = 1
 
-    info(__version__)
     dut_dict = None
     if config['uatg']['gen_test'].lower() == 'true' or \
             config['uatg']['gen_cvg'].lower() == 'true' or \
@@ -304,7 +309,9 @@ def from_config(config_file, verbose):
     if config['uatg']['clean'].lower() == 'true':
         logger.debug('Invoking clean_dirs')
         clean_dirs(work_dir=config_work_dir, modules_dir=module_dir)
+    end_time = perf_counter()
 
+    logger.debug(f'Execution time is {end_time - start_time}s')
     logger.info(f'Exiting UATG')
     logger.info(f'Good day! Stay Hydrated.')
 

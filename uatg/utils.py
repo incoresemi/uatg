@@ -693,7 +693,7 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
 
 
 # UATG Functions
-def clean_modules(module_dir, modules):
+def clean_modules(module_dir, modules, excludes):
     """
     Function to read the modules specified by the user, check if they exist or
     raise an error.
@@ -704,7 +704,7 @@ def clean_modules(module_dir, modules):
 
     if 'all' in modules:
 
-        module = ['all']
+        module = available_modules
 
     else:
         try:
@@ -717,10 +717,28 @@ def clean_modules(module_dir, modules):
 
         except ValueError:
             pass
+
         for element in module:
             if element not in available_modules:
                 exit(f'Module {element} is not supported/unavailable.')
+    try:
+        excludes = excludes.replace(' ', ',')
+        excludes = excludes.replace(', ', ',')
+        excludes = excludes.replace(' ,', ',')
+        exclude = list(set(excludes.split(",")))
+        exclude.remove('')
+        exclude.sort()
+    except ValueError:
+        pass
 
+    for element in exclude:
+        logger.debug(f'Attempting to remove {element} from module list')
+        try:
+            module.remove(element)
+        except ValueError:
+            logger.warning(f'attempt to remove {element} from module list '\
+                           f'failed.')
+    
     return module
 
 
