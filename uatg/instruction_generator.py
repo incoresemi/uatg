@@ -238,13 +238,13 @@ class instruction_generator:
 
     def __generate_labels(self, prefix='', no_of_chars=15):
         label = f'label_{prefix}_' + ''.join(
-            choices(string.ascii_letters, k=no_of_chars))
+            choices(ascii_letters, k=no_of_chars))
         if label not in self.prog_labels:
             self.prog_labels.append(label)
         else:
             while label in self.prog_labels:
                 label = 'label_' + ''.join(
-                    choices(string.ascii_letters + string.digits,
+                    choices(ascii_letters + digits,
                                    k=no_of_chars))
             self.prog_labels.append(label)
         return label
