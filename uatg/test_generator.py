@@ -32,9 +32,10 @@ def asm_generation_process(args):
 
     # actual generation process
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
+    
     name = (str(plugin.plugin_object).split(".", 1))
     t_name = ((name[1].split(" ", 1))[0])
-
+    
     # data section for paging pages
     priv_asm_code = ['', '', '']
     priv_asm_data = ""
@@ -225,10 +226,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         logger.error(e)
         logger.error('Exiting UATG. ISA cannot be found/understood')
         exit(0)
-
-    if modules == ['all']:
-        logger.debug(f'Checking {modules_dir} for modules')
-        modules = list_of_modules(modules_dir)
+ 
     logger.debug('The modules are {0}'.format((', '.join(modules))))
 
     # creating a shared dictionary which can be accessed by all processes
@@ -251,7 +249,14 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         remove(join(work_dir, 'makefile'))
 
     logger.info('****** Generating Tests ******')
+    
     for module in modules:
+        
+        processes = 1
+
+        if module != 'mbox':
+            processes = jobs
+        
         module_dir = join(modules_dir, module)
         work_tests_dir = join(work_dir, module)
 
@@ -312,14 +317,15 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         # plugins into an asm file
         arg_list = []
         for plugin in manager.getAllPlugins():
+            
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
                  work_dir, compile_macros_dict))
 
         # multi processing process pool
-        logger.debug(f"Spawning {jobs} processes")
-        process_pool = Pool(jobs)
+        logger.debug(f"Spawning {processes} processes")
+        process_pool = Pool(processes)
         # creating a map of processes
         process_pool.map(asm_generation_process, arg_list)
         process_pool.close()
@@ -398,10 +404,6 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict, jobs):
         pass
     else:
         work_dir = abspath((join(uarch_dir, '../work/')))
-
-    if modules == ['all']:
-        logger.debug(f'Checking {modules_dir} for modules')
-        modules = list_of_modules(modules_dir)
 
     # yaml containing ISA parameters of DUT
     isa_yaml = config_dict['isa_dict']
