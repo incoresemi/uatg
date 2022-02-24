@@ -377,8 +377,7 @@ def from_config(config_file, verbose):
     '--configuration',
     '-cfg',
     multiple=True,
-    required=False,
-    default=None,
+    required=True,
     type=click.Path(exists=True, resolve_path=True, readable=True),
     help=("Path to the DUT configuration YAML Files. "
           "The YAML files should be specified (space separated) in the "
