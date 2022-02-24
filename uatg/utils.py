@@ -12,6 +12,7 @@ from ruamel.yaml import YAML
 from subprocess import run, PIPE, CalledProcessError
 from shlex import split
 
+
 class sv_components:
     """
         This class contains the methods which will return the tb_top and
@@ -220,8 +221,7 @@ def load_yaml(file):
         If the file is in YAML, it reads the file and returns the data from the
         file as a dictionary.
     """
-    if exists(file) and (file.endswith('.yaml') or
-                                 file.endswith('.yml')):
+    if exists(file) and (file.endswith('.yaml') or file.endswith('.yml')):
         yaml = YAML(typ="rt")
         yaml.default_flow_style = False
         yaml.allow_unicode = True
@@ -414,7 +414,7 @@ def create_plugins(plugins_path, index_yaml, module):
     """
     index_yaml = abspath(index_yaml) 
     if exists(index_yaml) and (index_yaml.endswith('.yaml') or
-                                 index_yaml.endswith('.yml')):
+                               index_yaml.endswith('.yml')):
         index_yaml = load_yaml(index_yaml)
         logger.debug('using index.yaml from path specified in config.ini file')
 
@@ -459,24 +459,16 @@ def create_plugins(plugins_path, index_yaml, module):
 
 
 def create_config_file(config_path, jobs, modules, module_dir, work_dir,
-                       linker_dir, alias_path, test_compile, config_files):
+                       linker_dir, alias_path, test_compile, cfg_files):
     """
         Creates a template config.ini file at the config_path directory.
         Invoked by running uatg setup.
     """
     work_dir = '/home/user/myquickstart/work/' if work_dir is None else work_dir
-    
-    if len(config_files):
-        cfg_files = f'[uatg.configuration_files]\nisa = {config_files[0]}\n' \
-                f'core = {config_files[1]}\ncustom = {config_files[2]}\n' \
-                f'csr_grouping = {config_files[3]}\ndebug = {config_files[4]}'
-    else:
-        cfg_files = '[uatg.configuration_files]\nisa = ' \
-                '/home/user/myquickstart/isa_config.yaml\ncore = ' \
-                '/home/user/myquickstart/core_config.yaml\ncustom = ' \
-                '/home/user/myquickstart/custom_config.yaml\ncsr_grouping = ' \
-                '/home/user/myquickstart/csr_grouping.yaml\ndebug = ' \
-                '/home/user/myquickstart/rv_debug.yaml'
+
+    cfg_files = f'[uatg.configuration_files]\nisa = {cfg_files[0]}\n' \
+                f'core = {cfg_files[1]}\ncustom = {cfg_files[2]}\n' \
+                f'csr_grouping = {cfg_files[3]}\ndebug = {cfg_files[4]}'
 
     modules = 'all' if modules is None else modules
     module_dir = '/home/user/myquickstart/chromite_uatg_tests/modules/' \
@@ -739,6 +731,7 @@ def clean_modules(module_dir, modules, excludes):
         for element in module:
             if element not in available_modules:
                 exit(f'Module {element} is not supported/unavailable.')
+    exclude = []
     try:
         excludes = excludes.replace(' ', ',')
         excludes = excludes.replace(', ', ',')
@@ -754,9 +747,9 @@ def clean_modules(module_dir, modules, excludes):
         try:
             module.remove(element)
         except ValueError:
-            logger.warning(f'attempt to remove {element} from module list '\
+            logger.warning(f'attempt to remove {element} from module list '
                            f'failed.')
-    
+
     return module
 
 
@@ -823,8 +816,7 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
         base_key = basename(test)[:-2]
         test_list[base_key] = {}
         test_list[base_key]['generator'] = 'uatg'
-        test_list[base_key]['work_dir'] = abspath(asm_dir + '/' +
-                                                          base_key)
+        test_list[base_key]['work_dir'] = abspath(asm_dir + '/' + base_key)
         test_list[base_key]['isa'] = isa
         test_list[base_key]['march'] = march
         test_list[base_key]['mabi'] = 'lp64'
@@ -1109,14 +1101,11 @@ def run_make(work_dir, jobs):
     chdir(abspath(work_dir))
     logger.debug(f'Current directory is: {work_dir}')
     logger.info(f'Invoking makefile to perform an empty compilation')
-    logger.warning(f'Based on the number of tests and their size, '\
+    logger.warning(f'Based on the number of tests and their size, '
                    f'this step might take a lot of time.')
 
     try:
-        out = run(split(f'make -j{jobs}'),
-                             check=True,
-                             stdout=PIPE,
-                             stderr=PIPE)
+        out = run(split(f'make -j{jobs}'), check=True, stdout=PIPE, stderr=PIPE)
         logger.debug(out.stdout.decode('ascii'))
         logger.info('All the generated Assmebly files are syntatically correct')
         logger.info('Empty Syntax Check - Complete! No errors found.')
