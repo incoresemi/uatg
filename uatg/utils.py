@@ -459,22 +459,24 @@ def create_plugins(plugins_path, index_yaml, module):
 
 
 def create_config_file(config_path, jobs, modules, module_dir, work_dir,
-                       linker_dir, alias_path, test_compile, cfg_files):
+                       linker_dir, alias_path, test_compile, config_files):
     """
         Creates a template config.ini file at the config_path directory.
         Invoked by running uatg setup.
     """
     work_dir = '/home/user/myquickstart/work/' if work_dir is None else work_dir
-
-    cfg_files = '[uatg.configuration_files]\nisa = ' \
+    
+    if len(config_files):
+        cfg_files = f'[uatg.configuration_files]\nisa = {config_files[0]}\n' \
+                f'core = {config_files[1]}\ncustom = {config_files[2]}\n' \
+                f'csr_grouping = {config_files[3]}\ndebug = {config_files[4]}'
+    else:
+        cfg_files = '[uatg.configuration_files]\nisa = ' \
                 '/home/user/myquickstart/isa_config.yaml\ncore = ' \
                 '/home/user/myquickstart/core_config.yaml\ncustom = ' \
                 '/home/user/myquickstart/custom_config.yaml\ncsr_grouping = ' \
                 '/home/user/myquickstart/csr_grouping.yaml\ndebug = ' \
-                '/home/user/myquickstart/rv_debug.yaml' if (cfg_files is None) \
-        else f'[uatg.configuration_files]\nisa = {cfg_files[0]}\n' \
-             f'core = {cfg_files[1]}\ncustom = {cfg_files[2]}\n' \
-             f'csr_grouping = {cfg_files[3]}\ndebug = {cfg_files[4]}'
+                '/home/user/myquickstart/rv_debug.yaml'
 
     modules = 'all' if modules is None else modules
     module_dir = '/home/user/myquickstart/chromite_uatg_tests/modules/' \
@@ -498,10 +500,10 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           ' tests are to be generated/validated in comma separated format.\n' \
           '# Run \'uatg --list-modules -md <path> \' to find all the modules ' \
           'that are supported.\n# Use \'all\' to generate/validate all ' \
-          f'modules\nmodules = {modules}\n' \
+          f'modules\nmodules = {modules}\n\n' \
           f'# list of modules to be excluded '\
           f'from the test generation. Use when modules = all \n'\
-          f'excluded_modules ='\
+          f'excluded_modules =\n'\
           f'\n# Absolute path to chromite_uatg_tests/modules Directory\n' \
           f'module_dir = {module_dir}' \
           '\n\n# Directory to dump assembly files and reports\n' \
@@ -511,7 +513,11 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           f'linker_dir = {linker_dir}' \
           '\n\n# Absolute Path of the yaml file containing the signal ' \
           'aliases of the DUT ' \
-          f'\nalias_file = {alias_path}\n\n# [True, False] If the gen_test_' \
+          f'\nalias_file = {alias_path}\n\n# path to the index file '\
+          f'containing  the list of tests to be generated. By default, \n'\
+          f'# or when empty, UATG will use the inidex.yaml file within '\
+          f' the modules directory\nindex_file =\n\n'\
+          f'# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Unless you want to ' \
           'run individual tests in river_core, set the flag to True\n' \
