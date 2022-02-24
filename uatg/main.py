@@ -377,7 +377,8 @@ def from_config(config_file, verbose):
     '--configuration',
     '-cfg',
     multiple=True,
-    required=True,
+    required=False,
+    default=[],
     type=click.Path(exists=True, resolve_path=True, readable=True),
     help=("Path to the DUT configuration YAML Files. "
           "The YAML files should be specified (space separated) in the "
@@ -421,7 +422,7 @@ def setup(config_path, jobs, modules, module_dir, work_dir, linker_dir,
                        modules=modules, module_dir=module_dir,
                        work_dir=work_dir, linker_dir=linker_dir,
                        alias_path=alias_path, test_compile=test_compile,
-                       cfg_files=configuration
+                       config_files=configuration
                        )
     create_dut_config_files(dut_config_path=dut_path)
     create_alias_file(alias_path=alias_path)
