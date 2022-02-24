@@ -43,113 +43,113 @@ def asm_generation_process(args):
     if check:
         test_gen = plugin.plugin_object.generate_asm()
 
-        for test_seq in test_gen:
-            assert isinstance(test_seq, list)
-            seq = '001'
-            for ret_list_of_dicts in test_seq:
-                test_name = t_name + '-' + seq
-                logger.debug(f'Selected test: {test_name}')
+        #for test_seq in test_gen:
+            #assert isinstance(test_seq, list)
+        seq = '001'
+        for ret_list_of_dicts in test_gen:
+            test_name = t_name + '-' + seq
+            logger.debug(f'Selected test: {test_name}')
 
-                assert isinstance(ret_list_of_dicts, dict)
-                # Checking for the returned sections from each test
-                asm_code = ret_list_of_dicts['asm_code']
+            assert isinstance(ret_list_of_dicts, dict)
+            # Checking for the returned sections from each test
+            asm_code = ret_list_of_dicts['asm_code']
 
-                try:
-                    if ret_list_of_dicts['name_postfix']:
-                        inst_name_postfix = '-' + ret_list_of_dicts['name_postfix']
-                    else:
-                        inst_name_postfix = ''
-                except KeyError:
-                    inst_name_postfix = ''
-
-                # add inst name to test name as postfix
-                test_name = test_name + inst_name_postfix
-
-                try:
-                    asm_data = ret_list_of_dicts['asm_data']
-                except KeyError:
-                    asm_data = rvtest_data(bit_width=0, num_vals=1, random=True)
-
-                try:
-                    asm_sig = ret_list_of_dicts['asm_sig']
-                except KeyError:
-                    asm_sig = '\n'
-
-                # create an entry in the compile_macros dict
-                if 'rv64' in isa.lower():
-                    compile_macros_dict[test_name] = ['XLEN=64']
+            try:
+                if ret_list_of_dicts['name_postfix']:
+                    inst_name_postfix = '-' + ret_list_of_dicts['name_postfix']
                 else:
-                    compile_macros_dict[test_name] = ['XLEN=32']
+                    inst_name_postfix = ''
+            except KeyError:
+                inst_name_postfix = ''
 
-                try:
-                    compile_macros_dict[test_name] = compile_macros_dict[
-                                                         test_name] + \
-                                                     ret_list_of_dicts[
-                                                         'compile_macros']
-                except KeyError:
-                    logger.debug(f'No custom Compile macros specified for '
-                                 f'{test_name}')
+            # add inst name to test name as postfix
+            test_name = test_name + inst_name_postfix
 
-                # generate and setup page tables based on info from plugin
-                privileged_dict = {}
-                try:
-                    privileged_dict = ret_list_of_dicts['privileged_test']
-                except KeyError:
-                    privileged_dict['enable'] = False
+            try:
+                asm_data = ret_list_of_dicts['asm_data']
+            except KeyError:
+                asm_data = rvtest_data(bit_width=0, num_vals=1, random=True)
 
-                if privileged_dict['enable']:
-                    priv_asm_code, priv_asm_data = setup_pages(
-                        page_size=privileged_dict['page_size'],
-                        paging_mode=privileged_dict['paging_mode'],
-                        valid_ll_pages=privileged_dict['ll_pages'],
-                        mode=privileged_dict['mode'])
+            try:
+                asm_sig = ret_list_of_dicts['asm_sig']
+            except KeyError:
+                asm_sig = '\n'
 
-                # Adding License, includes and macros
-                # asm = license_str + includes + test_entry
-                asm = (test_format_string[0] + test_format_string[1] +
-                       test_format_string[2])
+            # create an entry in the compile_macros dict
+            if 'rv64' in isa.lower():
+                compile_macros_dict[test_name] = ['XLEN=64']
+            else:
+                compile_macros_dict[test_name] = ['XLEN=32']
 
-                # Appending Coding Macros & Instructions
-                # asm += rvcode_begin + asm_code + rvcode_end
+            try:
+                compile_macros_dict[test_name] = compile_macros_dict[
+                                                     test_name] + \
+                                                 ret_list_of_dicts[
+                                                     'compile_macros']
+            except KeyError:
+                logger.debug(f'No custom Compile macros specified for '
+                             f'{test_name}')
 
-                asm += test_format_string[3] + priv_asm_code[0] + \
-                    priv_asm_code[1] + asm_code + \
-                    priv_asm_code[2] + test_format_string[4]
+            # generate and setup page tables based on info from plugin
+            privileged_dict = {}
+            try:
+                privileged_dict = ret_list_of_dicts['privileged_test']
+            except KeyError:
+                privileged_dict['enable'] = False
 
-                # Appending RVTEST_DATA macros and data values
-                # asm += rvtest_data_begin + asm_data + rvtest_data_end
-                asm += test_format_string[5] + asm_data + priv_asm_data + \
-                    test_format_string[6]
+            if privileged_dict['enable']:
+                priv_asm_code, priv_asm_data = setup_pages(
+                    page_size=privileged_dict['page_size'],
+                    paging_mode=privileged_dict['paging_mode'],
+                    valid_ll_pages=privileged_dict['ll_pages'],
+                    mode=privileged_dict['mode'])
 
-                # Appending RVMODEL macros
-                # asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
+            # Adding License, includes and macros
+            # asm = license_str + includes + test_entry
+            asm = (test_format_string[0] + test_format_string[1] +
+                   test_format_string[2])
 
-                asm += test_format_string[7] + asm_sig + \
-                    test_format_string[8]
+            # Appending Coding Macros & Instructions
+            # asm += rvcode_begin + asm_code + rvcode_end
 
-                mkdir(join(work_tests_dir, test_name))
-                with open(join(work_tests_dir, test_name, test_name + '.S'),
-                          'w') as f:
-                    f.write(asm)
-                seq = '%03d' % (int(seq, 10) + 1)
-                logger.debug(f'Generating test for {test_name}')
+            asm += test_format_string[3] + priv_asm_code[0] + \
+                priv_asm_code[1] + asm_code + \
+                priv_asm_code[2] + test_format_string[4]
 
-                try:
-                    make_file[module].append(test_name)
+            # Appending RVTEST_DATA macros and data values
+            # asm += rvtest_data_begin + asm_data + rvtest_data_end
+            asm += test_format_string[5] + asm_data + priv_asm_data + \
+                test_format_string[6]
 
-                except KeyError:
-                    make_file[module] = process_manager.list([test_name])
+            # Appending RVMODEL macros
+            # asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
 
-                make_file['tests'].append(
-                    (test_name,
-                     dump_makefile(isa=isa,
-                                   link_path=linker_dir,
-                                   test_path=join(work_tests_dir, test_name,
-                                                          test_name + '.S'),
-                                   test_name=test_name,
-                                   compile_macros=compile_macros_dict[test_name],
-                                   env_path=join(uarch_dir, 'env'),
-                                   work_dir=work_dir)))
+            asm += test_format_string[7] + asm_sig + \
+                test_format_string[8]
+
+            mkdir(join(work_tests_dir, test_name))
+            with open(join(work_tests_dir, test_name, test_name + '.S'),
+                      'w') as f:
+                f.write(asm)
+            seq = '%03d' % (int(seq, 10) + 1)
+            logger.debug(f'Generating test for {test_name}')
+
+            try:
+                make_file[module].append(test_name)
+
+            except KeyError:
+                make_file[module] = process_manager.list([test_name])
+
+            make_file['tests'].append(
+                (test_name,
+                 dump_makefile(isa=isa,
+                               link_path=linker_dir,
+                               test_path=join(work_tests_dir, test_name,
+                                                      test_name + '.S'),
+                               test_name=test_name,
+                               compile_macros=compile_macros_dict[test_name],
+                               env_path=join(uarch_dir, 'env'),
+                               work_dir=work_dir)))
 
     else:
         logger.warning(f'Skipped {t_name}')
@@ -252,10 +252,10 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     
     for module in modules:
         
-        processes = 1
+        processes = jobs
 
-        if module != 'mbox':
-            processes = jobs
+        #if module != 'mbox':
+        #    processes = jobs
         
         module_dir = join(modules_dir, module)
         work_tests_dir = join(work_dir, module)
