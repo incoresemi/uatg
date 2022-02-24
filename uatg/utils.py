@@ -404,7 +404,7 @@ shakti_end:                                                             \
         outfile.write(out)
 
 
-def create_plugins(plugins_path, module):
+def create_plugins(plugins_path, index_yaml, module):
     """
     This function is used to create Yapsy Plugin files.
     The YAPSY plugins are required to be in a certain pattern. This function
@@ -412,8 +412,17 @@ def create_plugins(plugins_path, module):
     Yapsy will ignore all other python file which does not have a
     .yapsy-plugin file associated with it.
     """
-    # the index yaml is in the modules directory
-    index_yaml = load_yaml(join(plugins_path, '../index.yaml'))
+    index_yaml = abspath(index_yaml) 
+    if exists(index_yaml) and (index_yaml.endswith('.yaml') or
+                                 index_yaml.endswith('.yml')):
+        index_yaml = load_yaml(index_yaml)
+        logger.debug('using index.yaml from path specified in config.ini file')
+
+    else:
+        # the index yaml is in the modules directory
+        index_yaml = load_yaml(join(plugins_path, '../index.yaml'))
+        logger.debug('using the default index.yaml file ')
+
     files = listdir(plugins_path)
 
     for file in files:
@@ -462,7 +471,7 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
                 '/home/user/myquickstart/core_config.yaml\ncustom = ' \
                 '/home/user/myquickstart/custom_config.yaml\ncsr_grouping = ' \
                 '/home/user/myquickstart/csr_grouping.yaml\ndebug = ' \
-                '/home/user/myquickstart/rv_debug.yaml' if cfg_files is None \
+                '/home/user/myquickstart/rv_debug.yaml' if (cfg_files is None) \
         else f'[uatg.configuration_files]\nisa = {cfg_files[0]}\n' \
              f'core = {cfg_files[1]}\ncustom = {cfg_files[2]}\n' \
              f'csr_grouping = {cfg_files[3]}\ndebug = {cfg_files[4]}'
@@ -490,6 +499,9 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           '# Run \'uatg --list-modules -md <path> \' to find all the modules ' \
           'that are supported.\n# Use \'all\' to generate/validate all ' \
           f'modules\nmodules = {modules}\n' \
+          f'# list of modules to be excluded '\
+          f'from the test generation. Use when modules = all \n'\
+          f'excluded_modules ='\
           f'\n# Absolute path to chromite_uatg_tests/modules Directory\n' \
           f'module_dir = {module_dir}' \
           '\n\n# Directory to dump assembly files and reports\n' \

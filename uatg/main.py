@@ -136,6 +136,10 @@ def clean(module_dir, work_dir, verbose):
               help='Set verbose level for debugging',
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
+@click.option('--index_file',
+              '-i',
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to index.yaml file from the tests directory")
 @click.option('--jobs',
               '-j',
               default=1,
@@ -143,7 +147,7 @@ def clean(module_dir, work_dir, verbose):
               type=click.INT)
 @cli.command()
 def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
-             gen_test_list, work_dir, modules, verbose, jobs):
+             gen_test_list, work_dir, modules, verbose, index_file, jobs):
     """
     Generates tests, cover-groups for a list of modules corresponding to the DUT
     parameters specified in the configuration yamls, inside the work_dir.
@@ -167,6 +171,7 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
                    modules=module,
                    config_dict=dut_dict,
                    test_list=str(gen_test_list),
+                   index_path=index_file,
                    jobs=jobs)
     if gen_cvg:
         if alias_file is not None:
@@ -253,7 +258,8 @@ def from_config(config_file, verbose):
     config_work_dir = config['uatg']['work_dir']
     config_linker_dir = config['uatg']['linker_dir']
     config_test_list_flag = config['uatg']['gen_test_list']
-    excluded_modules = config['uatg']['excluded_modules'] 
+    excluded_modules = config['uatg']['excluded_modules']
+    index_yaml_path = config['uatg']['index_file']
     # Uncomment to overwrite verbosity from config file.
     # verbose = config['uatg']['verbose']
 
@@ -283,6 +289,7 @@ def from_config(config_file, verbose):
                        modules=module,
                        config_dict=dut_dict,
                        test_list=config_test_list_flag,
+                       index_path=index_yaml_path,
                        jobs=jobs)
 
     if config['uatg']['test_compile'].lower() == 'true':
@@ -314,7 +321,6 @@ def from_config(config_file, verbose):
     logger.debug(f'Execution time is {end_time - start_time}s')
     logger.info(f'Exiting UATG')
     logger.info(f'Good day! Stay Hydrated.')
-
 
 # -------------------------
 
@@ -371,7 +377,8 @@ def from_config(config_file, verbose):
     '--configuration',
     '-cfg',
     multiple=True,
-    required=True,
+    required=False,
+    default=None,
     type=click.Path(exists=True, resolve_path=True, readable=True),
     help=("Path to the DUT configuration YAML Files. "
           "The YAML files should be specified (space separated) in the "
@@ -398,6 +405,7 @@ def from_config(config_file, verbose):
               default='./',
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Directory to store the DUT configuration yaml files")
+
 @cli.command()
 def setup(config_path, jobs, modules, module_dir, work_dir, linker_dir,
           configuration, alias_path, test_compile, dut_path):
@@ -414,7 +422,7 @@ def setup(config_path, jobs, modules, module_dir, work_dir, linker_dir,
                        modules=modules, module_dir=module_dir,
                        work_dir=work_dir, linker_dir=linker_dir,
                        alias_path=alias_path, test_compile=test_compile,
-                       cfg_files=configuration,
+                       cfg_files=configuration
                        )
     create_dut_config_files(dut_config_path=dut_path)
     create_alias_file(alias_path=alias_path)

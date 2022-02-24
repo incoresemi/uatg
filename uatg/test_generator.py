@@ -43,8 +43,6 @@ def asm_generation_process(args):
     if check:
         test_gen = plugin.plugin_object.generate_asm()
 
-        #for test_seq in test_gen:
-            #assert isinstance(test_seq, list)
         seq = '001'
         for ret_list_of_dicts in test_gen:
             test_name = t_name + '-' + seq
@@ -193,7 +191,7 @@ def sv_generation_process(args):
 
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
-                   modules_dir, jobs):
+                   modules_dir, index_path, jobs):
     """
     The function generates ASM files for all the test classes specified within
     the module_dir. The user can also select the modules for which he would want
@@ -250,12 +248,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
     logger.info('****** Generating Tests ******')
     
-    for module in modules:
-        
-        processes = jobs
-
-        #if module != 'mbox':
-        #    processes = jobs
+    for module in modules: 
         
         module_dir = join(modules_dir, module)
         work_tests_dir = join(work_dir, module)
@@ -266,7 +259,9 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
         logger.debug(f'Directory for {module} is {module_dir}')
         logger.info(f'Starting plugin Creation for {module}')
-        create_plugins(plugins_path=module_dir, module=module)
+        create_plugins(plugins_path=module_dir,
+                       index_yaml=index_path,
+                       module=module)
         logger.info(f'Created plugins for {module}')
         username = getuser()
         time = ((str(datetime.now())).split("."))[0]
@@ -324,8 +319,8 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                  work_dir, compile_macros_dict))
 
         # multi processing process pool
-        logger.debug(f"Spawning {processes} processes")
-        process_pool = Pool(processes)
+        logger.debug(f"Spawning {jobs} processes")
+        process_pool = Pool(jobs)
         # creating a map of processes
         process_pool.map(asm_generation_process, arg_list)
         process_pool.close()
