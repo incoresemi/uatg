@@ -1,14 +1,16 @@
 # See LICENSE.incore for license details
 
 # imports
-import os
-import re
-import glob
-import random as rnd
+# import os
+from os import remove, listdir, getcwd, chdir
+from os.path import join, abspath, exists, basename
+from re import findall, M
+from glob import glob
+from random import randint
 from uatg.log import logger
 from ruamel.yaml import YAML
-import subprocess
-import shlex
+from subprocess import run, PIPE, CalledProcessError
+from shlex import split
 
 
 class sv_components:
@@ -212,6 +214,11 @@ def info(version):
     logger.info('All Rights Reserved.')
 
 
+def uatg_exit():
+    logger.info(f'Exiting UATG')
+    logger.info(f'Good day! Stay Hydrated.')
+
+
 def load_yaml(file):
     """
         Common function to load YAML Files.
@@ -219,8 +226,7 @@ def load_yaml(file):
         If the file is in YAML, it reads the file and returns the data from the
         file as a dictionary.
     """
-    if os.path.exists(file) and (file.endswith('.yaml') or
-                                 file.endswith('.yml')):
+    if exists(file) and (file.endswith('.yaml') or file.endswith('.yml')):
         yaml = YAML(typ="rt")
         yaml.default_flow_style = False
         yaml.allow_unicode = True
@@ -286,17 +292,17 @@ def join_yaml_reports(work_dir='abs_path_here/', module='branch_predictor'):
         option present in UATG.
     """
     files = [
-        file for file in os.listdir(os.path.join(work_dir, 'reports', module))
+        file for file in listdir(join(work_dir, 'reports', module))
         if file.endswith('_report.yaml')
     ]
     yaml = YAML()
     reports = {}
     for file in files:
-        fp = open(os.path.join(work_dir, 'reports', module, file), 'r')
+        fp = open(join(work_dir, 'reports', module, file), 'r')
         data = yaml.load(fp)
         reports.update(dict(data))
         fp.close()
-    f = open(os.path.join(work_dir, 'combined_reports.yaml'), 'w')
+    f = open(join(work_dir, 'combined_reports.yaml'), 'w')
     yaml.default_flow_style = False
     yaml.dump(reports, f)
     f.close()
@@ -327,7 +333,7 @@ SECTIONS
 } 
 '''
 
-    with open(os.path.join(target_dir, "link.ld"), 'w') as outfile:
+    with open(join(target_dir, "link.ld"), 'w') as outfile:
         outfile.write(out)
 
 
@@ -399,11 +405,11 @@ shakti_end:                                                             \
 #define RVMODEL_CLEAR_MEXT_INT
 #endif // _COMPLIANCE_MODEL_H'''
 
-    with open(os.path.join(target_dir, 'model_test.h'), 'w') as outfile:
+    with open(join(target_dir, 'model_test.h'), 'w') as outfile:
         outfile.write(out)
 
 
-def create_plugins(plugins_path, module):
+def create_plugins(plugins_path, index_yaml, module):
     """
     This function is used to create Yapsy Plugin files.
     The YAPSY plugins are required to be in a certain pattern. This function
@@ -411,9 +417,18 @@ def create_plugins(plugins_path, module):
     Yapsy will ignore all other python file which does not have a
     .yapsy-plugin file associated with it.
     """
-    # the index yaml is in the modules directory
-    index_yaml = load_yaml(os.path.join(plugins_path, '../index.yaml'))
-    files = os.listdir(plugins_path)
+    index_yaml = abspath(index_yaml)
+    if exists(index_yaml) and (index_yaml.endswith('.yaml') or
+                               index_yaml.endswith('.yml')):
+        index_yaml = load_yaml(index_yaml)
+        logger.debug('using index.yaml from path specified in config.ini file')
+
+    else:
+        # the index yaml is in the modules directory
+        index_yaml = load_yaml(join(plugins_path, '../index.yaml'))
+        logger.debug('using the default index.yaml file ')
+
+    files = listdir(plugins_path)
 
     for file in files:
         if ('.py' in file) and (not file.startswith('.')):
@@ -428,16 +443,13 @@ def create_plugins(plugins_path, module):
                 exit(f'update the index.yaml with your new test')
 
             if val:
-                f = open(
-                    os.path.join(plugins_path, test_name + '.yapsy-plugin'),
-                    'w')
+                f = open(join(plugins_path, test_name + '.yapsy-plugin'), 'w')
                 f.write("[Core]\nName=" + test_name + "\nModule=" + test_name)
                 f.close()
                 logger.debug(f'Created plugin for {test_name}')
             else:
                 try:
-                    os.remove(
-                        os.path.join(plugins_path, test_name + '.yapsy-plugin'))
+                    remove(join(plugins_path, test_name + '.yapsy-plugin'))
                     logger.warn(
                         f'removing already existing plugin file for {test_name}'
                     )
@@ -456,15 +468,9 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
     """
     work_dir = '/home/user/myquickstart/work/' if work_dir is None else work_dir
 
-    cfg_files = '[uatg.configuration_files]\nisa = ' \
-                '/home/user/myquickstart/isa_config.yaml\ncore = ' \
-                '/home/user/myquickstart/core_config.yaml\ncustom = ' \
-                '/home/user/myquickstart/custom_config.yaml\ncsr_grouping = ' \
-                '/home/user/myquickstart/csr_grouping.yaml\ndebug = ' \
-                '/home/user/myquickstart/rv_debug.yaml' if cfg_files is None \
-        else f'[uatg.configuration_files]\nisa = {cfg_files[0]}\n' \
-             f'core = {cfg_files[1]}\ncustom = {cfg_files[2]}\n' \
-             f'csr_grouping = {cfg_files[3]}\ndebug = {cfg_files[4]}'
+    cfg_files = f'[uatg.configuration_files]\nisa = {cfg_files[0]}\n' \
+                f'core = {cfg_files[1]}\ncustom = {cfg_files[2]}\n' \
+                f'csr_grouping = {cfg_files[3]}\ndebug = {cfg_files[4]}'
 
     modules = 'all' if modules is None else modules
     module_dir = '/home/user/myquickstart/chromite_uatg_tests/modules/' \
@@ -488,7 +494,10 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           ' tests are to be generated/validated in comma separated format.\n' \
           '# Run \'uatg --list-modules -md <path> \' to find all the modules ' \
           'that are supported.\n# Use \'all\' to generate/validate all ' \
-          f'modules\nmodules = {modules}\n' \
+          f'modules\nmodules = {modules}\n\n' \
+          f'# list of modules to be excluded '\
+          f'from the test generation. Use when modules = all \n'\
+          f'excluded_modules =\n'\
           f'\n# Absolute path to chromite_uatg_tests/modules Directory\n' \
           f'module_dir = {module_dir}' \
           '\n\n# Directory to dump assembly files and reports\n' \
@@ -498,7 +507,11 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           f'linker_dir = {linker_dir}' \
           '\n\n# Absolute Path of the yaml file containing the signal ' \
           'aliases of the DUT ' \
-          f'\nalias_file = {alias_path}\n\n# [True, False] If the gen_test_' \
+          f'\nalias_file = {alias_path}\n\n# path to the index file '\
+          f'containing  the list of tests to be generated. By default, \n'\
+          f'# or when empty, UATG will use the inidex.yaml file within '\
+          f' the modules directory\nindex_file =\n\n'\
+          f'# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Unless you want to ' \
           'run individual tests in river_core, set the flag to True\n' \
@@ -523,7 +536,7 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           'following line by adding a \'#\' in front if you are using the ' \
           f'checked YAMLs from CHROMITE\n\n{cfg_files}' \
 
-    with open(os.path.join(config_path, 'config.ini'), 'w') as f:
+    with open(join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
 
 
@@ -548,7 +561,7 @@ def create_alias_file(alias_path):
             'ras_stack_top_index_port2__read\n  bpu_btb_tag_valid: ' \
             'btb_valids\n '
 
-    with open(os.path.join(alias_path, 'aliasing.yaml'), 'w') as f:
+    with open(join(alias_path, 'aliasing.yaml'), 'w') as f:
         f.write(alias)
 
 
@@ -576,7 +589,7 @@ def create_dut_config_files(dut_config_path):
                 f'\n{s2}pmp_granularity: 1\n{s2}physical_addr_sz: 32\n{s2}' \
                 f'supported_xlen:\n{s4}- 64\n'
 
-    with open(os.path.join(dut_config_path, 'isa_config.yaml'), 'w') as f:
+    with open(join(dut_config_path, 'isa_config.yaml'), 'w') as f:
         f.write(rv64i_isa)
 
     rv64i_custom = f'hart_ids: [0]\nhart0:\n  dtim_base:\n{s4}reset-val: 0x0' \
@@ -615,7 +628,7 @@ def create_dut_config_files(dut_config_path):
                    f'branch predictor unit, i-cache, d-cache units\n{s6}' \
                    f'address: 0x800\n{s6}priv_mode: U\n'
 
-    with open(os.path.join(dut_config_path, 'custom_config.yaml'), 'w') as f:
+    with open(join(dut_config_path, 'custom_config.yaml'), 'w') as f:
         f.write(rv64i_custom)
 
     core64 = f'm_extension:\n{s2}mul_stages_in : 1\n{s2}mul_stages_out: 1' \
@@ -623,7 +636,7 @@ def create_dut_config_files(dut_config_path):
              f'True\n{s2}predictor: gshare\n{s2}btb_depth: 32\n{s2}bht_depth:' \
              f' 512\n{s2}history_len: 8\n{s2}history_bits: 5\n{s2}ras_depth: 8'
 
-    with open(os.path.join(dut_config_path, 'core_config.yaml'), 'w') as f:
+    with open(join(dut_config_path, 'core_config.yaml'), 'w') as f:
         f.write(core64)
 
     csr_grouping64 = f'grp1:\n{s2}- MISA\n{s2}- MSCRATCH\n{s2}- SSCRATCH' \
@@ -637,12 +650,12 @@ def create_dut_config_files(dut_config_path):
                      f'- MEDELEG\n{s2}- PMPCFG0\n{s2}- PMPADDR0\n{s2}' \
                      f'- PMPADDR1\n{s2}- PMPADDR2\n{s2}- PMPADDR3\n{s2}' \
                      f'- CUSTOMCONTROL'
-    with open(os.path.join(dut_config_path, 'csr_grouping.yaml'), 'w') as f:
+    with open(join(dut_config_path, 'csr_grouping.yaml'), 'w') as f:
         f.write(csr_grouping64)
 
     rv_debug = f''
 
-    with open(os.path.join(dut_config_path, 'rv_debug.yaml'), 'w') as f:
+    with open(join(dut_config_path, 'rv_debug.yaml'), 'w') as f:
         f.write(rv_debug)
 
 
@@ -683,16 +696,16 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
             for i in range(num_vals):
                 if signed:
                     data += f'\t.{size[bit_width]}\t' \
-                            f'{hex(rnd.randint(min_signed, max_signed))}\n'
+                            f'{hex(randint(min_signed, max_signed))}\n'
                 else:
                     data += f'\t.{size[bit_width]}\t' \
-                            f'{hex(rnd.randint(min_unsigned, max_unsigned))}\n'
+                            f'{hex(randint(min_unsigned, max_unsigned))}\n'
     data += '\nsample_data:\n.word\t0xbabecafe\n'
     return data
 
 
 # UATG Functions
-def clean_modules(module_dir, modules):
+def clean_modules(module_dir, modules, excludes):
     """
     Function to read the modules specified by the user, check if they exist or
     raise an error.
@@ -703,7 +716,7 @@ def clean_modules(module_dir, modules):
 
     if 'all' in modules:
 
-        module = ['all']
+        module = available_modules
 
     else:
         try:
@@ -716,9 +729,28 @@ def clean_modules(module_dir, modules):
 
         except ValueError:
             pass
+
         for element in module:
             if element not in available_modules:
                 exit(f'Module {element} is not supported/unavailable.')
+    exclude = []
+    try:
+        excludes = excludes.replace(' ', ',')
+        excludes = excludes.replace(', ', ',')
+        excludes = excludes.replace(' ,', ',')
+        exclude = list(set(excludes.split(",")))
+        exclude.remove('')
+        exclude.sort()
+    except ValueError:
+        pass
+
+    for element in exclude:
+        logger.debug(f'Attempting to remove {element} from module list')
+        try:
+            module.remove(element)
+        except ValueError:
+            logger.warning(f'attempt to remove {element} from module list '
+                           f'failed.')
 
     return module
 
@@ -739,7 +771,7 @@ def split_isa_string(isa_string):
     The updates ISA string is returned.
     """
 
-    str_match = re.findall(r'([^\d]*?)(?!_)*(Z.*?)*(_|$)', isa_string, re.M)
+    str_match = findall(r'([^\d]*?)(?!_)*(Z.*?)*(_|$)', isa_string, M)
     extension_list = []
     for match in str_match:
         stdisa, z, ignore = match
@@ -760,9 +792,9 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
       The test list generation is an optional feature which the user may choose
       to use.
     """
-    asm_test_list = glob.glob(asm_dir + '/**/*.S')
-    env_dir = os.path.join(uarch_dir, 'env/')
-    target_dir = os.path.abspath(asm_dir + '/../')
+    asm_test_list = glob(asm_dir + '/**/*.S')
+    env_dir = join(uarch_dir, 'env/')
+    target_dir = abspath(asm_dir + '/../')
 
     extension_list = split_isa_string(isa)
     march = ''
@@ -783,11 +815,10 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
 
     for test in asm_test_list:
         logger.debug(f"Current test is {test}")
-        base_key = os.path.basename(test)[:-2]
+        base_key = basename(test)[:-2]
         test_list[base_key] = {}
         test_list[base_key]['generator'] = 'uatg'
-        test_list[base_key]['work_dir'] = os.path.abspath(asm_dir + '/' +
-                                                          base_key)
+        test_list[base_key]['work_dir'] = abspath(asm_dir + '/' + base_key)
         test_list[base_key]['isa'] = isa
         test_list[base_key]['march'] = march
         test_list[base_key]['mabi'] = 'lp64'
@@ -797,10 +828,10 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
                          '-fno-builtin-printf -fvisibility=hidden '
         test_list[base_key][
             'linker_args'] = '-static -nostdlib -nostartfiles -lm -lgcc -T'
-        test_list[base_key]['linker_file'] = os.path.abspath(
-            os.path.join(target_dir, 'link.ld'))
-        test_list[base_key]['asm_file'] = os.path.abspath(
-            os.path.join(asm_dir, base_key, base_key + '.S'))
+        test_list[base_key]['linker_file'] = abspath(join(
+            target_dir, 'link.ld'))
+        test_list[base_key]['asm_file'] = abspath(
+            join(asm_dir, base_key, base_key + '.S'))
         test_list[base_key]['include'] = [env_dir, target_dir]
         test_list[base_key]['compile_macros'] = compile_macros_dict[base_key]
         test_list[base_key]['extra_compile'] = []
@@ -819,13 +850,13 @@ def generate_sv_components(sv_dir, alias_file):
     interface = sv_obj.generate_interface()
     defines = sv_obj.generate_defines()
 
-    with open(os.path.join(sv_dir, "tb_top.sv"), 'w') as tb_top_file:
+    with open(join(sv_dir, "tb_top.sv"), 'w') as tb_top_file:
         tb_top_file.write(tb_top)
 
-    with open(os.path.join(sv_dir, "interface.sv"), 'w') as interface_file:
+    with open(join(sv_dir, "interface.sv"), 'w') as interface_file:
         interface_file.write(interface)
 
-    with open(os.path.join(sv_dir, "defines.sv"), 'w') as defines_file:
+    with open(join(sv_dir, "defines.sv"), 'w') as defines_file:
         defines_file.write(defines)
 
 
@@ -835,8 +866,8 @@ def list_of_modules(module_dir):
     in the modules directory.
     """
     module_list = []
-    if os.path.exists(os.path.join(module_dir, 'index.yaml')):
-        modules = load_yaml(os.path.join(module_dir, 'index.yaml'))
+    if exists(join(module_dir, 'index.yaml')):
+        modules = load_yaml(join(module_dir, 'index.yaml'))
         for key, value in modules.items():
             if value is not None:
                 module_list.append(key)
@@ -860,7 +891,7 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
     flags = '-static -std=gnu99 -O2 -fno-common -fno-builtin-printf ' \
             '-fvisibility=hidden -static -nostdlib -nostartfiles -lm -lgcc'
     cmd = f'{compiler} -mcmodel={mcmodel} {flags} -march={march} -mabi={mabi}' \
-          f' -lm -lgcc -T {os.path.join(link_path,"link.ld")} {test_path}' \
+          f' -lm -lgcc -T {join(link_path,"link.ld")} {test_path}' \
           f' -I {env_path}' \
           f' -I {work_dir} {macros}' \
           f' -o /dev/null'
@@ -1068,27 +1099,24 @@ def run_make(work_dir, jobs):
         :returns: placeholder int
         :rtype: int
     """
-    cwd = os.getcwd()
-    os.chdir(os.path.abspath(work_dir))
+    cwd = getcwd()
+    chdir(abspath(work_dir))
     logger.debug(f'Current directory is: {work_dir}')
     logger.info(f'Invoking makefile to perform an empty compilation')
-    logger.warning(f'Based on the number of tests and their size, '\
+    logger.warning(f'Based on the number of tests and their size, '
                    f'this step might take a lot of time.')
 
     try:
-        out = subprocess.run(shlex.split(f'make -j{jobs}'),
-                             check=True,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
+        out = run(split(f'make -j{jobs}'), check=True, stdout=PIPE, stderr=PIPE)
         logger.debug(out.stdout.decode('ascii'))
         logger.info('All the generated Assmebly files are syntatically correct')
         logger.info('Empty Syntax Check - Complete! No errors found.')
 
-    except subprocess.CalledProcessError as e:
+    except CalledProcessError as e:
         logger.error(e.stderr.decode('ascii'))
         logger.warning(f'Please fix the errors and re-generate the tests')
         logger.info('Empty Syntax Check - Complete! Error found.')
 
-    os.chdir(cwd)
-    logger.debug(f'Current directory is: {os.getcwd()}')
+    chdir(cwd)
+    logger.debug(f'Current directory is: {getcwd()}')
     return 1

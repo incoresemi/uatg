@@ -1,23 +1,20 @@
 # See LICENSE.incore for license details
 
-import glob
-import os
-import sys
+from glob import glob
+from os import mkdir, makedirs, remove
+from os.path import join, dirname, abspath, exists, isdir, isfile
+from sys import exit
 from datetime import datetime
 from getpass import getuser
 from multiprocessing import Pool, Manager
 from shutil import rmtree, copyfile
-
-import ruamel.yaml as yaml
+from ruamel.yaml import dump
 from yapsy.PluginManager import PluginManager
-
-import uatg
+from uatg import __file__
 from uatg.log import logger
 from uatg.utils import create_plugins, generate_test_list, create_linker, \
     create_model_test_h, join_yaml_reports, generate_sv_components, \
     list_of_modules, rvtest_data, dump_makefile, setup_pages
-from yapsy.PluginManager import PluginManager
-from multiprocessing import Pool, Manager
 
 # create a manager for shared resources
 process_manager = Manager()
@@ -31,10 +28,11 @@ def asm_generation_process(args):
     # unpacking the args tuple
     plugin, core_yaml, isa_yaml, isa, test_format_string, work_tests_dir, \
         make_file, module, linker_dir, uarch_dir, work_dir, \
-        compile_macros_dict = args
+        compile_macros_dict, module_test_count_dict = args
 
     # actual generation process
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
+
     name = (str(plugin.plugin_object).split(".", 1))
     t_name = ((name[1].split(" ", 1))[0])
 
@@ -43,11 +41,11 @@ def asm_generation_process(args):
     priv_asm_data = ""
 
     if check:
-        test_seq = plugin.plugin_object.generate_asm()
-        assert isinstance(test_seq, list)
+        test_gen = plugin.plugin_object.generate_asm()
+
         seq = '001'
-        for ret_list_of_dicts in test_seq:
-            test_name = ((name[1].split(" ", 1))[0]) + '-' + seq
+        for ret_list_of_dicts in test_gen:
+            test_name = t_name + '-' + seq
             logger.debug(f'Selected test: {test_name}')
 
             assert isinstance(ret_list_of_dicts, dict)
@@ -127,8 +125,8 @@ def asm_generation_process(args):
             asm += test_format_string[7] + asm_sig + \
                 test_format_string[8]
 
-            os.mkdir(os.path.join(work_tests_dir, test_name))
-            with open(os.path.join(work_tests_dir, test_name, test_name + '.S'),
+            mkdir(join(work_tests_dir, test_name))
+            with open(join(work_tests_dir, test_name, test_name + '.S'),
                       'w') as f:
                 f.write(asm)
             seq = '%03d' % (int(seq, 10) + 1)
@@ -144,15 +142,18 @@ def asm_generation_process(args):
                 (test_name,
                  dump_makefile(isa=isa,
                                link_path=linker_dir,
-                               test_path=os.path.join(work_tests_dir, test_name,
-                                                      test_name + '.S'),
+                               test_path=join(work_tests_dir, test_name,
+                                              test_name + '.S'),
                                test_name=test_name,
                                compile_macros=compile_macros_dict[test_name],
-                               env_path=os.path.join(uarch_dir, 'env'),
+                               env_path=join(uarch_dir, 'env'),
                                work_dir=work_dir)))
 
+        module_test_count_dict[f'{t_name}'] = (int(seq)) - 1
+
     else:
-        logger.warning(f'Skipped {t_name}')
+        logger.warning(f'{t_name} is not valid for the current core '\
+                        'configuration')
 
     logger.debug(f'Finished Generating Assembly Files for {t_name}')
 
@@ -193,7 +194,7 @@ def sv_generation_process(args):
 
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
-                   modules_dir, jobs):
+                   modules_dir, index_path, jobs):
     """
     The function generates ASM files for all the test classes specified within
     the module_dir. The user can also select the modules for which he would want
@@ -206,14 +207,14 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     the ASM files on the DUT, when required. Finally, the test generator only
     generates the tests whose targets are implemented in the DUT.
     """
-    uarch_dir = os.path.dirname(uatg.__file__)
+    uarch_dir = dirname(__file__)
 
     if work_dir:
         pass
     else:
-        work_dir = os.path.abspath((os.path.join(uarch_dir, '../work/')))
+        work_dir = abspath((join(uarch_dir, '../work/')))
 
-    os.makedirs(work_dir, exist_ok=True)
+    makedirs(work_dir, exist_ok=True)
 
     logger.info(f'uatg dir is {uarch_dir}')
     logger.info(f'work_dir is {work_dir}')
@@ -227,10 +228,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         logger.error('Exiting UATG. ISA cannot be found/understood')
         exit(0)
 
-    if modules == ['all']:
-        logger.debug(f'Checking {modules_dir} for modules')
-        modules = list_of_modules(modules_dir)
-    logger.debug('The modules are {0}'.format((', '.join(modules))))
+    logger.info('The modules are {0}'.format((', '.join(modules))))
 
     # creating a shared dictionary which can be accessed by all processes
     # stores the makefile commands
@@ -248,13 +246,20 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     # this dictionary will contain all the compile macros for each test
     compile_macros_dict = process_manager.dict()
 
-    if os.path.exists(os.path.join(work_dir, 'makefile')):
-        os.remove(os.path.join(work_dir, 'makefile'))
+    if exists(join(work_dir, 'makefile')):
+        remove(join(work_dir, 'makefile'))
 
     logger.info('****** Generating Tests ******')
+
+    total_test_count_dict = {}
+
     for module in modules:
-        module_dir = os.path.join(modules_dir, module)
-        work_tests_dir = os.path.join(work_dir, module)
+
+        # creating a shared list to display the number of tests generated per module
+        module_test_count_dict = process_manager.dict()
+
+        module_dir = join(modules_dir, module)
+        work_tests_dir = join(work_dir, module)
 
         # initializing make commands for individual modules
         # the yaml file containing configuration data for the DUT
@@ -262,7 +267,9 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
         logger.debug(f'Directory for {module} is {module_dir}')
         logger.info(f'Starting plugin Creation for {module}')
-        create_plugins(plugins_path=module_dir, module=module)
+        create_plugins(plugins_path=module_dir,
+                       index_yaml=index_path,
+                       module=module)
         logger.info(f'Created plugins for {module}')
         username = getuser()
         time = ((str(datetime.now())).split("."))[0]
@@ -291,16 +298,16 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         if len(error_status) > 0:
             for i in error_status:
                 logger.error(str(i[0]) + ' : ' + str(i[1]))
-            sys.exit('Python Errors at one/multiple files')
+            exit('Python Errors at one/multiple files')
 
         # check if prior test files are present and remove them. create new dir.
-        if (os.path.isdir(work_tests_dir)) and \
-                os.path.exists(work_tests_dir):
+        if (isdir(work_tests_dir)) and \
+                exists(work_tests_dir):
             rmtree(work_tests_dir)
 
-        os.mkdir(work_tests_dir)
+        mkdir(work_tests_dir)
 
-        logger.debug(f'Generating assembly tests for {module}')
+        logger.info(f'Generating assembly tests for {module}')
 
         # test format strings
         test_format_string = [
@@ -313,19 +320,33 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         # plugins into an asm file
         arg_list = []
         for plugin in manager.getAllPlugins():
+
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
-                 work_dir, compile_macros_dict))
+                 work_dir, compile_macros_dict, module_test_count_dict))
 
         # multi processing process pool
-        logger.debug(f"Spawning {jobs} processes")
+        logger.info(f"Spawning {jobs} processes")
         process_pool = Pool(jobs)
         # creating a map of processes
         process_pool.map(asm_generation_process, arg_list)
         process_pool.close()
 
-        logger.debug(f'Finished Generating Assembly Tests for {module}')
+        logger.info('\n****** Count of assembly tests generated (per plugin) '\
+                   f'for {module} ******')
+
+        s_no = 1
+        for k, v in module_test_count_dict.items():
+            logger.info(f'{s_no} | {k} : {v}')
+            s_no = s_no + 1
+
+        total_test_count_dict[f'{module}'] = sum([v for v in \
+                                        module_test_count_dict.values()])
+        logger.info(f'\nTotal number of tests generated for {module} : '\
+                     '{}\n\n'.format(total_test_count_dict[module]))
+
+        logger.info(f'Finished Generating Assembly Tests for {module}')
 
         if test_list:
             logger.info(f'Creating test_list for the {module}')
@@ -333,8 +354,10 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                 generate_test_list(work_tests_dir, uarch_dir, isa,
                                    test_list_dict, compile_macros_dict))
 
-    with open(os.path.join(work_dir, 'makefile'), 'w') as f:
-        logger.debug('Dumping makefile')
+    logger.info('Assembly generation for all modules completed')
+
+    with open(join(work_dir, 'makefile'), 'w') as f:
+        logger.info('Dumping makefile')
         f.write('all' + ': ')
         f.write(' \\\n\t'.join(make_file['all']))
         f.write('\n')
@@ -354,32 +377,45 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         for i in make_file['tests']:
             f.write(i[0] + ': \n\t')
             f.write(i[1] + '\n')
-    logger.info('****** Finished Generating Tests ******')
 
-    if linker_dir and os.path.isfile(os.path.join(linker_dir, 'link.ld')):
-        logger.debug('Using user specified linker: ' +
-                     os.path.join(linker_dir, 'link.ld'))
-        copyfile(os.path.join(linker_dir, 'link.ld'), work_dir + '/link.ld')
+    if linker_dir and isfile(join(linker_dir, 'link.ld')):
+        logger.info('Using user specified linker: ' +
+                    join(linker_dir, 'link.ld'))
+        copyfile(join(linker_dir, 'link.ld'), work_dir + '/link.ld')
     else:
         create_linker(target_dir=work_dir)
-        logger.debug(f'Creating a linker file at {work_dir}')
+        logger.info(f'Creating a linker file at {work_dir}')
 
-    if linker_dir and os.path.isfile(os.path.join(linker_dir, 'model_test.h')):
-        logger.debug('Using user specified model_test file: ' +
-                     os.path.join(linker_dir, 'model_test.h'))
-        copyfile(os.path.join(linker_dir, 'model_test.h'),
-                 work_dir + '/model_test.h')
+    if linker_dir and isfile(join(linker_dir, 'model_test.h')):
+        logger.info('Using user specified model_test file: ' +
+                    join(linker_dir, 'model_test.h'))
+        copyfile(join(linker_dir, 'model_test.h'), work_dir + '/model_test.h')
     else:
         create_model_test_h(target_dir=work_dir)
-        logger.debug(f'Creating Model_test.h file at {work_dir}')
+        logger.info(f'Creating Model_test.h file at {work_dir}')
     if test_list:
         logger.info('Test List was generated by UATG. You can find it in '
                     'the work dir ')
     else:
         logger.info('Test list will not be generated by uatg')
     if test_list.lower() == 'true':
-        with open(os.path.join(work_dir, 'test_list.yaml'), 'w') as outfile:
-            yaml.dump(test_list_dict, outfile)
+        with open(join(work_dir, 'test_list.yaml'), 'w') as outfile:
+            dump(test_list_dict, outfile)
+
+    logger.info('\n****** Number of tests generated (per module) '\
+                'by UATG ******')
+
+    s_no = 1
+    for k, v in total_test_count_dict.items():
+        logger.info(f'{s_no} | {k} - {v}')
+        s_no = s_no + 1
+
+    logger.info('\nTotal number of tests generated by UATG in this run : '\
+                '{}\n\n'\
+                .format(sum([v for v in total_test_count_dict.values()])))
+
+    logger.info('****** Finished Generating Tests and other dependencies'\
+                ' ******')
 
 
 def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict, jobs):
@@ -393,32 +429,28 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict, jobs):
     In addition, the method also takes in an alias_dict which can be used to
     alias the BSV signal names to something even more comprehensible.
     """
-    uarch_dir = os.path.dirname(uatg.__file__)
+    uarch_dir = dirname(__file__)
 
     if work_dir:
         pass
     else:
-        work_dir = os.path.abspath((os.path.join(uarch_dir, '../work/')))
-
-    if modules == ['all']:
-        logger.debug(f'Checking {modules_dir} for modules')
-        modules = list_of_modules(modules_dir)
+        work_dir = abspath((join(uarch_dir, '../work/')))
 
     # yaml containing ISA parameters of DUT
     isa_yaml = config_dict['isa_dict']
     logger.info('****** Generating Covergroups ******')
 
-    sv_dir = os.path.join(work_dir, 'sv_top')
-    os.makedirs(sv_dir, exist_ok=True)
+    sv_dir = join(work_dir, 'sv_top')
+    makedirs(sv_dir, exist_ok=True)
 
     # generate the tbtop and interface files
     generate_sv_components(sv_dir, alias_dict)
     logger.debug("Generated tbtop, defines and interface files")
-    sv_file = os.path.join(sv_dir, 'coverpoints.sv')
+    sv_file = join(sv_dir, 'coverpoints.sv')
 
-    if os.path.isfile(sv_file):
+    if isfile(sv_file):
         logger.debug("Removing Existing coverpoints SV file")
-        os.remove(sv_file)
+        remove(sv_file)
 
     # create a shared list for storing the coverpoints
     cover_list = process_manager.list()
@@ -426,7 +458,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict, jobs):
     for module in modules:
         logger.debug(f'Generating CoverPoints for {module}')
 
-        module_dir = os.path.join(modules_dir, module)
+        module_dir = join(modules_dir, module)
 
         # yaml file with core parameters
         core_yaml = config_dict['core_config']
@@ -440,7 +472,7 @@ def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict, jobs):
         if len(error_status) > 0:
             for i in error_status:
                 logger.error(str(i[0]) + ' : ' + str(i[1]))
-            sys.exit('Python Errors at one/multiple files')
+            exit('Python Errors at one/multiple files')
 
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
@@ -475,7 +507,7 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
        report for every test for which the user tries to validate.
     """
 
-    uarch_dir = os.path.dirname(uatg.__file__)
+    uarch_dir = dirname(__file__)
 
     logger.info('****** Validating Test results, Minimal log checking ******')
 
@@ -487,18 +519,18 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
     if work_dir:
         pass
     else:
-        work_dir = os.path.abspath((os.path.join(uarch_dir, '../work/')))
+        work_dir = abspath((join(uarch_dir, '../work/')))
 
     _pass_ct = 0
     _fail_ct = 0
     _tot_ct = 1
 
     for module in modules:
-        module_dir = os.path.join(modules_dir, module)
-        # module_tests_dir = os.path.join(module_dir, 'tests')
-        work_tests_dir = os.path.join(work_dir, module)
-        reports_dir = os.path.join(work_dir, 'reports', module)
-        os.makedirs(reports_dir, exist_ok=True)
+        module_dir = join(modules_dir, module)
+        # module_tests_dir = join(module_dir, 'tests')
+        work_tests_dir = join(work_dir, module)
+        reports_dir = join(work_dir, 'reports', module)
+        makedirs(reports_dir, exist_ok=True)
         # YAML with ISA paramters
         core_yaml = config_dict['core_config']
         # isa yaml with ISA paramters
@@ -512,7 +544,7 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
         if len(error_status) > 0:
             for i in error_status:
                 logger.error(str(i[0]) + ' : ' + str(i[1]))
-            sys.exit('Python Errors at one/multiple files')
+            exit('Python Errors at one/multiple files')
 
         logger.debug(f'Minimal Log Checking for {module}')
 
@@ -520,7 +552,7 @@ def validate_tests(modules, config_dict, work_dir, modules_dir):
             _name = (str(plugin.plugin_object).split(".", 1))
             _test_name = ((_name[1].split(" ", 1))[0])
             _check = plugin.plugin_object.execute(core_yaml, isa_yaml)
-            _log_file_path = os.path.join(work_tests_dir, _test_name, 'log')
+            _log_file_path = join(work_tests_dir, _test_name, 'log')
             if _check:
                 try:
                     _result = plugin.plugin_object.check_log(
@@ -566,32 +598,31 @@ def clean_dirs(work_dir, modules_dir):
     Presently it removes __pycache__, work_dir directory and also removes
     the '.yapsy plugins' files in the module's directories.
     """
-    uarch_dir = os.path.dirname(uatg.__file__)
+    uarch_dir = dirname(__file__)
     if work_dir:
         pass
     else:
-        work_dir = os.path.abspath((os.path.join(uarch_dir, '../work/')))
+        work_dir = abspath((join(uarch_dir, '../work/')))
 
-    module_dir = os.path.join(work_dir, '**')
-    # module_tests_dir = os.path.join(module_dir, 'tests')
+    module_dir = join(work_dir, '**')
+    # module_tests_dir = join(module_dir, 'tests')
 
     logger.info('****** Cleaning ******')
     logger.debug(f'work_dir is {module_dir}')
-    yapsy_dir = os.path.join(modules_dir, '**/*.yapsy-plugin')
-    pycache_dir = os.path.join(modules_dir, '**/__pycache__')
+    yapsy_dir = join(modules_dir, '**/*.yapsy-plugin')
+    pycache_dir = join(modules_dir, '**/__pycache__')
     logger.debug(f'yapsy_dir is {yapsy_dir}')
     logger.debug(f'pycache_dir is {pycache_dir}')
-    tf = glob.glob(module_dir)
-    pf = glob.glob(pycache_dir) + glob.glob(
-        os.path.join(uarch_dir, '__pycache__'))
-    yf = glob.glob(yapsy_dir, recursive=True)
+    tf = glob(module_dir)
+    pf = glob(pycache_dir) + glob(join(uarch_dir, '__pycache__'))
+    yf = glob(yapsy_dir, recursive=True)
     logger.debug(f'removing {tf}, {yf} and {pf}')
     for element in tf + pf:
-        if os.path.isdir(element):
+        if isdir(element):
             rmtree(element)
         else:
-            os.remove(element)
+            remove(element)
 
     for element in yf:
-        os.remove(element)
+        remove(element)
     logger.info("Generated Test files/folders removed")
