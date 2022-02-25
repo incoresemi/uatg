@@ -228,7 +228,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         logger.error('Exiting UATG. ISA cannot be found/understood')
         exit(0)
 
-    logger.debug('The modules are {0}'.format((', '.join(modules))))
+    logger.info('The modules are {0}'.format((', '.join(modules))))
 
     # creating a shared dictionary which can be accessed by all processes
     # stores the makefile commands
