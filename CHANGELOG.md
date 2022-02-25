@@ -2,6 +2,22 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2022-02-25
+- Reduce memory usage by using generators in the plugins.
+- UATG will display the number of tests generated per module and in total.
+- Feature to generate config.ini with valid paths using ``uatg setup``.
+- Support for custom index.yaml file.
+- Individual entries for core configuration YAMLs in config.ini
+- ``test_compile`` node in config.ini to enable dry compile runs of generated assembly.
+- ``jobs`` node in config.ini to control the number of processes spawned.
+- make paths in generated test-list absolute.
+- add macros and utility functions to run and generate supervisor/user tests.
+- fix issue with displaying plugin syntax errors (YAPSY).
+- add instruction generator.
+- fix multiple bugs.
+- minor updates to the trap handler.
+- minor documentation
+
 ## [1.3.0] - 2021-11-24
 - Fix docs
 - Add multi-processing support at the test plugin level.
