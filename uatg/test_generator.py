@@ -28,14 +28,14 @@ def asm_generation_process(args):
     # unpacking the args tuple
     plugin, core_yaml, isa_yaml, isa, test_format_string, work_tests_dir, \
         make_file, module, linker_dir, uarch_dir, work_dir, \
-        compile_macros_dict = args
+        compile_macros_dict, module_test_count_dict = args
 
     # actual generation process
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
-    
+
     name = (str(plugin.plugin_object).split(".", 1))
     t_name = ((name[1].split(" ", 1))[0])
-    
+
     # data section for paging pages
     priv_asm_code = ['', '', '']
     priv_asm_data = ""
@@ -143,14 +143,17 @@ def asm_generation_process(args):
                  dump_makefile(isa=isa,
                                link_path=linker_dir,
                                test_path=join(work_tests_dir, test_name,
-                                                      test_name + '.S'),
+                                              test_name + '.S'),
                                test_name=test_name,
                                compile_macros=compile_macros_dict[test_name],
                                env_path=join(uarch_dir, 'env'),
                                work_dir=work_dir)))
 
+        module_test_count_dict[f'{t_name}'] = (int(seq)) - 1
+
     else:
-        logger.warning(f'Skipped {t_name}')
+        logger.warning(f'{t_name} is not valid for the current core '\
+                        'configuration')
 
     logger.debug(f'Finished Generating Assembly Files for {t_name}')
 
@@ -224,7 +227,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         logger.error(e)
         logger.error('Exiting UATG. ISA cannot be found/understood')
         exit(0)
- 
+
     logger.debug('The modules are {0}'.format((', '.join(modules))))
 
     # creating a shared dictionary which can be accessed by all processes
@@ -247,9 +250,14 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         remove(join(work_dir, 'makefile'))
 
     logger.info('****** Generating Tests ******')
-    
-    for module in modules: 
-        
+
+    total_test_count_dict = {}
+
+    for module in modules:
+
+        # creating a shared list to display the number of tests generated per module
+        module_test_count_dict = process_manager.dict()
+
         module_dir = join(modules_dir, module)
         work_tests_dir = join(work_dir, module)
 
@@ -299,7 +307,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
 
         mkdir(work_tests_dir)
 
-        logger.debug(f'Generating assembly tests for {module}')
+        logger.info(f'Generating assembly tests for {module}')
 
         # test format strings
         test_format_string = [
@@ -312,20 +320,33 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         # plugins into an asm file
         arg_list = []
         for plugin in manager.getAllPlugins():
-            
+
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
-                 work_dir, compile_macros_dict))
+                 work_dir, compile_macros_dict, module_test_count_dict))
 
         # multi processing process pool
-        logger.debug(f"Spawning {jobs} processes")
+        logger.info(f"Spawning {jobs} processes")
         process_pool = Pool(jobs)
         # creating a map of processes
         process_pool.map(asm_generation_process, arg_list)
         process_pool.close()
 
-        logger.debug(f'Finished Generating Assembly Tests for {module}')
+        logger.info('\n****** Count of assembly tests generated (per plugin) '\
+                   f'for {module} ******')
+
+        s_no = 1
+        for k, v in module_test_count_dict.items():
+            logger.info(f'{s_no} | {k} : {v}')
+            s_no = s_no + 1
+
+        total_test_count_dict[f'{module}'] = sum([v for v in \
+                                        module_test_count_dict.values()])
+        logger.info(f'\nTotal number of tests generated for {module} : '\
+                     '{}\n\n'.format(total_test_count_dict[module]))
+
+        logger.info(f'Finished Generating Assembly Tests for {module}')
 
         if test_list:
             logger.info(f'Creating test_list for the {module}')
@@ -333,8 +354,10 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                 generate_test_list(work_tests_dir, uarch_dir, isa,
                                    test_list_dict, compile_macros_dict))
 
+    logger.info('Assembly generation for all modules completed')
+
     with open(join(work_dir, 'makefile'), 'w') as f:
-        logger.debug('Dumping makefile')
+        logger.info('Dumping makefile')
         f.write('all' + ': ')
         f.write(' \\\n\t'.join(make_file['all']))
         f.write('\n')
@@ -354,24 +377,22 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         for i in make_file['tests']:
             f.write(i[0] + ': \n\t')
             f.write(i[1] + '\n')
-    logger.info('****** Finished Generating Tests ******')
 
     if linker_dir and isfile(join(linker_dir, 'link.ld')):
-        logger.debug('Using user specified linker: ' +
-                     join(linker_dir, 'link.ld'))
+        logger.info('Using user specified linker: ' +
+                    join(linker_dir, 'link.ld'))
         copyfile(join(linker_dir, 'link.ld'), work_dir + '/link.ld')
     else:
         create_linker(target_dir=work_dir)
-        logger.debug(f'Creating a linker file at {work_dir}')
+        logger.info(f'Creating a linker file at {work_dir}')
 
     if linker_dir and isfile(join(linker_dir, 'model_test.h')):
-        logger.debug('Using user specified model_test file: ' +
-                     join(linker_dir, 'model_test.h'))
-        copyfile(join(linker_dir, 'model_test.h'),
-                 work_dir + '/model_test.h')
+        logger.info('Using user specified model_test file: ' +
+                    join(linker_dir, 'model_test.h'))
+        copyfile(join(linker_dir, 'model_test.h'), work_dir + '/model_test.h')
     else:
         create_model_test_h(target_dir=work_dir)
-        logger.debug(f'Creating Model_test.h file at {work_dir}')
+        logger.info(f'Creating Model_test.h file at {work_dir}')
     if test_list:
         logger.info('Test List was generated by UATG. You can find it in '
                     'the work dir ')
@@ -380,6 +401,21 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     if test_list.lower() == 'true':
         with open(join(work_dir, 'test_list.yaml'), 'w') as outfile:
             dump(test_list_dict, outfile)
+
+    logger.info('\n****** Number of tests generated (per module) '\
+                'by UATG ******')
+
+    s_no = 1
+    for k, v in total_test_count_dict.items():
+        logger.info(f'{s_no} | {k} - {v}')
+        s_no = s_no + 1
+
+    logger.info('\nTotal number of tests generated by UATG in this run : '\
+                '{}\n\n'\
+                .format(sum([v for v in total_test_count_dict.values()])))
+
+    logger.info('****** Finished Generating Tests and other dependencies'\
+                ' ******')
 
 
 def generate_sv(work_dir, config_dict, modules, modules_dir, alias_dict, jobs):
@@ -578,8 +614,7 @@ def clean_dirs(work_dir, modules_dir):
     logger.debug(f'yapsy_dir is {yapsy_dir}')
     logger.debug(f'pycache_dir is {pycache_dir}')
     tf = glob(module_dir)
-    pf = glob(pycache_dir) + glob(
-        join(uarch_dir, '__pycache__'))
+    pf = glob(pycache_dir) + glob(join(uarch_dir, '__pycache__'))
     yf = glob(yapsy_dir, recursive=True)
     logger.debug(f'removing {tf}, {yf} and {pf}')
     for element in tf + pf:

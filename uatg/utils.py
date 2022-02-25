@@ -214,6 +214,11 @@ def info(version):
     logger.info('All Rights Reserved.')
 
 
+def uatg_exit():
+    logger.info(f'Exiting UATG')
+    logger.info(f'Good day! Stay Hydrated.')
+
+
 def load_yaml(file):
     """
         Common function to load YAML Files.
@@ -412,7 +417,7 @@ def create_plugins(plugins_path, index_yaml, module):
     Yapsy will ignore all other python file which does not have a
     .yapsy-plugin file associated with it.
     """
-    index_yaml = abspath(index_yaml) 
+    index_yaml = abspath(index_yaml)
     if exists(index_yaml) and (index_yaml.endswith('.yaml') or
                                index_yaml.endswith('.yml')):
         index_yaml = load_yaml(index_yaml)
@@ -438,16 +443,13 @@ def create_plugins(plugins_path, index_yaml, module):
                 exit(f'update the index.yaml with your new test')
 
             if val:
-                f = open(
-                    join(plugins_path, test_name + '.yapsy-plugin'),
-                    'w')
+                f = open(join(plugins_path, test_name + '.yapsy-plugin'), 'w')
                 f.write("[Core]\nName=" + test_name + "\nModule=" + test_name)
                 f.close()
                 logger.debug(f'Created plugin for {test_name}')
             else:
                 try:
-                    remove(
-                        join(plugins_path, test_name + '.yapsy-plugin'))
+                    remove(join(plugins_path, test_name + '.yapsy-plugin'))
                     logger.warn(
                         f'removing already existing plugin file for {test_name}'
                     )
@@ -826,8 +828,8 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
                          '-fno-builtin-printf -fvisibility=hidden '
         test_list[base_key][
             'linker_args'] = '-static -nostdlib -nostartfiles -lm -lgcc -T'
-        test_list[base_key]['linker_file'] = abspath(
-            join(target_dir, 'link.ld'))
+        test_list[base_key]['linker_file'] = abspath(join(
+            target_dir, 'link.ld'))
         test_list[base_key]['asm_file'] = abspath(
             join(asm_dir, base_key, base_key + '.S'))
         test_list[base_key]['include'] = [env_dir, target_dir]
