@@ -9,6 +9,7 @@ from uatg.utils import load_yaml
 
 seed(101)
 
+
 class instruction_generator:
     """
         This class reads the isem.yaml file and based upon the ISA specification
@@ -42,8 +43,7 @@ class instruction_generator:
                         be generated.
         """
         assert (search(r'RV\d+I', isa) is not None)
-        instruction_file = join(dirname(__file__),
-                                        'isem.yaml')
+        instruction_file = join(dirname(__file__), 'isem.yaml')
         integer_reg_file = {'x' + str(num) for num in range(32)}
         float_reg_file = {'f' + str(num) for num in range(32)}
         compressed_reg_file = {'x' + str(num) for num in range(8, 15)}
@@ -244,8 +244,7 @@ class instruction_generator:
         else:
             while label in self.prog_labels:
                 label = 'label_' + ''.join(
-                    choices(ascii_letters + digits,
-                                   k=no_of_chars))
+                    choices(ascii_letters + digits, k=no_of_chars))
             self.prog_labels.append(label)
         return label
 
@@ -364,8 +363,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = choices(list(self.i_insts.keys()),
-                                          k=no_of_insts)
+            random_insts = choices(list(self.i_insts.keys()), k=no_of_insts)
             for key in random_insts:
                 if key in ('beq', 'bne', 'blt', 'bge', 'bltu', 'bgeu', 'jal',
                            'jalr', 'lb', 'lh', 'lw', 'ld', 'lbu', 'lhu', 'lwu',
@@ -426,8 +424,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = choices(list(self.m_insts.keys()),
-                                          k=no_of_insts)
+            random_insts = choices(list(self.m_insts.keys()), k=no_of_insts)
             for key in random_insts:
                 asm_syntax = self.m_insts[key]
                 r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
@@ -473,8 +470,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            instructions = choices(list(self.a_insts.keys()),
-                                          k=no_of_insts)
+            instructions = choices(list(self.a_insts.keys()), k=no_of_insts)
         for _ in range(no_of_insts):
             inst = choice(instructions)
             asm_syntax = self.a_insts[inst]
@@ -562,8 +558,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = choices(list(self.f_insts.keys()),
-                                          k=no_of_insts)
+            random_insts = choices(list(self.f_insts.keys()), k=no_of_insts)
             for key in random_insts:
                 asm_syntax = self.f_insts[key]
                 r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
@@ -608,8 +603,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = choices(list(self.d_insts.keys()),
-                                          k=no_of_insts)
+            random_insts = choices(list(self.d_insts.keys()), k=no_of_insts)
             for key in random_insts:
                 asm_syntax = self.d_insts[key]
                 r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)
@@ -653,8 +647,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = choices(list(self.c_insts.keys()),
-                                          k=no_of_insts)
+            random_insts = choices(list(self.c_insts.keys()), k=no_of_insts)
             for key in random_insts:
                 if key in (
                         'c.beqz',
@@ -760,8 +753,7 @@ class instruction_generator:
 
         ret_list = []
         if instructions == 'random':
-            random_insts = choices(list(self.b_insts.keys()),
-                                          k=no_of_insts)
+            random_insts = choices(list(self.b_insts.keys()), k=no_of_insts)
             for key in random_insts:
                 asm_syntax = self.b_insts[key]
                 r_inst = self.__replace_fields(asm_syntax, modifiers=modifiers)

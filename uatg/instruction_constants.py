@@ -21,7 +21,7 @@ arithmetic_instructions = {
     'rv64-shift-reg': ['sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'],
     'rv128-shift-reg': [
         'sll', 'sra', 'srl', 'sllw', 'sraw', 'srlw'
-                                             'slld', 'srad', 'srld'
+        'slld', 'srad', 'srld'
     ],
     'rv32-shift-imm': ['slli', 'srli', 'srai'],
     'rv64-shift-imm': ['slli', 'srli', 'srai', 'slliw', 'srliw', 'sraiw'],
@@ -350,7 +350,6 @@ rv64_encodings = {
         ],
 }
 
-
 # Utility functions for data generation
 
 
@@ -494,7 +493,7 @@ def illegal_generator(isa='RV32I') -> list:
             instructions[opcode] = consts
     # illegal_list variable contains all the illegal values for a particular isa
     # extension. it's initialized to store all illegal opcodes in the 7bit range
-    illegal_list = [i for i in range(2 ** 7) if i not in instructions.keys()]
+    illegal_list = [i for i in range(2**7) if i not in instructions.keys()]
 
     # Choosing illegals that DO NOT get interpreted as Compressed instructions.
     # i.e now the list has instructions with opcode[1:0] == 0b11
@@ -509,8 +508,7 @@ def illegal_generator(isa='RV32I') -> list:
         # Variable to store the illegal values for each range in legal values
         illegal_values = {
             (beg, end):
-                set(range(2 ** (end - beg + 1))) - instructions[opcode][
-                    (beg, end)]
+            set(range(2**(end - beg + 1))) - instructions[opcode][(beg, end)]
             for (beg, end) in instructions[opcode].keys()
         }
         # Finding all permutations for illegal fields in an instruction
