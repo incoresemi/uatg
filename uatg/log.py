@@ -1,22 +1,7 @@
 # See LICENSE.incore for details
 
-import logging
-import colorlog
-
-
-# Filter for logs from yapsy module
-class yapsy_filter(logging.Filter):
-    """
-    This class implemets a subclass of the Filter() class of logging
-    and helps us filter out the logs generated from the yapsy plugin manager
-    package. These errors are (currently) irrelevent to the operation of UATG.
-    Hence, we filter these log statements.
-    """
-
-    def filter(self, log):
-        if '<LogRecord: yapsy,' in str(log.getMessage):
-            return 0
-        return 1
+from logging import ERROR, CRITICAL, WARNING, INFO, DEBUG, getLogger, StreamHandler, root
+from colorlog import ColoredFormatter
 
 
 class Log:
@@ -27,17 +12,19 @@ class Log:
     """
 
     aliases = {
-        logging.CRITICAL: ("critical", "crit", "fatal"),
-        logging.ERROR: ("error", "err"),
-        logging.WARNING: ("warning", "warn"),
-        logging.INFO: ("info", "inf"),
-        logging.DEBUG: ("debug", "dbg")
+        CRITICAL: ("critical", "crit", "fatal"),
+        ERROR: ("error", "err"),
+        WARNING: ("warning", "warn"),
+        INFO: ("info", "inf"),
+        DEBUG: ("debug", "dbg")
     }
 
     def __init__(self, format=None):
+        self.stream = None
+        self._lvl = None
         if not format:
-            format = "%(log_color)s%(levelname)8s%(reset)s |" \
-                     " %(log_color)s%(message)s%(reset)s"
+            format = "%(log_color)s%(levelname)8s%(reset)s | %(log_color)" \
+                     "s%(message)s%(reset)s"
         self.format = format
         self.colors = {
             'DEBUG': 'purple',
@@ -46,9 +33,7 @@ class Log:
             'ERROR': 'bold_red',
             'CRITICAL': 'bold_red',
         }
-        self.logger = logging.getLogger()
-        self._lvl = None
-        self.stream = None
+        self.logger = getLogger("uatg")
 
     # the magic happens here: we use the "extra" argument documented in
     # https://docs.python.org/2/library/logging.html#logging.Logger.debug
@@ -89,30 +74,26 @@ class Log:
         for log_level in self.aliases:
             if lvl == log_level or lvl in self.aliases[log_level]:
                 return log_level
-        print('Invalid log level passed. Please select from debug '
-              '| info | warning | error')
+        print('Invalid log level passed. Please select from debug | info |'
+              ' warning | error')
         raise ValueError("{}-Invalid log level.".format(lvl))
 
-    def level(self, lvl=logging.CRITICAL):
+    def level(self, lvl=CRITICAL):
         """Setup the Logger."""
 
         self._lvl = self._parse_level(lvl)
-
-        self.stream = logging.StreamHandler()
+        self.stream = StreamHandler()
         self.stream.setLevel(self._lvl)
 
         self.stream.setLevel(self._lvl)
 
         self.stream.setFormatter(
-            colorlog.ColoredFormatter(self.format, log_colors=self.colors))
-
-        # Adding our filter to the Handler.
-        self.stream.addFilter(yapsy_filter())
+            ColoredFormatter(self.format, log_colors=self.colors))
 
         self.logger.setLevel(self._lvl)
 
         self.logger.addHandler(self.stream)
-        logging.root.setLevel(self._lvl)
+        root.setLevel(self._lvl)
 
 
 logger = Log()

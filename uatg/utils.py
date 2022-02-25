@@ -1,12 +1,16 @@
 # See LICENSE.incore for license details
 
 # imports
-import os
-import re
-import glob
-import random as rnd
+# import os
+from os import remove, listdir, getcwd, chdir
+from os.path import join, abspath, exists, basename
+from re import findall, M
+from glob import glob
+from random import randint
 from uatg.log import logger
 from ruamel.yaml import YAML
+from subprocess import run, PIPE, CalledProcessError
+from shlex import split
 
 
 class sv_components:
@@ -210,6 +214,11 @@ def info(version):
     logger.info('All Rights Reserved.')
 
 
+def uatg_exit():
+    logger.info(f'Exiting UATG')
+    logger.info(f'Good day! Stay Hydrated.')
+
+
 def load_yaml(file):
     """
         Common function to load YAML Files.
@@ -217,8 +226,7 @@ def load_yaml(file):
         If the file is in YAML, it reads the file and returns the data from the
         file as a dictionary.
     """
-    if os.path.exists(file) and (file.endswith('.yaml') or
-                                 file.endswith('.yml')):
+    if exists(file) and (file.endswith('.yaml') or file.endswith('.yml')):
         yaml = YAML(typ="rt")
         yaml.default_flow_style = False
         yaml.allow_unicode = True
@@ -232,7 +240,7 @@ def load_yaml(file):
         exit('INVALID_FILE/PATH')
 
 
-def combine_config_yamls(configuration_path):
+def combine_config_yamls(configuration):
     """
         This function reads all the YAML file paths specified by the user.
         Loads the data into a dictionary and then returns it to the invoking
@@ -240,32 +248,39 @@ def combine_config_yamls(configuration_path):
     """
     dut_dict = {}
     try:
-        dut_dict['isa_dict'] = load_yaml(configuration_path[0])  # Yaml for ISA
-    except IndexError:
+        dut_dict['isa_dict'] = load_yaml(configuration['isa'])  # Yaml for ISA
+    except KeyError:
         logger.error('isa configuration yaml is missing. '
                      'UATG cannot proceed without '
                      'providing a path to the valid YAML file')
         raise Exception('MISSING_ISA_CONFIG_YAML')
     try:
         dut_dict['core_config'] = load_yaml(
-            configuration_path[1])  # Yaml for DUT configuration
-    except IndexError:
+            configuration['core'])  # Yaml for DUT configuration
+    except KeyError:
         logger.error('core config yaml is missing. UATG cannot proceed without '
                      'providing a path to the valid YAML file')
         raise Exception('MISSING_CORE_CONFIGURATION_YAML')
     try:
         dut_dict['rv64i_custom'] = load_yaml(
-            configuration_path[2])  # Yaml for Modules
-    except IndexError:
+            configuration['custom'])  # Yaml for Modules
+    except KeyError:
         logger.error('custom_config.yaml path is missing. UATG cannot proceed '
                      'without providing a path to the YAMLfile')
         raise Exception('MISSING_CUSTOM_CONFIGURATION_YAML')
     try:
         dut_dict['csr_grouping'] = load_yaml(
-            configuration_path[3])  # YAML for CSRs
-    except IndexError:
+            configuration['csr_grouping'])  # YAML for CSRs
+    except KeyError:
         logger.error('Path to csr_grouping.yaml is invalid.')
         raise Exception('MISSING_CSRGROUPING')
+
+    try:
+        dut_dict['rv64_debug'] = load_yaml(
+            configuration['debug'])  # YAML for CSRs
+    except KeyError:
+        logger.error('Path to rv_debug.yaml is invalid.')
+        raise Exception('MISSING_RV_DEBUG')
 
     return dut_dict
 
@@ -277,17 +292,17 @@ def join_yaml_reports(work_dir='abs_path_here/', module='branch_predictor'):
         option present in UATG.
     """
     files = [
-        file for file in os.listdir(os.path.join(work_dir, 'reports', module))
+        file for file in listdir(join(work_dir, 'reports', module))
         if file.endswith('_report.yaml')
     ]
     yaml = YAML()
     reports = {}
     for file in files:
-        fp = open(os.path.join(work_dir, 'reports', module, file), 'r')
+        fp = open(join(work_dir, 'reports', module, file), 'r')
         data = yaml.load(fp)
         reports.update(dict(data))
         fp.close()
-    f = open(os.path.join(work_dir, 'combined_reports.yaml'), 'w')
+    f = open(join(work_dir, 'combined_reports.yaml'), 'w')
     yaml.default_flow_style = False
     yaml.dump(reports, f)
     f.close()
@@ -318,7 +333,7 @@ SECTIONS
 } 
 '''
 
-    with open(os.path.join(target_dir, "link.ld"), 'w') as outfile:
+    with open(join(target_dir, "link.ld"), 'w') as outfile:
         outfile.write(out)
 
 
@@ -390,11 +405,11 @@ shakti_end:                                                             \
 #define RVMODEL_CLEAR_MEXT_INT
 #endif // _COMPLIANCE_MODEL_H'''
 
-    with open(os.path.join(target_dir, 'model_test.h'), 'w') as outfile:
+    with open(join(target_dir, 'model_test.h'), 'w') as outfile:
         outfile.write(out)
 
 
-def create_plugins(plugins_path, module):
+def create_plugins(plugins_path, index_yaml, module):
     """
     This function is used to create Yapsy Plugin files.
     The YAPSY plugins are required to be in a certain pattern. This function
@@ -402,9 +417,18 @@ def create_plugins(plugins_path, module):
     Yapsy will ignore all other python file which does not have a
     .yapsy-plugin file associated with it.
     """
-    # the index yaml is in the modules directory
-    index_yaml = load_yaml(os.path.join(plugins_path, '../index.yaml'))
-    files = os.listdir(plugins_path)
+    index_yaml = abspath(index_yaml)
+    if exists(index_yaml) and (index_yaml.endswith('.yaml') or
+                               index_yaml.endswith('.yml')):
+        index_yaml = load_yaml(index_yaml)
+        logger.debug('using index.yaml from path specified in config.ini file')
+
+    else:
+        # the index yaml is in the modules directory
+        index_yaml = load_yaml(join(plugins_path, '../index.yaml'))
+        logger.debug('using the default index.yaml file ')
+
+    files = listdir(plugins_path)
 
     for file in files:
         if ('.py' in file) and (not file.startswith('.')):
@@ -419,16 +443,13 @@ def create_plugins(plugins_path, module):
                 exit(f'update the index.yaml with your new test')
 
             if val:
-                f = open(
-                    os.path.join(plugins_path, test_name + '.yapsy-plugin'),
-                    'w')
+                f = open(join(plugins_path, test_name + '.yapsy-plugin'), 'w')
                 f.write("[Core]\nName=" + test_name + "\nModule=" + test_name)
                 f.close()
                 logger.debug(f'Created plugin for {test_name}')
             else:
                 try:
-                    os.remove(
-                        os.path.join(plugins_path, test_name + '.yapsy-plugin'))
+                    remove(join(plugins_path, test_name + '.yapsy-plugin'))
                     logger.warn(
                         f'removing already existing plugin file for {test_name}'
                     )
@@ -439,37 +460,58 @@ def create_plugins(plugins_path, module):
                     f'Skippping test {test_name} as index yaml has False')
 
 
-def create_config_file(config_path):
+def create_config_file(config_path, jobs, modules, module_dir, work_dir,
+                       linker_dir, alias_path, test_compile, cfg_files):
     """
         Creates a template config.ini file at the config_path directory.
         Invoked by running uatg setup.
     """
+    work_dir = '/home/user/myquickstart/work/' if work_dir is None else work_dir
+
+    cfg_files = f'[uatg.configuration_files]\nisa = {cfg_files[0]}\n' \
+                f'core = {cfg_files[1]}\ncustom = {cfg_files[2]}\n' \
+                f'csr_grouping = {cfg_files[3]}\ndebug = {cfg_files[4]}'
+
+    modules = 'all' if modules is None else modules
+    module_dir = '/home/user/myquickstart/chromite_uatg_tests/modules/' \
+        if module_dir is None else module_dir
+
+    linker_dir = '/home/user/myquickstart/chromite_uatg_tests/target' \
+        if linker_dir is None else linker_dir
+
+    alias_path = '/home/user/myquickstart/chromite_uatg_tests/' \
+        if alias_path is None else alias_path
+
     cfg = '# See LICENSE.incore for license details\n\n' \
-          '[uatg]\n\n# [info, error, debug] set verbosity level to view ' \
-          'different levels of messages.\nverbose = info\n# [True, False] ' \
+          '[uatg]\n\n'\
+          '# number of processes to spawn. Default = 1\n'\
+          f'jobs = {jobs}\n'\
+          '\n# [info, error, debug] set verbosity level to view ' \
+          'different levels of messages. '\
+          '\nverbose = info\n\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
           ' tests are to be generated/validated in comma separated format.\n' \
           '# Run \'uatg --list-modules -md <path> \' to find all the modules ' \
           'that are supported.\n# Use \'all\' to generate/validate all ' \
-          'modules\nmodules = all\n\n# Absolute path to chromite_uatg_tests' \
-          '/modules Directory\n' \
-          'module_dir = /home/user/myquickstart/chromite_uatg_tests/modules/' \
+          f'modules\nmodules = {modules}\n\n' \
+          f'# list of modules to be excluded '\
+          f'from the test generation. Use when modules = all \n'\
+          f'excluded_modules =\n'\
+          f'\n# Absolute path to chromite_uatg_tests/modules Directory\n' \
+          f'module_dir = {module_dir}' \
           '\n\n# Directory to dump assembly files and reports\n' \
-          'work_dir = /home/user/myquickstart/work/' \
+          f'work_dir = {work_dir}' \
           '\n\n# location to store the link.ld linker file. By default it\'s ' \
           'the target directory within chromite_uatg_tests\n' \
-          'linker_dir = /home/user/myquickstart/chromite_uatg_tests/target' \
-          '\n\n# Path to the yaml files containing DUT Configuration.\n' \
-          'configuration_files = /home/user/myquickstart/isa_config.yaml,' \
-          '/home/user/myquickstart/core_config.yaml,' \
-          '/home/user/myquickstart/custom_config.yaml,' \
-          '/home/user/myquickstart/csr_grouping.yaml' \
-          '\n\n# Absolute Path of the yaml file contain' \
-          'ing the signal aliases of the DUT ' \
-          '\nalias_file = /home/user/myquickstart/chromite_uatg_tests/' \
-          'aliasing.yaml' \
-          '\n\n# [True, False] If the gen_test_' \
+          f'linker_dir = {linker_dir}' \
+          '\n\n# Absolute Path of the yaml file containing the signal ' \
+          'aliases of the DUT ' \
+          f'\nalias_file = {alias_path}\n\n# path to the index file '\
+          f'containing  the list of tests to be generated. By default, \n'\
+          f'# or when empty, UATG will use the inidex.yaml file within '\
+          f' the modules directory\nindex_file =\n\n'\
+          f'# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Unless you want to ' \
           'run individual tests in river_core, set the flag to True\n' \
@@ -478,9 +520,23 @@ def create_config_file(config_path):
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          'are generated\ngen_cvg = True\n'
+          f'are generated\ngen_cvg = False\n\ntest_compile = {test_compile}'\
+          '\n\n# Path to the yaml files containing DUT Configuration.\n' \
+          '# If you are using the CHROMITE core, uncomment the following line'\
+          ' by removing the \'#\'.\n# By doing this, UATG will use the '\
+          'checked YAMLs of Chromite\n'\
+          '#[uatg.configuration_files]\n'\
+          '#isa = /home/user/myquickstart/chromite/build/'\
+          'rv64i_isa_checked.yaml \n'\
+          '#core = /home/user/myquickstart/chromite/build/core64_checked.yaml' \
+          '\n#custom = /home/user/myquickstart/chromite/build/rv64i_custom_' \
+          'checked.yaml\n#csr_grouping = /home/user/myquickstart/chromite/' \
+          'sample_config/c64/csr_grouping64.yaml\n#debug = /home/user/myquick' \
+          'start/chromite/build/rv64i_debug_checked.yaml\n\n# comment the ' \
+          'following line by adding a \'#\' in front if you are using the ' \
+          f'checked YAMLs from CHROMITE\n\n{cfg_files}' \
 
-    with open(os.path.join(config_path, 'config.ini'), 'w') as f:
+    with open(join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
 
 
@@ -505,7 +561,7 @@ def create_alias_file(alias_path):
             'ras_stack_top_index_port2__read\n  bpu_btb_tag_valid: ' \
             'btb_valids\n '
 
-    with open(os.path.join(alias_path, 'aliasing.yaml'), 'w') as f:
+    with open(join(alias_path, 'aliasing.yaml'), 'w') as f:
         f.write(alias)
 
 
@@ -533,7 +589,7 @@ def create_dut_config_files(dut_config_path):
                 f'\n{s2}pmp_granularity: 1\n{s2}physical_addr_sz: 32\n{s2}' \
                 f'supported_xlen:\n{s4}- 64\n'
 
-    with open(os.path.join(dut_config_path, 'isa_config.yaml'), 'w') as f:
+    with open(join(dut_config_path, 'isa_config.yaml'), 'w') as f:
         f.write(rv64i_isa)
 
     rv64i_custom = f'hart_ids: [0]\nhart0:\n  dtim_base:\n{s4}reset-val: 0x0' \
@@ -572,7 +628,7 @@ def create_dut_config_files(dut_config_path):
                    f'branch predictor unit, i-cache, d-cache units\n{s6}' \
                    f'address: 0x800\n{s6}priv_mode: U\n'
 
-    with open(os.path.join(dut_config_path, 'custom_config.yaml'), 'w') as f:
+    with open(join(dut_config_path, 'custom_config.yaml'), 'w') as f:
         f.write(rv64i_custom)
 
     core64 = f'm_extension:\n{s2}mul_stages_in : 1\n{s2}mul_stages_out: 1' \
@@ -580,7 +636,7 @@ def create_dut_config_files(dut_config_path):
              f'True\n{s2}predictor: gshare\n{s2}btb_depth: 32\n{s2}bht_depth:' \
              f' 512\n{s2}history_len: 8\n{s2}history_bits: 5\n{s2}ras_depth: 8'
 
-    with open(os.path.join(dut_config_path, 'core_config.yaml'), 'w') as f:
+    with open(join(dut_config_path, 'core_config.yaml'), 'w') as f:
         f.write(core64)
 
     csr_grouping64 = f'grp1:\n{s2}- MISA\n{s2}- MSCRATCH\n{s2}- SSCRATCH' \
@@ -594,8 +650,13 @@ def create_dut_config_files(dut_config_path):
                      f'- MEDELEG\n{s2}- PMPCFG0\n{s2}- PMPADDR0\n{s2}' \
                      f'- PMPADDR1\n{s2}- PMPADDR2\n{s2}- PMPADDR3\n{s2}' \
                      f'- CUSTOMCONTROL'
-    with open(os.path.join(dut_config_path, 'csr_grouping.yaml'), 'w') as f:
+    with open(join(dut_config_path, 'csr_grouping.yaml'), 'w') as f:
         f.write(csr_grouping64)
+
+    rv_debug = f''
+
+    with open(join(dut_config_path, 'rv_debug.yaml'), 'w') as f:
+        f.write(rv_debug)
 
 
 def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
@@ -635,16 +696,16 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
             for i in range(num_vals):
                 if signed:
                     data += f'\t.{size[bit_width]}\t' \
-                            f'{hex(rnd.randint(min_signed, max_signed))}\n'
+                            f'{hex(randint(min_signed, max_signed))}\n'
                 else:
                     data += f'\t.{size[bit_width]}\t' \
-                            f'{hex(rnd.randint(min_unsigned, max_unsigned))}\n'
+                            f'{hex(randint(min_unsigned, max_unsigned))}\n'
     data += '\nsample_data:\n.word\t0xbabecafe\n'
     return data
 
 
 # UATG Functions
-def clean_modules(module_dir, modules):
+def clean_modules(module_dir, modules, excludes):
     """
     Function to read the modules specified by the user, check if they exist or
     raise an error.
@@ -655,7 +716,7 @@ def clean_modules(module_dir, modules):
 
     if 'all' in modules:
 
-        module = ['all']
+        module = available_modules
 
     else:
         try:
@@ -668,9 +729,28 @@ def clean_modules(module_dir, modules):
 
         except ValueError:
             pass
+
         for element in module:
             if element not in available_modules:
                 exit(f'Module {element} is not supported/unavailable.')
+    exclude = []
+    try:
+        excludes = excludes.replace(' ', ',')
+        excludes = excludes.replace(', ', ',')
+        excludes = excludes.replace(' ,', ',')
+        exclude = list(set(excludes.split(",")))
+        exclude.remove('')
+        exclude.sort()
+    except ValueError:
+        pass
+
+    for element in exclude:
+        logger.debug(f'Attempting to remove {element} from module list')
+        try:
+            module.remove(element)
+        except ValueError:
+            logger.warning(f'attempt to remove {element} from module list '
+                           f'failed.')
 
     return module
 
@@ -691,7 +771,7 @@ def split_isa_string(isa_string):
     The updates ISA string is returned.
     """
 
-    str_match = re.findall(r'([^\d]*?)(?!_)*(Z.*?)*(_|$)', isa_string, re.M)
+    str_match = findall(r'([^\d]*?)(?!_)*(Z.*?)*(_|$)', isa_string, M)
     extension_list = []
     for match in str_match:
         stdisa, z, ignore = match
@@ -712,9 +792,9 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
       The test list generation is an optional feature which the user may choose
       to use.
     """
-    asm_test_list = glob.glob(asm_dir + '/**/*.S')
-    env_dir = os.path.join(uarch_dir, 'env/')
-    target_dir = asm_dir + '/../'
+    asm_test_list = glob(asm_dir + '/**/*.S')
+    env_dir = join(uarch_dir, 'env/')
+    target_dir = abspath(asm_dir + '/../')
 
     extension_list = split_isa_string(isa)
     march = ''
@@ -735,10 +815,10 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
 
     for test in asm_test_list:
         logger.debug(f"Current test is {test}")
-        base_key = os.path.basename(test)[:-2]
+        base_key = basename(test)[:-2]
         test_list[base_key] = {}
         test_list[base_key]['generator'] = 'uatg'
-        test_list[base_key]['work_dir'] = asm_dir + '/' + base_key
+        test_list[base_key]['work_dir'] = abspath(asm_dir + '/' + base_key)
         test_list[base_key]['isa'] = isa
         test_list[base_key]['march'] = march
         test_list[base_key]['mabi'] = 'lp64'
@@ -748,9 +828,10 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
                          '-fno-builtin-printf -fvisibility=hidden '
         test_list[base_key][
             'linker_args'] = '-static -nostdlib -nostartfiles -lm -lgcc -T'
-        test_list[base_key]['linker_file'] = os.path.join(target_dir, 'link.ld')
-        test_list[base_key]['asm_file'] = os.path.join(asm_dir, base_key,
-                                                       base_key + '.S')
+        test_list[base_key]['linker_file'] = abspath(join(
+            target_dir, 'link.ld'))
+        test_list[base_key]['asm_file'] = abspath(
+            join(asm_dir, base_key, base_key + '.S'))
         test_list[base_key]['include'] = [env_dir, target_dir]
         test_list[base_key]['compile_macros'] = compile_macros_dict[base_key]
         test_list[base_key]['extra_compile'] = []
@@ -769,13 +850,13 @@ def generate_sv_components(sv_dir, alias_file):
     interface = sv_obj.generate_interface()
     defines = sv_obj.generate_defines()
 
-    with open(os.path.join(sv_dir, "tb_top.sv"), 'w') as tb_top_file:
+    with open(join(sv_dir, "tb_top.sv"), 'w') as tb_top_file:
         tb_top_file.write(tb_top)
 
-    with open(os.path.join(sv_dir, "interface.sv"), 'w') as interface_file:
+    with open(join(sv_dir, "interface.sv"), 'w') as interface_file:
         interface_file.write(interface)
 
-    with open(os.path.join(sv_dir, "defines.sv"), 'w') as defines_file:
+    with open(join(sv_dir, "defines.sv"), 'w') as defines_file:
         defines_file.write(defines)
 
 
@@ -785,8 +866,8 @@ def list_of_modules(module_dir):
     in the modules directory.
     """
     module_list = []
-    if os.path.exists(os.path.join(module_dir, 'index.yaml')):
-        modules = load_yaml(os.path.join(module_dir, 'index.yaml'))
+    if exists(join(module_dir, 'index.yaml')):
+        modules = load_yaml(join(module_dir, 'index.yaml'))
         for key, value in modules.items():
             if value is not None:
                 module_list.append(key)
@@ -810,9 +891,232 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
     flags = '-static -std=gnu99 -O2 -fno-common -fno-builtin-printf ' \
             '-fvisibility=hidden -static -nostdlib -nostartfiles -lm -lgcc'
     cmd = f'{compiler} -mcmodel={mcmodel} {flags} -march={march} -mabi={mabi}' \
-          f' -lm -lgcc -T {os.path.join(link_path,"link.ld")} {test_path}' \
+          f' -lm -lgcc -T {join(link_path,"link.ld")} {test_path}' \
           f' -I {env_path}' \
           f' -I {work_dir} {macros}' \
           f' -o /dev/null'
 
     return cmd
+
+
+def setup_pages(page_size=4096,
+                paging_mode='sv39',
+                valid_ll_pages=64,
+                mode='machine'):
+    """
+        creates pagetables to run tests in User and Supervisor modes
+        Currently works with the sv39 virtual memory addressing.
+
+        :param page_size: Size of the pages - 4kiB.
+        :param paging_mode: Paging mode used in the tests - sv39, for now.
+        :param valid_ll_pages: Valid last level pages to be created.
+        :param mode: Mode of execution for which the test is being generated.
+        :type page_size: int
+        :type paging_mode: string
+        :type valid_ll_pages: int
+        :type mode: string
+        :returns: ([out_code_string], out_data_string)
+        :rtype: tuple(list, string)
+    """
+
+    if mode == 'machine':
+        # machine mode tests don't have anything to do with pages.
+        # so, we return a list of empty strings.
+        return ['', '', ''], ''
+
+    entries = page_size // 8
+    # assuming that the size will always be a power of 2
+    power = len(bin(page_size)[2:]) - 1
+    align = power
+    shift_amount = 60
+    levels, mode_val = None, None
+    if paging_mode == 'sv32':
+        mode_val = 1  # paging mode for the SATP register
+        levels = 2
+        entries = entries * 2
+        shift_amount = 31
+    elif paging_mode == 'sv39':
+        mode_val = 8  # paging mode to be used in the SATP register
+        levels = 3
+    elif paging_mode == 'sv48':
+        mode_val = 9  # paging mode
+        levels = 4
+    elif paging_mode == 'sv57':
+        mode_val = 10
+        levels = 5
+
+    # data section
+    pre = f"\n.align {align}\n\n"
+
+    initial_level_pages_s = ''
+    for level in range(levels - 1):
+        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n.dword 0x0\n"\
+                                 f".endr\n"
+
+    initial_level_pages_u = ''
+    if mode == 'user':
+        for level in range(1, levels - 1):
+            initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n"\
+                                     f".dword 0x0\n.endr\n"
+
+    # assumption that the l3 pt entry 0 will point to 80000000
+
+    base_address = 0x80000000
+
+    # all bits other than U bit will be set by default
+    valid_bit = 0x01
+    read_bit = 0x02
+    write_bit = 0x04
+    execute_bit = 0x08
+    u_bit_s = 0x00
+    u_bit_u = 0x10
+    global_bit = 0x20
+    access_bit = 0x40
+    dirty_bit = 0x80
+
+    ll_entries_s = ''
+    ll_entries_u = ''
+    # ll_page_s = ''
+    # ll_page_u = ''
+    base_address_new = base_address
+
+    if mode == 'user':
+        for i in range(valid_ll_pages):
+            pte_address_u = base_address_new >> power
+            pte_address_u = pte_address_u << 10
+            pte_entry_u = pte_address_u | dirty_bit | access_bit |\
+                global_bit | u_bit_u | execute_bit | write_bit |\
+                read_bit | valid_bit
+            ll_entries_u += '.dword {0} # entry_{1}\n'.format(
+                hex(pte_entry_u), i)
+            base_address_new += page_size
+
+    base_address_new = base_address
+    for i in range(valid_ll_pages):
+        pte_address_s = base_address_new >> power
+        pte_address_s = pte_address_s << 10
+        pte_entry_s = pte_address_s | dirty_bit | access_bit |\
+            global_bit | u_bit_s | execute_bit | write_bit |\
+            read_bit | valid_bit
+        ll_entries_s += '.dword {0} # entry_{1}\n'.format(hex(pte_entry_s), i)
+        base_address_new += page_size
+
+    ll_page_s = f'l{levels-1}_pt:\n'\
+                f'{ll_entries_s}.rept {entries-valid_ll_pages}\n'\
+                f'.dword 0x0\n.endr\n'
+
+    ll_page_u = f'l{levels-1}_u_pt:\n'\
+                f'{ll_entries_u}.rept {entries-valid_ll_pages}\n'\
+                f'.dword 0x0\n.endr\n'
+
+    out_data_string = pre + initial_level_pages_s + ll_page_s + \
+        initial_level_pages_u + ll_page_u
+
+    # code section
+    # using the macro
+    # offset = 0
+    out_code_string = []
+
+    # calculation to set up root level pages
+    pte_updation = f"\n.option norvc"\
+                   f"\n\t# setting up root PTEs\n"\
+                   f"\tla t0, l0_pt # load address of root page\n\n"
+
+    shift_string = f"\t# calculation for offset\n"\
+                   f"\taddi t6, x0, 3\n\tslli t6, t6, 10\n\tadd t0, t0, t6\n"
+
+    for i in range(levels - 1):
+        offset = 24 if i == (levels - 3) else 0
+        offset_calc = shift_string if i == (levels - 2) else ""
+        pte_updation += f"\t# setting up l{i} table to point l{i+1} table\n"\
+                        f"\taddi t1, x0, 1 # add value 1 to reg\n"\
+                        f"\tslli t2, t1, {power} # left shift to create a page"\
+                        f"with value == page size\n"\
+                        f"\tadd t3, t2, t0 # add with the existing "\
+                        f"address to get address of level l page\n"\
+                        f"\tsrli t4, t3, {power} # divide that address with "\
+                        f"page size\n"\
+                        f"\tslli t4, t4, 10 # left shift for PTE format\n"\
+                        f"\tadd t4, t4, t1 # set valid bit to 1\n"\
+                        f"{offset_calc}"\
+                        f"\tsd t4, {offset}(t0) "\
+                        f"# store l{i+1} first entry address "\
+                        f"into the first entry of l{i}\n\n"
+        if i < levels - 2:
+            pte_updation += f"\t#address updation\n"\
+                            f"\tadd t0, t3, 0 # move the address of "\
+                            f"level {i+1} page to t0\n\n"
+
+    pte_updation += "\n"
+
+    if mode == 'user':
+        pte_updation += f"\t# user page table set up\n"
+        pte_updation += f"\tla t0, l0_pt # load address of root page\n\n"
+        pte_updation += f"\tla t3, l1_u_pt # load address of l1 user page\n\n"
+        common_setup = f"\tsrli t5, t3, 12\n"\
+                       f"\tslli t5, t5, 10\n"\
+                       f"\tli t4, 1\n"\
+                       f"\tadd t5, t5, t4\n"\
+                       f"\tsd t5, (t0)\n"
+        for i in range(levels - 1):
+            pte_updation += f"\t# update l{i} page entry with address "\
+                            f"of l{i+1} page\n"
+            if i != 0:
+                pte_updation += f"\taddi t2, x0, 1\n"\
+                                f"\tslli t2, t2, 12\n"\
+                                f"\tadd t3, t0, t2\n"
+            pte_updation += f"{common_setup}\n"
+
+            if i < levels - 2:
+                pte_updation += f"\t# address updation\n"\
+                                f"\tadd t0, t3, 0 # move address of \n"\
+                                f"\t\t\t\t #l{i+1} page into t0"
+
+    user_entry = "RVTEST_USER_ENTRY()\n" if mode == 'user' else ""
+    user_exit = "RVTEST_USER_EXIT()\n" if mode == 'user' else ""
+
+    out_code_string.append(pte_updation)
+
+    out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "
+                           f"{shift_amount})\n"
+                           f"supervisor_entry_label:\n"
+                           f"\n{user_entry}"
+                           f"test_entry:\n.option rvc\n\n")
+    out_code_string.append(f"\n\n.option norvc\n{user_exit}"
+                           f"test_exit:\n"
+                           f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"
+                           f"supervisor_exit_label:\n")
+
+    return out_code_string, out_data_string
+
+
+def run_make(work_dir, jobs):
+    """
+        function to invoke the empty compilation makefile
+
+        :param work_dir: path to the work directory
+        :param jobs: number of parallel processes for the make utility to spawn
+        :returns: placeholder int
+        :rtype: int
+    """
+    cwd = getcwd()
+    chdir(abspath(work_dir))
+    logger.debug(f'Current directory is: {work_dir}')
+    logger.info(f'Invoking makefile to perform an empty compilation')
+    logger.warning(f'Based on the number of tests and their size, '
+                   f'this step might take a lot of time.')
+
+    try:
+        out = run(split(f'make -j{jobs}'), check=True, stdout=PIPE, stderr=PIPE)
+        logger.debug(out.stdout.decode('ascii'))
+        logger.info('All the generated Assmebly files are syntatically correct')
+        logger.info('Empty Syntax Check - Complete! No errors found.')
+
+    except CalledProcessError as e:
+        logger.error(e.stderr.decode('ascii'))
+        logger.warning(f'Please fix the errors and re-generate the tests')
+        logger.info('Empty Syntax Check - Complete! Error found.')
+
+    chdir(cwd)
+    logger.debug(f'Current directory is: {getcwd()}')
+    return 1

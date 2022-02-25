@@ -53,6 +53,7 @@ something like this
     ├── csr_grouping.yaml
     ├── custom_config.yaml
     ├── isa_config.yaml
+    ├── rv_debug.yaml 
     └── work
    
 If you had gone through the quickstart, you may find some more ``.yapsy_plugin``
@@ -82,6 +83,7 @@ Let's start by generating the tests.
     -md ~/myquickstart/chromite_uatg_tests/modules/ \ 
     -cfg ~/myquickstart/isa_config.yaml -cfg ~/myquickstart/core_config.yaml \
     -cfg ~/myquickstart/custom_config.yaml -cfg ~/myquickstart/csr_grouping.yaml \
+    -cfg ~/myquickstart/rv_debug.yaml \
     -af ~/myquickstart/chromite_uatg_tests/aliasing.yaml
 
 - Here the ``-v`` option is used to control the verbosity of the log. Debug logs
@@ -105,13 +107,14 @@ Let's start by generating the tests.
   directory.
 - ``-md`` is the path to the modules directory containing the test_classes. The
   test_classes will be sorted into directories based on the module being tested.
-- ``-cfg`` takes multiple absolute paths. The path to the 4 YAML files 
+- ``-cfg`` takes multiple absolute paths. The path to the 5 YAML files 
   used to configure the core should be passed here. The yaml paths should be passed 
   in the following order, 
       1. isa_config.yaml 
       2. core_config.yaml 
       3. custom_config.yaml
-      4. csr_grouping.yaml.
+      4. csr_grouping.yaml
+      5. rv_debug.yaml.
   Each path should be specified with a preceding ``-cfg`` as shown above.
 - ``-af`` is the path to the aliasing.yaml file generated using ``uatg setup``.
 
@@ -270,7 +273,9 @@ Your directory structure should be like this.
     ├── core_config.yaml
     ├── csr_grouping.yaml
     ├── custom_config.yaml
-    ├── isa_config.yaml
+    ├── isa_config.yaml 
+    ├── rv_debug.yaml
+    ├── config.ini
     └── work/
         ├── branch_predictor
         │   ├── uatg_gshare_fa_btb_fill_01-001
@@ -555,6 +560,7 @@ We will next create a ``river_core.ini`` under the ``myquickstart`` directory.
 You can use the setup to create this file:
 
 In addition to the
+
 .. code-block:: console
 
    $ cd ~/myquickstart

@@ -1,0 +1,1458 @@
+i_extension:
+  # RV[32|64]I instructions
+  add:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'add $xrd, $xrs1, $xrs2'
+  sub:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sub $xrd, $xrs1, $xrs2'
+  sll:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sll $xrd, $xrs1, $xrs2'
+  slt:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'slt $xrd, $xrs1, $xrs2'
+  sltu:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sltu $xrd, $xrs1, $xrs2'
+  xor:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'xor $xrd, $xrs1, $xrs2'
+  srl:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'srl $xrd, $xrs1, $xrs2'
+  sra:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sra $xrd, $xrs1, $xrs2'
+  or:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'or $xrd, $xrs1, $xrs2'
+  and:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'and $xrd, $xrs1, $xrs2'
+  addi:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'addi $xrd, $xrs1, $imm12'
+  slti:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'slti $xrd, $xrs1, $imm12'
+  sltiu:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sltiu $xrd, $xrs1, $imm12'
+  xori:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'xori $xrd, $xrs1, $imm12'
+  ori:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'ori $xrd, $xrs1, $imm12'
+  andi:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'andi $xrd, $xrs1, $imm12'
+  slli:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'slli $xrd, $xrs1, $shamt'
+  srli:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'srli $xrd, $xrs1, $shamt'
+  srai:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'srai $xrd, $xrs1, $shamt'
+  lb:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'lb $xrd, $imm12($xrs1)'
+  lh:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'lh $xrd, $imm12($xrs1)'
+  lw:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'lw $xrd, $imm12($xrs1)'
+  lbu:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'lbu $xrd, $imm12($xrs1)'
+  lhu:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'lhu $xrd, $imm12($xrs1)'
+  sb:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sb $xrs2, $imm12($xrs1)'
+  sh:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sh $xrs2, $imm12($xrs1)'
+  sw:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sw $xrs2, $imm12($xrs1)'
+  beq:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'beq $xrs1, $xrs2, $imm12'
+  bne:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'bne $xrs1, $xrs2, $imm12'
+  blt:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'blt $xrs1, $xrs2, $imm12'
+  bge:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'bge $xrs1, $xrs2, $imm12'
+  bltu:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'bltu $xrs1, $xrs2, $imm12'
+  bgeu:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'bgeu $xrs1, $xrs2, $imm12'
+  jalr:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'jalr $xrd, $xrs1, $imm12'
+  jal:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'jal $xrd, $imm12'
+  lui:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'lui $xrd, $uimm20'
+  auipc:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'auipc $xrd, $uimm20'
+  fence:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'fence $pred, $succ'
+  fence.i:
+    xlen: [ 32, 64 ]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'fence.i'
+  # RV64I Instructions
+  addiw:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'addiw $xrd, $xrs1, $imm12'
+  slliw:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'slliw $xrd, $xrs1, $shamt'
+  srliw:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'srliw $xrd, $xrs1, $shamt'
+  sraiw:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sraiw $xrd, $xrs1, $shamt'
+  addw:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'addw $xrd, $xrs1, $xrs2'
+  subw:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'subw $xrd, $xrs1, $xrs2'
+  sllw:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sllw $xrd, $xrs1, $xrs2'
+  srlw:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'srlw $xrd, $xrs1, $xrs2'
+  sraw:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sraw $xrd, $xrs1, $xrs2'
+  ld:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'ld $xrd $imm12($xrs1)'
+  lwu:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'lwu $xrd $imm12($xrs1)'
+  sd:
+    xlen: [64]
+    std_extension: 'I'
+    ialign: 32
+    asm_syntax: 'sd $xrs2 $imm12($xrs1)'
+
+m_extension:
+  # RV[32|64]M instructions
+  mul:
+    xlen: [ 32, 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'mul $xrd, $xrs1, $xrs2'
+  mulh:
+    xlen: [ 32, 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'mulh $xrd, $xrs1, $xrs2'
+  mulhsu:
+    xlen: [ 32, 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'mulhsu	$xrd, $xrs1, $xrs2'
+  mulhu:
+    xlen: [ 32, 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'mulhu $xrd, $xrs1, $xrs2'
+  div:
+    xlen: [ 32, 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'div $xrd, $xrs1, $xrs2'
+  divu:
+    xlen: [ 32, 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'divu $xrd, $xrs1, $xrs2'
+  rem:
+    xlen: [ 32, 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'rem $xrd, $xrs1, $xrs2'
+  remu:
+    xlen: [ 32, 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'remu $xrd, $xrs1, $xrs2'
+  # RV64M instructions
+  mulw:
+    xlen: [ 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'mulw $xrd, $xrs1, $xrs2'
+  divw:
+    xlen: [ 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'divw $xrd, $xrs1, $xrs2'
+  divuw:
+    xlen: [ 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'divuw $xrd, $xrs1, $xrs2'
+  remw:
+    xlen: [ 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'remw $xrd, $xrs1, $xrs2'
+  remuw:
+    xlen: [ 64 ]
+    std_extension: 'M'
+    ialign: 32
+    asm_syntax: 'remuw $xrd, $xrs1, $xrs2'
+
+a_extension:
+  # RV[32|64]A instructions
+  lr.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'lr.w $xrd, ($xrs1)'
+  sc.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'sc.w $xrd, $xrs2, ($xrs1)'
+  amoswap.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amoswap.w $xrd, $xrs2, ($xrs1)'
+  amoadd.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amoadd.w $xrd, $xrs2, ($xrs1)'
+  amoxor.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amoxor.w $xrd, $xrs2, ($xrs1)'
+  amoand.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amoand.w $xrd, $xrs2, ($xrs1)'
+  amoor.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amoor.w $xrd, $xrs2, ($xrs1)'
+  amomin.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amomin.w $xrd, $xrs2, ($xrs1)'
+  amomax.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amomax.w $xrd, $xrs2, ($xrs1)'
+  amominu.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amominu.w $xrd, $xrs2, ($xrs1)'
+  amomaxu.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amomaxu.w $xrd, $xrs2, ($xrs1)'
+  # RV64A instructions
+  lr.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'lr.d $xrd, ($xrs1)'
+  sc.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'sc.d $xrd, $xrs2, ($xrs1)'
+  amoswap.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amoswap.d $xrd, $xrs2, ($xrs1)'
+  amoadd.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amoadd.d $xrd, $xrs2, ($xrs1)'
+  amoxor.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amoxor.d $xrd, $xrs2, ($xrs1)'
+  amoand.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amoand.d $xrd, $xrs2, ($xrs1)'
+  amoor.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amoor.d $xrd, $xrs2, ($xrs1)'
+  amomin.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amomin.d $xrd, $xrs2, ($xrs1)'
+  amomax.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amomax.d $xrd, $xrs2, ($xrs1)'
+  amominu.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amominu.d $xrd, $xrs2, ($xrs1)'
+  amomaxu.d:
+    xlen: [ 64 ]
+    std_extension: 'A'
+    ialign: 32
+    asm_syntax: 'amomaxu.d $xrd, $xrs2, ($xrs1)'
+
+f_extension:
+  # RV[32|64]F instructions
+  fsgnj.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fsgnj.s $frd, $frs1, $frs2'
+  fnmsub.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fnmsub.s $frd, $frs1, $frs2, $frs3'
+  fmul.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fmul.s $frd, $frs1, $frs2'
+  fmsub.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fmsub.s $frd, $frs1, $frs2, $frs3'
+  fsgnjn.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fsgnjn.s $frd, $frs1, $frs2'
+  fcvt.wu.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fcvt.wu.s $xrd, $frs1'
+  fcvt.w.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fcvt.w.s $xrd, $frs1'
+  fsqrt.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fsqrt.s $frd, $frs1'
+  fmv.x.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fmv.x.w $xrd, $frs1'
+  flw:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'flw $frd, $imm12($xrs1)'
+  fmadd.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fmadd.s $frd, $frs1, $frs2, $frs3'
+  fclass.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fclass.s $xrd, $frs1'
+  fsw:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fsw $frs1, $imm12($xrs2)'
+  fcvt.s.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fcvt.s.w $frd, $xrs1'
+  fadd.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fadd.s $frd, $frs1, $frs2'
+  fmax.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fmax.s $frd, $frs1, $frs2'
+  flt.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'flt.s $xrd, $frs1, $frs2'
+  fsub.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fsub.s $frd, $frs1, $frs2'
+  fnmadd.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fnmadd.s $frd, $frs1, $frs2, $frs3'
+  fmv.w.x:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fmv.w.x $frd, $xrs1'
+  fdiv.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fdiv.s $frd, $frs1, $frs2'
+  fcvt.s.wu:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fcvt.s.wu $frd, $xrs1'
+  fsgnjx.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fsgnjx.s $frd, $frs1, $frs2'
+  feq.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'feq.s $xrd, $frs1, $frs2'
+  fmin.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fmin.s $frd, $frs1, $frs2'
+  fle.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fle.s $xrd, $frs1, $frs2'
+  # RV64F instructions
+  fcvt.l.s:
+    xlen: [ 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fcvt.l.s $xrd, $frs1'
+  fcvt.lu.s:
+    xlen: [ 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fcvt.lu.s $xrd, $frs1'
+  fcvt.s.l:
+    xlen: [ 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fcvt.s.l $frd, $xrs1'
+  fcvt.s.lu:
+    xlen: [ 64 ]
+    std_extension: 'F'
+    ialign: 32
+    asm_syntax: 'fcvt.s.lu $frd $xrs1'
+
+d_extension:
+  # RV[32|64]D Instructions
+  fadd.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fadd.d $frd, $frs1, $frs2'
+  fsub.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fsub.d $frd, $frs1, $frs2'
+  fmul.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fmul.d $frd, $frs1, $frs2'
+  fdiv.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fdiv.d $frd, $frs1, $frs2'
+  fsgnj.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fsgnj.d $frd, $frs1, $frs2'
+  fsgnjn.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fsgnjn.d $frd, $frs1, $frs2'
+  fsgnjx.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fsgnjx.d $frd, $frs1, $frs2'
+  fmin.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fmin.d $frd, $frs1, $frs2'
+  fmax.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fmax.d $frd, $frs1, $frs2'
+  fcvt.s.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fcvt.s.d $frd $frs1 '
+  fcvt.d.s:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fcvt.d.s $frd, $frs1'
+  fsqrt.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fsqrt.d $frd, $frs1'
+  fle.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fle.d $xrd, $frs1, $frs2'
+  flt.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'flt.d $xrd, $frs1, $frs2'
+  feq.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'feq.d $xrd, $frs1, $frs2'
+  fcvt.w.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fcvt.w.d $xrd, $frs1'
+  fcvt.wu.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fcvt.wu.d $xrd, $frs1'
+  fclass.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fclass.d $xrd, $frs1'
+  fcvt.d.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fcvt.d.w $xrd, $frs1 '
+  fcvt.d.wu:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fcvt.d.wu $frd, $xrs1 '
+  fld:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fld $frd, $imm12($xrs1)'
+  fsd:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fsd $xrs1, $imm12($frs2)'
+  fmadd.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fmadd.d $frd, $frs1, $frs2, $frs3'
+  fmsub.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fmsub.d $frd, $frs1, $frs2, $frs3'
+  fnmsub.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fnmsub.d $frd, $frs1, $frs2, $frs3'
+  fnmadd.d:
+    xlen: [ 32, 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fnmadd.d $frd, $frs1, $frs2, $frs3'
+  # RV64D Instructions
+  fcvt.l.d:
+    xlen: [ 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fcvt.l.d $xrd, $frs1'
+  fcvt.lu.d:
+    xlen: [ 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fcvt.lu.d $xrd, $frs1'
+  fmv.x.d:
+    xlen: [ 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fmv.x.d $xrd, $frs1'
+  fcvt.d.l:
+    xlen: [ 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fcvt.d.l $frd, $xrs1'
+  fcvt.d.lu:
+    xlen: [ 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fcvt.d.lu $frd, $xrs1'
+  fmv.d.x:
+    xlen: [ 64 ]
+    std_extension: 'D'
+    ialign: 32
+    asm_syntax: 'fmv.d.x $frd, $xrs1'
+
+c_extension:
+  # RV[32|64]C Instructions
+  c.add:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.add $xrd, $c.rs2'
+  c.addi:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.addi $xrd, $nzimm6'
+  c.addi16sp:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.addi16sp sp, $nzimm6'
+  c.addi4spn:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.addi4spn $c.rd, sp, $nzuimm8'
+  c.and:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.and $c.rd, $c.rs2'
+  c.andi:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.andi $c.rd, $imm6'
+  c.beqz:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.beqz $c.rs1, $imm8'
+  c.bnez:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.bnez $c.rs1, $imm8'
+  c.ebreak:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.ebreak'
+  c.fld:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.fld $c.rd, $uimm5($c.rs1)'
+  c.fldsp:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.fldsp $frd, $uimm6(x2)'
+  c.flw:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.flw $c.rd, $uimm5($c.rs1)'
+  c.flwsp:
+    xlen: [ 32 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.flwsp $xrd, $uimm6(x2)'
+  c.fsd:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.fsd $c.rd, $uimm5($c.rs1)'
+  c.fsdsp:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.fsdsp $xrs2, $uimm6(x2)'
+  c.fsw:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.fsw $c.rd, $uimm5($c.rs1)'
+  c.fswsp:
+    xlen: [ 32 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.fswsp $xrs1, $uimm6($xrs2)'
+  c.j:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.j $imm11'
+  c.jal:
+    xlen: [ 32 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.jal $imm11'
+  c.jalr:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.jalr $xrd'
+  c.jr:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.jr $xrs1'
+  c.li:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.li $xrd, $imm6'
+  c.lui:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.lui $xrd, $nzuimm6'
+  c.lw:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.lw $c.rd, $uimm5($c.rs1) '
+  c.lwsp:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.lwsp $xrd, $uimm6(sp)'
+  c.mv:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.mv $xrd, $c.rs2'
+  c.or:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.or $c.rd, $c.rs1'
+  c.slli:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.slli $xrd, $shamt'
+  c.srai:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.srai $c.rd, $shamt'
+  c.srli:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.srli $c.rd, $shamt'
+  c.sub:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.sub $c.rd, $c.rs1'
+  c.sw:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.sw $c.rd, $uimm5($c.rs1)'
+  c.swsp:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.swsp $xrs2, $uimm6(sp)'
+  c.xor:
+    xlen: [ 32, 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.xor $c.rd, $c.rs1'
+  c.nop:
+    xlen: [ 32, 64 ]
+    std_extension: C
+    ialign: 16
+    asm_syntax: 'c.nop'
+
+  #RV64C Instructions
+  c.addiw:
+    xlen: [ 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.addiw $xrd, $imm6'
+  c.addw:
+    xlen: [ 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.addw $c.rd, $c.rs1'
+  c.ld:
+    xlen: [ 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.ld $c.rd, $uimm5($c.rs1)'
+  c.ldsp:
+    xlen: [ 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.ldsp $xrd, $uimm6'
+  c.sd:
+    xlen: [ 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.sd $c.rd, $uimm5($c.rs1)'
+  c.sdsp:
+    xlen: [ 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.sdsp $xrs2, $uimm6(sp)'
+  c.subw:
+    xlen: [ 64 ]
+    std_extension: 'C'
+    ialign: 16
+    asm_syntax: 'c.subw $c.rd, $c.rs2'
+
+b_extension:
+  # RV[32|64]B Instructions
+  clz:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'clz $xrd, $xrs1'
+  ctz:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'ctz $xrd, $xrs1'
+  cpop:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'cpop $xrd, $xrs1'
+  andn:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'andn $xrd, $xrs1, $xrs2'
+  orn:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'orn $xrd, $xrs1, $xrs2'
+  xnorn:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'xnorn $xrd, $xrs1, $xrs2'
+  pack:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'pack $xrd, $xrs1, $xrs2'
+  packu:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'packu $xrd, $xrs1, $xrs2'
+  packh:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'packh $xrd, $xrs1, $xrs2'
+  min:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'min $xrd, $xrs1, $xrs2'
+  max:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'max $xrd, $xrs1, $xrs2'
+  minu:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'minu $xrd, $xrs1, $xrs2'
+  maxu:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'maxu $xrd, $xrs1, $xrs2'
+  sext.b:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sext.b $xrd, $xrs1'
+  sext.h:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sext.h $xrd, $xrs1'
+  bset:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bset $xrd, $xrs1, $xrs2'
+  bclr:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bclr $xrd, $xrs1, $xrs2'
+  binv:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'binv $xrd, $xrs1, $xrs2'
+  bext:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bext $xrd, $xrs1, $xrs2'
+  bseti:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bseti $xrd, $xrs1, $shamt'
+  bclri:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bclri $xrd, $xrs1, $shamt'
+  binvi:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'binvi $xrd, $xrs1, $shamt'
+  bexti:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bexti $xrd, $xrs1, $shamt'
+  slo:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'slo $xrd, $xrs1, $xrs2'
+  sro:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sro $xrd, $xrs1, $xrs2'
+  sloi:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sloi $xrd, $xrs1, $shamt'
+  sroi:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sroi $xrd, $xrs1, $shamt'
+  ror:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'ror $xrd, $xrs1, $xrs2'
+  rol:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'rol $xrd, $xrs1, $xrs2'
+  rori:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'rori $xrd, $xrs1, $shamt'
+  grev:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'grev $xrd, $xrs1, $xrs2'
+  grevi:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'grevi $xrd, $xrs1, $shamt'
+  shfl:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'shfl $xrd, $xrs1, $xrs2'
+  unshfl:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'unshfl $xrd, $xrs1, $xrs2'
+  shfli:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'shfli $xrd, $xrs1, $shamt'
+  unshfli:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'unshfli $xrd, $xrs1, $shamt'
+  xperm.n:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'xperm.n $xrd, $xrs1, $xrs2'
+  xperm.b:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'xperm.b $xrd, $xrs1, $xrs2'
+  xperm.h:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'xperm.h $xrd, $xrs1, $xrs2'
+  gorc:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'gorc $xrd, $xrs1, $xrs2'
+  gorci:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'gorci $xrd, $xrs1, $shamt'
+  bfp:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bfp $xrd, $xrs1, $xrs2'
+  bcompress:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bcompress $xrd, $xrs1, $xrs2'
+  bdecompress:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bdecompress $xrd, $xrs1, $xrs2'
+  clmul:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'clmul $xrd, $xrs1, $xrs2'
+  clmuh:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'clmuh $xrd, $xrs1, $xrs2'
+  clmur:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'clmur $xrd, $xrs1, $xrs2'
+  crc32.b:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'crc32.b $xrd, $xrs1'
+  crc32.h:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'crc32.h $xrd, $xrs1'
+  crc32.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'crc32.w $xrd, $xrs1'
+  crc32c.b:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'crc32c.b $xrd, $xrs1'
+  crc32c.h:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'crc32c.h $xrd, $xrs1'
+  crc32c.w:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'crc32c.w $xrd, $xrs1'
+  cmix:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'cmix $xrd, $xrs1, $xrs2, $xrs3'
+  cmov:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'cmov $xrd, $xrs1, $xrs2, $xrs3'
+  fsl:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'fsl $xrd, $xrs1, $xrs2, $xrs3'
+  fsr:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'fsr $xrd, $xrs1, $xrs2, $xrs3'
+  fsri:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'fsri $xrd, $xrs1, $xrs2, $shamt'
+  sh1add:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sh1add $xrd, $xrs1, $xrs2'
+  sh2add:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sh2add $xrd, $xrs1, $xrs2'
+  sh3add:
+    xlen: [ 32, 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sh3add $xrd, $xrs1, $xrs2'
+  # RV64B Instructions
+  clzw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'clzw $xrd, $xrs1'
+  ctzw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'ctzw $xrd, $xrs1'
+  cpopw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'cpopw $xrd, $xrs1'
+  packw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'packw $xrd, $xrs1, $xrs2'
+  packuw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'packuw $xrd, $xrs1, $xrs2'
+  slow:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'slow $xrd, $xrs1, $xrs2'
+  srow:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'srow $xrd, $xrs1, $xrs2'
+  sloiw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sloiw $xrd, $xrs1, $shamt'
+  sroiw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sroiw $xrd, $xrs1, $shamt'
+  rorw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'rorw $xrd, $xrs1, $xrs2'
+  rolw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'rolw $xrd, $xrs1, $xrs2'
+  roriw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'roriw $xrd, $xrs1, $shamt'
+  grevw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'grevw $xrd, $xrs1, $xrs2'
+  greviw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'greviw $xrd, $xrs1, $shamt'
+  shflw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'shflw $xrd, $xrs1, $xrs2'
+  unshflw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'unshflw $xrd, $xrs1, $xrs2'
+  xperm.w:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'xperm.w $xrd, $xrs1, $xrs2'
+  gorcw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'gorcw $xrd, $xrs1, $xrs2'
+  gorciw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'gorciw $xrd, $xrs1, $shamt'
+  bfpw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bfpw $xrd, $xrs1, $xrs2'
+  bcompressw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bcompressw $xrd, $xrs1, $xrs2'
+  bdecompressw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bdecompressw $xrd, $xrs1, $xrs2'
+  crc32.d:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'crc32.d $xrd, $xrs1'
+  crc32c.d:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'crc32c.d $xrd, $xrs1'
+  bmator:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bmator $xrd, $xrs1, $xrs2'
+  bmatxor:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bmatxor $xrd, $xrs1, $xrs2'
+  bmatflip:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'bmatflip $xrd, $xrs1'
+  fslw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'fslw $xrd, $xrs1, $xrs2, $xrs3'
+  fsrw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'fsrw $xrd, $xrs1, $xrs2, $xrs3'
+  fsriw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'fsriw $xrd, $xrs1, $xrs2, $shamt'
+  sh1add.uw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sh1add.uw $xrd, $xrs1, $xrs2'
+  sh2add.uw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sh2add.uw $xrd, $xrs1, $xrs2'
+  sh3add.uw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'sh3add.uw $xrd, $xrs1, $xrs2'
+  add.uw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'add.uw $xrd, $xrs1, $xrs2'
+  slli.uw:
+    xlen: [ 64 ]
+    std_extension: 'B'
+    ialign: 32
+    asm_syntax: 'slli.uw $xrd, $xrs1, $shamt'

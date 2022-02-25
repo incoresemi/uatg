@@ -1,15 +1,19 @@
 # See LICENSE.incore for license details
 """Console script for uatg."""
 
-import click
 from configparser import ConfigParser
-from uatg.log import logger
-from uatg.test_generator import generate_tests, clean_dirs, validate_tests
-from uatg.test_generator import generate_sv
+from logging import getLogger, ERROR
+from time import perf_counter
+
+import click
+
 from uatg.__init__ import __version__
+from uatg.log import logger
+from uatg.test_generator import generate_sv
+from uatg.test_generator import generate_tests, clean_dirs, validate_tests
+from uatg.utils import combine_config_yamls, create_alias_file, run_make
+from uatg.utils import create_dut_config_files, create_config_file, uatg_exit
 from uatg.utils import list_of_modules, info, clean_modules, load_yaml
-from uatg.utils import create_dut_config_files, create_config_file
-from uatg.utils import combine_config_yamls, create_alias_file
 
 
 @click.group()
@@ -55,6 +59,7 @@ def clean(module_dir, work_dir, verbose):
     info(__version__)
     logger.debug('Invoking clean_dirs')
     clean_dirs(work_dir=work_dir, modules_dir=module_dir)
+    uatg_exit()
 
 
 # -------------------------
@@ -81,6 +86,7 @@ def clean(module_dir, work_dir, verbose):
           "2. core_config.yaml "
           "3. custom_config.yaml "
           "4. csr_grouping.yaml "
+          "5. rv_debug.yaml"
           "The ordering should be strictly followed and any deviation will "
           "result in UATG erroring out. This Parameter is needed to "
           "generate/validate tests and also generate "
@@ -134,9 +140,18 @@ def clean(module_dir, work_dir, verbose):
               help='Set verbose level for debugging',
               type=click.Choice(['info', 'error', 'debug'],
                                 case_sensitive=False))
+@click.option('--index_file',
+              '-i',
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to index.yaml file from the tests directory")
+@click.option('--jobs',
+              '-j',
+              default=1,
+              help='Number of Jobs for UATG to spawn',
+              type=click.INT)
 @cli.command()
 def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
-             gen_test_list, work_dir, modules, verbose):
+             gen_test_list, work_dir, modules, verbose, index_file, jobs):
     """
     Generates tests, cover-groups for a list of modules corresponding to the DUT
     parameters specified in the configuration yamls, inside the work_dir.
@@ -159,7 +174,9 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
                    modules_dir=module_dir,
                    modules=module,
                    config_dict=dut_dict,
-                   test_list=str(gen_test_list))
+                   test_list=str(gen_test_list),
+                   index_path=index_file,
+                   jobs=jobs)
     if gen_cvg:
         if alias_file is not None:
             alias_dict = load_yaml(alias_file)
@@ -167,10 +184,13 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
                         config_dict=dut_dict,
                         modules_dir=module_dir,
                         modules=module,
-                        alias_dict=alias_dict)
+                        alias_dict=alias_dict,
+                        jobs=jobs)
         else:
             logger.error('Can not generate covergroups without alias_file.')
             exit('GEN_CVG WITHOUT ALIAS_FILE')
+
+        uatg_exit()
 
 
 # -------------------------
@@ -199,10 +219,12 @@ def list_modules(module_dir, verbose):
     Requires: -md, --module_dir
     """
     logger.level(verbose)
+    info(__version__)
     module_str = "\nSupported modules:\n"
     for module in (list_of_modules(module_dir)):
         module_str += '\t' + module + '\n'
     print(f'{module_str}')
+    uatg_exit()
 
 
 # -------------------------
@@ -237,44 +259,69 @@ def from_config(config_file, verbose):
 
     module_dir = config['uatg']['module_dir']
     modules = config['uatg']['modules']
+    config_work_dir = config['uatg']['work_dir']
+    config_linker_dir = config['uatg']['linker_dir']
+    config_test_list_flag = config['uatg']['gen_test_list']
+    excluded_modules = config['uatg']['excluded_modules']
+    index_yaml_path = config['uatg']['index_file']
     # Uncomment to overwrite verbosity from config file.
     # verbose = config['uatg']['verbose']
+
     logger.level(verbose)
-    module = clean_modules(module_dir, modules)
+    getLogger('yapsy').setLevel(ERROR)
 
     info(__version__)
+
+    module = clean_modules(module_dir, modules, excluded_modules)
+
+    try:
+        jobs = int(config['uatg']['jobs'])
+    except ValueError:
+        jobs = 1
+
     dut_dict = None
     if config['uatg']['gen_test'].lower() == 'true' or \
             config['uatg']['gen_cvg'].lower() == 'true' or \
             config['uatg']['val_test'].lower() == 'true':
-        configuration = config['uatg']['configuration_files'].split(',')
+        configuration = config['uatg.configuration_files']
         dut_dict = combine_config_yamls(configuration)
 
     if config['uatg']['gen_test'].lower() == 'true':
-        generate_tests(work_dir=config['uatg']['work_dir'],
-                       linker_dir=config['uatg']['linker_dir'],
+        generate_tests(work_dir=config_work_dir,
+                       linker_dir=config_linker_dir,
                        modules_dir=module_dir,
                        modules=module,
                        config_dict=dut_dict,
-                       test_list=config['uatg']['gen_test_list'])
+                       test_list=config_test_list_flag,
+                       index_path=index_yaml_path,
+                       jobs=jobs)
+
+    if config['uatg']['test_compile'].lower() == 'true':
+        logger.info(f'Empty Compilation is enabled')
+        logger.info(f'UATG will use RISCV-GCC to check if the generated '
+                    f'assembly tests are syntatically correct')
+        run_make(work_dir=config_work_dir, jobs=jobs)
 
     if config['uatg']['gen_cvg'].lower() == 'true':
         alias_dict = load_yaml(config['uatg']['alias_file'])
-        generate_sv(work_dir=config['uatg']['work_dir'],
+        generate_sv(work_dir=config_work_dir,
                     modules=module,
                     modules_dir=module_dir,
                     config_dict=dut_dict,
-                    alias_dict=alias_dict)
+                    alias_dict=alias_dict,
+                    jobs=jobs)
 
     if config['uatg']['val_test'].lower() == 'true':
         validate_tests(modules=module,
-                       work_dir=config['uatg']['work_dir'],
+                       work_dir=config_work_dir,
                        config_dict=dut_dict,
                        modules_dir=module_dir)
 
     if config['uatg']['clean'].lower() == 'true':
         logger.debug('Invoking clean_dirs')
-        clean_dirs(work_dir=config['uatg']['work_dir'], modules_dir=module_dir)
+        clean_dirs(work_dir=config_work_dir, modules_dir=module_dir)
+
+    uatg_exit()
 
 
 # -------------------------
@@ -284,22 +331,91 @@ def from_config(config_file, verbose):
               '-cp',
               multiple=False,
               required=False,
+              default='./',
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Directory to store the config.ini file")
+@click.option('--jobs',
+              '-j',
+              multiple=False,
+              required=False,
+              default=1,
+              type=click.INT,
+              help="No. of jobs to be spawned by uatg")
+@click.option('--modules',
+              '-m',
+              multiple=False,
+              required=False,
+              default='all',
+              type=click.STRING,
+              help="Modules to generate code for...")
+@click.option('--module_dir',
+              '-md',
+              multiple=False,
+              required=False,
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the modules directory")
+@click.option('--work_dir',
+              '-wd',
+              multiple=False,
+              required=False,
+              default='./',
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the working directory where generated files will be"
+              " stored.")
+@click.option('--linker_dir',
+              '-ld',
+              multiple=False,
+              required=False,
+              default='./',
+              type=click.Path(exists=True, resolve_path=True, readable=True),
+              help="Path to the linker directory")
+@click.option('--test_compile',
+              '-tc',
+              is_flag=True,
+              required=False,
+              default=False,
+              help='Set this flag to generate the Covergroups')
+@click.option(
+    '--configuration',
+    '-cfg',
+    multiple=True,
+    required=False,
+    default=[
+        '/home/user/myquickstart/isa_config.yaml',
+        '/home/user/myquickstart/core_config.yaml',
+        '/home/user/myquickstart/custom_config.yaml',
+        '/home/user/myquickstart/csr_grouping.yaml',
+        '/home/user/myquickstart/rv_debug.yaml'
+    ],
+    type=click.Path(exists=True, resolve_path=True, readable=True),
+    help=("Path to the DUT configuration YAML Files. "
+          "The YAML files should be specified (space separated) in the "
+          "following  order "
+          "1. isa_config.yaml "
+          "2. core_config.yaml "
+          "3. custom_config.yaml "
+          "4. csr_grouping.yaml "
+          "5. rv_debug.yaml"
+          "The ordering should be strictly followed and any deviation will "
+          "result in  UATG erroring out. This Parameter is needed to "
+          "generate/validate tests and also generate covergroups"))
 @click.option('--alias_path',
               '-ap',
               multiple=False,
               required=False,
+              default='./',
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Directory to store the aliasing.yaml file")
 @click.option('--dut_path',
               '-dp',
               multiple=False,
               required=False,
+              default='./',
               type=click.Path(exists=True, resolve_path=True, readable=True),
               help="Directory to store the DUT configuration yaml files")
 @cli.command()
-def setup(config_path, alias_path, dut_path):
+def setup(config_path, jobs, modules, module_dir, work_dir, linker_dir,
+          configuration, alias_path, test_compile, dut_path):
     """
         Creates template configuration files.
 
@@ -309,14 +425,15 @@ def setup(config_path, alias_path, dut_path):
         Optional: -dp, --dut_path;  -ap, --alias_path; -cp, --config_path
     """
 
-    if config_path is None:
-        config_path = './'
-    if alias_path is None:
-        alias_path = './'
-    if dut_path is None:
-        dut_path = './'
-
-    create_config_file(config_path=config_path)
+    create_config_file(config_path=config_path,
+                       jobs=jobs,
+                       modules=modules,
+                       module_dir=module_dir,
+                       work_dir=work_dir,
+                       linker_dir=linker_dir,
+                       alias_path=alias_path,
+                       test_compile=test_compile,
+                       cfg_files=configuration)
     create_dut_config_files(dut_config_path=dut_path)
     create_alias_file(alias_path=alias_path)
 
@@ -340,6 +457,7 @@ def setup(config_path, alias_path, dut_path):
           "2. core_config.yaml "
           "3. custom_config.yaml "
           "4. csr_grouping.yaml "
+          "5. rv_debug.yaml"
           "The ordering should be strictly followed and any deviation will "
           "result in  UATG erroring out. This Parameter is needed to "
           "generate/validate tests and also generate covergroups"))
@@ -394,3 +512,5 @@ def validate(configuration, module_dir, work_dir, modules, verbose):
                    work_dir=work_dir,
                    config_dict=dut_dict,
                    modules_dir=module_dir)
+
+    uatg_exit()
