@@ -164,10 +164,17 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
     """
     logger.level(verbose)
     info(__version__)
+    # Temp Fix: convert list to dict
+    temp_cfg = {
+        'isa': configuration[0],
+        'core': configuration[1],
+        'custom': configuration[2],
+        'csr_grouping': configuration[3],
+        'debug': configuration[4]
+    }
+    dut_dict = combine_config_yamls(temp_cfg)
 
-    dut_dict = combine_config_yamls(configuration)
-
-    module = clean_modules(module_dir, modules)
+    module = clean_modules(module_dir, modules, excludes='')
 
     generate_tests(work_dir=work_dir,
                    linker_dir=linker_dir,
@@ -505,9 +512,17 @@ def validate(configuration, module_dir, work_dir, modules, verbose):
     logger.level(verbose)
     info(__version__)
 
-    dut_dict = combine_config_yamls(configuration)
+    # Temp Fix: convert list to dict
+    temp_cfg = {
+        'isa': configuration[0],
+        'core': configuration[1],
+        'custom': configuration[2],
+        'csr_grouping': configuration[3],
+        'debug': configuration[4]
+    }
+    dut_dict = combine_config_yamls(temp_cfg)
 
-    module = clean_modules(module_dir, modules)
+    module = clean_modules(module_dir, modules, excludes='')
     validate_tests(modules=module,
                    work_dir=work_dir,
                    config_dict=dut_dict,
