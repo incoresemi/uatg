@@ -3,7 +3,6 @@
 
 from configparser import ConfigParser
 from logging import getLogger, ERROR
-from time import perf_counter
 
 import click
 
@@ -174,7 +173,7 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
     }
     dut_dict = combine_config_yamls(temp_cfg)
 
-    module = clean_modules(module_dir, modules, excludes='')
+    module = clean_modules(module_dir, modules)
 
     generate_tests(work_dir=work_dir,
                    linker_dir=linker_dir,
@@ -269,7 +268,6 @@ def from_config(config_file, verbose):
     config_work_dir = config['uatg']['work_dir']
     config_linker_dir = config['uatg']['linker_dir']
     config_test_list_flag = config['uatg']['gen_test_list']
-    excluded_modules = config['uatg']['excluded_modules']
     index_yaml_path = config['uatg']['index_file']
     # Uncomment to overwrite verbosity from config file.
     # verbose = config['uatg']['verbose']
@@ -279,7 +277,7 @@ def from_config(config_file, verbose):
 
     info(__version__)
 
-    module = clean_modules(module_dir, modules, excluded_modules)
+    module = clean_modules(module_dir, modules)
 
     try:
         jobs = int(config['uatg']['jobs'])
@@ -522,7 +520,7 @@ def validate(configuration, module_dir, work_dir, modules, verbose):
     }
     dut_dict = combine_config_yamls(temp_cfg)
 
-    module = clean_modules(module_dir, modules, excludes='')
+    module = clean_modules(module_dir, modules)
     validate_tests(modules=module,
                    work_dir=work_dir,
                    config_dict=dut_dict,

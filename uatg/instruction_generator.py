@@ -484,8 +484,8 @@ class instruction_generator:
                                           2), sample(modifiers['xrs2'], 1)[0],
                                    sample(modifiers['xrd'], 1)[0])
             _ = 0
-            while len({xrs1, temp, xrs2, xrd
-                      }) != 4 or xrs2 == 'x0' or xrs1 == 'x0':
+            while len({xrs1, temp, xrs2, xrd}) != 4 \
+                    or xrs2 == 'x0' or xrs1 == 'x0':
                 # making sure that register dependencies are met
                 ([xrs1, temp], xrs2, xrd) = (sample(modifiers['xrs1'], 2),
                                              sample(modifiers['xrs2'], 1)[0],
@@ -523,7 +523,8 @@ class instruction_generator:
                           'amominu.w', 'amominu.d'):
                 rt = f'\n.align {_align}\n{_lab}:\n{_nop}\n' \
                      f'la {xrs1}, {_lab}\n' \
-                     f'li {xrs2}, {hex(2 ** int(self.xlen) - 1)}\n{asm_syntax}\n'
+                     f'li {xrs2}, {hex(2 ** int(self.xlen) - 1)}\n' \
+                     f'{asm_syntax}\n'
             ret_list.append(rt)
         return ret_list
 

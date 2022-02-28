@@ -495,9 +495,6 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           '# Run \'uatg --list-modules -md <path> \' to find all the modules ' \
           'that are supported.\n# Use \'all\' to generate/validate all ' \
           f'modules\nmodules = {modules}\n\n' \
-          f'# list of modules to be excluded '\
-          f'from the test generation. Use when modules = all \n'\
-          f'excluded_modules =\n'\
           f'\n# Absolute path to chromite_uatg_tests/modules Directory\n' \
           f'module_dir = {module_dir}' \
           '\n\n# Directory to dump assembly files and reports\n' \
@@ -705,7 +702,7 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
 
 
 # UATG Functions
-def clean_modules(module_dir, modules, excludes):
+def clean_modules(module_dir, modules):
     """
     Function to read the modules specified by the user, check if they exist or
     raise an error.
@@ -733,24 +730,6 @@ def clean_modules(module_dir, modules, excludes):
         for element in module:
             if element not in available_modules:
                 exit(f'Module {element} is not supported/unavailable.')
-    exclude = []
-    try:
-        excludes = excludes.replace(' ', ',')
-        excludes = excludes.replace(', ', ',')
-        excludes = excludes.replace(' ,', ',')
-        exclude = list(set(excludes.split(",")))
-        exclude.remove('')
-        exclude.sort()
-    except ValueError:
-        pass
-
-    for element in exclude:
-        logger.debug(f'Attempting to remove {element} from module list')
-        try:
-            module.remove(element)
-        except ValueError:
-            logger.warning(f'attempt to remove {element} from module list '
-                           f'failed.')
 
     return module
 
