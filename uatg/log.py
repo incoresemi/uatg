@@ -1,6 +1,7 @@
 # See LICENSE.incore for details
 
-from logging import ERROR, CRITICAL, WARNING, INFO, DEBUG, getLogger, StreamHandler, root
+from logging import ERROR, CRITICAL, WARNING, INFO, DEBUG, getLogger, \
+    StreamHandler, root
 from colorlog import ColoredFormatter
 
 
@@ -19,13 +20,13 @@ class Log:
         DEBUG: ("debug", "dbg")
     }
 
-    def __init__(self, format=None):
+    def __init__(self, _format=None):
         self.stream = None
         self._lvl = None
-        if not format:
-            format = "%(log_color)s%(levelname)8s%(reset)s | %(log_color)" \
+        if not _format:
+            _format = "%(log_color)s%(levelname)8s%(reset)s | %(log_color)" \
                      "s%(message)s%(reset)s"
-        self.format = format
+        self.format = _format
         self.colors = {
             'DEBUG': 'purple',
             'INFO': 'green',

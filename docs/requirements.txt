@@ -37,3 +37,4 @@ sphinx_tabs==2.1.0
 m2r2==0.2.7
 ruamel.yaml>=0.17.16
 yapsy>=1.12.2
+mistune==0.8.4

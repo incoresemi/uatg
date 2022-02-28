@@ -16,19 +16,20 @@
 #
 import sys
 import os
-import shlex
-import re 
+import re
+
 
 def get_version():
-    changelog = open('../../CHANGELOG.md','r').read()
-    x = re.findall(r'##\s*\[(.*?)\]',changelog)[0]
+    changelog = open('../../CHANGELOG.md', 'r').read()
+    x = re.findall(r'##\s*\[(.*?)\]', changelog)[0]
     return str(x)
+
 
 sys.path.insert(0, os.path.abspath('../..'))
 sys.setrecursionlimit(1500)
 
 project = u'UATG'
-copyright = '2021 InCore Semiconductors Pvt. Ltd.'
+_copyright = '2021 InCore Semiconductors Pvt. Ltd.'
 author = 'InCore Semiconductors Pvt. Ltd.'
 
 # The short X.Y version
@@ -36,9 +37,11 @@ version = get_version()
 # The full version, including alpha/beta/rc tags
 release = version
 
+
 def setup(app):
     app.add_stylesheet("custom.css")
     app.add_css_file("_static/custom.css")
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -71,7 +74,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The encoding of source files.
-#source_encoding = 'utf-8-sig'
+# source_encoding = 'utf-8-sig'
 
 # The master toctree document.
 master_doc = 'index'
@@ -90,41 +93,40 @@ exclude_patterns = ['_build']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
-
 # -- Options for HTML output -------------------------------------------------
 
-#gitlab_url = 'https://gitlab.com/incoresemi/micro-arch-tests'
+# gitlab_url = 'https://gitlab.com/incoresemi/micro-arch-tests'
 github_url = 'https://github.com/incoresemi/uatg'
 html_show_sourcelink = True
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'bootstrap'
-#html_theme = 'alabaster'
+# html_theme = 'bootstrap'
+# html_theme = 'alabaster'
 import sphinx_rtd_theme
+
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
-        'prev_next_buttons_location': 'both',
-        'display_version': True,
-        'includehidden': False,
-        'collapse_navigation':True,
-        'sticky_navigation': True,
-        'navigation_depth': 4,
-        'includehidden': True,
-        'titles_only': False
-        }
-#html_sidebars = {
+    'prev_next_buttons_location': 'both',
+    'display_version': True,
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
+# html_sidebars = {
 #    "**": ["about.html", "navigation.html", "searchbox.html", "donate.html"]
-#}
+# }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_logo='_static/incore_logo.png'
+html_logo = '_static/incore_logo.png'
 html_show_license = True
-docs_title = 'Docs / %s' %(version)
+docs_title = 'Docs / %s' % version
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
@@ -135,7 +137,7 @@ html_context = {
     'is_release': False,
     'theme_logo_only': False,
     'current_version': version,
-     }
+}
 html_last_updated_fmt = '%b %d, %Y'
 # If false, no module index is generated.
 html_domain_indices = False
@@ -169,23 +171,22 @@ html_show_license = True
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'UATGdoc'
 
-
 # -- Options for LaTeX output ------------------------------------------------
-latex_engine='xelatex'
+latex_engine = 'xelatex'
 numfig = True
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
-     'papersize': 'letterpaper',
-    'releasename':version,
+    'papersize': 'letterpaper',
+    'releasename': version,
     'extraclassoptions': 'openany, twoside',
 
     # Sonny, Lenny, Glenn, Conny, Rejne, Bjarne and Bjornstrup
-    #'fncychap': '\\usepackage[Bjornstrup]{fncychap}',
+    # 'fncychap': '\\usepackage[Bjornstrup]{fncychap}',
     'fncychap': '\\usepackage{fancyhdr}',
     'fontpkg': '\\usepackage{amsmath,amsfonts,amssymb,amsthm}',
 
-    'figure_align':'htbp',
+    'figure_align': 'htbp',
     # The font size ('10pt', '11pt' or '12pt').
     #
     'pointsize': '12pt',
@@ -295,7 +296,6 @@ latex_elements = {
         \linespread{1}
     ''',
 
-
     'maketitle': r'''
         \pagenumbering{Roman} %%% to avoid page 1 conflict with actual page 1
 
@@ -348,13 +348,11 @@ latex_elements = {
         InnerLinkColor={rgb}{0,0,1}, \
         OuterLinkColor={rgb}{0,0,1}',
 
-        'tableofcontents':' ',
-
-
+    'tableofcontents': ' ',
 
 }
 
-#latex_elements = {
+# latex_elements = {
 #    # The paper size ('letterpaper' or 'a4paper').
 #    #
 #     'papersize': 'letterpaper',
@@ -372,13 +370,14 @@ latex_elements = {
 #     'figure_align': 'htbp',
 #
 #     'atendofbody' : ' InCore Semiconductors Pvt. Ltd.'
-#}
+# }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'UATG.tex', 'InCore Micro-Architectural Test Framework Documentation',
+    (master_doc, 'UATG.tex',
+     'InCore Micro-Architectural Test Framework Documentation',
      'InCore Semiconductors Pvt. Ltd.', 'manual'),
 ]
 
@@ -391,10 +390,10 @@ latex_show_pagerefs = True
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'uarchtestframework', 'InCore Micro-Architectural Test Framework Documentation',
+    (master_doc, 'uarchtestframework',
+     'InCore Micro-Architectural Test Framework Documentation',
      [author], 1)
 ]
-
 
 # -- Options for Texinfo output ----------------------------------------------
 
@@ -402,11 +401,11 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'UATG', 'InCore Micro-Architectural Test Framework Documentation',
+    (master_doc, 'UATG',
+     'InCore Micro-Architectural Test Framework Documentation',
      author, 'UATG', 'One line description of project.',
      'Miscellaneous'),
 ]
-
 
 # -- Options for Epub output -------------------------------------------------
 
@@ -414,7 +413,7 @@ texinfo_documents = [
 epub_title = project
 epub_author = author
 epub_publisher = author
-epub_copyright = copyright
+epub_copyright = _copyright
 
 # The unique identifier of the text. This can be a ISBN number
 # or the project homepage.
@@ -427,7 +426,6 @@ epub_copyright = copyright
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
-
 
 # -- Extension configuration -------------------------------------------------
 

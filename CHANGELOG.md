@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2022-02-28
+- fix bug with configuration yaml CLI
+- update colorlog requirement
+- update pypi package requirements for docs generation
+- minor cleanup
+
 ## [1.4.0] - 2022-02-25
 - Reduce memory usage by using generators in the plugins.
 - UATG will display the number of tests generated per module and in total.
