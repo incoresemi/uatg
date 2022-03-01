@@ -678,6 +678,14 @@ RVTEST_SIGUPD(swreg,destreg,offset)
     )
 //-------------------------------mbox macros-----------------------------------
 
+//Test for mbox instructions with compressed instructions (WAR dependecies with mul(32) followed by compressed(16) instruction)
+#define MBOX_COMPRESSED_RR_OP(rand_inst, inst, reg1, reg2, reg3, destreg1, correctval, val1, val2, val3, swreg, offset, code...) \
+        LI (reg1, val1);\
+        LI (reg2, val2);\
+        LI (reg3, val3);\
+        code;\
+        RVTEST_SIGUPD(swreg,destreg1,offset)
+
 //Tests for Mbox instructions with reg reg operand(add-reg and shift-reg)
 #define MBOX_TEST_RR_OP(inst, inst1, reg1, reg2, reg3, destreg, correctval, val1, val2, val3, swreg, offset, testreg) \
      TEST_CASE(testreg, destreg, correctval, swreg, offset, \
