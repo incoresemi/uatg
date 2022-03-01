@@ -189,6 +189,10 @@ intended_trap_handler:
   li  t3, 6
   beq t3, t0, increment_pc
 
+  // store access fault
+  li t3, 7
+  beq t3, t0, increment_pc
+
   // e-call from M
   li t3, 11
   beq t3, t0, increment_pc
@@ -257,16 +261,14 @@ load_misaligned_handler:
 illegal_handler:
 increment_pc:
   andi t1, t1, 0x3
-  addi t4, x0, 3
-  beq t4, t1, four_byte
+  addi t4, x0, 2
+  beq t4, t1, two_byte
   
   // checks if C is enabled in MISA
   // csrr t6, CSR_MISA
   // slli t6, t6, (XLEN-4)
   // srli t6, t6, (XLEN-1)
   // beq t6, x0, four_byte
-  
-  j two_byte
 
   four_byte:
     addi t2, t2, 0x4
