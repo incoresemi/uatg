@@ -132,6 +132,7 @@ compressed_instructions = {
     # integer register register operations
     'reg-reg': ['c.mv', 'c.add'],
     'rv32-reg-regCA': ['c.and', 'c.or', 'c.xor', 'c.sub'],
+    'rv64-reg-regCA': ['c.and', 'c.or', 'c.xor', 'c.sub'],
     'rv64-regCA': ['c.addw', 'c.subw'],
     'rv128-regCA': ['c.addw', 'c.subw']
 }
