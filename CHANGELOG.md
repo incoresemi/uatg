@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2022-03-02
+- updates to trap handler
+- fixes to instruction constants
+
 ## [1.4.1] - 2022-02-28
 - fix bug with configuration yaml CLI
 - update colorlog requirement
