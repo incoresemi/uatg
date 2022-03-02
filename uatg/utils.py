@@ -881,7 +881,15 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
 def setup_pages(page_size=4096,
                 paging_mode='sv39',
                 valid_ll_pages=64,
-                mode='machine'):
+                mode='machine',
+                valid=True,
+                read=True,
+                write=True,
+                execute=True,
+                user=True,
+                globl=True,
+                access=True,
+                dirty=True):
     """
         creates pagetables to run tests in User and Supervisor modes
         Currently works with the sv39 virtual memory addressing.
@@ -943,15 +951,15 @@ def setup_pages(page_size=4096,
     base_address = 0x80000000
 
     # all bits other than U bit will be set by default
-    valid_bit = 0x01
-    read_bit = 0x02
-    write_bit = 0x04
-    execute_bit = 0x08
-    u_bit_s = 0x00
-    u_bit_u = 0x10
-    global_bit = 0x20
-    access_bit = 0x40
-    dirty_bit = 0x80
+    valid_bit = 0x01 if valid else 0x00
+    read_bit = 0x02 if read else 0x00
+    write_bit = 0x04 if write else 0x00
+    execute_bit = 0x08 if execute else 0x00
+    u_bit_s = 0x00 if user else 0x00
+    u_bit_u = 0x10 if user else 0x00
+    global_bit = 0x20 if globl else 0x00
+    access_bit = 0x40 if access else 0x00
+    dirty_bit = 0x80 if dirty else 0x00
 
     ll_entries_s = ''
     ll_entries_u = ''

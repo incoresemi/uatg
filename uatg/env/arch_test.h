@@ -172,13 +172,45 @@ trap_handler_entry:
   bne t3, a0, unintended_trap_handler
 
 intended_trap_handler:
+  
+  // instruction address misaligned
+  li t3, 0
+  beq t3, t0, instruction_misaligned_handler
+
+  // breakpoint
+  li t3, 3
+  beq t3, t0, increment_pc
+
+  // load access fault
+  li t3, 5
+  beq t3, t0, increment_pc
+  
+  // store/AMO misaligned
+  li  t3, 6
+  beq t3, t0, increment_pc
+
+  // store access fault
+  li t3, 7
+  beq t3, t0, increment_pc
+
+  // e-call from M
+  li t3, 11
+  beq t3, t0, increment_pc
 
 #ifdef s_u_mode_test
-  // ecall from Supervisor Mode
+  // ecall from Supervisor Mode. rets to Machine mode
   li t3, 9
   beq t3, t0, supervisor_to_machine_ecall_handler // if t0 == 9, the trap is due to an ecall from S
+  // ecall from user mode, rets to supervisor mode
   li t3, 8
   beq t3, t0, user_to_supervisor_ecall_handler // if t0 == 8, the trap is due to an ecall from U
+  // load page fault
+  li t3, 13
+  beq t3, t0, increment_pc
+  // store/AMO page fault
+  li t3, 15
+  beq t3, t0, increment_pc
+
 #endif
   j unintended_trap_handler
 
@@ -219,6 +251,7 @@ unintended_trap_handler:
   // for all other cause values restore and exit handler
   j restore_and_exit_trap
 
+instruction_misaligned_handler:
 store_misaligned_handler:
 load_misaligned_handler:
   // load the lowest byte of the instruction into t3. address of instruction in 
@@ -226,18 +259,16 @@ load_misaligned_handler:
   // we then follow the same stuff we do for illegal
 
 illegal_handler:
-
+increment_pc:
   andi t1, t1, 0x3
-  addi t4, x0, 3
-  beq t4, t1, four_byte
+  addi t4, x0, 2
+  beq t4, t1, two_byte
   
   // checks if C is enabled in MISA
-  csrr t6, CSR_MISA
-  slli t6, t6, (XLEN-4)
-  srli t6, t6, (XLEN-1)
-  beq t6, x0, four_byte
-  
-  j two_byte
+  // csrr t6, CSR_MISA
+  // slli t6, t6, (XLEN-4)
+  // srli t6, t6, (XLEN-1)
+  // beq t6, x0, four_byte
 
   four_byte:
     addi t2, t2, 0x4
@@ -648,6 +679,14 @@ RVTEST_SIGUPD(swreg,destreg,offset)
       inst destreg, reg1, reg2; \
     )
 //-------------------------------mbox macros-----------------------------------
+
+//Test for mbox instructions with compressed instructions (WAR dependecies with mul(32) followed by compressed(16) instruction)
+#define MBOX_COMPRESSED_RR_OP(rand_inst, inst, reg1, reg2, reg3, destreg1, correctval, val1, val2, val3, swreg, offset, code...) \
+        LI (reg1, val1);\
+        LI (reg2, val2);\
+        LI (reg3, val3);\
+        code;\
+        RVTEST_SIGUPD(swreg,destreg1,offset)
 
 //Tests for Mbox instructions with reg reg operand(add-reg and shift-reg)
 #define MBOX_TEST_RR_OP(inst, inst1, reg1, reg2, reg3, destreg, correctval, val1, val2, val3, swreg, offset, testreg) \

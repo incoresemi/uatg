@@ -126,12 +126,13 @@ compressed_instructions = {
     # integer constant generation instructions
     'reg-const': ['c.li', 'c.lui'],
     # integer register immediate instructions
-    'reg-imm': ['c.addi'],
+    'rv32-reg-imm': ['c.addi'],
     'rv64-reg-imm': ['c.addiw'],
     'rv128-reg-imm': ['c.addiw'],
     # integer register register operations
     'reg-reg': ['c.mv', 'c.add'],
-    'reg-regCA': ['c.and', 'c.or', 'c.xor', 'c.sub'],
+    'rv32-reg-regCA': ['c.and', 'c.or', 'c.xor', 'c.sub'],
+    'rv64-reg-regCA': ['c.and', 'c.or', 'c.xor', 'c.sub'],
     'rv64-regCA': ['c.addw', 'c.subw'],
     'rv128-regCA': ['c.addw', 'c.subw']
 }
