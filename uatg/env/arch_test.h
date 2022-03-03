@@ -172,6 +172,9 @@ trap_handler_entry:
   bne t3, a0, unintended_trap_handler
 
 intended_trap_handler:
+  // instruction access fault
+  li t3, 1
+  beq t3, t0, intended_instruction_access_fault_handler
   
   // instruction address misaligned
   li t3, 0
@@ -204,6 +207,9 @@ intended_trap_handler:
   // ecall from user mode, rets to supervisor mode
   li t3, 8
   beq t3, t0, user_to_supervisor_ecall_handler // if t0 == 8, the trap is due to an ecall from U
+  // instruction page fault
+  li t3, 12
+  beq t3, t0, instruction_page_fault_handler
   // load page fault
   li t3, 13
   beq t3, t0, increment_pc
@@ -233,7 +239,29 @@ supervisor_to_machine_ecall_handler:
   addi t6, x0, 3
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
+  j mepc_updation
+
+instruction_page_fault_handler:
+  la t5, sample_data
+  ld t6, (t5)
+  // update CSR MEPC
+  li t5, 0xF0000000
+  // for supervisor address
+  or t5, t5, t6
+  //csrw CSR_MEPC, t6
+  //addi t6, x0, 1
+  //slli t6, t6, 11
+  //csrs CSR_MSTATUS, t6
+  //j restore_and_exit_trap
+  j mepc_updation
 #endif
+
+intended_instruction_access_fault_handler:
+  la t6, access_fault
+  li t5, 0
+  ld t5, 0(t6)
+  j mepc_updation
+
 mepc_updation:
   csrw CSR_MEPC, t5
   
@@ -244,6 +272,8 @@ unintended_trap_handler:
   // mcause value of illegal initialized in t3
   li t3, 2 
   beq t3, t0, illegal_handler
+  li t3, 1
+  beq t3, t0, unintended_instruction_access_fault_handler
   li t3, 4
   beq t3, t0, load_misaligned_handler
   li t3, 6
@@ -257,6 +287,11 @@ load_misaligned_handler:
   // load the lowest byte of the instruction into t3. address of instruction in 
   lb t1, 0(t2)
   // we then follow the same stuff we do for illegal
+  j increment_pc
+
+unintended_instruction_access_fault_handler:
+  la t2, rvtest_code_end
+  j adjust_mepc
 
 illegal_handler:
 increment_pc:
