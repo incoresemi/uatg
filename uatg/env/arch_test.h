@@ -172,10 +172,13 @@ trap_handler_entry:
   bne t3, a0, unintended_trap_handler
 
 intended_trap_handler:
+
+#ifdef access_fault_test
   // instruction access fault
   li t3, 1
   beq t3, t0, intended_instruction_access_fault_handler
-  
+#endif
+
   // instruction address misaligned
   li t3, 0
   beq t3, t0, instruction_misaligned_handler
@@ -256,11 +259,13 @@ instruction_page_fault_handler:
   j mepc_updation
 #endif
 
+#ifdef access_fault_test
 intended_instruction_access_fault_handler:
   la t6, access_fault
   li t5, 0
   ld t5, 0(t6)
   j mepc_updation
+#endif
 
 mepc_updation:
   csrw CSR_MEPC, t5
