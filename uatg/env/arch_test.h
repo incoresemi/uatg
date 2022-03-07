@@ -215,10 +215,10 @@ intended_trap_handler:
   beq t3, t0, instruction_page_fault_handler
   // load page fault
   li t3, 13
-  beq t3, t0, increment_pc
+  beq t3, t0, load_page_fault_handler
   // store/AMO page fault
   li t3, 15
-  beq t3, t0, increment_pc
+  beq t3, t0, store_page_fault_handler
 
 #endif
   j unintended_trap_handler
@@ -244,19 +244,22 @@ supervisor_to_machine_ecall_handler:
   csrs CSR_MSTATUS, t6
   j mepc_updation
 
+store_page_fault_handler:
+load_page_fault_handler:
+  csrr t5, CSR_MEPC
+  li t6, 0xF0000000
+  or t1, t5, t6
+  j increment_pc
+
 instruction_page_fault_handler:
-  la t5, sample_data
+  la t5, return_address
   ld t6, (t5)
   // update CSR MEPC
   li t5, 0xF0000000
   // for supervisor address
   or t5, t5, t6
-  //csrw CSR_MEPC, t6
-  //addi t6, x0, 1
-  //slli t6, t6, 11
-  //csrs CSR_MSTATUS, t6
-  //j restore_and_exit_trap
   j mepc_updation
+
 #endif
 
 #ifdef access_fault_test
@@ -283,8 +286,27 @@ unintended_trap_handler:
   beq t3, t0, load_misaligned_handler
   li t3, 6
   beq t3, t0, store_misaligned_handler
+  // instruction page fault
+  li t3, 12
+  beq t3, t0, unintended_instruction_page_fault_handler
+  // load page fault
+  li t3, 13
+  beq t3, t0, unintended_load_page_fault_handler
+  // store/AMO page fault
+  li t3, 15
+  beq t3, t0, unintended_store_page_fault_handler 
   // for all other cause values restore and exit handler
   j restore_and_exit_trap
+
+unintended_instruction_access_fault_handler:
+unintended_instruction_page_fault_handler:
+unintended_store_page_fault_handler:
+unintended_load_page_fault_handler:
+  la t2, rvtest_code_end
+  addi t6, x0, 1
+  slli t6, t6, 11
+  csrs CSR_MSTATUS, t6
+  j adjust_mepc
 
 instruction_misaligned_handler:
 store_misaligned_handler:
@@ -293,10 +315,6 @@ load_misaligned_handler:
   lb t1, 0(t2)
   // we then follow the same stuff we do for illegal
   j increment_pc
-
-unintended_instruction_access_fault_handler:
-  la t2, rvtest_code_end
-  j adjust_mepc
 
 illegal_handler:
 increment_pc:
