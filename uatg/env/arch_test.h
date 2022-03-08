@@ -247,17 +247,29 @@ supervisor_to_machine_ecall_handler:
 store_page_fault_handler:
 load_page_fault_handler:
   csrr t5, CSR_MEPC
+  li t3, 173
+  beq a1, t3, u_ls_page_fault
   li t6, 0xF0000000
   or t1, t5, t6
+  j increment_pc
+u_ls_page_fault:
+  li t6, 0x0fffffff
+  and t1, t5, t6
   j increment_pc
 
 instruction_page_fault_handler:
   la t5, return_address
   ld t6, (t5)
+  li t3, 173
+  beq a1, t3, u_i_page_fault
   // update CSR MEPC
   li t5, 0xF0000000
   // for supervisor address
   or t5, t5, t6
+  j mepc_updation
+u_i_page_fault:
+  li t5, 0x0fffffff
+  and t5, t5, t6
   j mepc_updation
 
 #endif
