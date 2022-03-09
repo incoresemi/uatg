@@ -386,11 +386,12 @@ def from_config(config_file, verbose):
     multiple=True,
     required=False,
     default=[
-        '/home/user/myquickstart/isa_config.yaml',
-        '/home/user/myquickstart/core_config.yaml',
-        '/home/user/myquickstart/custom_config.yaml',
-        '/home/user/myquickstart/csr_grouping.yaml',
-        '/home/user/myquickstart/rv_debug.yaml'
+        '/home/user/myquickstart/chromite/build/rv64i_isa_checked.yaml',
+        '/home/user/myquickstart/chromite/build/core64_checked.yaml',
+        '/home/user/myquickstart/chromite/build/rv64i_custom_checked.yaml',
+        '/home/user/myquickstart/chromite/sample_config/c64/csr_grouping64.'
+        'yaml',
+        '/home/user/myquickstart/chromite/build/rv64i_debug_checked.yaml'
     ],
     type=click.Path(exists=True, resolve_path=True, readable=True),
     help=("Path to the DUT configuration YAML Files. "

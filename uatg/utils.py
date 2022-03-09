@@ -1,16 +1,18 @@
 # See LICENSE.incore for license details
 
+from glob import glob
 # imports
 # import os
 from os import remove, listdir, getcwd, chdir
 from os.path import join, abspath, exists, basename
-from re import findall, M
-from glob import glob
 from random import randint
-from uatg.log import logger
-from ruamel.yaml import YAML
-from subprocess import run, PIPE, CalledProcessError
+from re import findall, M
 from shlex import split
+from subprocess import run, PIPE, CalledProcessError
+
+from ruamel.yaml import YAML
+
+from uatg.log import logger
 
 
 class sv_components:
@@ -483,11 +485,11 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
         if alias_path is None else alias_path
 
     cfg = '# See LICENSE.incore for license details\n\n' \
-          '[uatg]\n\n'\
-          '# number of processes to spawn. Default = 1\n'\
-          f'jobs = {jobs}\n'\
+          '[uatg]\n\n' \
+          '# number of processes to spawn. Default = 1\n' \
+          f'jobs = {jobs}\n' \
           '\n# [info, error, debug] set verbosity level to view ' \
-          'different levels of messages. '\
+          'different levels of messages. ' \
           '\nverbose = info\n\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
@@ -504,10 +506,10 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           f'linker_dir = {linker_dir}' \
           '\n\n# Absolute Path of the yaml file containing the signal ' \
           'aliases of the DUT ' \
-          f'\nalias_file = {alias_path}\n\n# path to the index file '\
-          f'containing  the list of tests to be generated. By default, \n'\
-          f'# or when empty, UATG will use the inidex.yaml file within '\
-          f' the modules directory\nindex_file =\n\n'\
+          f'\nalias_file = {alias_path}\n\n# path to the index file ' \
+          f'containing  the list of tests to be generated. By default, \n' \
+          f'# or when empty, UATG will use the inidex.yaml file within ' \
+          f' the modules directory\nindex_file =\n\n' \
           f'# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Unless you want to ' \
@@ -517,21 +519,21 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          f'are generated\ngen_cvg = False\n\ntest_compile = {test_compile}'\
+          f'are generated\ngen_cvg = False\n\ntest_compile = {test_compile}' \
           '\n\n# Path to the yaml files containing DUT Configuration.\n' \
-          '# If you are using the CHROMITE core, uncomment the following line'\
-          ' by removing the \'#\'.\n# By doing this, UATG will use the '\
-          'checked YAMLs of Chromite\n'\
-          '#[uatg.configuration_files]\n'\
-          '#isa = /home/user/myquickstart/chromite/build/'\
-          'rv64i_isa_checked.yaml \n'\
+          '# If you are using the CHROMITE core, uncomment the following line' \
+          ' by removing the \'#\'.\n# By doing this, UATG will use the ' \
+          'checked YAMLs of Chromite\n' \
+          '#[uatg.configuration_files]\n' \
+          '#isa = /home/user/myquickstart/chromite/build/' \
+          'rv64i_isa_checked.yaml \n' \
           '#core = /home/user/myquickstart/chromite/build/core64_checked.yaml' \
           '\n#custom = /home/user/myquickstart/chromite/build/rv64i_custom_' \
           'checked.yaml\n#csr_grouping = /home/user/myquickstart/chromite/' \
-          'sample_config/c64/csr_grouping64.yaml\n#debug = /home/user/myquick' \
-          'start/chromite/build/rv64i_debug_checked.yaml\n\n# comment the ' \
-          'following line by adding a \'#\' in front if you are using the ' \
-          f'checked YAMLs from CHROMITE\n\n{cfg_files}' \
+          'sample_config/rv64imacsu/csr_grouping64.yaml\n#debug = /home/user/' \
+          'myquickstart/chromite/build/rv64i_debug_checked.yaml\n\n# comment ' \
+          'the following line by adding a \'#\' in front if you are using ' \
+          f'the checked YAMLs from CHROMITE\n\n{cfg_files}'
 
     with open(join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
@@ -680,9 +682,9 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
     if bit_width == 0:
         pass
     else:
-        max_signed = 2**(bit_width - 1) - 1
-        min_signed = -2**(bit_width - 1)
-        max_unsigned = 2**bit_width - 1
+        max_signed = 2 ** (bit_width - 1) - 1
+        min_signed = -2 ** (bit_width - 1)
+        max_unsigned = 2 ** bit_width - 1
         min_unsigned = 0
         # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
         #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
@@ -870,7 +872,7 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
     flags = '-static -std=gnu99 -O2 -fno-common -fno-builtin-printf ' \
             '-fvisibility=hidden -static -nostdlib -nostartfiles -lm -lgcc'
     cmd = f'{compiler} -mcmodel={mcmodel} {flags} -march={march} -mabi={mabi}' \
-          f' -lm -lgcc -T {join(link_path,"link.ld")} {test_path}' \
+          f' -lm -lgcc -T {join(link_path, "link.ld")} {test_path}' \
           f' -I {env_path}' \
           f' -I {work_dir} {macros}' \
           f' -o /dev/null'
@@ -882,14 +884,14 @@ def setup_pages(page_size=4096,
                 paging_mode='sv39',
                 valid_ll_pages=64,
                 mode='machine',
-                pte_dict={'valid':True,
-                          'read':True,
-                          'write':True,
-                          'execute':True,
-                          'user':True,
-                          'globl':True,
-                          'access':True,
-                          'dirty':True}):
+                pte_dict={'valid': True,
+                          'read': True,
+                          'write': True,
+                          'execute': True,
+                          'user': True,
+                          'globl': True,
+                          'access': True,
+                          'dirty': True}):
     """
         creates pagetables to run tests in User and Supervisor modes
         Currently works with the sv39 virtual memory addressing.
@@ -937,13 +939,13 @@ def setup_pages(page_size=4096,
 
     initial_level_pages_s = ''
     for level in range(levels - 1):
-        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n.dword 0x0\n"\
-                                 f".endr\n"
+        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n.dword 0x0" \
+                                 f"\n.endr\n"
 
     initial_level_pages_u = ''
     if mode == 'user':
         for level in range(1, levels - 1):
-            initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n"\
+            initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n" \
                                      f".dword 0x0\n.endr\n"
 
     # assumption that the l3 pt entry 0 will point to 80000000
@@ -971,8 +973,8 @@ def setup_pages(page_size=4096,
         for i in range(valid_ll_pages):
             pte_address_u = base_address_new >> power
             pte_address_u = pte_address_u << 10
-            pte_entry_u = pte_address_u | dirty_bit | access_bit |\
-                global_bit | u_bit_u | execute_bit | write_bit |\
+            pte_entry_u = pte_address_u | dirty_bit | access_bit | \
+                global_bit | u_bit_u | execute_bit | write_bit | \
                 read_bit | valid_bit
             ll_entries_u += '.dword {0} # entry_{1}\n'.format(
                 hex(pte_entry_u), i)
@@ -982,18 +984,18 @@ def setup_pages(page_size=4096,
     for i in range(valid_ll_pages):
         pte_address_s = base_address_new >> power
         pte_address_s = pte_address_s << 10
-        pte_entry_s = pte_address_s | dirty_bit | access_bit |\
-            global_bit | u_bit_s | execute_bit | write_bit |\
+        pte_entry_s = pte_address_s | dirty_bit | access_bit | \
+            global_bit | u_bit_s | execute_bit | write_bit | \
             read_bit | valid_bit
         ll_entries_s += '.dword {0} # entry_{1}\n'.format(hex(pte_entry_s), i)
         base_address_new += page_size
 
-    ll_page_s = f'l{levels-1}_pt:\n'\
-                f'{ll_entries_s}.rept {entries-valid_ll_pages}\n'\
+    ll_page_s = f'l{levels - 1}_pt:\n' \
+                f'{ll_entries_s}.rept {entries - valid_ll_pages}\n' \
                 f'.dword 0x0\n.endr\n'
 
-    ll_page_u = f'l{levels-1}_u_pt:\n'\
-                f'{ll_entries_u}.rept {entries-valid_ll_pages}\n'\
+    ll_page_u = f'l{levels - 1}_u_pt:\n' \
+                f'{ll_entries_u}.rept {entries - valid_ll_pages}\n' \
                 f'.dword 0x0\n.endr\n'
 
     out_data_string = pre + initial_level_pages_s + ll_page_s + \
@@ -1005,34 +1007,34 @@ def setup_pages(page_size=4096,
     out_code_string = []
 
     # calculation to set up root level pages
-    pte_updation = f"\n.option norvc"\
-                   f"\n\t# setting up root PTEs\n"\
+    pte_updation = f"\n.option norvc" \
+                   f"\n\t# setting up root PTEs\n" \
                    f"\tla t0, l0_pt # load address of root page\n\n"
 
-    shift_string = f"\t# calculation for offset\n"\
+    shift_string = f"\t# calculation for offset\n" \
                    f"\taddi t6, x0, 3\n\tslli t6, t6, 10\n\tadd t0, t0, t6\n"
 
     for i in range(levels - 1):
         offset = 24 if i == (levels - 3) else 0
         offset_calc = shift_string if i == (levels - 2) else ""
-        pte_updation += f"\t# setting up l{i} table to point l{i+1} table\n"\
-                        f"\taddi t1, x0, 1 # add value 1 to reg\n"\
-                        f"\tslli t2, t1, {power} # left shift to create a page"\
-                        f"with value == page size\n"\
-                        f"\tadd t3, t2, t0 # add with the existing "\
-                        f"address to get address of level l page\n"\
-                        f"\tsrli t4, t3, {power} # divide that address with "\
-                        f"page size\n"\
-                        f"\tslli t4, t4, 10 # left shift for PTE format\n"\
-                        f"\tadd t4, t4, t1 # set valid bit to 1\n"\
-                        f"{offset_calc}"\
-                        f"\tsd t4, {offset}(t0) "\
-                        f"# store l{i+1} first entry address "\
+        pte_updation += f"\t# setting up l{i} table to point l{i + 1} table\n" \
+                        f"\taddi t1, x0, 1 # add value 1 to reg\n" \
+                        f"\tslli t2, t1, {power} # left shift to create a " \
+                        f"page with value == page size\n" \
+                        f"\tadd t3, t2, t0 # add with the existing " \
+                        f"address to get address of level l page\n" \
+                        f"\tsrli t4, t3, {power} # divide that address with " \
+                        f"page size\n" \
+                        f"\tslli t4, t4, 10 # left shift for PTE format\n" \
+                        f"\tadd t4, t4, t1 # set valid bit to 1\n" \
+                        f"{offset_calc}" \
+                        f"\tsd t4, {offset}(t0) " \
+                        f"# store l{i + 1} first entry address " \
                         f"into the first entry of l{i}\n\n"
         if i < levels - 2:
-            pte_updation += f"\t#address updation\n"\
-                            f"\tadd t0, t3, 0 # move the address of "\
-                            f"level {i+1} page to t0\n\n"
+            pte_updation += f"\t#address updation\n" \
+                            f"\tadd t0, t3, 0 # move the address of " \
+                            f"level {i + 1} page to t0\n\n"
 
     pte_updation += "\n"
 
@@ -1040,24 +1042,24 @@ def setup_pages(page_size=4096,
         pte_updation += f"\t# user page table set up\n"
         pte_updation += f"\tla t0, l0_pt # load address of root page\n\n"
         pte_updation += f"\tla t3, l1_u_pt # load address of l1 user page\n\n"
-        common_setup = f"\tsrli t5, t3, 12\n"\
-                       f"\tslli t5, t5, 10\n"\
-                       f"\tli t4, 1\n"\
-                       f"\tadd t5, t5, t4\n"\
+        common_setup = f"\tsrli t5, t3, 12\n" \
+                       f"\tslli t5, t5, 10\n" \
+                       f"\tli t4, 1\n" \
+                       f"\tadd t5, t5, t4\n" \
                        f"\tsd t5, (t0)\n"
         for i in range(levels - 1):
-            pte_updation += f"\t# update l{i} page entry with address "\
-                            f"of l{i+1} page\n"
+            pte_updation += f"\t# update l{i} page entry with address " \
+                            f"of l{i + 1} page\n"
             if i != 0:
-                pte_updation += f"\taddi t2, x0, 1\n"\
-                                f"\tslli t2, t2, 12\n"\
+                pte_updation += f"\taddi t2, x0, 1\n" \
+                                f"\tslli t2, t2, 12\n" \
                                 f"\tadd t3, t0, t2\n"
             pte_updation += f"{common_setup}\n"
 
             if i < levels - 2:
-                pte_updation += f"\t# address updation\n"\
-                                f"\tadd t0, t3, 0 # move address of \n"\
-                                f"\t\t\t\t #l{i+1} page into t0"
+                pte_updation += f"\t# address updation\n" \
+                                f"\tadd t0, t3, 0 # move address of \n" \
+                                f"\t\t\t\t #l{i + 1} page into t0"
 
     user_entry = "RVTEST_USER_ENTRY()\n" if mode == 'user' else ""
     user_exit = "RVTEST_USER_EXIT()\n" if mode == 'user' else ""
