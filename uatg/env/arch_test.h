@@ -210,6 +210,7 @@ intended_trap_handler:
   // ecall from user mode, rets to supervisor mode
   li t3, 8
   beq t3, t0, user_to_supervisor_ecall_handler // if t0 == 8, the trap is due to an ecall from U
+#ifdef page_fault_test
   // instruction page fault
   li t3, 12
   beq t3, t0, instruction_page_fault_handler
@@ -219,7 +220,7 @@ intended_trap_handler:
   // store/AMO page fault
   li t3, 15
   beq t3, t0, store_page_fault_handler
-
+#endif
 #endif
   j unintended_trap_handler
 
@@ -244,22 +245,30 @@ supervisor_to_machine_ecall_handler:
   csrs CSR_MSTATUS, t6
   j mepc_updation
 
+#ifdef page_fault_test
 store_page_fault_handler:
 load_page_fault_handler:
-  csrr t5, CSR_MEPC
+  la t5, return_address
+  ld t6, (t5)
+  li t4, 0x200000ef
+  ld t5, faulty_page_address
+  sd t4, 0(t5)
   li t3, 173
   beq a1, t3, u_ls_page_fault
-  li t6, 0xF0000000
-  or t1, t5, t6
-  j increment_pc
+  li t5, 0xF0000000
+  or t5, t5, t6
+  j mepc_updation
 u_ls_page_fault:
-  li t6, 0x0fffffff
-  and t1, t5, t6
-  j increment_pc
+  li t5, 0x0fffffff
+  and t5, t5, t6
+  j mepc_updation
 
 instruction_page_fault_handler:
   la t5, return_address
   ld t6, (t5)
+  li t4, 0x200000ef
+  ld t5, faulty_page_address
+  sd t4, 0(t5)
   li t3, 173
   beq a1, t3, u_i_page_fault
   // update CSR MEPC
@@ -272,6 +281,7 @@ u_i_page_fault:
   and t5, t5, t6
   j mepc_updation
 
+#endif
 #endif
 
 #ifdef access_fault_test
@@ -315,7 +325,7 @@ unintended_instruction_page_fault_handler:
 unintended_store_page_fault_handler:
 unintended_load_page_fault_handler:
   la t2, rvtest_code_end
-  addi t6, x0, 1
+  addi t6, x0, 3
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
   j adjust_mepc
@@ -508,7 +518,7 @@ rvtest_data_end:
   /*set SUM bit in STATUS*/\
   addi t5, x0, 1;\
   slli t5, t5, 18;\
-  add t6, t6,t5;\
+  add t6, t6, t5;\
   csrs CSR_SSTATUS, t6;/*set SPP bits in SSTATUS*/\
   li t6, 0x0fffffff;\
   /*user address is 00000000*/\
