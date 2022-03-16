@@ -884,6 +884,10 @@ def setup_pages(page_size=4096,
                 paging_mode='sv39',
                 valid_ll_pages=64,
                 mode='machine',
+                megapage=False,
+                gigapage=False,
+                fault=False,
+                mem_fault=False,
                 pte_dict={'valid': True,
                           'read': True,
                           'write': True,
@@ -953,15 +957,15 @@ def setup_pages(page_size=4096,
     base_address = 0x80000000
 
     # all bits other than U bit will be set by default
-    valid_bit = 0x01 if pte_dict['valid'] else 0x00
-    read_bit = 0x02 if pte_dict['read'] else 0x00
-    write_bit = 0x04 if pte_dict['write'] else 0x00
-    execute_bit = 0x08 if pte_dict['execute'] else 0x00
-    u_bit_s = 0x00 if pte_dict['user'] else 0x00
-    u_bit_u = 0x10 if pte_dict['user'] else 0x00
-    global_bit = 0x20 if pte_dict['globl'] else 0x00
-    access_bit = 0x40 if pte_dict['access'] else 0x00
-    dirty_bit = 0x80 if pte_dict['dirty'] else 0x00
+    valid_bit = 0x01
+    read_bit = 0x02
+    write_bit = 0x04
+    execute_bit = 0x08
+    u_bit_s = 0x00
+    u_bit_u = 0x10
+    global_bit = 0x20
+    access_bit = 0x40
+    dirty_bit = 0x80
 
     ll_entries_s = ''
     ll_entries_u = ''
@@ -1060,6 +1064,58 @@ def setup_pages(page_size=4096,
                 pte_updation += f"\t# address updation\n" \
                                 f"\tadd t0, t3, 0 # move address of \n" \
                                 f"\t\t\t\t #l{i + 1} page into t0"
+    if mode == 'user':
+        a1_reg = 173
+        pt_label = f'l{levels-1}_u_pt'
+    else:
+        a1_reg = 0
+        pt_label = f'l{levels-1}_pt'
+    
+    fault_valid_bit = 0x01 if pte_dict['valid'] else 0x00
+    fault_read_bit = 0x02 if pte_dict['read'] else 0x00
+    fault_write_bit = 0x04 if pte_dict['write'] else 0x00
+    fault_execute_bit = 0x08 if pte_dict['execute'] else 0x00
+    fault_u_bit = 0x10 if (pte_dict['user'] and mode == 'user') else 0x00
+    fault_global_bit = 0x20 if pte_dict['globl'] else 0x00
+    fault_access_bit = 0x40 if pte_dict['access'] else 0x00
+    fault_dirty_bit = 0x80 if pte_dict['dirty'] else 0x00
+
+    faulty_pte_bits = fault_valid_bit | fault_read_bit | fault_write_bit |\
+                      fault_execute_bit | fault_u_bit | fault_global_bit |\
+                      fault_access_bit | fault_dirty_bit
+    
+    faulty_pte_val = 0xffffffffffffff00 | faulty_pte_bits
+    
+    fault_page_label = "faulting_address" if mem_fault else "faulting_instruction"
+
+    if fault == True:
+        fault_creation = f"\naddress_loading:\n"\
+                         f"\tli a0, 173\n"\
+                         f"\tli a1, {a1_reg}\n"\
+                         f"\tla t5, faulting_instruction\n"\
+                         f"\tla t6, return_address\n"\
+                         f"\tsd t5, 0(t6)\n\n"\
+                         f"offset_adjustment:\n"\
+                         f"\tli t3, 0x1ff\n"\
+                         f"\tli t4, 0x1ff000\n"\
+                         f"\tla t5, {fault_page_label}\n"\
+                         f"\tand t5, t5, t4\n"\
+                         f"\tsrli t5, t5, 12\n"\
+                         f"\tand t5, t5, t3\n"\
+                         f"\tslli t5, t5, 3\n"\
+                         f"\tla t6, {pt_label}\n"\
+                         f"\tadd t6, t6, t5\n"\
+                         f"\tld t3, 0(t6)\n"\
+                         f"\tli t2, {hex(faulty_pte_val)}\n"\
+                         f"\tand t3, t3, t2\n"\
+                         f"\tsd t3, 0(t6)\n"\
+                         f"\tla t5, faulty_page_address\n"\
+                         f"\tsd t6, 0(t5)\n"
+
+    else:
+        fault_creation = ""
+
+    pte_updation += fault_creation
 
     user_entry = "RVTEST_USER_ENTRY()\n" if mode == 'user' else ""
     user_exit = "RVTEST_USER_EXIT()\n" if mode == 'user' else ""
