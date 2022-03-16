@@ -250,15 +250,27 @@ store_page_fault_handler:
 load_page_fault_handler:
   la t5, return_address
   ld t6, (t5)
-  li t4, 0x200000ef
-  ld t5, faulty_page_address
-  sd t4, 0(t5)
+  // check if user or supervisor mode
   li t3, 173
   beq a1, t3, u_ls_page_fault
+  // fix page table entry
+  li t4, 0xef
+  ld t5, faulty_page_address
+  ld t3, 0(t5)
+  or t4, t3, t4
+  sd t4, 0(t5)
+  // update address for supervisor mode
   li t5, 0xF0000000
   or t5, t5, t6
   j mepc_updation
 u_ls_page_fault:
+  // fix PTE
+  li t4, 0xff
+  ld t5, faulty_page_address
+  ld t3, 0(t5)
+  or t4, t3, t4
+  sd t4, 0(t5)
+  // update address for the user mode
   li t5, 0x0fffffff
   and t5, t5, t6
   j mepc_updation
@@ -266,17 +278,28 @@ u_ls_page_fault:
 instruction_page_fault_handler:
   la t5, return_address
   ld t6, (t5)
-  li t4, 0x200000ef
-  ld t5, faulty_page_address
-  sd t4, 0(t5)
+  // check if U or supervisor mode
   li t3, 173
   beq a1, t3, u_i_page_fault
+  // update PTE
+  li t4, 0xef
+  ld t5, faulty_page_address
+  ld t3, 0(t5)
+  or t4, t3, t4
+  sd t4, 0(t5)
   // update CSR MEPC
   li t5, 0xF0000000
   // for supervisor address
   or t5, t5, t6
   j mepc_updation
 u_i_page_fault:
+  // update the PTE
+  li t4, 0xff
+  ld t5, faulty_page_address
+  ld t3, 0(t5)
+  or t4, t3, t4
+  sd t4, 0(t5)
+  // update address for the User mode
   li t5, 0x0fffffff
   and t5, t5, t6
   j mepc_updation
