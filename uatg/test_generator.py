@@ -102,12 +102,33 @@ def asm_generation_process(args):
             except KeyError:
                 privileged_dict['enable'] = False
 
+            try:
+                pt_fault = privileged_dict['fault']
+            except KeyError:
+                logger.debug("test does not generate a PT fault")
+                pt_fault = False
+                pass
+            
+            try:
+                pt_mem_fault = privileged_dict['mem_fault']
+            except KeyError:
+                pt_mem_fault = False
+                pass
+
+            try:
+                pte_bit_dict = privileged_dict['pte_dict']
+            except KeyError:
+                pass
+
             if privileged_dict['enable']:
                 priv_asm_code, priv_asm_data = setup_pages(
                     page_size=privileged_dict['page_size'],
                     paging_mode=privileged_dict['paging_mode'],
                     valid_ll_pages=privileged_dict['ll_pages'],
-                    mode=privileged_dict['mode'])
+                    mode=privileged_dict['mode'],
+                    fault=pt_fault,
+                    mem_fault=pt_mem_fault,
+                    pte_dict=pte_bit_dict)
 
             # Adding License, includes and macros
             # asm = license_str + includes + test_entry
