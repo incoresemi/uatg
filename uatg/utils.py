@@ -508,8 +508,10 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           'aliases of the DUT ' \
           f'\nalias_file = {alias_path}\n\n# path to the index file ' \
           f'containing  the list of tests to be generated. By default, \n' \
-          f'# or when empty, UATG will use the inidex.yaml file within ' \
+          f'# or when empty, UATG will use the index.yaml file within ' \
           f' the modules directory\nindex_file =\n\n' \
+          f'# paging modes in for which the tests need to be generated\n'\
+          'paging_modes = \n\n'\
           f'# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Unless you want to ' \
@@ -1165,3 +1167,57 @@ def run_make(work_dir, jobs):
     chdir(cwd)
     logger.debug(f'Current directory is: {getcwd()}')
     return 1
+
+def paging_modes(yaml_string, isa):
+    """
+        This function reads the YAML entry specifying the valid 
+        paging modses supported by the SATP CSR and returns the mode(s)
+        for the framework to generate tests
+    """
+    split_string = yaml_string.split(' ')
+    values = (split_string[-1][1:-1]).split(',')
+    beg, end = int(values[0]), int(values[1])
+    
+    valid_list = []
+    for i in range(beg, end+1):
+        valid_list.append(i)
+    
+    valid_modes = []
+
+    if 'RV64' in isa:
+        if 8 in valid_list:
+            valid_modes.append('sv39')
+        if 9 in valid_list:
+            valid_modes.append('sv48')
+        if 10 in valid_list:
+            valid_modes.append('sv57')
+    else:
+        if 1 in valid_list:
+            valid_modes.append('sv32')
+
+    return valid_modes
+
+def select_paging_modes(paging_modes):
+    """
+    Function to read the paging modes specified by the user, 
+    and generate only those modes and not every possible paging mode.
+    Returns a list of the user selected modes
+    """
+    mode = []
+
+    if paging_modes is not None:
+        try:
+            modes = paging_modes.replace(' ', ',')
+            modes = modes.replace(', ', ',')
+            modes = modes.replace(' ,', ',')
+            mode = list(set(modes.split(",")))
+            mode.remove('')
+            mode.sort()
+
+        except ValueError:
+            pass
+    
+    if not mode:
+        mode.append('sv39')
+
+    return mode

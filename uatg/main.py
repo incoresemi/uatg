@@ -148,9 +148,18 @@ def clean(module_dir, work_dir, verbose):
               default=1,
               help='Number of Jobs for UATG to spawn',
               type=click.INT)
+@click.option('--paging_modes',
+              '-pm',
+              multiple=True,
+              required=False,
+              default=None,
+              help='Select the paging modes for whihc the tests need to be '
+                    'generated')
+
 @cli.command()
 def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
-             gen_test_list, work_dir, modules, verbose, index_file, jobs):
+             gen_test_list, work_dir, modules, verbose, index_file, jobs, 
+             paging_modes):
     """
     Generates tests, cover-groups for a list of modules corresponding to the DUT
     parameters specified in the configuration yamls, inside the work_dir.
@@ -182,6 +191,7 @@ def generate(alias_file, configuration, linker_dir, module_dir, gen_cvg,
                    config_dict=dut_dict,
                    test_list=str(gen_test_list),
                    index_path=index_file,
+                   paging_modes=paging_modes,
                    jobs=jobs)
     if gen_cvg:
         if alias_file is not None:
@@ -269,6 +279,7 @@ def from_config(config_file, verbose):
     config_linker_dir = config['uatg']['linker_dir']
     config_test_list_flag = config['uatg']['gen_test_list']
     index_yaml_path = config['uatg']['index_file']
+    required_paging_modes = config['uatg']['paging_modes']
     # Uncomment to overwrite verbosity from config file.
     # verbose = config['uatg']['verbose']
 
@@ -299,6 +310,7 @@ def from_config(config_file, verbose):
                        config_dict=dut_dict,
                        test_list=config_test_list_flag,
                        index_path=index_yaml_path,
+                       paging_modes=required_paging_modes,
                        jobs=jobs)
 
     if config['uatg']['test_compile'].lower() == 'true':

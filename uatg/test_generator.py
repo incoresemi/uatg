@@ -16,7 +16,8 @@ from uatg import __file__
 from uatg.log import logger
 from uatg.utils import create_plugins, generate_test_list, create_linker, \
     create_model_test_h, join_yaml_reports, generate_sv_components, \
-    list_of_modules, rvtest_data, dump_makefile, setup_pages
+    list_of_modules, rvtest_data, dump_makefile, setup_pages, \
+    select_paging_modes
 
 # create a manager for shared resources
 process_manager = Manager()
@@ -30,7 +31,7 @@ def asm_generation_process(args):
     # unpacking the args tuple
     plugin, core_yaml, isa_yaml, isa, test_format_string, work_tests_dir, \
         make_file, module, linker_dir, uarch_dir, work_dir, \
-        compile_macros_dict, module_test_count_dict = args
+        compile_macros_dict, module_test_count_dict, page_modes = args
 
     # actual generation process
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
@@ -48,7 +49,6 @@ def asm_generation_process(args):
         seq = '001'
         for ret_list_of_dicts in test_gen:
             test_name = t_name + '-' + seq
-            logger.debug(f'Selected test: {test_name}')
 
             assert isinstance(ret_list_of_dicts, dict)
             # Checking for the returned sections from each test
@@ -64,6 +64,7 @@ def asm_generation_process(args):
 
             # add inst name to test name as postfix
             test_name = test_name + inst_name_postfix
+            logger.debug(f'Selected test: {test_name}')
 
             try:
                 asm_data = ret_list_of_dicts['asm_data']
@@ -119,16 +120,27 @@ def asm_generation_process(args):
                 pte_bit_dict = privileged_dict['pte_dict']
             except KeyError:
                 pass
+            
+            required_paging_modes = select_paging_modes(page_modes)
+            current_paging_mode = privileged_dict['paging_mode']
 
             if privileged_dict['enable']:
-                priv_asm_code, priv_asm_data = setup_pages(
-                    page_size=privileged_dict['page_size'],
-                    paging_mode=privileged_dict['paging_mode'],
-                    valid_ll_pages=privileged_dict['ll_pages'],
-                    mode=privileged_dict['mode'],
-                    fault=pt_fault,
-                    mem_fault=pt_mem_fault,
-                    pte_dict=pte_bit_dict)
+                if privileged_dict['paging_mode'] in required_paging_modes:
+                    logger.debug(f"{current_paging_mode} is in user listed "\
+                                  "paging modes")
+                    priv_asm_code, priv_asm_data = setup_pages(
+                        page_size=privileged_dict['page_size'],
+                        paging_mode=privileged_dict['paging_mode'],
+                        valid_ll_pages=privileged_dict['ll_pages'],
+                        mode=privileged_dict['mode'],
+                        fault=pt_fault,
+                        mem_fault=pt_mem_fault,
+                        pte_dict=pte_bit_dict)
+                else:
+                    logger.warning(f'{current_paging_mode} is not in user listed'\
+                                  ' paging modes')
+                    logger.warning(f'skipping test generation for {test_name}')
+                    continue
 
             # Adding License, includes and macros
             # asm = license_str + includes + test_entry
@@ -222,7 +234,7 @@ def sv_generation_process(args):
 
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
-                   modules_dir, index_path, jobs):
+                   modules_dir, index_path, paging_modes, jobs):
     """
     The function generates ASM files for all the test classes specified within
     the module_dir. The user can also select the modules for which he would want
@@ -352,7 +364,8 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
-                 work_dir, compile_macros_dict, module_test_count_dict))
+                 work_dir, compile_macros_dict, module_test_count_dict, 
+                 paging_modes))
 
         # multi processing process pool
         logger.info(f"Spawning {jobs} processes")
