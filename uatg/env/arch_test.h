@@ -167,7 +167,7 @@ trap_handler_entry:
   //store the updated number of bytes in mtrap_count region
   addi t4, t4, 3*REGWIDTH
   SREG t4, 0(t3)
-
+  
   li t3, 173
   bne t3, a0, unintended_trap_handler
 
@@ -176,12 +176,12 @@ intended_trap_handler:
 #ifdef access_fault_test
   // instruction access fault
   li t3, 1
-  beq t3, t0, intended_instruction_access_fault_handler
+  beq t3, t0, intended_instruction_access_fault_exception_handler
 #endif
 
   // instruction address misaligned
   li t3, 0
-  beq t3, t0, instruction_misaligned_handler
+  beq t3, t0, instruction_misaligned_exception_handler
 
   // breakpoint
   li t3, 3
@@ -206,26 +206,32 @@ intended_trap_handler:
 #ifdef s_u_mode_test
   // ecall from Supervisor Mode. rets to Machine mode
   li t3, 9
-  beq t3, t0, supervisor_to_machine_ecall_handler // if t0 == 9, the trap is due to an ecall from S
+  beq t3, t0, supervisor_to_machine_ecall_exception_handler // if t0 == 9, the trap is due to an ecall from S
   // ecall from user mode, rets to supervisor mode
   li t3, 8
-  beq t3, t0, user_to_supervisor_ecall_handler // if t0 == 8, the trap is due to an ecall from U
+  beq t3, t0, user_to_supervisor_ecall_exception_handler // if t0 == 8, the trap is due to an ecall from U
 #ifdef page_fault_test
   // instruction page fault
   li t3, 12
-  beq t3, t0, instruction_page_fault_handler
+  beq t3, t0, instruction_page_fault_exception_handler
   // load page fault
   li t3, 13
-  beq t3, t0, load_page_fault_handler
+  beq t3, t0, load_page_fault_exception_handler
   // store/AMO page fault
   li t3, 15
-  beq t3, t0, store_page_fault_handler
+  beq t3, t0, store_page_fault_exception_handler
 #endif
 #endif
+
+#ifdef interrupt_testing
+  srli t3, t0, (XLEN-1)
+  bnez t3, interrupt_handler
+#endif
+
   j unintended_trap_handler
 
 #ifdef s_u_mode_test
-user_to_supervisor_ecall_handler:
+user_to_supervisor_ecall_exception_handler:
   la t5, test_exit
   // update MPP to perform MRET into Supervisor
   li t6, 0xF0000000/*for supervisor*/;\
@@ -237,7 +243,7 @@ user_to_supervisor_ecall_handler:
   csrs CSR_MSTATUS, t6
   j mepc_updation
 
-supervisor_to_machine_ecall_handler:
+supervisor_to_machine_ecall_exception_handler:
   la t5, supervisor_exit_label
   // update MPP in mstatus to perform an MRET
   addi t6, x0, 3
@@ -246,8 +252,8 @@ supervisor_to_machine_ecall_handler:
   j mepc_updation
 
 #ifdef page_fault_test
-store_page_fault_handler:
-load_page_fault_handler:
+store_page_fault_exception_handler:
+load_page_fault_exception_handler:
   la t5, return_address
   ld t6, (t5)
   // check if user or supervisor mode
@@ -275,7 +281,7 @@ u_ls_page_fault:
   and t5, t5, t6
   j mepc_updation
 
-instruction_page_fault_handler:
+instruction_page_fault_exception_handler:
   la t5, return_address
   ld t6, (t5)
   // check if U or supervisor mode
@@ -308,11 +314,63 @@ u_i_page_fault:
 #endif
 
 #ifdef access_fault_test
-intended_instruction_access_fault_handler:
+intended_instruction_access_fault_exception_handler:
   la t6, access_fault
   li t5, 0
   ld t5, 0(t6)
   j mepc_updation
+#endif
+
+#ifdef interrupt_testing
+interrupt_handler:
+  addi t4, t0, 0
+  li t3, 0xf
+  and t4, t3, t4
+  // supervisor software interrupt handling
+  li t3, 1
+  beq t3, t4, supervisor_software_interrupt_handler
+  // machine softeare interrupt handler
+  li t3, 3
+  beq t3, t4, machine_software_interrupt_handler
+  // supervisor timer insterrupt
+  li t3, 5
+  beq t3, t4, supervisor_timer_interrupt_handler
+  // machine timer handler
+  li t3, 7
+  beq t3, t4, machine_timer_interrupt_handler
+
+  j unintended_trap_handler
+
+supervisor_software_interrupt_handler:
+  li t2, 0x2000000
+  sw x0, 0(t2)
+  csrci CSR_MIP, 1
+  j increment_pc
+
+machine_software_interrupt_handler:
+  csrci CSR_MIP, 3
+  j increment_pc
+
+supervisor_timer_interrupt_handler:
+  li t3, 0x2004000 // address of mtime CMP
+  li t4, 0x200BFF8 // address of MTIME
+  ld t5, 0(t4) // reading mtime
+  // decrementing MTIME value to write into MTIME CMP for rollover
+  addi t5, t5, -1
+  sw t5, 0(t3)
+  csrci CSR_MIP, 5
+  j increment_pc
+
+machine_timer_interrupt_handler:
+  li t3, 0x2004000 // address of mtime CMP
+  li t4, 0x200BFF8 // address of MTIME
+  ld t5, 0(t4) // reading mtime
+  // decrementing MTIME value to write into MTIME CMP for rollover
+  addi t5, t5, -1
+  sw t5, 0(t3)
+  csrci CSR_MIP, 7 
+  j increment_pc
+
 #endif
 
 mepc_updation:
@@ -324,44 +382,44 @@ mepc_updation:
 unintended_trap_handler:
   // mcause value of illegal initialized in t3
   li t3, 2 
-  beq t3, t0, illegal_handler
+  beq t3, t0, illegal_instruction_exception_handler
   li t3, 1
-  beq t3, t0, unintended_instruction_access_fault_handler
+  beq t3, t0, unintended_instruction_access_fault_exception_handler
   li t3, 4
-  beq t3, t0, load_misaligned_handler
+  beq t3, t0, load_misaligned_exception_handler
   li t3, 6
-  beq t3, t0, store_misaligned_handler
+  beq t3, t0, store_misaligned_exception_handler
   // instruction page fault
   li t3, 12
-  beq t3, t0, unintended_instruction_page_fault_handler
+  beq t3, t0, unintended_instruction_page_fault_exception_handler
   // load page fault
   li t3, 13
-  beq t3, t0, unintended_load_page_fault_handler
+  beq t3, t0, unintended_load_page_fault_exception_handler
   // store/AMO page fault
   li t3, 15
-  beq t3, t0, unintended_store_page_fault_handler 
+  beq t3, t0, unintended_store_page_fault_exception_handler
   // for all other cause values restore and exit handler
   j restore_and_exit_trap
 
-unintended_instruction_access_fault_handler:
-unintended_instruction_page_fault_handler:
-unintended_store_page_fault_handler:
-unintended_load_page_fault_handler:
+unintended_instruction_access_fault_exception_handler:
+unintended_instruction_page_fault_exception_handler:
+unintended_store_page_fault_exception_handler:
+unintended_load_page_fault_exception_handler:
   la t2, rvtest_code_end
   addi t6, x0, 3
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
   j adjust_mepc
 
-instruction_misaligned_handler:
-store_misaligned_handler:
-load_misaligned_handler:
+instruction_misaligned_exception_handler:
+store_misaligned_exception_handler:
+load_misaligned_exception_handler:
   // load the lowest byte of the instruction into t3. address of instruction in 
   lb t1, 0(t2)
   // we then follow the same stuff we do for illegal
   j increment_pc
 
-illegal_handler:
+illegal_instruction_exception_handler:
 increment_pc:
   andi t1, t1, 0x3
   addi t4, x0, 2
