@@ -345,6 +345,8 @@ supervisor_software_interrupt_handler:
   li t2, 0x2000000
   sw x0, 0(t2)
   csrci CSR_MIP, 1
+  la t1, interrupt_address
+  la t2, interrupt_address
   j increment_pc
 
 machine_software_interrupt_handler:
