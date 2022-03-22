@@ -119,7 +119,7 @@ def asm_generation_process(args):
             try:
                 pte_bit_dict = privileged_dict['pte_dict']
             except KeyError:
-                pte_bit_dict = {}
+                pte_bit_dict = None
                 pass
             
             required_paging_modes = select_paging_modes(page_modes)
@@ -130,13 +130,13 @@ def asm_generation_process(args):
                     logger.debug(f"{current_paging_mode} is in user listed "\
                                   "paging modes")
                     priv_asm_code, priv_asm_data = setup_pages(
+                        pte_dict=pte_bit_dict,
                         page_size=privileged_dict['page_size'],
                         paging_mode=privileged_dict['paging_mode'],
                         valid_ll_pages=privileged_dict['ll_pages'],
                         mode=privileged_dict['mode'],
                         fault=pt_fault,
-                        mem_fault=pt_mem_fault,
-                        pte_dict=pte_bit_dict)
+                        mem_fault=pt_mem_fault)
                 else:
                     logger.warning(f'{current_paging_mode} is not in user listed'\
                                   ' paging modes')

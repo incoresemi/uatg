@@ -882,22 +882,18 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
     return cmd
 
 
-def setup_pages(page_size=4096,
+def setup_pages(pte_dict,
+                page_size=4096,
                 paging_mode='sv39',
                 valid_ll_pages=64,
                 mode='machine',
                 megapage=False,
                 gigapage=False,
                 fault=False,
-                mem_fault=False,
-                pte_dict={'valid': True,
-                          'read': True,
-                          'write': True,
-                          'execute': True,
-                          'user': True,
-                          'globl': True,
-                          'access': True,
-                          'dirty': True}):
+                mem_fault=False
+                ):
+
+                
     """
         creates pagetables to run tests in User and Supervisor modes
         Currently works with the sv39 virtual memory addressing.
@@ -918,7 +914,16 @@ def setup_pages(page_size=4096,
         # machine mode tests don't have anything to do with pages.
         # so, we return a list of empty strings.
         return ['', '', ''], ''
-
+    if pte_dict == None:
+        pte_dict={'valid': True,
+                  'read': True,
+                  'write': True,
+                  'execute': True,
+                  'user': True,
+                  'globl': True,
+                  'access': True,
+                  'dirty': True}
+    
     entries = page_size // 8
     # assuming that the size will always be a power of 2
     power = len(bin(page_size)[2:]) - 1
