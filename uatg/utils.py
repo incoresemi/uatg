@@ -510,8 +510,8 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           f'containing  the list of tests to be generated. By default, \n' \
           f'# or when empty, UATG will use the index.yaml file within ' \
           f' the modules directory\nindex_file =\n\n' \
-          f'# paging modes in for which the tests need to be generated\n'\
-          'paging_modes = \n\n'\
+          f'# paging modes in for which the tests need to be generated\n' \
+          'paging_modes = \n\n' \
           f'# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Unless you want to ' \
@@ -684,9 +684,9 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
     if bit_width == 0:
         pass
     else:
-        max_signed = 2 ** (bit_width - 1) - 1
-        min_signed = -2 ** (bit_width - 1)
-        max_unsigned = 2 ** bit_width - 1
+        max_signed = 2**(bit_width - 1) - 1
+        min_signed = -2**(bit_width - 1)
+        max_unsigned = 2**bit_width - 1
         min_unsigned = 0
         # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
         #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
@@ -890,10 +890,7 @@ def setup_pages(pte_dict,
                 megapage=False,
                 gigapage=False,
                 fault=False,
-                mem_fault=False
-                ):
-
-                
+                mem_fault=False):
     """
         creates pagetables to run tests in User and Supervisor modes
         Currently works with the sv39 virtual memory addressing.
@@ -914,16 +911,18 @@ def setup_pages(pte_dict,
         # machine mode tests don't have anything to do with pages.
         # so, we return a list of empty strings.
         return ['', '', ''], ''
-    if pte_dict == None:
-        pte_dict={'valid': True,
-                  'read': True,
-                  'write': True,
-                  'execute': True,
-                  'user': True,
-                  'globl': True,
-                  'access': True,
-                  'dirty': True}
-    
+    if pte_dict is None:
+        pte_dict = {
+            'valid': True,
+            'read': True,
+            'write': True,
+            'execute': True,
+            'user': True,
+            'globl': True,
+            'access': True,
+            'dirty': True
+        }
+
     entries = page_size // 8
     # assuming that the size will always be a power of 2
     power = len(bin(page_size)[2:]) - 1
@@ -985,8 +984,8 @@ def setup_pages(pte_dict,
             pte_address_u = base_address_new >> power
             pte_address_u = pte_address_u << 10
             pte_entry_u = pte_address_u | dirty_bit | access_bit | \
-                global_bit | u_bit_u | execute_bit | write_bit | \
-                read_bit | valid_bit
+                          global_bit | u_bit_u | execute_bit | write_bit | \
+                          read_bit | valid_bit
             ll_entries_u += '.dword {0} # entry_{1}\n'.format(
                 hex(pte_entry_u), i)
             base_address_new += page_size
@@ -996,8 +995,8 @@ def setup_pages(pte_dict,
         pte_address_s = base_address_new >> power
         pte_address_s = pte_address_s << 10
         pte_entry_s = pte_address_s | dirty_bit | access_bit | \
-            global_bit | u_bit_s | execute_bit | write_bit | \
-            read_bit | valid_bit
+                      global_bit | u_bit_s | execute_bit | write_bit | \
+                      read_bit | valid_bit
         ll_entries_s += '.dword {0} # entry_{1}\n'.format(hex(pte_entry_s), i)
         base_address_new += page_size
 
@@ -1010,7 +1009,7 @@ def setup_pages(pte_dict,
                 f'.dword 0x0\n.endr\n'
 
     out_data_string = pre + initial_level_pages_s + ll_page_s + \
-        initial_level_pages_u + ll_page_u
+                      initial_level_pages_u + ll_page_u
 
     # code section
     # using the macro
@@ -1073,11 +1072,11 @@ def setup_pages(pte_dict,
                                 f"\t\t\t\t #l{i + 1} page into t0"
     if mode == 'user':
         a1_reg = 173
-        pt_label = f'l{levels-1}_u_pt'
+        pt_label = f'l{levels - 1}_u_pt'
     else:
         a1_reg = 0
-        pt_label = f'l{levels-1}_pt'
-    
+        pt_label = f'l{levels - 1}_pt'
+
     fault_valid_bit = 0x01 if pte_dict['valid'] else 0x00
     fault_read_bit = 0x02 if pte_dict['read'] else 0x00
     fault_write_bit = 0x04 if pte_dict['write'] else 0x00
@@ -1087,36 +1086,37 @@ def setup_pages(pte_dict,
     fault_access_bit = 0x40 if pte_dict['access'] else 0x00
     fault_dirty_bit = 0x80 if pte_dict['dirty'] else 0x00
 
-    faulty_pte_bits = fault_valid_bit | fault_read_bit | fault_write_bit |\
-                      fault_execute_bit | fault_u_bit | fault_global_bit |\
+    faulty_pte_bits = fault_valid_bit | fault_read_bit | fault_write_bit | \
+                      fault_execute_bit | fault_u_bit | fault_global_bit | \
                       fault_access_bit | fault_dirty_bit
-    
-    faulty_pte_val = 0xffffffffffffff00 | faulty_pte_bits
-    
-    fault_page_label = "faulting_address" if mem_fault else "faulting_instruction"
 
-    if fault == True:
-        fault_creation = f"\naddress_loading:\n"\
-                         f"\tli a0, 173\n"\
-                         f"\tli a1, {a1_reg}\n"\
-                         f"\tla t5, faulting_instruction\n"\
-                         f"\tla t6, return_address\n"\
-                         f"\tsd t5, 0(t6)\n\n"\
-                         f"offset_adjustment:\n"\
-                         f"\tli t3, 0x1ff\n"\
-                         f"\tli t4, 0x1ff000\n"\
-                         f"\tla t5, {fault_page_label}\n"\
-                         f"\tand t5, t5, t4\n"\
-                         f"\tsrli t5, t5, 12\n"\
-                         f"\tand t5, t5, t3\n"\
-                         f"\tslli t5, t5, 3\n"\
-                         f"\tla t6, {pt_label}\n"\
-                         f"\tadd t6, t6, t5\n"\
-                         f"\tld t3, 0(t6)\n"\
-                         f"\tli t2, {hex(faulty_pte_val)}\n"\
-                         f"\tand t3, t3, t2\n"\
-                         f"\tsd t3, 0(t6)\n"\
-                         f"\tla t5, faulty_page_address\n"\
+    faulty_pte_val = 0xffffffffffffff00 | faulty_pte_bits
+
+    fault_page_label = "faulting_address" if mem_fault else \
+        "faulting_instruction"
+
+    if fault:
+        fault_creation = f"\naddress_loading:\n" \
+                         f"\tli a0, 173\n" \
+                         f"\tli a1, {a1_reg}\n" \
+                         f"\tla t5, faulting_instruction\n" \
+                         f"\tla t6, return_address\n" \
+                         f"\tsd t5, 0(t6)\n\n" \
+                         f"offset_adjustment:\n" \
+                         f"\tli t3, 0x1ff\n" \
+                         f"\tli t4, 0x1ff000\n" \
+                         f"\tla t5, {fault_page_label}\n" \
+                         f"\tand t5, t5, t4\n" \
+                         f"\tsrli t5, t5, 12\n" \
+                         f"\tand t5, t5, t3\n" \
+                         f"\tslli t5, t5, 3\n" \
+                         f"\tla t6, {pt_label}\n" \
+                         f"\tadd t6, t6, t5\n" \
+                         f"\tld t3, 0(t6)\n" \
+                         f"\tli t2, {hex(faulty_pte_val)}\n" \
+                         f"\tand t3, t3, t2\n" \
+                         f"\tsd t3, 0(t6)\n" \
+                         f"\tla t5, faulty_page_address\n" \
                          f"\tsd t6, 0(t5)\n"
 
     else:
@@ -1131,9 +1131,9 @@ def setup_pages(pte_dict,
 
     out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "
                            f"{shift_amount})\n"
-                           f"supervisor_entry_label:\n"
+                           f"101:\t# supervisor entry point\n"
                            f"\n{user_entry}"
-                           f"test_entry:\n.option rvc\n\n")
+                           f"102:\t# user entry point\n.option rvc\n\n")
     out_code_string.append(f"\n\n.option norvc\n{user_exit}"
                            f"test_exit:\n"
                            f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"
@@ -1173,6 +1173,7 @@ def run_make(work_dir, jobs):
     logger.debug(f'Current directory is: {getcwd()}')
     return 1
 
+
 def paging_modes(yaml_string, isa):
     """
         This function reads the YAML entry specifying the valid 
@@ -1182,11 +1183,11 @@ def paging_modes(yaml_string, isa):
     split_string = yaml_string.split(' ')
     values = (split_string[-1][1:-1]).split(',')
     beg, end = int(values[0]), int(values[1])
-    
+
     valid_list = []
-    for i in range(beg, end+1):
+    for i in range(beg, end + 1):
         valid_list.append(i)
-    
+
     valid_modes = []
 
     if 'RV64' in isa:
@@ -1201,6 +1202,7 @@ def paging_modes(yaml_string, isa):
             valid_modes.append('sv32')
 
     return valid_modes
+
 
 def select_paging_modes(paging_modes):
     """
@@ -1221,7 +1223,7 @@ def select_paging_modes(paging_modes):
 
         except ValueError:
             pass
-    
+
     if not mode:
         mode.append('sv39')
 

@@ -233,12 +233,22 @@ intended_trap_handler:
 #ifdef s_u_mode_test
 user_to_supervisor_ecall_exception_handler:
   la t5, test_exit
+  la t6, exit_to_s_mode
+  ld t6, 0(t6)
+  beqz t6, machine_exit
+  supervisor_exit:
   // update MPP to perform MRET into Supervisor
   li t6, 0xF0000000/*for supervisor*/;\
   /*update MEPC*/\
   /*supervisor virtula address is F000000..*/\
   or t5, t5, t6;/*for supervisor*/\
   addi t6, x0, 1
+    slli t6, t6, 11
+    csrs CSR_MSTATUS, t6
+    j mepc_updation
+  machine_exit:
+    // update MPP to perform MRET into Machine
+    addi t6, x0, 3
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
   j mepc_updation
@@ -582,7 +592,7 @@ rvtest_data_end:
   li t6, 0xF0000000/*for supervisor*/;\
   /*update MEPC*/\
   /*supervisor virtula address is F000000..*/\
-  la t1, supervisor_entry_label;/*label for loading MEPC*/\
+  la t1, 101f;/*label for loading MEPC*/\
   or t5, t1, t6;/*for supervisor*/\
   csrw CSR_MEPC, t5;/*update MEPC*/\
   /*mret*/\
@@ -606,7 +616,7 @@ rvtest_data_end:
   li t6, 0x0fffffff;\
   /*user address is 00000000*/\
   /*update MEPC*/\
-  la t1, test_entry;/*label for loading SEPC*/\
+  la t1, 102f;/*label for loading SEPC*/\
   and t5, t1, t6;/*for user*/\
   csrw CSR_SEPC, t5;/*update MEPC*/\
   /*mret*/\
