@@ -115,10 +115,11 @@ def asm_generation_process(args):
             except KeyError:
                 pt_mem_fault = False
                 pass
-
+            
             try:
                 pte_bit_dict = privileged_dict['pte_dict']
             except KeyError:
+                pte_bit_dict = {}
                 pass
             
             required_paging_modes = select_paging_modes(page_modes)
