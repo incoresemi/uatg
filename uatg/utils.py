@@ -954,7 +954,7 @@ def setup_pages(pte_dict,
 
     initial_level_pages_u = ''
     if mode == 'user':
-        for level in range(1, levels - 1):
+        for level in range(levels-2, levels - 1):
             initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n" \
                                      f".dword 0x0\n.endr\n"
 
@@ -1050,26 +1050,26 @@ def setup_pages(pte_dict,
 
     if mode == 'user':
         pte_updation += f"\t# user page table set up\n"
-        pte_updation += f"\tla t0, l0_pt # load address of root page\n\n"
-        pte_updation += f"\tla t3, l1_u_pt # load address of l1 user page\n\n"
+        pte_updation += f"\tla t0, l{levels-3}_pt # load address of root page\n\n"
+        pte_updation += f"\tla t3, l{levels-2}_u_pt # load address of l1 user page\n\n"
         common_setup = f"\tsrli t5, t3, 12\n" \
                        f"\tslli t5, t5, 10\n" \
                        f"\tli t4, 1\n" \
                        f"\tadd t5, t5, t4\n" \
                        f"\tsd t5, (t0)\n"
-        for i in range(levels - 1):
-            pte_updation += f"\t# update l{i} page entry with address " \
-                            f"of l{i + 1} page\n"
+        for i in range(2):
+            pte_updation += f"\n\t# update l{levels-3+i} page entry with address " \
+                            f"of l{levels-2+i} page\n"
             if i != 0:
                 pte_updation += f"\taddi t2, x0, 1\n" \
                                 f"\tslli t2, t2, 12\n" \
                                 f"\tadd t3, t0, t2\n"
             pte_updation += f"{common_setup}\n"
 
-            if i < levels - 2:
+            if i < 1:
                 pte_updation += f"\t# address updation\n" \
-                                f"\tadd t0, t3, 0 # move address of \n" \
-                                f"\t\t\t\t #l{i + 1} page into t0"
+                                f"\tadd t0, t3, 0 # move address of " \
+                                f"l{i + 1} page into t0\n"
     if mode == 'user':
         a1_reg = 173
         pt_label = f'l{levels - 1}_u_pt'
@@ -1182,11 +1182,8 @@ def paging_modes(yaml_string, isa):
     """
     split_string = yaml_string.split(' ')
     values = (split_string[-1][1:-1]).split(',')
-    beg, end = int(values[0]), int(values[1])
-
-    valid_list = []
-    for i in range(beg, end + 1):
-        valid_list.append(i)
+    valid_list = [int(i) for i in values]
+    logger.debug(f"{valid_list}  {yaml_string}")
 
     valid_modes = []
 

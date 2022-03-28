@@ -132,7 +132,7 @@ def asm_generation_process(args):
                     priv_asm_code, priv_asm_data = setup_pages(
                         pte_dict=pte_bit_dict,
                         page_size=privileged_dict['page_size'],
-                        paging_mode=privileged_dict['paging_mode'],
+                        paging_mode=current_paging_mode,
                         valid_ll_pages=privileged_dict['ll_pages'],
                         mode=privileged_dict['mode'],
                         fault=pt_fault,
