@@ -352,16 +352,21 @@ interrupt_handler:
   j unintended_trap_handler
 
 supervisor_software_interrupt_handler:
-  li t2, 0x2000000
-  sw x0, 0(t2)
+//  li t2, 0x2000000
+//  sw x0, 0(t2)
   csrci CSR_MIP, 1
   la t1, interrupt_address
-  la t2, interrupt_address
-  j increment_pc
+  ld t2, 0(t1)
+  add t1, t2, x0
+  j adjust_mepc
 
 machine_software_interrupt_handler:
-  csrci CSR_MIP, 3
-  j increment_pc
+  RVMODEL_CLEAR_MSW_INT
+  li t1, 8
+  csrc CSR_MIP, t1
+  la t1, interrupt_address
+  ld t2, 0(t1)
+  j adjust_mepc
 
 supervisor_timer_interrupt_handler:
   li t3, 0x2004000 // address of mtime CMP
@@ -374,14 +379,16 @@ supervisor_timer_interrupt_handler:
   j increment_pc
 
 machine_timer_interrupt_handler:
-  li t3, 0x2004000 // address of mtime CMP
-  li t4, 0x200BFF8 // address of MTIME
-  ld t5, 0(t4) // reading mtime
-  // decrementing MTIME value to write into MTIME CMP for rollover
-  addi t5, t5, -1
-  sw t5, 0(t3)
-  csrci CSR_MIP, 7 
-  j increment_pc
+  li t1, 0x2004000 // mtimecmp
+  li t2, 0x200BFF8 // mtime
+  li x1, 1
+  slli x1, x1, 63
+  sd x1, 0(t1) // write 1 << 63 to mtimecmp
+  sd x0, 0(t1) // set mtime to 0 mtimecmp > mtime -> interrupt off
+  la t1, interrupt_address
+  ld t2, 0(t1)
+  //csrr t1, CSR_MIP
+  j adjust_mepc
 
 #endif
 
