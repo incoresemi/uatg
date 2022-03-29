@@ -125,8 +125,13 @@ def asm_generation_process(args):
             required_paging_modes = select_paging_modes(page_modes)
             current_paging_mode = privileged_dict['paging_mode']
 
+
             if privileged_dict['enable']:
-                if privileged_dict['paging_mode'] in required_paging_modes:
+                if (privileged_dict['paging_mode'] == 'sv39') and \
+                        (privileged_dict['mode'] == 'machine'):
+                            current_paging_mode = required_paging_modes[0]
+
+                if current_paging_mode in required_paging_modes:
                     logger.debug(f"{current_paging_mode} is in user listed "\
                                   "paging modes")
                     priv_asm_code, priv_asm_data = setup_pages(
