@@ -1208,7 +1208,10 @@ def select_paging_modes(paging_modes):
     """
     mode = []
 
-    if paging_modes is not None:
+    if isinstance(paging_modes, tuple):
+        mode = list(paging_modes)
+        mode.sort()
+    elif paging_modes is not None:
         try:
             modes = paging_modes.replace(' ', ',')
             modes = modes.replace(', ', ',')
