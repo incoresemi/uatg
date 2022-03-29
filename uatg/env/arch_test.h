@@ -236,19 +236,21 @@ user_to_supervisor_ecall_exception_handler:
   la t6, exit_to_s_mode
   ld t6, 0(t6)
   beqz t6, machine_exit
-  supervisor_exit:
+supervisor_exit:
   // update MPP to perform MRET into Supervisor
-  li t6, 0xF0000000/*for supervisor*/;\
-  /*update MEPC*/\
-  /*supervisor virtula address is F000000..*/\
-  or t5, t5, t6;/*for supervisor*/\
+  li t6, 0x0FFFFFFF/*for supervisor*/
+  /*update MEPC*/
+  /*supervisor virtula address is F000000..*/
+  and t5, t5, t6/*for supervisor*/
+  li t6, 0xF00000000
+  or t5, t5, t6
   addi t6, x0, 1
-    slli t6, t6, 11
-    csrs CSR_MSTATUS, t6
-    j mepc_updation
-  machine_exit:
-    // update MPP to perform MRET into Machine
-    addi t6, x0, 3
+  slli t6, t6, 11
+  csrs CSR_MSTATUS, t6
+  j mepc_updation
+machine_exit:
+  // update MPP to perform MRET into Machine
+  addi t6, x0, 3
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
   j mepc_updation
@@ -276,7 +278,9 @@ load_page_fault_exception_handler:
   or t4, t3, t4
   sd t4, 0(t5)
   // update address for supervisor mode
-  li t5, 0xF0000000
+  li t5, 0x0FFFFFFF
+  and t5, t5, t6
+  li t6, 0xF00000000
   or t5, t5, t6
   j mepc_updation
 u_ls_page_fault:
@@ -304,8 +308,10 @@ instruction_page_fault_exception_handler:
   or t4, t3, t4
   sd t4, 0(t5)
   // update CSR MEPC
-  li t5, 0xF0000000
+  li t5, 0x0FFFFFFF
   // for supervisor address
+  and t5, t5, t6
+  li t6, 0xF00000000
   or t5, t5, t6
   j mepc_updation
 u_i_page_fault:
@@ -586,21 +592,24 @@ rvtest_data_end:
   /*setting up SATP*/\
   addi t0, x0, mode;/*mode field value based on paging mode in SATP*/\
   slli t1, t0, shift_amount;/*left shift to move it to the mode field of SATP*/\
+  csrs CSR_SATP, t1;\
   /*slli t2, t0, pg_size_exp;*/\
   la t3, l0_pt;/*load the address of the root page*/\
   srli t4, t3, pg_size_exp;/*divide the address by the page size*/\
-  add t5, t1, t4;/*add the t1 reg with mode value with the t3 reg*/\
-  csrw CSR_SATP, t5;/*load the value into SATP*/\
+  add t5, x0, t4;/*add the t1 reg with mode value with the t3 reg*/\
+  csrs CSR_SATP, t5;/*load the value into SATP*/\
   /*update MPP with 1 to go into supervisor mode*/\
   addi t6, x0, 1;/*supervisor*/\
   slli t6, t6, 11;\
   csrs CSR_MSTATUS, t6;/*set MPP bits in MSTATUS*/\
   /*value to convert the Physical address to Virtual address*/\
-  li t6, 0xF0000000/*for supervisor*/;\
+  li t6, 0x0FFFFFFF/*for supervisor in sv39*/;\
   /*update MEPC*/\
-  /*supervisor virtula address is F000000..*/\
+  /*supervisor virtula address is F00000000..*/\
   la t1, 101f;/*label for loading MEPC*/\
-  or t5, t1, t6;/*for supervisor*/\
+  and t5, t1, t6;/*for supervisor*/\
+  li t6, 0xF00000000;\
+  or t5, t5, t6;\
   csrw CSR_MEPC, t5;/*update MEPC*/\
   /*mret*/\
   mret;

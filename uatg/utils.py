@@ -1021,12 +1021,11 @@ def setup_pages(pte_dict,
                    f"\n\t# setting up root PTEs\n" \
                    f"\tla t0, l0_pt # load address of root page\n\n"
 
-    shift_string = f"\t# calculation for offset\n" \
-                   f"\taddi t6, x0, 3\n\tslli t6, t6, 10\n\tadd t0, t0, t6\n"
-
     for i in range(levels - 1):
-        offset = 24 if i == (levels - 3) else 0
-        offset_calc = shift_string if i == (levels - 2) else ""
+        offset = f'\tmv t2, t0\n\tli t1, 0x1e0\n\tadd t0, t0, t1\n'
+        move_t0 = '\tmv t0, t2\n'
+        offset_root = offset if i == (levels - 3) else ''
+        offset_move_t0 = move_t0 if i == (levels -3) else ''
         pte_updation += f"\t# setting up l{i} table to point l{i + 1} table\n" \
                         f"\taddi t1, x0, 1 # add value 1 to reg\n" \
                         f"\tslli t2, t1, {power} # left shift to create a " \
@@ -1037,8 +1036,9 @@ def setup_pages(pte_dict,
                         f"page size\n" \
                         f"\tslli t4, t4, 10 # left shift for PTE format\n" \
                         f"\tadd t4, t4, t1 # set valid bit to 1\n" \
-                        f"{offset_calc}" \
-                        f"\tsd t4, {offset}(t0) " \
+                        f"{offset_root}"\
+                        f"\tsd t4, (t0)\n"\
+                        f"{offset_move_t0}"\
                         f"# store l{i + 1} first entry address " \
                         f"into the first entry of l{i}\n\n"
         if i < levels - 2:
@@ -1183,7 +1183,6 @@ def paging_modes(yaml_string, isa):
     split_string = yaml_string.split(' ')
     values = (split_string[-1][1:-1]).split(',')
     valid_list = [int(i) for i in values]
-    logger.debug(f"{valid_list}  {yaml_string}")
 
     valid_modes = []
 
