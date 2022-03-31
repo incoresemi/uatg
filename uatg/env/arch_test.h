@@ -238,12 +238,35 @@ user_to_supervisor_ecall_exception_handler:
   beqz t6, machine_exit
 supervisor_exit:
   // update MPP to perform MRET into Supervisor
-  li t6, 0x0FFFFFFF/*for supervisor*/
-  /*update MEPC*/
-  /*supervisor virtula address is F000000..*/
-  and t5, t5, t6/*for supervisor*/
+  /*for all virtual addresses*/
+  /*mask value to convert the Physical address to Virtual address*/
+  li t6, 0x7FFFFFFF/*for all virtual addresses, iresspective of satp.mode*/
+  and t5, t5, t6/*for retaining all bits execpt MSB*/
+  la t3, satp_mode_val
+  ld t6, 0(t3)
+  /*compare to update virtual address*/
+  li t3, 9
+  beq t6, t3, sv48_v_address_u_to_s_ecall
+  li t3, 10
+  beq t6, t3, sv57_v_address_u_to_s_ecall
+  /*sv39. sv32 pagin mode*/
+  /*supervisor virtual address is F00000000 for sv39, sv32*/
   li t6, 0xF00000000
   or t5, t5, t6
+  j u_to_s_ecall_exit_updates
+sv48_v_address_u_to_s_ecall:
+  /*case for sv48*/
+  /*supervisor virtual address is F0000000000 for sv48*/
+  li t6, 0xF0000000000
+  or t5, t5, t6
+  j u_to_s_ecall_exit_updates
+sv57_v_address_u_to_s_ecall:
+  /*case for sv57*/
+  /*supervisor virtual address is F0000000000 for sv57*/
+  li t6, 0xF000000000000
+  or t5, t5, t6
+  j u_to_s_ecall_exit_updates
+u_to_s_ecall_exit_updates:
   addi t6, x0, 1
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
@@ -278,11 +301,37 @@ load_page_fault_exception_handler:
   or t4, t3, t4
   sd t4, 0(t5)
   // update address for supervisor mode
-  li t5, 0x0FFFFFFF
-  and t5, t5, t6
+  /*for all virtual addresses*/
+  /*mask value to convert the Physical address to Virtual address*/
+  li t6, 0x7FFFFFFF/*for all virtual addresses, iresspective of satp.mode*/
+  and t5, t5, t6/*for retaining all bits execpt MSB*/
+  la t3, satp_mode_val
+  ld t6, 0(t3)
+  /*compare to update virtual address*/
+  li t3, 9
+  beq t6, t3, sv48_v_address_l_s_pagefault
+  li t3, 10
+  beq t6, t3, sv57_v_address_l_s_pagefault
+  /*sv39. sv32 pagin mode*/
+  /*supervisor virtual address is F00000000 for sv39, sv32*/
   li t6, 0xF00000000
   or t5, t5, t6
+  j l_s_pagefault_handler_exit
+sv48_v_address_l_s_pagefault:
+  /*case for sv48*/
+  /*supervisor virtual address is F0000000000 for sv48*/
+  li t6, 0xF0000000000
+  or t5, t5, t6
+  j l_s_pagefault_handler_exit
+sv57_v_address_l_s_pagefault:
+  /*case for sv57*/
+  /*supervisor virtual address is F0000000000 for sv57*/
+  li t6, 0xF000000000000
+  or t5, t5, t6
+  j l_s_pagefault_handler_exit
+l_s_pagefault_handler_exit:
   j mepc_updation
+
 u_ls_page_fault:
   // fix PTE
   li t4, 0xff
@@ -307,13 +356,38 @@ instruction_page_fault_exception_handler:
   ld t3, 0(t5)
   or t4, t3, t4
   sd t4, 0(t5)
-  // update CSR MEPC
-  li t5, 0x0FFFFFFF
-  // for supervisor address
-  and t5, t5, t6
+  // update address for supervisor mode
+  /*for all virtual addresses*/
+  /*mask value to convert the Physical address to Virtual address*/
+  li t6, 0x7FFFFFFF/*for all virtual addresses, iresspective of satp.mode*/
+  and t5, t5, t6/*for retaining all bits execpt MSB*/
+  la t3, satp_mode_val
+  ld t6, 0(t3)
+  /*compare to update virtual address*/
+  li t3, 9
+  beq t6, t3, sv48_v_address_i_pagefault
+  li t3, 10
+  beq t6, t3, sv57_v_address_i_pagefault
+  /*sv39. sv32 pagin mode*/
+  /*supervisor virtual address is F00000000 for sv39, sv32*/
   li t6, 0xF00000000
   or t5, t5, t6
+  j i_pagefault_handler_exit
+sv48_v_address_i_pagefault:
+  /*case for sv48*/
+  /*supervisor virtual address is F0000000000 for sv48*/
+  li t6, 0xF0000000000
+  or t5, t5, t6
+  j i_pagefault_handler_exit
+sv57_v_address_i_pagefault:
+  /*case for sv57*/
+  /*supervisor virtual address is F0000000000 for sv57*/
+  li t6, 0xF000000000000
+  or t5, t5, t6
+  j i_pagefault_handler_exit
+i_pagefault_handler_exit:
   j mepc_updation
+
 u_i_page_fault:
   // update the PTE
   li t4, 0xff
@@ -602,16 +676,38 @@ rvtest_data_end:
   addi t6, x0, 1;/*supervisor*/\
   slli t6, t6, 11;\
   csrs CSR_MSTATUS, t6;/*set MPP bits in MSTATUS*/\
-  /*value to convert the Physical address to Virtual address*/\
-  li t6, 0x0FFFFFFF/*for supervisor in sv39*/;\
-  /*update MEPC*/\
-  /*supervisor virtula address is F00000000..*/\
+  /*for all virtual addresses*/\
+  /*mask value to convert the Physical address to Virtual address*/\
+  li t6, 0x7FFFFFFF;/*for all virtual addresses, iresspective of satp.mode*/\
   la t1, 101f;/*label for loading MEPC*/\
-  and t5, t1, t6;/*for supervisor*/\
+  and t5, t1, t6;/*for retaining all bits execpt MSB*/\
+  li t3, 9;\
+  beq t0, t3, sv48_v_address_setup;\
+  li t3, 10;\
+  beq t0, t3, sv57_v_address_setup;\
+  /*sv39. sv32 pagin mode*/\
+  /*supervisor virtual address is F00000000 for sv39, sv32*/\
   li t6, 0xF00000000;\
   or t5, t5, t6;\
+  j ret_to_supervisor;\
+sv48_v_address_setup:\
+  /*case for sv48*/\
+  /*supervisor virtual address is F0000000000 for sv48*/\
+  li t6, 0xF0000000000;\
+  or t5, t5, t6;\
+  j ret_to_supervisor;\
+sv57_v_address_setup:\
+  /*case for sv57*/\
+  /*supervisor virtual address is F0000000000 for sv57*/\
+  li t6, 0xF000000000000;\
+  or t5, t5, t6;\
+  j ret_to_supervisor;\
+ret_to_supervisor:\
+  /*update address region within data section for trap handler*/\
   csrw CSR_MEPC, t5;/*update MEPC*/\
-  /*mret*/\
+  la t6, satp_mode_val;\
+  sd t0, 0(t6);\
+  /* ret to supervisor mode*/\
   mret;
 
 #define RVTEST_SUPERVISOR_EXIT()\

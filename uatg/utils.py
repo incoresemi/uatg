@@ -889,6 +889,8 @@ def setup_pages(pte_dict,
                 mode='machine',
                 megapage=False,
                 gigapage=False,
+                terapage=False,
+                petapage=False,
                 fault=False,
                 mem_fault=False):
     """
@@ -929,6 +931,7 @@ def setup_pages(pte_dict,
     align = power
     shift_amount = 60
     levels, mode_val = None, None
+    paging_offset_constant = "0x0"
     if paging_mode == 'sv32':
         mode_val = 1  # paging mode for the SATP register
         levels = 2
@@ -937,12 +940,15 @@ def setup_pages(pte_dict,
     elif paging_mode == 'sv39':
         mode_val = 8  # paging mode to be used in the SATP register
         levels = 3
+        paging_offset_constant = "0x1e0"
     elif paging_mode == 'sv48':
         mode_val = 9  # paging mode
         levels = 4
+        paging_offset_constant = "0xF0"
     elif paging_mode == 'sv57':
         mode_val = 10
         levels = 5
+        paging_offset_constant = "0x78" 
 
     # data section
     pre = f"\n.align {align}\n\n"
@@ -954,7 +960,7 @@ def setup_pages(pte_dict,
 
     initial_level_pages_u = ''
     if mode == 'user':
-        for level in range(levels-2, levels - 1):
+        for level in range(levels - 1):
             initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n" \
                                      f".dword 0x0\n.endr\n"
 
@@ -1020,12 +1026,13 @@ def setup_pages(pte_dict,
     pte_updation = f"\n.option norvc" \
                    f"\n\t# setting up root PTEs\n" \
                    f"\tla t0, l0_pt # load address of root page\n\n"
-
+ 
     for i in range(levels - 1):
-        offset = f'\tmv t2, t0\n\tli t1, 0x1e0\n\tadd t0, t0, t1\n'
+        offset = f'\tmv t2, t0\n\tli t1, {paging_offset_constant}'\
+                 f'\n\tadd t0, t0, t1\n'
         move_t0 = '\tmv t0, t2\n'
-        offset_root = offset if i == (levels - 3) else ''
-        offset_move_t0 = move_t0 if i == (levels -3) else ''
+        offset_root = offset if i == 0 else ''
+        offset_move_t0 = move_t0 if i == 0 else ''
         pte_updation += f"\t# setting up l{i} table to point l{i + 1} table\n" \
                         f"\taddi t1, x0, 1 # add value 1 to reg\n" \
                         f"\tslli t2, t1, {power} # left shift to create a " \
@@ -1041,7 +1048,7 @@ def setup_pages(pte_dict,
                         f"{offset_move_t0}"\
                         f"# store l{i + 1} first entry address " \
                         f"into the first entry of l{i}\n\n"
-        if i < levels - 2:
+        if i < levels-2:
             pte_updation += f"\t#address updation\n" \
                             f"\tadd t0, t3, 0 # move the address of " \
                             f"level {i + 1} page to t0\n\n"
@@ -1049,15 +1056,16 @@ def setup_pages(pte_dict,
     pte_updation += "\n"
 
     if mode == 'user':
+        #user_lowest_level = f"{levels-3}_u" if (levels-3 != 0) else "0"
         pte_updation += f"\t# user page table set up\n"
-        pte_updation += f"\tla t0, l{levels-3}_pt # load address of root page\n\n"
-        pte_updation += f"\tla t3, l{levels-2}_u_pt # load address of l1 user page\n\n"
+        pte_updation += f"\tla t0, l0_pt # load address of root page\n\n"
+        pte_updation += f"\tla t3, l1_u_pt # load address of l1 user page\n\n"
         common_setup = f"\tsrli t5, t3, 12\n" \
                        f"\tslli t5, t5, 10\n" \
                        f"\tli t4, 1\n" \
                        f"\tadd t5, t5, t4\n" \
                        f"\tsd t5, (t0)\n"
-        for i in range(2):
+        for i in range(levels-1):
             pte_updation += f"\n\t# update l{levels-3+i} page entry with address " \
                             f"of l{levels-2+i} page\n"
             if i != 0:
@@ -1066,7 +1074,7 @@ def setup_pages(pte_dict,
                                 f"\tadd t3, t0, t2\n"
             pte_updation += f"{common_setup}\n"
 
-            if i < 1:
+            if i < levels-2:
                 pte_updation += f"\t# address updation\n" \
                                 f"\tadd t0, t3, 0 # move address of " \
                                 f"l{i + 1} page into t0\n"
