@@ -891,6 +891,8 @@ def setup_pages(pte_dict,
                 gigapage=False,
                 terapage=False,
                 petapage=False,
+                user_superpage=False,
+                user_supervisor_superpage=False,
                 fault=False,
                 mem_fault=False):
     """
@@ -925,44 +927,135 @@ def setup_pages(pte_dict,
             'dirty': True
         }
 
-    entries = page_size // 8
+    entries_per_pt = page_size // 8
     # assuming that the size will always be a power of 2
     power = len(bin(page_size)[2:]) - 1
     align = power
-    shift_amount = 60
+    #shift_amount = 60
     levels, mode_val = None, None
-    paging_offset_constant = "0x0"
-    if paging_mode == 'sv32':
-        mode_val = 1  # paging mode for the SATP register
-        levels = 2
-        entries = entries * 2
-        shift_amount = 31
-    elif paging_mode == 'sv39':
-        mode_val = 8  # paging mode to be used in the SATP register
-        levels = 3
-        paging_offset_constant = "0x1e0"
-    elif paging_mode == 'sv48':
-        mode_val = 9  # paging mode
-        levels = 4
-        paging_offset_constant = "0xF0"
-    elif paging_mode == 'sv57':
-        mode_val = 10
-        levels = 5
-        paging_offset_constant = "0x78" 
+    xlen = 64
+
+    paging_val_dict = {
+            'sv32': {
+                'satp_mode_val': 1,
+                'levels' : 2,
+                'superpage_level' : {
+                    'megapage' : 1
+                    },
+                'entries' : entries_per_pt * 2,
+                'shift_amount' : 31,
+                'xlen' : 32,
+                'paging_offset_constant' : "0x0"
+                },
+
+            'sv39': {
+                'satp_mode_val' : 8,
+                'levels' : 3,
+                'superpage_level' : {
+                    'megapage' : 2,
+                    'gigapage' : 1
+                    },
+                'entries' : entries_per_pt,
+                'shift_amount' : 60,
+                'xlen': 64,
+                'paging_offset_constant' : "0x1e0"
+                },
+
+            'sv48': {
+                'satp_mode_val' : 9,
+                'levels' : 4,
+                'superpage_level' : {
+                    'megapage' : 3,
+                    'gigapage' : 2,
+                    'terapage' : 1
+                    },
+                'entries' : entries_per_pt,
+                'shift_amount' : 60,
+                'xlen' : 64,
+                'paging_offset_constant' : "0xF0"
+                },
+            
+            'sv57': {
+                'satp_mode_val': 10,
+                'levels' : 5,
+                'superpage_level' : {
+                    'megapage' : 4,
+                    'gigapage' : 3,
+                    'terapage' : 2,
+                    'petapage' : 1
+                    },
+                'entries' : entries_per_pt,
+                'shift_amount' : 60,
+                'xlen' : 64,
+                'paging_offset_constant' : "0x78"
+                }
+            }
+    
+    if petapage == True and paging_mode == 'sv57':
+        superpage_level = 'petapage'
+    elif terapage == True and (paging_mode == 'sv48' or paging_mode == 'sv57'):
+        superpage_mode_level = 'terapage'
+    elif gigapage == True and (paging_mode == 'sv39' or
+            paging_mode == 'sv48' or
+            paging_mode == 'sv57'):
+        superpage_mode_level = 'gigapage'
+    elif megapage == True and (paging_mode == 'sv32' or 
+            paging_mode == 'sv39' or
+            paging_mode == 'sv48' or paging_mode == 'sv57'):
+        superpage_mode_level = 'megapage'
+    else:
+        superpage_mode_level = 'usual'
+    
+    # values for paging set up
+
+    mode_val = paging_val_dict[paging_mode]['satp_mode_val']
+    levels = paging_val_dict[paging_mode]['levels']
+    entries = paging_val_dict[paging_mode]['entries']
+    shift_amount = paging_val_dict[paging_mode]['shift_amount']
+    xlen = paging_val_dict[paging_mode]['xlen']
+    paging_offset_constant = paging_val_dict[paging_mode]['paging_offset_constant']
+    
+    # for super pages
+    try:
+        spage_level = paging_val_dict[paging_mode]['superpage_level']\
+                   [superpage_mode_level]
+    except KeyError:
+        # key error occurs only when superpaging is not enabled.
+        # in the loop generating assembly to set up pages, we check for 99 to 
+        # know that super paging is not enabled.
+        logger.debug("Not generating super pages")
+        spage_level = 99
+    
+    # leaf PTE in superpage
+    leaf_pte_u = ''
+    leaf_pte_s = ''
+    if user_supervisor_superpage == True:
+        leaf_pte_u = '\tli t5, 0x200000ff\n'
+        leaf_pte_s = '\tli t4, 0x200000ef\n'
+    elif user_superpage == True:
+        leaf_pte_u = '\tli t5, 0x200000ff\n'
+    else:
+        leaf_pte_s = '\tli t4, 0x200000ef\n'
+
+    if xlen == 64:
+        word_fill = '.dword'
+    else:
+        word_fill = '.word'
+    # setup for super pages
 
     # data section
     pre = f"\n.align {align}\n\n"
 
     initial_level_pages_s = ''
     for level in range(levels - 1):
-        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n.dword 0x0" \
+        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n{word_fill} 0x0" \
                                  f"\n.endr\n"
 
     initial_level_pages_u = ''
     if mode == 'user':
-        for level in range(levels - 1):
+        for level in range(1,levels - 1):
             initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n" \
-                                     f".dword 0x0\n.endr\n"
+                                     f"{word_fill} 0x0\n.endr\n"
 
     # assumption that the l3 pt entry 0 will point to 80000000
 
@@ -992,7 +1085,7 @@ def setup_pages(pte_dict,
             pte_entry_u = pte_address_u | dirty_bit | access_bit | \
                           global_bit | u_bit_u | execute_bit | write_bit | \
                           read_bit | valid_bit
-            ll_entries_u += '.dword {0} # entry_{1}\n'.format(
+            ll_entries_u += '{0} {1} # entry_{2}\n'.format(word_fill,
                 hex(pte_entry_u), i)
             base_address_new += page_size
 
@@ -1003,16 +1096,16 @@ def setup_pages(pte_dict,
         pte_entry_s = pte_address_s | dirty_bit | access_bit | \
                       global_bit | u_bit_s | execute_bit | write_bit | \
                       read_bit | valid_bit
-        ll_entries_s += '.dword {0} # entry_{1}\n'.format(hex(pte_entry_s), i)
+        ll_entries_s += '{0} {1} # entry_{2}\n'.format(word_fill,hex(pte_entry_s), i)
         base_address_new += page_size
 
     ll_page_s = f'l{levels - 1}_pt:\n' \
                 f'{ll_entries_s}.rept {entries - valid_ll_pages}\n' \
-                f'.dword 0x0\n.endr\n'
+                f'{word_fill} 0x0\n.endr\n'
 
     ll_page_u = f'l{levels - 1}_u_pt:\n' \
                 f'{ll_entries_u}.rept {entries - valid_ll_pages}\n' \
-                f'.dword 0x0\n.endr\n'
+                f'{word_fill} 0x0\n.endr\n'
 
     out_data_string = pre + initial_level_pages_s + ll_page_s + \
                       initial_level_pages_u + ll_page_u
@@ -1033,6 +1126,7 @@ def setup_pages(pte_dict,
         move_t0 = '\tmv t0, t2\n'
         offset_root = offset if i == 0 else ''
         offset_move_t0 = move_t0 if i == 0 else ''
+        superpage_entry_s = leaf_pte_s if i == (spage_level - 1) else ''
         pte_updation += f"\t# setting up l{i} table to point l{i + 1} table\n" \
                         f"\taddi t1, x0, 1 # add value 1 to reg\n" \
                         f"\tslli t2, t1, {power} # left shift to create a " \
@@ -1044,7 +1138,8 @@ def setup_pages(pte_dict,
                         f"\tslli t4, t4, 10 # left shift for PTE format\n" \
                         f"\tadd t4, t4, t1 # set valid bit to 1\n" \
                         f"{offset_root}"\
-                        f"\tsd t4, (t0)\n"\
+                        f"{superpage_entry_s}"\
+                        f"\tSREG t4, (t0)\n"\
                         f"{offset_move_t0}"\
                         f"# store l{i + 1} first entry address " \
                         f"into the first entry of l{i}\n\n"
@@ -1063,16 +1158,21 @@ def setup_pages(pte_dict,
         common_setup = f"\tsrli t5, t3, 12\n" \
                        f"\tslli t5, t5, 10\n" \
                        f"\tli t4, 1\n" \
-                       f"\tadd t5, t5, t4\n" \
-                       f"\tsd t5, (t0)\n"
+                       f"\tadd t5, t5, t4\n"
+        common_setup_store = f"\tSREG t5, (t0)\n"
+
         for i in range(levels-1):
+            superpage_entry_u = leaf_pte_u if i == (spage_level - 1) else ''
             pte_updation += f"\n\t# update l{levels-3+i} page entry with address " \
                             f"of l{levels-2+i} page\n"
             if i != 0:
                 pte_updation += f"\taddi t2, x0, 1\n" \
                                 f"\tslli t2, t2, 12\n" \
                                 f"\tadd t3, t0, t2\n"
+            
             pte_updation += f"{common_setup}\n"
+            pte_updation += f'{superpage_entry_u}'\
+                            f'{common_setup_store}'
 
             if i < levels-2:
                 pte_updation += f"\t# address updation\n" \
@@ -1109,7 +1209,7 @@ def setup_pages(pte_dict,
                          f"\tli a1, {a1_reg}\n" \
                          f"\tla t5, faulting_instruction\n" \
                          f"\tla t6, return_address\n" \
-                         f"\tsd t5, 0(t6)\n\n" \
+                         f"\tSREG t5, 0(t6)\n\n" \
                          f"offset_adjustment:\n" \
                          f"\tli t3, 0x1ff\n" \
                          f"\tli t4, 0x1ff000\n" \
@@ -1123,9 +1223,9 @@ def setup_pages(pte_dict,
                          f"\tld t3, 0(t6)\n" \
                          f"\tli t2, {hex(faulty_pte_val)}\n" \
                          f"\tand t3, t3, t2\n" \
-                         f"\tsd t3, 0(t6)\n" \
+                         f"\tSREG t3, 0(t6)\n" \
                          f"\tla t5, faulty_page_address\n" \
-                         f"\tsd t6, 0(t5)\n"
+                         f"\tSREG t6, 0(t5)\n"
 
     else:
         fault_creation = ""
