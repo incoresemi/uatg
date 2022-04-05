@@ -234,7 +234,7 @@ intended_trap_handler:
 user_to_supervisor_ecall_exception_handler:
   la t5, test_exit
   la t6, exit_to_s_mode
-  ld t6, 0(t6)
+  LREG t6, 0(t6)
   beqz t6, machine_exit
 supervisor_exit:
   // update MPP to perform MRET into Supervisor
@@ -243,7 +243,7 @@ supervisor_exit:
   li t6, 0x7FFFFFFF/*for all virtual addresses, iresspective of satp.mode*/
   and t5, t5, t6/*for retaining all bits execpt MSB*/
   la t3, satp_mode_val
-  ld t6, 0(t3)
+  LREG t6, 0(t3)
   /*compare to update virtual address*/
   li t3, 9
   beq t6, t3, sv48_v_address_u_to_s_ecall
@@ -290,23 +290,23 @@ supervisor_to_machine_ecall_exception_handler:
 store_page_fault_exception_handler:
 load_page_fault_exception_handler:
   la t5, return_address
-  ld t6, (t5)
+  LREG t6, (t5)
   // check if user or supervisor mode
   li t3, 173
   beq a1, t3, u_ls_page_fault
   // fix page table entry
   li t4, 0xef
-  ld t5, faulty_page_address
-  ld t3, 0(t5)
+  LREG t5, faulty_page_address
+  LREG t3, 0(t5)
   or t4, t3, t4
-  sd t4, 0(t5)
+  SREG t4, 0(t5)
   // update address for supervisor mode
   /*for all virtual addresses*/
   /*mask value to convert the Physical address to Virtual address*/
   li t6, 0x7FFFFFFF/*for all virtual addresses, iresspective of satp.mode*/
   and t5, t5, t6/*for retaining all bits execpt MSB*/
   la t3, satp_mode_val
-  ld t6, 0(t3)
+  LREG t6, 0(t3)
   /*compare to update virtual address*/
   li t3, 9
   beq t6, t3, sv48_v_address_l_s_pagefault
@@ -335,10 +335,10 @@ l_s_pagefault_handler_exit:
 u_ls_page_fault:
   // fix PTE
   li t4, 0xff
-  ld t5, faulty_page_address
-  ld t3, 0(t5)
+  LREG t5, faulty_page_address
+  LREG t3, 0(t5)
   or t4, t3, t4
-  sd t4, 0(t5)
+  SREG t4, 0(t5)
   // update address for the user mode
   li t5, 0x0fffffff
   and t5, t5, t6
@@ -346,23 +346,23 @@ u_ls_page_fault:
 
 instruction_page_fault_exception_handler:
   la t5, return_address
-  ld t6, (t5)
+  LREG t6, (t5)
   // check if U or supervisor mode
   li t3, 173
   beq a1, t3, u_i_page_fault
   // update PTE
   li t4, 0xef
-  ld t5, faulty_page_address
-  ld t3, 0(t5)
+  LREG t5, faulty_page_address
+  LREG t3, 0(t5)
   or t4, t3, t4
-  sd t4, 0(t5)
+  SREG t4, 0(t5)
   // update address for supervisor mode
   /*for all virtual addresses*/
   /*mask value to convert the Physical address to Virtual address*/
   li t6, 0x7FFFFFFF/*for all virtual addresses, iresspective of satp.mode*/
   and t5, t5, t6/*for retaining all bits execpt MSB*/
   la t3, satp_mode_val
-  ld t6, 0(t3)
+  LREG t6, 0(t3)
   /*compare to update virtual address*/
   li t3, 9
   beq t6, t3, sv48_v_address_i_pagefault
@@ -391,10 +391,10 @@ i_pagefault_handler_exit:
 u_i_page_fault:
   // update the PTE
   li t4, 0xff
-  ld t5, faulty_page_address
-  ld t3, 0(t5)
+  LREG t5, faulty_page_address
+  LREG t3, 0(t5)
   or t4, t3, t4
-  sd t4, 0(t5)
+  SREG t4, 0(t5)
   // update address for the User mode
   li t5, 0x0fffffff
   and t5, t5, t6
@@ -407,7 +407,7 @@ u_i_page_fault:
 intended_instruction_access_fault_exception_handler:
   la t6, access_fault
   li t5, 0
-  ld t5, 0(t6)
+  LREG t5, 0(t6)
   j mepc_updation
 #endif
 
@@ -436,7 +436,7 @@ supervisor_software_interrupt_handler:
 //  sw x0, 0(t2)
   csrci CSR_MIP, 1
   la t1, interrupt_address
-  ld t2, 0(t1)
+  LREG t2, 0(t1)
   add t1, t2, x0
   j adjust_mepc
 
@@ -445,13 +445,13 @@ machine_software_interrupt_handler:
   li t1, 8
   csrc CSR_MIP, t1
   la t1, interrupt_address
-  ld t2, 0(t1)
+  LREG t2, 0(t1)
   j adjust_mepc
 
 supervisor_timer_interrupt_handler:
   li t3, 0x2004000 // address of mtime CMP
   li t4, 0x200BFF8 // address of MTIME
-  ld t5, 0(t4) // reading mtime
+  LREG t5, 0(t4) // reading mtime
   // decrementing MTIME value to write into MTIME CMP for rollover
   addi t5, t5, -1
   sw t5, 0(t3)
@@ -463,10 +463,10 @@ machine_timer_interrupt_handler:
   li t2, 0x200BFF8 // mtime
   li x1, 1
   slli x1, x1, 63
-  sd x1, 0(t1) // write 1 << 63 to mtimecmp
-  sd x0, 0(t1) // set mtime to 0 mtimecmp > mtime -> interrupt off
+  SREG x1, 0(t1) // write 1 << 63 to mtimecmp
+  SREG x0, 0(t1) // set mtime to 0 mtimecmp > mtime -> interrupt off
   la t1, interrupt_address
-  ld t2, 0(t1)
+  LREG t2, 0(t1)
   //csrr t1, CSR_MIP
   j adjust_mepc
 
@@ -682,27 +682,28 @@ rvtest_data_end:
   la t1, 101f;/*label for loading MEPC*/\
   and t5, t1, t6;/*for retaining all bits execpt MSB*/\
   li t3, 9;\
-  beq t0, t3, sv48_v_address_setup;\
+  /*the labels to the shims updating the addresses are chosen arbitrarily*/\
+  beq t0, t3, 9717f;\
   li t3, 10;\
-  beq t0, t3, sv57_v_address_setup;\
+  beq t0, t3, 1797f;\
   /*sv39. sv32 pagin mode*/\
   /*supervisor virtual address is F00000000 for sv39, sv32*/\
   li t6, 0xF00000000;\
   or t5, t5, t6;\
-  j ret_to_supervisor;\
-sv48_v_address_setup:\
+  j 9900f;\
+9717:\
   /*case for sv48*/\
   /*supervisor virtual address is F0000000000 for sv48*/\
   li t6, 0xF0000000000;\
   or t5, t5, t6;\
-  j ret_to_supervisor;\
-sv57_v_address_setup:\
+  j 9900f;\
+1797:\
   /*case for sv57*/\
   /*supervisor virtual address is F0000000000 for sv57*/\
   li t6, 0xF000000000000;\
   or t5, t5, t6;\
-  j ret_to_supervisor;\
-ret_to_supervisor:\
+  j 9900f;\
+9900:\
   /*update address region within data section for trap handler*/\
   csrw CSR_MEPC, t5;/*update MEPC*/\
   la t6, satp_mode_val;\
