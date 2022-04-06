@@ -1,8 +1,6 @@
 # See LICENSE.incore for license details
 
 from glob import glob
-# imports
-# import os
 from os import remove, listdir, getcwd, chdir
 from os.path import join, abspath, exists, basename
 from random import randint
@@ -684,9 +682,9 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
     if bit_width == 0:
         pass
     else:
-        max_signed = 2**(bit_width - 1) - 1
-        min_signed = -2**(bit_width - 1)
-        max_unsigned = 2**bit_width - 1
+        max_signed = 2 ** (bit_width - 1) - 1
+        min_signed = -2 ** (bit_width - 1)
+        max_unsigned = 2 ** bit_width - 1
         min_unsigned = 0
         # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
         #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
@@ -954,7 +952,7 @@ def setup_pages(pte_dict,
 
     initial_level_pages_u = ''
     if mode == 'user':
-        for level in range(levels-2, levels - 1):
+        for level in range(levels - 2, levels - 1):
             initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n" \
                                      f".dword 0x0\n.endr\n"
 
@@ -1025,7 +1023,7 @@ def setup_pages(pte_dict,
         offset = f'\tmv t2, t0\n\tli t1, 0x1e0\n\tadd t0, t0, t1\n'
         move_t0 = '\tmv t0, t2\n'
         offset_root = offset if i == (levels - 3) else ''
-        offset_move_t0 = move_t0 if i == (levels -3) else ''
+        offset_move_t0 = move_t0 if i == (levels - 3) else ''
         pte_updation += f"\t# setting up l{i} table to point l{i + 1} table\n" \
                         f"\taddi t1, x0, 1 # add value 1 to reg\n" \
                         f"\tslli t2, t1, {power} # left shift to create a " \
@@ -1036,9 +1034,9 @@ def setup_pages(pte_dict,
                         f"page size\n" \
                         f"\tslli t4, t4, 10 # left shift for PTE format\n" \
                         f"\tadd t4, t4, t1 # set valid bit to 1\n" \
-                        f"{offset_root}"\
-                        f"\tsd t4, (t0)\n"\
-                        f"{offset_move_t0}"\
+                        f"{offset_root}" \
+                        f"\tsd t4, (t0)\n" \
+                        f"{offset_move_t0}" \
                         f"# store l{i + 1} first entry address " \
                         f"into the first entry of l{i}\n\n"
         if i < levels - 2:
@@ -1050,16 +1048,18 @@ def setup_pages(pte_dict,
 
     if mode == 'user':
         pte_updation += f"\t# user page table set up\n"
-        pte_updation += f"\tla t0, l{levels-3}_pt # load address of root page\n\n"
-        pte_updation += f"\tla t3, l{levels-2}_u_pt # load address of l1 user page\n\n"
+        pte_updation += f"\tla t0, l{levels - 3}" \
+                        f"_pt # load address of root page\n\n"
+        pte_updation += f"\tla t3, l{levels - 2}" \
+                        f"_u_pt # load address of l1 user page\n\n"
         common_setup = f"\tsrli t5, t3, 12\n" \
                        f"\tslli t5, t5, 10\n" \
                        f"\tli t4, 1\n" \
                        f"\tadd t5, t5, t4\n" \
                        f"\tsd t5, (t0)\n"
         for i in range(2):
-            pte_updation += f"\n\t# update l{levels-3+i} page entry with address " \
-                            f"of l{levels-2+i} page\n"
+            pte_updation += f"\n\t# update l{levels - 3 + i} page entry with address " \
+                            f"of l{levels - 2 + i} page\n"
             if i != 0:
                 pte_updation += f"\taddi t2, x0, 1\n" \
                                 f"\tslli t2, t2, 12\n" \

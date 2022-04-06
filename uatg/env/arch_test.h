@@ -390,7 +390,7 @@ machine_timer_interrupt_handler:
   li x1, 1
   slli x1, x1, 63
   sd x1, 0(t1) // write 1 << 63 to mtimecmp
-  sd x0, 0(t1) // set mtime to 0 mtimecmp > mtime -> interrupt off
+  sd x0, 0(t2) // set mtime to 0 mtimecmp > mtime -> interrupt off
   la t1, interrupt_address
   ld t2, 0(t1)
   //csrr t1, CSR_MIP
