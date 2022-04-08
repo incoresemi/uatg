@@ -915,6 +915,7 @@ def setup_pages(pte_dict,
         # machine mode tests don't have anything to do with pages.
         # so, we return a list of empty strings.
         return ['', '', ''], ''
+    
     if pte_dict is None:
         pte_dict = {
             'valid': True,
@@ -1053,7 +1054,7 @@ def setup_pages(pte_dict,
 
     initial_level_pages_u = ''
     if mode == 'user':
-        for level in range(1,levels - 1):
+        for level in range(1, levels - 1):
             initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n" \
                                      f"{word_fill} 0x0\n.endr\n"
 
@@ -1102,10 +1103,12 @@ def setup_pages(pte_dict,
     ll_page_s = f'l{levels - 1}_pt:\n' \
                 f'{ll_entries_s}.rept {entries - valid_ll_pages}\n' \
                 f'{word_fill} 0x0\n.endr\n'
-
-    ll_page_u = f'l{levels - 1}_u_pt:\n' \
-                f'{ll_entries_u}.rept {entries - valid_ll_pages}\n' \
-                f'{word_fill} 0x0\n.endr\n'
+    if mode == 'user':
+        ll_page_u = f'l{levels - 1}_u_pt:\n' \
+                    f'{ll_entries_u}.rept {entries - valid_ll_pages}\n' \
+                    f'{word_fill} 0x0\n.endr\n'
+    else:
+        ll_page_u = ''
 
     out_data_string = pre + initial_level_pages_s + ll_page_s + \
                       initial_level_pages_u + ll_page_u
