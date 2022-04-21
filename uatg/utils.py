@@ -1,8 +1,8 @@
 # See LICENSE.incore for license details
-
+import re
 from glob import glob
 from os import remove, listdir, getcwd, chdir
-from os.path import join, abspath, exists, basename
+from os.path import join, abspath, exists, basename, dirname
 from random import randint
 from re import findall, M
 from shlex import split
@@ -1227,3 +1227,15 @@ def select_paging_modes(paging_modes):
         mode.append('sv39')
 
     return mode
+
+
+def macros_parser(arch_test_path=join(dirname(__file__), 'env/arch_test.h')):
+    with open(arch_test_path, 'r') as f:
+        lines = f.readlines()
+    macros = []
+    for line in lines:
+        if '#ifdef' in line:
+            pref = line[0:line.find('#ifdef')]
+            if '//' not in pref and '/*' not in pref:
+                macros.append(line[line.find('#ifdef') + 6:].strip('\n '))
+    return list(set(macros))
