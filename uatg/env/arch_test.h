@@ -112,7 +112,15 @@
 
 #ifdef rvtest_strap_routine
   la t1, strap_handler_entry
-  csrw CSR_STVEC, t1
+  // assume paging to be sv39
+  /*value to convert the Physical address to Virtual address*/\
+  li t6, 0x0FFFFFFF/*for supervisor in sv39*/;\
+  /*update MEPC*/\
+  /*supervisor virtula address is F00000000..*/\
+  and t5, t1, t6;/*for supervisor*/\
+  li t6, 0xF00000000;\
+  or t5, t5, t6;\
+  csrw CSR_STVEC, t5
 #endif
 
   .globl rvtest_code_begin
@@ -136,7 +144,7 @@ mtrap_handler_entry:
   // store the current registers into memory
   // using space in memory instead of allocating a stack
   csrrw sp, mscratch, sp // save sp to mscratch before destroying it
-  la sp, trapreg_sv 
+  la sp, trapreg_sv_m
 
   // we will only store 6 registers which will be used in the routine
   SREG t0, 1*REGWIDTH(sp)
@@ -155,6 +163,9 @@ mtrap_handler_entry:
 
   // copy the mepc into t2
   csrr t2, CSR_MEPC
+
+  // read mip (no use)
+  csrr t3, CSR_MIP
  
   // load the current trap count from signature to t4. t3 used to hold the address of mtrap_count
   la t3, mtrap_count
@@ -344,19 +355,28 @@ intended_instruction_access_fault_mexception_handler:
 
 #ifdef interrupt_testing
 m_interrupt_handler:
+  csrr t4, CSR_MIP
   addi t4, t0, 0
   li t3, 0xf
   and t4, t3, t4
 
-  // machine softeare interrupt handler
+  // Supervisor software interrupt handler
+  li t3, 1
+  beq t3, t4, supervisor_software_interrupt_handler
+
+  // machine software interrupt handler
   li t3, 3
   beq t3, t4, machine_software_interrupt_handler
+
+  // Supervisor timer handler
+  li t3, 5
+  beq t3, t4, supervisor_timer_interrupt_handler
 
   // machine timer handler
   li t3, 7
   beq t3, t4, machine_timer_interrupt_handler
 
-  j unintended_trap_handler
+  j unintended_m_interrupt
 
 machine_software_interrupt_handler:
   RVMODEL_CLEAR_MSW_INT
@@ -426,6 +446,11 @@ load_misaligned_mexception_handler:
   // we then follow the same stuff we do for illegal
   j increment_m_pc
 
+unintended_m_interrupt:
+// rare case. mostly shouldnt occur. yet as a failsafe
+csrw CSR_MIP, x0
+j restore_and_exit_mtrap
+
 illegal_instruction_mexception_handler:
 increment_m_pc:
   andi t1, t1, 0x3
@@ -452,7 +477,7 @@ adjust_mepc:
 
 // Restore Register values 
 restore_and_exit_mtrap:
-  la sp, trapreg_sv
+  la sp, trapreg_sv_m
   LREG t0, 1*REGWIDTH(sp)
   LREG t1, 2*REGWIDTH(sp)
   LREG t2, 3*REGWIDTH(sp)
@@ -480,7 +505,7 @@ strap_handler_entry:
   // store the current registers into memory
   // using space in memory instead of allocating a stack
   csrrw sp, sscratch, sp // save sp to mscratch before destroying it
-  la sp, trapreg_sv 
+  la sp, trapreg_sv_s
 
   // we will only store 6 registers which will be used in the routine
   SREG t0, 1*REGWIDTH(sp)
@@ -689,29 +714,28 @@ s_interrupt_handler:
   li t3, 1
   beq t3, t4, supervisor_software_interrupt_handler
 
-  // supervisor timer insterrupt
+  // supervisor timer interrupt
   li t3, 5
   beq t3, t4, supervisor_timer_interrupt_handler
 
   j unintended_strap_handler
 
 supervisor_software_interrupt_handler:
-//  li t2, 0x2000000
-//  sw x0, 0(t2)
-  csrci CSR_SIP, 1
+  csrci CSR_SIP, 0x2
   la t1, interrupt_address
-  ld t2, 0(t1)
-  add t1, t2, x0
+  ld t1, 0(t1)
+  // assuming paging to be sv39
+  li t6, 0x0FFFFFFF/*for supervisor in sv39*/
+  /*supervisor virtual address is F00000000..*/
+  and t5, t1, t6;/*for supervisor*/\
+  li t6, 0xF00000000;\
+  or t2, t5, t6;
+
   j adjust_sepc
 
 supervisor_timer_interrupt_handler:
-  li t3, 0x2004000 // address of mtime CMP
-  li t4, 0x200BFF8 // address of MTIME
-  ld t5, 0(t4) // reading mtime
-  // decrementing MTIME value to write into MTIME CMP for rollover
-  addi t5, t5, -1
-  sw t5, 0(t3)
-  csrci CSR_SIP, 5
+  li t3, 0x20
+  csrc CSR_SIP, t3
   j increment_s_pc
 
 #endif
@@ -742,6 +766,7 @@ unintended_strap_handler:
   li t3, 15
   beq t3, t0, unintended_store_page_fault_sexception_handler
   // for all other cause values restore and exit handler
+
   j restore_and_exit_strap
 
 unintended_instruction_access_fault_sexception_handler:
@@ -761,6 +786,11 @@ load_misaligned_sexception_handler:
   lb t1, 0(t2)
   // we then follow the same stuff we do for illegal
   j increment_s_pc
+
+unintended_s_interrupt:
+// rare case. mostly shouldnt occur. yet as a failsafe
+csrw CSR_SIP, x0
+j restore_and_exit_strap
 
 illegal_instruction_sexception_handler:
 increment_s_pc:
@@ -788,7 +818,7 @@ adjust_sepc:
 
 // Restore Register values 
 restore_and_exit_strap:
-  la sp, trapreg_sv
+  la sp, trapreg_sv_s
   LREG t0, 1*REGWIDTH(sp)
   LREG t1, 2*REGWIDTH(sp)
   LREG t2, 3*REGWIDTH(sp)
@@ -800,7 +830,9 @@ restore_and_exit_strap:
 
 strap_handler_exit:
   .option pop
-  sret
+  //sret
+  li a0, 173
+  ecall
 #endif
 
 #ifdef rvtest_gpr_save
@@ -849,16 +881,15 @@ end_code:
 .align 4
 .global rvtest_data_begin
 rvtest_data_begin:
+
 #ifdef rvtest_mtrap_routine
-trapreg_sv:
+trapreg_sv_m:
   .fill 7, REGWIDTH, 0xdeadbeef
 #endif
-
 #ifdef rvtest_strap_routine
-trapreg_sv:
+trapreg_sv_s:
   .fill 7, REGWIDTH, 0xdeadbeef
 #endif
-
 .endm
 
 .macro RVTEST_DATA_END
