@@ -134,13 +134,13 @@ trap_handler_entry:
   la sp, trapreg_sv 
 
   // we will only store 6 registers which will be used in the routine
-  SREG t0, 1*REGWIDTH(sp)
-  SREG t1, 2*REGWIDTH(sp)
-  SREG t2, 3*REGWIDTH(sp)
-  SREG t3, 4*REGWIDTH(sp)
-  SREG t4, 5*REGWIDTH(sp)
-  SREG t5, 6*REGWIDTH(sp)
-  SREG t6, 7*REGWIDTH(sp)
+  SREG t0, 0*REGWIDTH(sp)
+  SREG t1, 1*REGWIDTH(sp)
+  SREG t2, 2*REGWIDTH(sp)
+  SREG t3, 3*REGWIDTH(sp)
+  SREG t4, 4*REGWIDTH(sp)
+  SREG t5, 5*REGWIDTH(sp)
+  SREG t6, 6*REGWIDTH(sp)
   
   // copy the exception cause into t0
   csrr t0, CSR_MCAUSE
@@ -289,17 +289,17 @@ supervisor_to_machine_ecall_exception_handler:
 #ifdef page_fault_test
 store_page_fault_exception_handler:
 load_page_fault_exception_handler:
-  la t5, return_address
-  LREG t6, (t5)
+  la t6, return_address
+  LREG t5, (t6)
   // check if user or supervisor mode
   li t3, 173
   beq a1, t3, u_ls_page_fault
   // fix page table entry
   li t4, 0xef
-  LREG t5, faulty_page_address
-  LREG t3, 0(t5)
+  LREG t6, faulty_page_address
+  LREG t3, 0(t6)
   or t4, t3, t4
-  SREG t4, 0(t5)
+  SREG t4, 0(t6)
   // update address for supervisor mode
   /*for all virtual addresses*/
   /*mask value to convert the Physical address to Virtual address*/
@@ -335,27 +335,28 @@ l_s_pagefault_handler_exit:
 u_ls_page_fault:
   // fix PTE
   li t4, 0xff
-  LREG t5, faulty_page_address
-  LREG t3, 0(t5)
+  LREG t6, faulty_page_address
+  LREG t3, 0(t6)
   or t4, t3, t4
-  SREG t4, 0(t5)
+  SREG t4, 0(t6)
   // update address for the user mode
-  li t5, 0x0fffffff
+  li t6, 0x0fffffff
   and t5, t5, t6
   j mepc_updation
 
+// instruction page fault handler
 instruction_page_fault_exception_handler:
-  la t5, return_address
-  LREG t6, (t5)
+  la t6, return_address
+  LREG t5, (t6)
   // check if U or supervisor mode
   li t3, 173
   beq a1, t3, u_i_page_fault
   // update PTE
   li t4, 0xef
-  LREG t5, faulty_page_address
-  LREG t3, 0(t5)
+  LREG t6, faulty_page_address
+  LREG t3, 0(t6)
   or t4, t3, t4
-  SREG t4, 0(t5)
+  SREG t4, 0(t6)
   // update address for supervisor mode
   /*for all virtual addresses*/
   /*mask value to convert the Physical address to Virtual address*/
@@ -391,12 +392,12 @@ i_pagefault_handler_exit:
 u_i_page_fault:
   // update the PTE
   li t4, 0xff
-  LREG t5, faulty_page_address
-  LREG t3, 0(t5)
+  LREG t6, faulty_page_address
+  LREG t3, 0(t6)
   or t4, t3, t4
-  SREG t4, 0(t5)
+  SREG t4, 0(t6)
   // update address for the User mode
-  li t5, 0x0fffffff
+  li t6, 0x0fffffff
   and t5, t5, t6
   j mepc_updation
 
@@ -545,13 +546,13 @@ adjust_mepc:
 // Restore Register values 
 restore_and_exit_trap:
   la sp, trapreg_sv
-  LREG t0, 1*REGWIDTH(sp)
-  LREG t1, 2*REGWIDTH(sp)
-  LREG t2, 3*REGWIDTH(sp)
-  LREG t3, 4*REGWIDTH(sp)
-  LREG t4, 5*REGWIDTH(sp)
-  LREG t5, 6*REGWIDTH(sp)
-  LREG t6, 7*REGWIDTH(sp)
+  LREG t0, 0*REGWIDTH(sp)
+  LREG t1, 1*REGWIDTH(sp)
+  LREG t2, 2*REGWIDTH(sp)
+  LREG t3, 3*REGWIDTH(sp)
+  LREG t4, 4*REGWIDTH(sp)
+  LREG t5, 5*REGWIDTH(sp)
+  LREG t6, 6*REGWIDTH(sp)
   csrrw sp, mscratch, sp
 
 trap_handler_exit:
