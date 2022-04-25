@@ -121,10 +121,51 @@ def asm_generation_process(args):
             except KeyError:
                 pte_bit_dict = None
                 pass
-            
+
+            try:
+                pt_megapage = privileged_dict['megapage']
+            except KeyError:
+                pt_megapage = True
+                pass
+
+            try:
+                pt_gigapage = privileged_dict['gigapage']
+            except KeyError:
+                pt_gigapage = False
+                pass
+
+            try:
+                pt_terapage = privileged_dict['terapage']
+            except KeyError:
+                pt_terapage = False
+                pass
+
+            try:
+                pt_petapage = privileged_dict['petapage']
+            except KeyError:
+                pt_petapage = False
+                pass
+
+            try:
+                pt_user_superpage = privileged_dict['user_superpage']
+            except KeyError:
+                pt_user_superpage = False
+                pass
+
+            try:
+                pt_user_supervisor_superpage = privileged_dict['user_supervisor_superpage']
+            except KeyError:
+                pt_user_supervisor_superpage =  False
+                pass
+
+            try:
+                pt_misaligned_superpage = privileged_dict['misaligned_page']
+            except KeyError:
+                pt_misaligned_superpage = False
+                pass
+
             required_paging_modes = select_paging_modes(page_modes)
             current_paging_mode = privileged_dict['paging_mode']
-
 
             if privileged_dict['enable']:
                 if (privileged_dict['paging_mode'] == 'sv39') and \
@@ -140,8 +181,17 @@ def asm_generation_process(args):
                         paging_mode=current_paging_mode,
                         valid_ll_pages=privileged_dict['ll_pages'],
                         mode=privileged_dict['mode'],
+                        megapage=pt_megapage,
+                        gigapage=pt_gigapage,
+                        terapage=pt_terapage,
+                        petapage=pt_petapage,
+                        user_superpage=pt_user_superpage,
+                        user_supervisor_superpage=pt_user_supervisor_superpage,
                         fault=pt_fault,
-                        mem_fault=pt_mem_fault)
+                        mem_fault=pt_mem_fault,
+                        misaligned_superpage=pt_misaligned_superpage
+                    )
+
                 else:
                     logger.warning(f'{current_paging_mode} is not in user listed'\
                                   ' paging modes')
