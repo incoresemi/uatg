@@ -894,7 +894,8 @@ def setup_pages(pte_dict,
                 user_superpage=False,
                 user_supervisor_superpage=False,
                 fault=False,
-                mem_fault=False):
+                mem_fault=False,
+                misaligned_superpage=False):
     """
         creates pagetables to run tests in User and Supervisor modes
         Currently works with the sv39 virtual memory addressing.
@@ -1031,12 +1032,22 @@ def setup_pages(pte_dict,
     leaf_pte_u = ''
     leaf_pte_s = ''
     if user_supervisor_superpage == True:
-        leaf_pte_u = '\tli t5, 0x200000ff\n'
-        leaf_pte_s = '\tli t4, 0x200000ef\n'
+        if misaligned_superpage == True:
+            leaf_pte_u = '\tli t5, 0x20eeeeff\n'
+            leaf_pte_s = '\tli t4, 0x20eeeeef\n'
+        else:
+            leaf_pte_u = '\tli t5, 0x200000ff\n'
+            leaf_pte_s = '\tli t4, 0x200000ef\n'
     elif user_superpage == True:
-        leaf_pte_u = '\tli t5, 0x200000ff\n'
+        if misaligned_superpage == True:
+            leaf_pte_u = '\tli t5, 0x20eeeeff\n'
+        else:
+            leaf_pte_u = '\tli t5, 0x200000ff\n'
     else:
-        leaf_pte_s = '\tli t4, 0x200000ef\n'
+        if misaligned_superpage == True:
+            leaf_pte_s = '\tli t4, 0x20eeeeef\n'
+        else:
+            leaf_pte_s = '\tli t4, 0x200000ef\n'
 
     if xlen == 64:
         word_fill = '.dword'
