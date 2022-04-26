@@ -351,8 +351,17 @@ rv64_encodings = {
         ],
 }
 
-# Utility functions for data generation
 
+# possible superpage variants based on paging modes
+
+possible_superpage_variants = {
+        'sv32' : ['megapage'],
+        'sv39' : ['megapage', 'gigapage'],
+        'sv48' : ['megapage', 'gigapage'], # not included as core does not support ['terapage'],
+        'sv57' : ['megapage', 'gigapage'] # not included as core does not support  'terapage', 'petapage']
+        }
+
+# Utility functions for data generation
 
 def twos(val, bits):
     """
