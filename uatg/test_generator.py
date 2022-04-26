@@ -125,7 +125,7 @@ def asm_generation_process(args):
             try:
                 pt_megapage = privileged_dict['megapage']
             except KeyError:
-                pt_megapage = True
+                pt_megapage = False
                 pass
 
             try:
