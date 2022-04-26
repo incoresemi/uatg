@@ -994,7 +994,7 @@ def setup_pages(pte_dict,
             }
     
     if petapage == True and paging_mode == 'sv57':
-        superpage_level = 'petapage'
+        superpage_mode_level = 'petapage'
     elif terapage == True and (paging_mode == 'sv48' or paging_mode == 'sv57'):
         superpage_mode_level = 'terapage'
     elif gigapage == True and (paging_mode == 'sv39' or
@@ -1026,24 +1026,31 @@ def setup_pages(pte_dict,
         # in the loop generating assembly to set up pages, we check for 99 to 
         # know that super paging is not enabled.
         logger.debug("Not generating super pages")
-        spage_level = 99
+        spage_level = 0
     
     # leaf PTE in superpage
     leaf_pte_u = ''
     leaf_pte_s = ''
     if user_supervisor_superpage == True:
         if misaligned_superpage == True:
+            logger.debug("Currently, when user and supervisor superpages are "\
+                         "present,\nOnly the userpage is set to be misaligned."\
+                         "\nSupport for both misaligned user and supervisor "\
+                         "pages is not present, yet!")
             leaf_pte_u = '\tli t5, 0x20eeeeff\n'
-            leaf_pte_s = '\tli t4, 0x20eeeeef\n'
+            leaf_pte_s = '\tli t4, 0x200000ef\n'
         else:
+            logger.debug("creating both user and supervisor superpages")
             leaf_pte_u = '\tli t5, 0x200000ff\n'
             leaf_pte_s = '\tli t4, 0x200000ef\n'
     elif user_superpage == True:
+        logger.debug("creating user superpages only")
         if misaligned_superpage == True:
             leaf_pte_u = '\tli t5, 0x20eeeeff\n'
         else:
             leaf_pte_u = '\tli t5, 0x200000ff\n'
     else:
+        logger.debug("creating supervisor superpages only")
         if misaligned_superpage == True:
             leaf_pte_s = '\tli t4, 0x20eeeeef\n'
         else:
@@ -1133,6 +1140,12 @@ def setup_pages(pte_dict,
     pte_updation = f"\n.option norvc" \
                    f"\n\t# setting up root PTEs\n" \
                    f"\tla t0, l0_pt # load address of root page\n\n"
+
+    data_for_misaligned_test = f"\n\tla t4, faulty_page_address\n"\
+                               f"\tSREG t0, (t4)\n"\
+                               f"\tla t4, misaligned_superpage\n"\
+                               f"\taddi t5, x0, 1\n"\
+                               f"\tSREG t5, (t4)\n"
  
     for i in range(levels - 1):
         offset = f'\tmv t2, t0\n\tli t1, {paging_offset_constant}'\
@@ -1141,6 +1154,12 @@ def setup_pages(pte_dict,
         offset_root = offset if i == 0 else ''
         offset_move_t0 = move_t0 if i == 0 else ''
         superpage_entry_s = leaf_pte_s if i == (spage_level - 1) else ''
+        s_superpage_address_load = data_for_misaligned_test \
+                                    if (i == (spage_level-1)) and \
+                                       (misaligned_superpage == True) and \
+                                       (user_supervisor_superpage == False)and \
+                                       (user_superpage == False) \
+                                    else ''
         pte_updation += f"\t# setting up l{i} table to point l{i + 1} table\n" \
                         f"\taddi t1, x0, 1 # add value 1 to reg\n" \
                         f"\tslli t2, t1, {power} # left shift to create a " \
@@ -1154,6 +1173,7 @@ def setup_pages(pte_dict,
                         f"{offset_root}"\
                         f"{superpage_entry_s}"\
                         f"\tSREG t4, (t0)\n"\
+                        f"{s_superpage_address_load}\n"\
                         f"{offset_move_t0}"\
                         f"# store l{i + 1} first entry address " \
                         f"into the first entry of l{i}\n\n"
@@ -1177,6 +1197,12 @@ def setup_pages(pte_dict,
 
         for i in range(levels-1):
             superpage_entry_u = leaf_pte_u if i == (spage_level - 1) else ''
+            u_superpage_address_load = data_for_misaligned_test \
+                                        if (i == (spage_level-1)) and \
+                                           (misaligned_superpage == True) and \
+                                           (user_supervisor_superpage == True) and \
+                                           (user_superpage == True) \
+                                        else ''
             pte_updation += f"\n\t# update l{levels-3+i} page entry with address " \
                             f"of l{levels-2+i} page\n"
             if i != 0:
@@ -1186,6 +1212,7 @@ def setup_pages(pte_dict,
             
             pte_updation += f"{common_setup}\n"
             pte_updation += f'{superpage_entry_u}'\
+                            f'{u_superpage_address_load}\n'\
                             f'{common_setup_store}'
 
             if i < levels-2:
@@ -1223,23 +1250,26 @@ def setup_pages(pte_dict,
                          f"\tli a1, {a1_reg}\n" \
                          f"\tla t5, faulting_instruction\n" \
                          f"\tla t6, return_address\n" \
-                         f"\tSREG t5, 0(t6)\n\n" \
-                         f"offset_adjustment:\n" \
-                         f"\tli t3, 0x1ff\n" \
-                         f"\tli t4, 0x1ff000\n" \
-                         f"\tla t5, {fault_page_label}\n" \
-                         f"\tand t5, t5, t4\n" \
-                         f"\tsrli t5, t5, 12\n" \
-                         f"\tand t5, t5, t3\n" \
-                         f"\tslli t5, t5, 3\n" \
-                         f"\tla t6, {pt_label}\n" \
-                         f"\tadd t6, t6, t5\n" \
-                         f"\tld t3, 0(t6)\n" \
-                         f"\tli t2, {hex(faulty_pte_val)}\n" \
-                         f"\tand t3, t3, t2\n" \
-                         f"\tSREG t3, 0(t6)\n" \
-                         f"\tla t5, faulty_page_address\n" \
-                         f"\tSREG t6, 0(t5)\n"
+                         f"\tSREG t5, 0(t6)\n\n"
+        
+        if (misaligned_superpage == False):
+            fault_creation += f"offset_adjustment:\n" \
+                              f"\tli t3, 0x1ff\n" \
+                              f"\tli t4, 0x1ff000\n" \
+                              f"\tla t5, {fault_page_label}\n" \
+                              f"\tand t5, t5, t4\n" \
+                              f"\tsrli t5, t5, 12\n" \
+                              f"\tand t5, t5, t3\n" \
+                              f"\tslli t5, t5, 3\n" \
+                              f"\tla t6, {pt_label}\n" \
+                              f"\tadd t6, t6, t5\n" \
+                              f"\tld t3, 0(t6)\n" \
+                              f"\tli t2, {hex(faulty_pte_val)}\n" \
+                              f"\tand t3, t3, t2\n" \
+                              f"\tSREG t3, 0(t6)\n" \
+                              f"\tla t5, faulty_page_address\n" \
+                              f"\tSREG t6, 0(t5)\n"
+
 
     else:
         fault_creation = ""

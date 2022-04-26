@@ -294,11 +294,30 @@ load_page_fault_exception_handler:
   // check if user or supervisor mode
   li t3, 173
   beq a1, t3, u_ls_page_fault
+#ifdef misaligned_superpage_test
+  // check if the fault is from a misaligned superpage
+  // fix misaligned superpage entry
+  la t6, misaligned_superpage
+  LREG t3, (t6)
+  addi t4, x0, 1
+  beq t3, t4, misaligned_supervisor_superpage_ls_fault_pte_val_loading
+#endif
   // fix page table entry
   li t4, 0xef
   LREG t6, faulty_page_address
   LREG t3, 0(t6)
   or t4, t3, t4
+  j s_ls_fault_handler
+#ifdef misaligned_superpage_test
+  // this does not have to necessarily be inside ifdefs. 
+  // keepng it in ifdef to avoid confusion and reduce code size by few bytes
+misaligned_supervisor_superpage_ls_fault_pte_val_loading:
+  li t4, 0x200000ef
+  LREG t6, faulty_page_address
+  LREG t3, 0(t6)
+  and t4, t3, t4
+#endif
+s_ls_fault_handler:
   SREG t4, 0(t6)
   // update address for supervisor mode
   /*for all virtual addresses*/
@@ -333,11 +352,28 @@ l_s_pagefault_handler_exit:
   j mepc_updation
 
 u_ls_page_fault:
-  // fix PTE
+#ifdef misaligned_superpage_test
+  // check if the fault is from a misaligned superpage
+  // fix misaligned superpage entry
+  la t6, misaligned_superpage
+  LREG t3, (t6)
+  addi t4, x0, 1
+  beq t3, t4, misaligned_user_superpage_ls_fault_pte_val_loading
+#endif
+  // fix page table entry
   li t4, 0xff
   LREG t6, faulty_page_address
   LREG t3, 0(t6)
   or t4, t3, t4
+  j u_ls_fault_handler
+#ifdef misaligned_superpage_test
+misaligned_user_superpage_ls_fault_pte_val_loading:
+  li t4, 0x200000ff
+  LREG t6, faulty_page_address
+  LREG t3, 0(t6)
+  and t4, t3, t4
+#endif
+u_ls_fault_handler:
   SREG t4, 0(t6)
   // update address for the user mode
   li t6, 0x0fffffff
@@ -351,11 +387,28 @@ instruction_page_fault_exception_handler:
   // check if U or supervisor mode
   li t3, 173
   beq a1, t3, u_i_page_fault
+#ifdef misaligned_superpage_test
+  // check if the fault is from a misaligned superpage
+  // fix misaligned superpage entry
+  la t6, misaligned_superpage
+  LREG t3, (t6)
+  addi t4, x0, 1
+  beq t3, t4, misaligned_supervisor_superpage_i_fault_pte_val_loading
+#endif
   // update PTE
   li t4, 0xef
   LREG t6, faulty_page_address
   LREG t3, 0(t6)
   or t4, t3, t4
+  j s_i_fault_handler
+#ifdef misaligned_superpage_test
+misaligned_supervisor_superpage_i_fault_pte_val_loading:
+  li t4, 0x200000ef
+  LREG t6, faulty_page_address
+  LREG t3, 0(t6)
+  and t4, t3, t4
+#endif
+s_i_fault_handler:
   SREG t4, 0(t6)
   // update address for supervisor mode
   /*for all virtual addresses*/
@@ -390,11 +443,28 @@ i_pagefault_handler_exit:
   j mepc_updation
 
 u_i_page_fault:
+#ifdef misaligned_superpage_test
+  // check if the fault is from a misaligned superpage
+  // fix misaligned superpage entry
+  la t6, misaligned_superpage
+  LREG t3, (t6)
+  addi t4, x0, 1
+  beq t3, t4, misaligned_user_superpage_i_fault_pte_val_loading
+#endif
   // update the PTE
   li t4, 0xff
   LREG t6, faulty_page_address
   LREG t3, 0(t6)
   or t4, t3, t4
+  j u_i_fault_handler
+#ifdef misaligned_superpage_test
+misaligned_user_superpage_i_fault_pte_val_loading:
+  li t4, 0x200000ff
+  LREG t6, faulty_page_address
+  LREG t3, 0(t6)
+  and t4, t3, t4
+#endif
+u_i_fault_handler:
   SREG t4, 0(t6)
   // update address for the User mode
   li t6, 0x0fffffff
