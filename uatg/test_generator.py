@@ -92,7 +92,6 @@ def asm_generation_process(args):
                              f'{test_name}')
 
             # generate and setup page tables based on info from plugin
-            # generate and setup page tables based on info from plugin
             privileged_dict = {'page_size': 4096,
                                'll_pages': 64,
                                'paging_mode': 'sv39',
