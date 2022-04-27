@@ -1219,7 +1219,13 @@ def setup_pages(pte_dict,
                 pte_updation += f"\t# address updation\n" \
                                 f"\tadd t0, t3, 0 # move address of " \
                                 f"l{i + 1} page into t0\n"
-    if mode == 'user':
+
+    if (terapage == True) or (petapage == True):
+        a0_reg = 0
+    else:
+        a0_reg = 173
+
+    if (mode == 'user') and (terapage == False) and (petapage == False):
         a1_reg = 173
         pt_label = f'l{levels - 1}_u_pt'
     else:
@@ -1246,7 +1252,7 @@ def setup_pages(pte_dict,
 
     if fault:
         fault_creation = f"\naddress_loading:\n" \
-                         f"\tli a0, 173\n" \
+                         f"\tli a0, {a0_reg}\n" \
                          f"\tli a1, {a1_reg}\n" \
                          f"\tla t5, faulting_instruction\n" \
                          f"\tla t6, return_address\n" \
