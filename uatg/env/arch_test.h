@@ -104,10 +104,25 @@
   .global rvtest_init;
 
   rvtest_init:
+
 #ifdef rvtest_mtrap_routine
-  la t1, trap_handler_entry
+  la t1, mtrap_handler_entry
   csrw CSR_MTVEC, t1
 #endif
+
+#ifdef rvtest_strap_routine
+  la t1, strap_handler_entry
+  // assume paging to be sv39
+  /*value to convert the Physical address to Virtual address*/\
+  li t6, 0x0FFFFFFF/*for supervisor in sv39*/;\
+  /*update MEPC*/\
+  /*supervisor virtula address is F00000000..*/\
+  and t5, t1, t6;/*for supervisor*/\
+  li t6, 0xF00000000;\
+  or t5, t5, t6;\
+  csrw CSR_STVEC, t5
+#endif
+
   .globl rvtest_code_begin
   rvtest_code_begin:
 .endm
@@ -120,18 +135,16 @@
   .option push
   .option norvc
   j end_code
-  
-
 
 // the current handler works only for illegal instructions. Illegal trap caused by Jumping in the 
 // middle of a 32-bit instruction will not be handled. to return from illegal traps, we check the
 // lower 2 bits of the instruction and increment mepc accordingly. Basically, we are categorizing
 // illegals as 32-bit illegals or 16-bit illegals.
-trap_handler_entry:
+mtrap_handler_entry:
   // store the current registers into memory
   // using space in memory instead of allocating a stack
   csrrw sp, mscratch, sp // save sp to mscratch before destroying it
-  la sp, trapreg_sv 
+  la sp, trapreg_sv_m
 
   // we will only store 6 registers which will be used in the routine
   SREG t0, 0*REGWIDTH(sp)
@@ -150,6 +163,9 @@ trap_handler_entry:
 
   // copy the mepc into t2
   csrr t2, CSR_MEPC
+
+  // read mip (no use)
+  csrr t3, CSR_MIP
  
   // load the current trap count from signature to t4. t3 used to hold the address of mtrap_count
   la t3, mtrap_count
@@ -169,74 +185,74 @@ trap_handler_entry:
   SREG t4, 0(t3)
   
   li t3, 173
-  bne t3, a0, unintended_trap_handler
+  bne t3, a0, unintended_mtrap_handler
 
-intended_trap_handler:
+intended_mtrap_handler:
 
 #ifdef access_fault_test
   // instruction access fault
   li t3, 1
-  beq t3, t0, intended_instruction_access_fault_exception_handler
+  beq t3, t0, intended_instruction_access_fault_mexception_handler
 #endif
 
   // instruction address misaligned
   li t3, 0
-  beq t3, t0, instruction_misaligned_exception_handler
+  beq t3, t0, instruction_misaligned_mexception_handler
 
   // breakpoint
   li t3, 3
-  beq t3, t0, increment_pc
+  beq t3, t0, increment_m_pc
 
   // load access fault
   li t3, 5
-  beq t3, t0, increment_pc
+  beq t3, t0, increment_m_pc
   
   // store/AMO misaligned
   li  t3, 6
-  beq t3, t0, increment_pc
+  beq t3, t0, increment_m_pc
 
   // store access fault
   li t3, 7
-  beq t3, t0, increment_pc
+  beq t3, t0, increment_m_pc
 
   // e-call from M
   li t3, 11
-  beq t3, t0, increment_pc
+  beq t3, t0, increment_m_pc
 
 #ifdef s_u_mode_test
   // ecall from Supervisor Mode. rets to Machine mode
   li t3, 9
-  beq t3, t0, supervisor_to_machine_ecall_exception_handler // if t0 == 9, the trap is due to an ecall from S
+  beq t3, t0, supervisor_to_machine_ecall_mexception_handler // if t0 == 9, the trap is due to an ecall from S
   // ecall from user mode, rets to supervisor mode
   li t3, 8
-  beq t3, t0, user_to_supervisor_ecall_exception_handler // if t0 == 8, the trap is due to an ecall from U
+  beq t3, t0, user_to_supervisor_ecall_mexception_handler // if t0 == 8, the trap is due to an ecall from U
 #ifdef page_fault_test
   // instruction page fault
   li t3, 12
-  beq t3, t0, instruction_page_fault_exception_handler
+  beq t3, t0, instruction_page_fault_mexception_handler
   // load page fault
   li t3, 13
-  beq t3, t0, load_page_fault_exception_handler
+  beq t3, t0, load_page_fault_mexception_handler
   // store/AMO page fault
   li t3, 15
-  beq t3, t0, store_page_fault_exception_handler
+  beq t3, t0, store_page_fault_mexception_handler
 #endif
 #endif
 
 #ifdef interrupt_testing
   srli t3, t0, (XLEN-1)
-  bnez t3, interrupt_handler
+  bnez t3, m_interrupt_handler
 #endif
 
-  j unintended_trap_handler
+  j unintended_mtrap_handler
 
 #ifdef s_u_mode_test
-user_to_supervisor_ecall_exception_handler:
+user_to_supervisor_ecall_mexception_handler:
   la t5, test_exit
   la t6, exit_to_s_mode
   LREG t6, 0(t6)
-  beqz t6, machine_exit
-supervisor_exit:
+  beqz t6, machine_exit_m
+supervisor_exit_m:
   // update MPP to perform MRET into Supervisor
   /*for all virtual addresses*/
   /*mask value to convert the Physical address to Virtual address*/
@@ -271,14 +287,14 @@ u_to_s_ecall_exit_updates:
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
   j mepc_updation
-machine_exit:
+machine_exit_m:
   // update MPP to perform MRET into Machine
   addi t6, x0, 3
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
   j mepc_updation
 
-supervisor_to_machine_ecall_exception_handler:
+supervisor_to_machine_ecall_mexception_handler:
   la t5, supervisor_exit_label
   // update MPP in mstatus to perform an MRET
   addi t6, x0, 3
@@ -287,13 +303,14 @@ supervisor_to_machine_ecall_exception_handler:
   j mepc_updation
 
 #ifdef page_fault_test
-store_page_fault_exception_handler:
-load_page_fault_exception_handler:
+store_page_fault_mexception_handler:
+load_page_fault_mexception_handler:
   la t6, return_address
   LREG t5, (t6)
   // check if user or supervisor mode
   li t3, 173
-  beq a1, t3, u_ls_page_fault
+  beq a1, t3, u_ls_page_fault_m
+
 #ifdef misaligned_superpage_test
   // check if the fault is from a misaligned superpage
   // fix misaligned superpage entry
@@ -302,6 +319,7 @@ load_page_fault_exception_handler:
   addi t4, x0, 1
   beq t3, t4, misaligned_supervisor_superpage_ls_fault_pte_val_loading
 #endif
+
   // fix page table entry
   li t4, 0xef
   LREG t6, faulty_page_address
@@ -351,7 +369,7 @@ sv57_v_address_l_s_pagefault:
 l_s_pagefault_handler_exit:
   j mepc_updation
 
-u_ls_page_fault:
+u_ls_page_fault_m:
 #ifdef misaligned_superpage_test
   // check if the fault is from a misaligned superpage
   // fix misaligned superpage entry
@@ -381,12 +399,12 @@ u_ls_fault_handler:
   j mepc_updation
 
 // instruction page fault handler
-instruction_page_fault_exception_handler:
+instruction_page_fault_mexception_handler:
   la t6, return_address
   LREG t5, (t6)
   // check if U or supervisor mode
   li t3, 173
-  beq a1, t3, u_i_page_fault
+  beq a1, t3, u_i_page_fault_m
 #ifdef misaligned_superpage_test
   // check if the fault is from a misaligned superpage
   // fix misaligned superpage entry
@@ -442,7 +460,7 @@ sv57_v_address_i_pagefault:
 i_pagefault_handler_exit:
   j mepc_updation
 
-u_i_page_fault:
+u_i_page_fault_m:
 #ifdef misaligned_superpage_test
   // check if the fault is from a misaligned superpage
   // fix misaligned superpage entry
@@ -451,6 +469,7 @@ u_i_page_fault:
   addi t4, x0, 1
   beq t3, t4, misaligned_user_superpage_i_fault_pte_val_loading
 #endif
+
   // update the PTE
   li t4, 0xff
   LREG t6, faulty_page_address
@@ -475,7 +494,7 @@ u_i_fault_handler:
 #endif
 
 #ifdef access_fault_test
-intended_instruction_access_fault_exception_handler:
+intended_instruction_access_fault_mexception_handler:
   la t6, access_fault
   li t5, 0
   LREG t5, 0(t6)
@@ -483,24 +502,29 @@ intended_instruction_access_fault_exception_handler:
 #endif
 
 #ifdef interrupt_testing
-interrupt_handler:
+m_interrupt_handler:
+  csrr t4, CSR_MIP
   addi t4, t0, 0
   li t3, 0xf
   and t4, t3, t4
-  // supervisor software interrupt handling
+
+  // Supervisor software interrupt handler
   li t3, 1
   beq t3, t4, supervisor_software_interrupt_handler
-  // machine softeare interrupt handler
+
+  // machine software interrupt handler
   li t3, 3
   beq t3, t4, machine_software_interrupt_handler
-  // supervisor timer insterrupt
+
+  // Supervisor timer handler
   li t3, 5
   beq t3, t4, supervisor_timer_interrupt_handler
+
   // machine timer handler
   li t3, 7
   beq t3, t4, machine_timer_interrupt_handler
 
-  j unintended_trap_handler
+  j unintended_m_interrupt
 
 supervisor_software_interrupt_handler:
 //  li t2, 0x2000000
@@ -527,7 +551,7 @@ supervisor_timer_interrupt_handler:
   addi t5, t5, -1
   sw t5, 0(t3)
   csrci CSR_MIP, 5
-  j increment_pc
+  j increment_m_pc
 
 machine_timer_interrupt_handler:
   li t1, 0x2004000 // mtimecmp
@@ -536,6 +560,7 @@ machine_timer_interrupt_handler:
   slli x1, x1, 63
   SREG x1, 0(t1) // write 1 << 63 to mtimecmp
   SREG x0, 0(t1) // set mtime to 0 mtimecmp > mtime -> interrupt off
+
   la t1, interrupt_address
   LREG t2, 0(t1)
   //csrr t1, CSR_MIP
@@ -547,53 +572,58 @@ mepc_updation:
   csrw CSR_MEPC, t5
   
   // jump to restoring registers and exiting trap handler
-  j restore_and_exit_trap
+  j restore_and_exit_mtrap
 
-unintended_trap_handler:
+unintended_mtrap_handler:
   // mcause value of illegal initialized in t3
   li t3, 2 
-  beq t3, t0, illegal_instruction_exception_handler
+  beq t3, t0, illegal_instruction_mexception_handler
   li t3, 1
-  beq t3, t0, unintended_instruction_access_fault_exception_handler
+  beq t3, t0, unintended_instruction_access_fault_mexception_handler
   li t3, 4
-  beq t3, t0, load_misaligned_exception_handler
+  beq t3, t0, load_misaligned_mexception_handler
   li t3, 6
-  beq t3, t0, store_misaligned_exception_handler
+  beq t3, t0, store_misaligned_mexception_handler
   // instruction page fault
   li t3, 12
-  beq t3, t0, unintended_instruction_page_fault_exception_handler
+  beq t3, t0, unintended_instruction_page_fault_mexception_handler
   // load page fault
   li t3, 13
-  beq t3, t0, unintended_load_page_fault_exception_handler
+  beq t3, t0, unintended_load_page_fault_mexception_handler
   // store/AMO page fault
   li t3, 15
-  beq t3, t0, unintended_store_page_fault_exception_handler
+  beq t3, t0, unintended_store_page_fault_mexception_handler
   // for all other cause values restore and exit handler
-  j restore_and_exit_trap
+  j restore_and_exit_mtrap
 
-unintended_instruction_access_fault_exception_handler:
-unintended_instruction_page_fault_exception_handler:
-unintended_store_page_fault_exception_handler:
-unintended_load_page_fault_exception_handler:
+unintended_instruction_access_fault_mexception_handler:
+unintended_instruction_page_fault_mexception_handler:
+unintended_store_page_fault_mexception_handler:
+unintended_load_page_fault_mexception_handler:
   la t2, rvtest_code_end
   addi t6, x0, 3
   slli t6, t6, 11
   csrs CSR_MSTATUS, t6
   j adjust_mepc
 
-instruction_misaligned_exception_handler:
-store_misaligned_exception_handler:
-load_misaligned_exception_handler:
+instruction_misaligned_mexception_handler:
+store_misaligned_mexception_handler:
+load_misaligned_mexception_handler:
   // load the lowest byte of the instruction into t3. address of instruction in 
   lb t1, 0(t2)
   // we then follow the same stuff we do for illegal
-  j increment_pc
+  j increment_m_pc
 
-illegal_instruction_exception_handler:
-increment_pc:
+unintended_m_interrupt:
+// rare case. mostly shouldnt occur. yet as a failsafe
+csrw CSR_MIP, x0
+j restore_and_exit_mtrap
+
+illegal_instruction_mexception_handler:
+increment_m_pc:
   andi t1, t1, 0x3
   addi t4, x0, 2
-  beq t4, t1, two_byte
+  beq t4, t1, two_byte_m
   
   // checks if C is enabled in MISA
   // csrr t6, CSR_MISA
@@ -601,11 +631,11 @@ increment_pc:
   // srli t6, t6, (XLEN-1)
   // beq t6, x0, four_byte
 
-  four_byte:
+  four_byte_m:
     addi t2, t2, 0x4
     j adjust_mepc
  
-  two_byte:
+  two_byte_m:
     addi t2, t2, 0x2
     j adjust_mepc
   
@@ -614,8 +644,9 @@ adjust_mepc:
   csrw CSR_MEPC, t2
 
 // Restore Register values 
-restore_and_exit_trap:
-  la sp, trapreg_sv
+
+restore_and_exit_mtrap:
+  la sp, trapreg_sv_m
   LREG t0, 0*REGWIDTH(sp)
   LREG t1, 1*REGWIDTH(sp)
   LREG t2, 2*REGWIDTH(sp)
@@ -623,11 +654,355 @@ restore_and_exit_trap:
   LREG t4, 4*REGWIDTH(sp)
   LREG t5, 5*REGWIDTH(sp)
   LREG t6, 6*REGWIDTH(sp)
+
   csrrw sp, mscratch, sp
 
-trap_handler_exit:
+mtrap_handler_exit:
   .option pop
   mret
+#endif
+
+#ifdef rvtest_strap_routine
+  .option push
+  .option norvc
+  j end_code
+
+// the current handler works only for illegal instructions. Illegal trap caused by Jumping in the 
+// middle of a 32-bit instruction will not be handled. to return from illegal traps, we check the
+// lower 2 bits of the instruction and increment mepc accordingly. Basically, we are categorizing
+// illegals as 32-bit illegals or 16-bit illegals.
+strap_handler_entry:
+  // store the current registers into memory
+  // using space in memory instead of allocating a stack
+  csrrw sp, sscratch, sp // save sp to mscratch before destroying it
+  la sp, trapreg_sv_s
+
+  // we will only store 6 registers which will be used in the routine
+  SREG t0, 1*REGWIDTH(sp)
+  SREG t1, 2*REGWIDTH(sp)
+  SREG t2, 3*REGWIDTH(sp)
+  SREG t3, 4*REGWIDTH(sp)
+  SREG t4, 5*REGWIDTH(sp)
+  SREG t5, 6*REGWIDTH(sp)
+  SREG t6, 7*REGWIDTH(sp)
+  
+  // copy the exception cause into t0
+  csrr t0, CSR_SCAUSE
+
+  // copy the mtval into t1
+  csrr t1, CSR_STVAL
+
+  // copy the mepc into t2
+  csrr t2, CSR_SEPC
+ 
+  // load the current trap count from signature to t4. t3 used to hold the address of mtrap_count
+  la t3, mtrap_count
+  LREG t4, 0(t3)
+
+  // adjust sp to point to the mtrap_signature where the above csrs need to be stored
+  la sp, mtrap_sigptr
+  add sp, sp, t4
+
+  // store mcause, mtval and mepc to signature region
+  SREG t0, 0(sp)
+  SREG t1, 1*REGWIDTH(sp)
+  SREG t2, 2*REGWIDTH(sp)
+
+  //store the updated number of bytes in mtrap_count region
+  addi t4, t4, 3*REGWIDTH
+  SREG t4, 0(t3)
+  
+  li t3, 173
+  bne t3, a0, unintended_strap_handler
+
+intended_strap_handler:
+
+#ifdef access_fault_test
+  // instruction access fault
+  li t3, 1
+  beq t3, t0, intended_instruction_access_fault_sexception_handler
+#endif
+
+  // instruction address misaligned
+  li t3, 0
+  beq t3, t0, instruction_misaligned_sexception_handler
+
+  // breakpoint
+  li t3, 3
+  beq t3, t0, increment_s_pc
+
+  // load access fault
+  li t3, 5
+  beq t3, t0, increment_s_pc
+  
+  // store/AMO misaligned
+  li  t3, 6
+  beq t3, t0, increment_s_pc
+
+  // store access fault
+  li t3, 7
+  beq t3, t0, increment_s_pc
+
+  // e-call from M
+  li t3, 11
+  beq t3, t0, increment_s_pc
+
+#ifdef s_u_mode_test
+  // ecall from Supervisor Mode. rets to Machine mode
+  li t3, 9
+  beq t3, t0, supervisor_to_machine_ecall_sexception_handler // if t0 == 9, the trap is due to an ecall from S
+  // ecall from user mode, rets to supervisor mode
+  li t3, 8
+  beq t3, t0, user_to_supervisor_ecall_sexception_handler // if t0 == 8, the trap is due to an ecall from U
+#ifdef page_fault_test
+  // instruction page fault
+  li t3, 12
+  beq t3, t0, instruction_page_fault_sexception_handler
+  // load page fault
+  li t3, 13
+  beq t3, t0, load_page_fault_sexception_handler
+  // store/AMO page fault
+  li t3, 15
+  beq t3, t0, store_page_fault_sexception_handler
+#endif
+#endif
+
+#ifdef interrupt_testing
+  srli t3, t0, (XLEN-1)
+  bnez t3, s_interrupt_handler
+#endif
+
+  j unintended_strap_handler
+
+#ifdef s_u_mode_test
+user_to_supervisor_ecall_sexception_handler:
+  la t5, test_exit
+  la t6, exit_to_s_mode
+  ld t6, 0(t6)
+supervisor_exit_s:
+  // update MPP to perform MRET into Supervisor
+  li t6, 0x0FFFFFFF/*for supervisor*/
+  /*update MEPC*/
+  /*supervisor virtula address is F000000..*/
+  and t5, t5, t6/*for supervisor*/
+  li t6, 0xF00000000
+  or t5, t5, t6
+  addi t6, x0, 1
+  slli t6, t6, 11
+  csrs CSR_SSTATUS, t6
+  j sepc_updation
+
+supervisor_to_machine_ecall_sexception_handler:
+  la t5, supervisor_exit_label
+  // update MPP in mstatus to perform an MRET
+  addi t6, x0, 3
+  slli t6, t6, 11
+  csrs CSR_SSTATUS, t6
+  j sepc_updation
+
+#ifdef page_fault_test
+store_page_fault_sexception_handler:
+load_page_fault_sexception_handler:
+  la t5, return_address
+  ld t6, (t5)
+  // check if user or supervisor mode
+  li t3, 173
+  beq a1, t3, u_ls_page_fault_s
+  // fix page table entry
+  li t4, 0xef
+  ld t5, faulty_page_address
+  ld t3, 0(t5)
+  or t4, t3, t4
+  sd t4, 0(t5)
+  // update address for supervisor mode
+  li t5, 0x0FFFFFFF
+  and t5, t5, t6
+  li t6, 0xF00000000
+  or t5, t5, t6
+  j sepc_updation
+u_ls_page_fault_s:
+  // fix PTE
+  li t4, 0xff
+  ld t5, faulty_page_address
+  ld t3, 0(t5)
+  or t4, t3, t4
+  sd t4, 0(t5)
+  // update address for the user mode
+  li t5, 0x0fffffff
+  and t5, t5, t6
+  j sepc_updation
+
+instruction_page_fault_sexception_handler:
+  la t5, return_address
+  ld t6, (t5)
+  // check if U or supervisor mode
+  li t3, 173
+  beq a1, t3, u_i_page_fault_s
+  // update PTE
+  li t4, 0xef
+  ld t5, faulty_page_address
+  ld t3, 0(t5)
+  or t4, t3, t4
+  sd t4, 0(t5)
+  // update CSR MEPC
+  li t5, 0x0FFFFFFF
+  // for supervisor address
+  and t5, t5, t6
+  li t6, 0xF00000000
+  or t5, t5, t6
+  j sepc_updation
+u_i_page_fault_s:
+  // update the PTE
+  li t4, 0xff
+  ld t5, faulty_page_address
+  ld t3, 0(t5)
+  or t4, t3, t4
+  sd t4, 0(t5)
+  // update address for the User mode
+  li t5, 0x0fffffff
+  and t5, t5, t6
+  j sepc_updation
+
+#endif
+#endif
+
+#ifdef access_fault_test
+intended_instruction_access_fault_sexception_handler:
+  la t6, access_fault
+  li t5, 0
+  ld t5, 0(t6)
+  j sepc_updation
+#endif
+
+#ifdef interrupt_testing
+s_interrupt_handler:
+  addi t4, t0, 0
+  li t3, 0xf
+  and t4, t3, t4
+
+  // supervisor software interrupt handling
+  li t3, 1
+  beq t3, t4, supervisor_software_interrupt_handler
+
+  // supervisor timer interrupt
+  li t3, 5
+  beq t3, t4, supervisor_timer_interrupt_handler
+
+  j unintended_strap_handler
+
+supervisor_software_interrupt_handler:
+  csrci CSR_SIP, 0x2
+  la t1, interrupt_address
+  ld t1, 0(t1)
+  // assuming paging to be sv39
+  li t6, 0x0FFFFFFF/*for supervisor in sv39*/
+  /*supervisor virtual address is F00000000..*/
+  and t5, t1, t6;/*for supervisor*/\
+  li t6, 0xF00000000;\
+  or t2, t5, t6;
+
+  j adjust_sepc
+
+supervisor_timer_interrupt_handler:
+  li t3, 0x20
+  csrc CSR_SIP, t3
+  j increment_s_pc
+
+#endif
+
+sepc_updation:
+  csrw CSR_SEPC, t5
+  
+  // jump to restoring registers and exiting trap handler
+  j restore_and_exit_strap
+
+unintended_strap_handler:
+  // mcause value of illegal initialized in t3
+  li t3, 2 
+  beq t3, t0, illegal_instruction_sexception_handler
+  li t3, 1
+  beq t3, t0, unintended_instruction_access_fault_sexception_handler
+  li t3, 4
+  beq t3, t0, load_misaligned_sexception_handler
+  li t3, 6
+  beq t3, t0, store_misaligned_sexception_handler
+  // instruction page fault
+  li t3, 12
+  beq t3, t0, unintended_instruction_page_fault_sexception_handler
+  // load page fault
+  li t3, 13
+  beq t3, t0, unintended_load_page_fault_sexception_handler
+  // store/AMO page fault
+  li t3, 15
+  beq t3, t0, unintended_store_page_fault_sexception_handler
+  // for all other cause values restore and exit handler
+
+  j restore_and_exit_strap
+
+unintended_instruction_access_fault_sexception_handler:
+unintended_instruction_page_fault_sexception_handler:
+unintended_store_page_fault_sexception_handler:
+unintended_load_page_fault_sexception_handler:
+  la t2, rvtest_code_end
+  addi t6, x0, 1
+  slli t6, t6, 11
+  csrs CSR_SSTATUS, t6
+  j adjust_sepc
+
+instruction_misaligned_sexception_handler:
+store_misaligned_sexception_handler:
+load_misaligned_sexception_handler:
+  // load the lowest byte of the instruction into t3. address of instruction in 
+  lb t1, 0(t2)
+  // we then follow the same stuff we do for illegal
+  j increment_s_pc
+
+unintended_s_interrupt:
+// rare case. mostly shouldnt occur. yet as a failsafe
+csrw CSR_SIP, x0
+j restore_and_exit_strap
+
+illegal_instruction_sexception_handler:
+increment_s_pc:
+  andi t1, t1, 0x3
+  addi t4, x0, 2
+  beq t4, t1, two_byte_s
+  
+  // checks if C is enabled in MISA
+  // csrr t6, CSR_MISA
+  // slli t6, t6, (XLEN-4)
+  // srli t6, t6, (XLEN-1)
+  // beq t6, x0, four_byte
+
+  four_byte_s:
+    addi t2, t2, 0x4
+    j adjust_sepc
+ 
+  two_byte_s:
+    addi t2, t2, 0x2
+    j adjust_sepc
+  
+// update the MEPC value to point to the next instruction.
+adjust_sepc:
+  csrw CSR_SEPC, t2
+
+// Restore Register values 
+restore_and_exit_strap:
+  la sp, trapreg_sv_s
+  LREG t0, 1*REGWIDTH(sp)
+  LREG t1, 2*REGWIDTH(sp)
+  LREG t2, 3*REGWIDTH(sp)
+  LREG t3, 4*REGWIDTH(sp)
+  LREG t4, 5*REGWIDTH(sp)
+  LREG t5, 6*REGWIDTH(sp)
+  LREG t6, 7*REGWIDTH(sp)
+  csrrw sp, sscratch, sp
+
+strap_handler_exit:
+  .option pop
+  //sret
+  li a0, 173
+  ecall
 #endif
 
 #ifdef rvtest_gpr_save
@@ -676,8 +1051,13 @@ end_code:
 .align 4
 .global rvtest_data_begin
 rvtest_data_begin:
+
 #ifdef rvtest_mtrap_routine
-trapreg_sv:
+trapreg_sv_m:
+  .fill 7, REGWIDTH, 0xdeadbeef
+#endif
+#ifdef rvtest_strap_routine
+trapreg_sv_s:
   .fill 7, REGWIDTH, 0xdeadbeef
 #endif
 .endm

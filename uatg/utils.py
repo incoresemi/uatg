@@ -1,10 +1,8 @@
 # See LICENSE.incore for license details
-
+import re
 from glob import glob
-# imports
-# import os
 from os import remove, listdir, getcwd, chdir
-from os.path import join, abspath, exists, basename
+from os.path import join, abspath, exists, basename, dirname
 from random import randint
 from re import findall, M
 from shlex import split
@@ -684,9 +682,9 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
     if bit_width == 0:
         pass
     else:
-        max_signed = 2**(bit_width - 1) - 1
-        min_signed = -2**(bit_width - 1)
-        max_unsigned = 2**bit_width - 1
+        max_signed = 2 ** (bit_width - 1) - 1
+        min_signed = -2 ** (bit_width - 1)
+        max_unsigned = 2 ** bit_width - 1
         min_unsigned = 0
         # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
         #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
@@ -1160,6 +1158,7 @@ def setup_pages(pte_dict,
                                        (user_supervisor_superpage == False)and \
                                        (user_superpage == False) \
                                     else ''
+
         pte_updation += f"\t# setting up l{i} table to point l{i + 1} table\n" \
                         f"\taddi t1, x0, 1 # add value 1 to reg\n" \
                         f"\tslli t2, t1, {power} # left shift to create a " \
@@ -1385,3 +1384,15 @@ def select_paging_modes(paging_modes):
         mode.append('sv39')
 
     return mode
+
+
+def macros_parser(arch_test_path=join(dirname(__file__), 'env/arch_test.h')):
+    with open(arch_test_path, 'r') as f:
+        lines = f.readlines()
+    macros = []
+    for line in lines:
+        if '#ifdef' in line:
+            pref = line[0:line.find('#ifdef')]
+            if '//' not in pref and '/*' not in pref:
+                macros.append(line[line.find('#ifdef') + 6:].strip('\n '))
+    return list(set(macros))

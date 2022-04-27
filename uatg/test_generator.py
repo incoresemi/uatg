@@ -17,7 +17,7 @@ from uatg.log import logger
 from uatg.utils import create_plugins, generate_test_list, create_linker, \
     create_model_test_h, join_yaml_reports, generate_sv_components, \
     list_of_modules, rvtest_data, dump_makefile, setup_pages, \
-    select_paging_modes
+    select_paging_modes, macros_parser
 
 # create a manager for shared resources
 process_manager = Manager()
@@ -30,8 +30,8 @@ def asm_generation_process(args):
     """
     # unpacking the args tuple
     plugin, core_yaml, isa_yaml, isa, test_format_string, work_tests_dir, \
-        make_file, module, linker_dir, uarch_dir, work_dir, \
-        compile_macros_dict, module_test_count_dict, page_modes = args
+    make_file, module, linker_dir, uarch_dir, work_dir, \
+    compile_macros_dict, module_test_count_dict, page_modes = args
 
     # actual generation process
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
@@ -83,10 +83,15 @@ def asm_generation_process(args):
                 compile_macros_dict[test_name] = ['XLEN=32']
 
             try:
-                compile_macros_dict[test_name] = compile_macros_dict[
-                                                     test_name] + \
-                                                 ret_list_of_dicts[
-                                                     'compile_macros']
+                available_macros = macros_parser(join(dirname(__file__),
+                                                      'env/arch_test.h'))
+                for i in ret_list_of_dicts['compile_macros']:
+                    if i not in available_macros:
+                        logger.error(f'{i}: Macro undefined in arch_test.h ')
+                        raise Exception('Undefined Macro')
+                        exit()
+                compile_macros_dict[test_name] += ret_list_of_dicts[
+                    'compile_macros']
             except KeyError:
                 logger.debug(f'No custom Compile macros specified for '
                              f'{test_name}')
@@ -108,13 +113,13 @@ def asm_generation_process(args):
                 logger.debug("test does not generate a PT fault")
                 pt_fault = False
                 pass
-            
+
             try:
                 pt_mem_fault = privileged_dict['mem_fault']
             except KeyError:
                 pt_mem_fault = False
                 pass
-            
+
             try:
                 pte_bit_dict = privileged_dict['pte_dict']
             except KeyError:
@@ -169,11 +174,11 @@ def asm_generation_process(args):
             if privileged_dict['enable']:
                 if (privileged_dict['paging_mode'] == 'sv39') and \
                         (privileged_dict['mode'] == 'machine'):
-                            current_paging_mode = required_paging_modes[0]
+                    current_paging_mode = required_paging_modes[0]
 
                 if current_paging_mode in required_paging_modes:
-                    logger.debug(f"{current_paging_mode} is in user listed "\
-                                  "paging modes")
+                    logger.debug(f"{current_paging_mode} is in user listed " \
+                                 "paging modes")
                     priv_asm_code, priv_asm_data = setup_pages(
                         pte_dict=pte_bit_dict,
                         page_size=privileged_dict['page_size'],
@@ -192,8 +197,9 @@ def asm_generation_process(args):
                     )
 
                 else:
-                    logger.warning(f'{current_paging_mode} is not in user listed'\
-                                  ' paging modes')
+                    logger.warning(
+                        f'{current_paging_mode} is not in user listed' \
+                        ' paging modes')
                     logger.warning(f'skipping test generation for {test_name}')
                     continue
 
@@ -206,19 +212,19 @@ def asm_generation_process(args):
             # asm += rvcode_begin + asm_code + rvcode_end
 
             asm += test_format_string[3] + priv_asm_code[0] + \
-                priv_asm_code[1] + asm_code + \
-                priv_asm_code[2] + test_format_string[4]
+                   priv_asm_code[1] + asm_code + \
+                   priv_asm_code[2] + test_format_string[4]
 
             # Appending RVTEST_DATA macros and data values
             # asm += rvtest_data_begin + asm_data + rvtest_data_end
             asm += test_format_string[5] + asm_data + priv_asm_data + \
-                test_format_string[6]
+                   test_format_string[6]
 
             # Appending RVMODEL macros
             # asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
 
             asm += test_format_string[7] + asm_sig + \
-                test_format_string[8]
+                   test_format_string[8]
 
             mkdir(join(work_tests_dir, test_name))
             with open(join(work_tests_dir, test_name, test_name + '.S'),
@@ -419,7 +425,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
-                 work_dir, compile_macros_dict, module_test_count_dict, 
+                 work_dir, compile_macros_dict, module_test_count_dict,
                  paging_modes))
 
         # multi processing process pool
@@ -492,12 +498,11 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         logger.info(f'Creating Model_test.h file at {work_dir}')
     if test_list:
         logger.info('Test List was generated by UATG. You can find it in '
-                    'the work dir ')
-    else:
-        logger.info('Test list will not be generated by uatg')
-    if test_list.lower() == 'true':
+                    f'the work dir{work_dir}')
         with open(join(work_dir, 'test_list.yaml'), 'w') as outfile:
             dump(test_list_dict, outfile)
+    else:
+        logger.info('Test list will not be generated by uatg')
 
     logger.info('\n****** Number of tests generated (per module) '
                 'by UATG ******')
