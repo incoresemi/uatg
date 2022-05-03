@@ -163,7 +163,7 @@ def asm_generation_process(args):
                 pass
 
             try:
-                pt_misaligned_superpage = privileged_dict['misaligned_page']
+                pt_misaligned_superpage = privileged_dict['misaligned_superpage']
             except KeyError:
                 pt_misaligned_superpage = False
                 pass
