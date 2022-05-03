@@ -1032,11 +1032,12 @@ def setup_pages(pte_dict,
     if user_supervisor_superpage == True:
         if misaligned_superpage == True:
             logger.debug("Currently, when user and supervisor superpages are "\
-                         "present,\nOnly the userpage is set to be misaligned."\
+                         "present,\nOnly the S page is set to be misaligned."\
                          "\nSupport for both misaligned user and supervisor "\
                          "pages is not present, yet!")
-            leaf_pte_u = '\tli t5, 0x20eeeeff\n'
-            leaf_pte_s = '\tli t4, 0x200000ef\n'
+            logger.debug('creating misaligned page')
+            leaf_pte_u = '\tli t5, 0x200000ff\n'
+            leaf_pte_s = '\tli t4, 0x20eeeeef\n'
         else:
             logger.debug("creating both user and supervisor superpages")
             leaf_pte_u = '\tli t5, 0x200000ff\n'
@@ -1044,12 +1045,14 @@ def setup_pages(pte_dict,
     elif user_superpage == True:
         logger.debug("creating user superpages only")
         if misaligned_superpage == True:
+            logger.debug('creating misaligned page')
             leaf_pte_u = '\tli t5, 0x20eeeeff\n'
         else:
             leaf_pte_u = '\tli t5, 0x200000ff\n'
     else:
         logger.debug("creating supervisor superpages only")
         if misaligned_superpage == True:
+            logger.debug('creating misaligned page')
             leaf_pte_s = '\tli t4, 0x20eeeeef\n'
         else:
             leaf_pte_s = '\tli t4, 0x200000ef\n'
@@ -1154,10 +1157,10 @@ def setup_pages(pte_dict,
         superpage_entry_s = leaf_pte_s if i == (spage_level - 1) else ''
         s_superpage_address_load = data_for_misaligned_test \
                                     if (i == (spage_level-1)) and \
-                                       (misaligned_superpage == True) and \
-                                       (user_supervisor_superpage == False)and \
+                                       (misaligned_superpage == True) \
+                                       and \
                                        (user_superpage == False) \
-                                    else ''
+                                       else ''
 
         pte_updation += f"\t# setting up l{i} table to point l{i + 1} table\n" \
                         f"\taddi t1, x0, 1 # add value 1 to reg\n" \
@@ -1199,9 +1202,9 @@ def setup_pages(pte_dict,
             u_superpage_address_load = data_for_misaligned_test \
                                         if (i == (spage_level-1)) and \
                                            (misaligned_superpage == True) and \
-                                           (user_supervisor_superpage == True) and \
-                                           (user_superpage == True) \
+                                           (user_superpage == True)\
                                         else ''
+
             pte_updation += f"\n\t# update l{levels-3+i} page entry with address " \
                             f"of l{levels-2+i} page\n"
             if i != 0:
@@ -1211,8 +1214,9 @@ def setup_pages(pte_dict,
             
             pte_updation += f"{common_setup}\n"
             pte_updation += f'{superpage_entry_u}'\
-                            f'{u_superpage_address_load}\n'\
-                            f'{common_setup_store}'
+                            f'{common_setup_store}'\
+                            f'{u_superpage_address_load}\n'
+            #pte_updation += f'{common_setup_store}'
 
             if i < levels-2:
                 pte_updation += f"\t# address updation\n" \
@@ -1225,11 +1229,26 @@ def setup_pages(pte_dict,
         a0_reg = 173
 
     if (mode == 'user') and (terapage == False) and (petapage == False):
-        a1_reg = 173
+        # user_supervisor superpgae is not a part of the test because in this 
+        # mode initially there is fault on the supervisor page and then 
+        # on the user page.
+        if (misaligned_superpage == True) and (user_superpage == False):
+            a1_reg = 0
+        else:
+            a1_reg = 173
+        
         pt_label = f'l{levels - 1}_u_pt'
     else:
         a1_reg = 0
         pt_label = f'l{levels - 1}_pt'
+
+    if mode == 'user' and user_superpage == False and misaligned_superpage == True:
+        handle_in_supervisor = f'\n\tla t3, handle_pf_in_supervisor\n'\
+                               f'\taddi t4, x0, 1\n'\
+                               f'\tSREG t4, (t3)\n\n'
+    else:
+        handle_in_supervisor = ''
+        
 
     fault_valid_bit = 0x01 if pte_dict['valid'] else 0x00
     fault_read_bit = 0x02 if pte_dict['read'] else 0x00
@@ -1255,7 +1274,8 @@ def setup_pages(pte_dict,
                          f"\tli a1, {a1_reg}\n" \
                          f"\tla t5, faulting_instruction\n" \
                          f"\tla t6, return_address\n" \
-                         f"\tSREG t5, 0(t6)\n\n"
+                         f"\tSREG t5, 0(t6)\n\n"\
+                         f"{handle_in_supervisor}\n"
         
         if (misaligned_superpage == False):
             fault_creation += f"offset_adjustment:\n" \
@@ -1281,6 +1301,11 @@ def setup_pages(pte_dict,
 
     pte_updation += fault_creation
 
+    if mode == 'user' and user_superpage == False:
+        u_mode_a1_reg = '\n\tli a1, 173\n'
+    else:
+        u_mode_a1_reg = ''
+
     user_entry = "RVTEST_USER_ENTRY()\n" if mode == 'user' else ""
     user_exit = "RVTEST_USER_EXIT()\n" if mode == 'user' else ""
 
@@ -1289,6 +1314,7 @@ def setup_pages(pte_dict,
     out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "
                            f"{shift_amount})\n"
                            f"101:\t# supervisor entry point\n"
+                           f"{u_mode_a1_reg}"
                            f"\n{user_entry}"
                            f"102:\t# user entry point\n.option rvc\n\n")
     out_code_string.append(f"\n\n.option norvc\n{user_exit}"
