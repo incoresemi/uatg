@@ -308,9 +308,15 @@ load_page_fault_mexception_handler:
   la t6, return_address
   LREG t5, (t6)
   // check if user or supervisor mode
+#ifdef misaligned_superpage_test
+  la t3, handle_pf_in_supervisor
+  LREG t4, (t3)
+  addi t3, x0, 1
+  beq t4, t3, s_ls_fault_handler_entry
+#endif
   li t3, 173
   beq a1, t3, u_ls_page_fault_m
-
+s_ls_fault_handler_entry:
 #ifdef misaligned_superpage_test
   // check if the fault is from a misaligned superpage
   // fix misaligned superpage entry
@@ -332,8 +338,9 @@ load_page_fault_mexception_handler:
 misaligned_supervisor_superpage_ls_fault_pte_val_loading:
   li t4, 0x200000ef
   LREG t6, faulty_page_address
-  LREG t3, 0(t6)
-  and t4, t3, t4
+  // LREG t6, faulty_page_address
+  // LREG t3, 0(t6)
+  // and t4, t3, t4
 #endif
 s_ls_fault_handler:
   SREG t4, 0(t6)
@@ -388,8 +395,9 @@ u_ls_page_fault_m:
 misaligned_user_superpage_ls_fault_pte_val_loading:
   li t4, 0x200000ff
   LREG t6, faulty_page_address
-  LREG t3, 0(t6)
-  and t4, t3, t4
+  // LREG t6, faulty_page_address
+  // LREG t3, 0(t6)
+  // and t4, t3, t4
 #endif
 u_ls_fault_handler:
   SREG t4, 0(t6)
@@ -403,8 +411,15 @@ instruction_page_fault_mexception_handler:
   la t6, return_address
   LREG t5, (t6)
   // check if U or supervisor mode
+#ifdef misaligned_superpage_test
+  la t3, handle_pf_in_supervisor
+  LREG t4, (t3)
+  addi t3, x0, 1
+  beq t4, t3, s_i_fault_handler_entry
+#endif
   li t3, 173
   beq a1, t3, u_i_page_fault_m
+s_i_fault_handler_entry:
 #ifdef misaligned_superpage_test
   // check if the fault is from a misaligned superpage
   // fix misaligned superpage entry
@@ -423,8 +438,9 @@ instruction_page_fault_mexception_handler:
 misaligned_supervisor_superpage_i_fault_pte_val_loading:
   li t4, 0x200000ef
   LREG t6, faulty_page_address
-  LREG t3, 0(t6)
-  and t4, t3, t4
+  // LREG t6, faulty_page_address
+  // LREG t3, 0(t6)
+  // and t4, t3, t4
 #endif
 s_i_fault_handler:
   SREG t4, 0(t6)
@@ -480,8 +496,9 @@ u_i_page_fault_m:
 misaligned_user_superpage_i_fault_pte_val_loading:
   li t4, 0x200000ff
   LREG t6, faulty_page_address
-  LREG t3, 0(t6)
-  and t4, t3, t4
+  // LREG t6, faulty_page_address
+  // LREG t3, 0(t6)
+  // and t4, t3, t4
 #endif
 u_i_fault_handler:
   SREG t4, 0(t6)
