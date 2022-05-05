@@ -1412,13 +1412,19 @@ def select_paging_modes(paging_modes):
     return mode
 
 
-def macros_parser(arch_test_path=join(dirname(__file__), 'env/arch_test.h')):
-    with open(arch_test_path, 'r') as f:
-        lines = f.readlines()
+def macros_parser(_path=[join(dirname(__file__), 'env/arch_test_unpriv.h'),
+                         join(dirname(__file__), 'env/arch_test_priv.h')]):
+    
     macros = []
-    for line in lines:
-        if '#ifdef' in line:
-            pref = line[0:line.find('#ifdef')]
-            if '//' not in pref and '/*' not in pref:
-                macros.append(line[line.find('#ifdef') + 6:].strip('\n '))
+
+    for arch_test_path in _path:
+
+        with open(arch_test_path, 'r') as f:
+            lines = f.readlines()
+        for line in lines:
+            if '#ifdef' in line:
+                pref = line[0:line.find('#ifdef')]
+                if '//' not in pref and '/*' not in pref:
+                    macros.append(line[line.find('#ifdef') + 6:].strip('\n '))
+    
     return list(set(macros))
