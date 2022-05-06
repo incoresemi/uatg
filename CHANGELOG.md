@@ -2,6 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2022-05-06
+- UATG can generate tests with all possible page table configurations.
+- UATG can generate aligned and misaligned superpages
+- UATG now verifies if the ``compile macros`` listed by the plugin are legal before generating the test list
+- split the arch_test header into privileged and unprivileged header files
+- interrupt handling capability in trap handler
+- new supervisor trap handler
+- page fault handling in trap handler(s)
+
 ## [1.4.2] - 2022-03-02
 - updates to trap handler
 - fixes to instruction constants
