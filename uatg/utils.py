@@ -1,16 +1,16 @@
 # See LICENSE.incore for license details
-
-# imports
-# import os
-from os import remove, listdir, getcwd, chdir
-from os.path import join, abspath, exists, basename
-from re import findall, M
+import re
 from glob import glob
+from os import remove, listdir, getcwd, chdir
+from os.path import join, abspath, exists, basename, dirname
 from random import randint
-from uatg.log import logger
-from ruamel.yaml import YAML
-from subprocess import run, PIPE, CalledProcessError
+from re import findall, M
 from shlex import split
+from subprocess import run, PIPE, CalledProcessError
+
+from ruamel.yaml import YAML
+
+from uatg.log import logger
 
 
 class sv_components:
@@ -483,11 +483,11 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
         if alias_path is None else alias_path
 
     cfg = '# See LICENSE.incore for license details\n\n' \
-          '[uatg]\n\n'\
-          '# number of processes to spawn. Default = 1\n'\
-          f'jobs = {jobs}\n'\
+          '[uatg]\n\n' \
+          '# number of processes to spawn. Default = 1\n' \
+          f'jobs = {jobs}\n' \
           '\n# [info, error, debug] set verbosity level to view ' \
-          'different levels of messages. '\
+          'different levels of messages. ' \
           '\nverbose = info\n\n# [True, False] ' \
           'the clean flag removes unnecessary files from the previous runs ' \
           'and cleans directories\nclean = False\n\n# Enter the modules whose' \
@@ -504,10 +504,12 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           f'linker_dir = {linker_dir}' \
           '\n\n# Absolute Path of the yaml file containing the signal ' \
           'aliases of the DUT ' \
-          f'\nalias_file = {alias_path}\n\n# path to the index file '\
-          f'containing  the list of tests to be generated. By default, \n'\
-          f'# or when empty, UATG will use the inidex.yaml file within '\
-          f' the modules directory\nindex_file =\n\n'\
+          f'\nalias_file = {alias_path}\n\n# path to the index file ' \
+          f'containing  the list of tests to be generated. By default, \n' \
+          f'# or when empty, UATG will use the index.yaml file within ' \
+          f' the modules directory\nindex_file =\n\n' \
+          f'# paging modes in for which the tests need to be generated\n' \
+          'paging_modes = \n\n' \
           f'# [True, False] If the gen_test_' \
           'list flag is True, the test_list.yaml needed for running tests in ' \
           'river_core are generated automatically.\n# Unless you want to ' \
@@ -517,21 +519,21 @@ def create_config_file(config_path, jobs, modules, module_dir, work_dir,
           '[True, False] If the val_test flag is True, Log from DUT are ' \
           'parsed and the modules are validated\nval_test = False\n# [True' \
           ', False] If the gen_cvg flag is True, System Verilog cover-groups ' \
-          f'are generated\ngen_cvg = False\n\ntest_compile = {test_compile}'\
+          f'are generated\ngen_cvg = False\n\ntest_compile = {test_compile}' \
           '\n\n# Path to the yaml files containing DUT Configuration.\n' \
-          '# If you are using the CHROMITE core, uncomment the following line'\
-          ' by removing the \'#\'.\n# By doing this, UATG will use the '\
-          'checked YAMLs of Chromite\n'\
-          '#[uatg.configuration_files]\n'\
-          '#isa = /home/user/myquickstart/chromite/build/'\
-          'rv64i_isa_checked.yaml \n'\
+          '# If you are using the CHROMITE core, uncomment the following line' \
+          ' by removing the \'#\'.\n# By doing this, UATG will use the ' \
+          'checked YAMLs of Chromite\n' \
+          '#[uatg.configuration_files]\n' \
+          '#isa = /home/user/myquickstart/chromite/build/' \
+          'rv64i_isa_checked.yaml \n' \
           '#core = /home/user/myquickstart/chromite/build/core64_checked.yaml' \
           '\n#custom = /home/user/myquickstart/chromite/build/rv64i_custom_' \
           'checked.yaml\n#csr_grouping = /home/user/myquickstart/chromite/' \
-          'sample_config/c64/csr_grouping64.yaml\n#debug = /home/user/myquick' \
-          'start/chromite/build/rv64i_debug_checked.yaml\n\n# comment the ' \
-          'following line by adding a \'#\' in front if you are using the ' \
-          f'checked YAMLs from CHROMITE\n\n{cfg_files}' \
+          'sample_config/rv64imacsu/csr_grouping64.yaml\n#debug = /home/user/' \
+          'myquickstart/chromite/build/rv64i_debug_checked.yaml\n\n# comment ' \
+          'the following line by adding a \'#\' in front if you are using ' \
+          f'the checked YAMLs from CHROMITE\n\n{cfg_files}'
 
     with open(join(config_path, 'config.ini'), 'w') as f:
         f.write(cfg)
@@ -680,9 +682,9 @@ def rvtest_data(bit_width=0, num_vals=20, random=True, signed=False, align=4) \
     if bit_width == 0:
         pass
     else:
-        max_signed = 2**(bit_width - 1) - 1
-        min_signed = -2**(bit_width - 1)
-        max_unsigned = 2**bit_width - 1
+        max_signed = 2 ** (bit_width - 1) - 1
+        min_signed = -2 ** (bit_width - 1)
+        max_unsigned = 2 ** bit_width - 1
         min_unsigned = 0
         # data += f'MAX_U:\t.{size[bit_width]} {hex(max_unsigned)}\nMIN_U:\t' \
         #         f'.{size[bit_width]} {hex(min_unsigned)}\n'
@@ -870,7 +872,7 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
     flags = '-static -std=gnu99 -O2 -fno-common -fno-builtin-printf ' \
             '-fvisibility=hidden -static -nostdlib -nostartfiles -lm -lgcc'
     cmd = f'{compiler} -mcmodel={mcmodel} {flags} -march={march} -mabi={mabi}' \
-          f' -lm -lgcc -T {join(link_path,"link.ld")} {test_path}' \
+          f' -lm -lgcc -T {join(link_path, "link.ld")} {test_path}' \
           f' -I {env_path}' \
           f' -I {work_dir} {macros}' \
           f' -o /dev/null'
@@ -878,18 +880,20 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
     return cmd
 
 
-def setup_pages(page_size=4096,
+def setup_pages(pte_dict,
+                page_size=4096,
                 paging_mode='sv39',
                 valid_ll_pages=64,
                 mode='machine',
-                valid=True,
-                read=True,
-                write=True,
-                execute=True,
-                user=True,
-                globl=True,
-                access=True,
-                dirty=True):
+                megapage=False,
+                gigapage=False,
+                terapage=False,
+                petapage=False,
+                user_superpage=False,
+                user_supervisor_superpage=False,
+                fault=False,
+                mem_fault=False,
+                misaligned_superpage=False):
     """
         creates pagetables to run tests in User and Supervisor modes
         Currently works with the sv39 virtual memory addressing.
@@ -910,56 +914,183 @@ def setup_pages(page_size=4096,
         # machine mode tests don't have anything to do with pages.
         # so, we return a list of empty strings.
         return ['', '', ''], ''
+    
+    if pte_dict is None:
+        pte_dict = {
+            'valid': True,
+            'read': True,
+            'write': True,
+            'execute': True,
+            'user': True,
+            'globl': True,
+            'access': True,
+            'dirty': True
+        }
 
-    entries = page_size // 8
+    entries_per_pt = page_size // 8
     # assuming that the size will always be a power of 2
     power = len(bin(page_size)[2:]) - 1
     align = power
-    shift_amount = 60
+    #shift_amount = 60
     levels, mode_val = None, None
-    if paging_mode == 'sv32':
-        mode_val = 1  # paging mode for the SATP register
-        levels = 2
-        entries = entries * 2
-        shift_amount = 31
-    elif paging_mode == 'sv39':
-        mode_val = 8  # paging mode to be used in the SATP register
-        levels = 3
-    elif paging_mode == 'sv48':
-        mode_val = 9  # paging mode
-        levels = 4
-    elif paging_mode == 'sv57':
-        mode_val = 10
-        levels = 5
+    xlen = 64
+
+    paging_val_dict = {
+            'sv32': {
+                'satp_mode_val': 1,
+                'levels' : 2,
+                'superpage_level' : {
+                    'megapage' : 1
+                    },
+                'entries' : entries_per_pt * 2,
+                'shift_amount' : 31,
+                'xlen' : 32,
+                'paging_offset_constant' : "0x0"
+                },
+
+            'sv39': {
+                'satp_mode_val' : 8,
+                'levels' : 3,
+                'superpage_level' : {
+                    'megapage' : 2,
+                    'gigapage' : 1
+                    },
+                'entries' : entries_per_pt,
+                'shift_amount' : 60,
+                'xlen': 64,
+                'paging_offset_constant' : "0x1e0"
+                },
+
+            'sv48': {
+                'satp_mode_val' : 9,
+                'levels' : 4,
+                'superpage_level' : {
+                    'megapage' : 3,
+                    'gigapage' : 2,
+                    'terapage' : 1
+                    },
+                'entries' : entries_per_pt,
+                'shift_amount' : 60,
+                'xlen' : 64,
+                'paging_offset_constant' : "0xF0"
+                },
+            
+            'sv57': {
+                'satp_mode_val': 10,
+                'levels' : 5,
+                'superpage_level' : {
+                    'megapage' : 4,
+                    'gigapage' : 3,
+                    'terapage' : 2,
+                    'petapage' : 1
+                    },
+                'entries' : entries_per_pt,
+                'shift_amount' : 60,
+                'xlen' : 64,
+                'paging_offset_constant' : "0x78"
+                }
+            }
+    
+    if petapage == True and paging_mode == 'sv57':
+        superpage_mode_level = 'petapage'
+    elif terapage == True and (paging_mode == 'sv48' or paging_mode == 'sv57'):
+        superpage_mode_level = 'terapage'
+    elif gigapage == True and (paging_mode == 'sv39' or
+            paging_mode == 'sv48' or
+            paging_mode == 'sv57'):
+        superpage_mode_level = 'gigapage'
+    elif megapage == True and (paging_mode == 'sv32' or 
+            paging_mode == 'sv39' or
+            paging_mode == 'sv48' or paging_mode == 'sv57'):
+        superpage_mode_level = 'megapage'
+    else:
+        superpage_mode_level = 'usual'
+    
+    # values for paging set up
+
+    mode_val = paging_val_dict[paging_mode]['satp_mode_val']
+    levels = paging_val_dict[paging_mode]['levels']
+    entries = paging_val_dict[paging_mode]['entries']
+    shift_amount = paging_val_dict[paging_mode]['shift_amount']
+    xlen = paging_val_dict[paging_mode]['xlen']
+    paging_offset_constant = paging_val_dict[paging_mode]['paging_offset_constant']
+    
+    # for super pages
+    try:
+        spage_level = paging_val_dict[paging_mode]['superpage_level']\
+                   [superpage_mode_level]
+    except KeyError:
+        # key error occurs only when superpaging is not enabled.
+        # in the loop generating assembly to set up pages, we check for 99 to 
+        # know that super paging is not enabled.
+        logger.debug("Not generating super pages")
+        spage_level = 0
+    
+    # leaf PTE in superpage
+    leaf_pte_u = ''
+    leaf_pte_s = ''
+    if user_supervisor_superpage == True:
+        if misaligned_superpage == True:
+            logger.debug("Currently, when user and supervisor superpages are "\
+                         "present,\nOnly the S page is set to be misaligned."\
+                         "\nSupport for both misaligned user and supervisor "\
+                         "pages is not present, yet!")
+            logger.debug('creating misaligned page')
+            leaf_pte_u = '\tli t5, 0x200000ff\n'
+            leaf_pte_s = '\tli t4, 0x20eeeeef\n'
+        else:
+            logger.debug("creating both user and supervisor superpages")
+            leaf_pte_u = '\tli t5, 0x200000ff\n'
+            leaf_pte_s = '\tli t4, 0x200000ef\n'
+    elif user_superpage == True:
+        logger.debug("creating user superpages only")
+        if misaligned_superpage == True:
+            logger.debug('creating misaligned page')
+            leaf_pte_u = '\tli t5, 0x20eeeeff\n'
+        else:
+            leaf_pte_u = '\tli t5, 0x200000ff\n'
+    else:
+        logger.debug("creating supervisor superpages only")
+        if misaligned_superpage == True:
+            logger.debug('creating misaligned page')
+            leaf_pte_s = '\tli t4, 0x20eeeeef\n'
+        else:
+            leaf_pte_s = '\tli t4, 0x200000ef\n'
+
+    if xlen == 64:
+        word_fill = '.dword'
+    else:
+        word_fill = '.word'
+    # setup for super pages
 
     # data section
     pre = f"\n.align {align}\n\n"
 
     initial_level_pages_s = ''
     for level in range(levels - 1):
-        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n.dword 0x0\n"\
-                                 f".endr\n"
+        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n{word_fill} 0x0" \
+                                 f"\n.endr\n"
 
     initial_level_pages_u = ''
     if mode == 'user':
         for level in range(1, levels - 1):
-            initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n"\
-                                     f".dword 0x0\n.endr\n"
+            initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n" \
+                                     f"{word_fill} 0x0\n.endr\n"
 
     # assumption that the l3 pt entry 0 will point to 80000000
 
     base_address = 0x80000000
 
     # all bits other than U bit will be set by default
-    valid_bit = 0x01 if valid else 0x00
-    read_bit = 0x02 if read else 0x00
-    write_bit = 0x04 if write else 0x00
-    execute_bit = 0x08 if execute else 0x00
-    u_bit_s = 0x00 if user else 0x00
-    u_bit_u = 0x10 if user else 0x00
-    global_bit = 0x20 if globl else 0x00
-    access_bit = 0x40 if access else 0x00
-    dirty_bit = 0x80 if dirty else 0x00
+    valid_bit = 0x01
+    read_bit = 0x02
+    write_bit = 0x04
+    execute_bit = 0x08
+    u_bit_s = 0x00
+    u_bit_u = 0x10
+    global_bit = 0x20
+    access_bit = 0x40
+    dirty_bit = 0x80
 
     ll_entries_s = ''
     ll_entries_u = ''
@@ -971,10 +1102,10 @@ def setup_pages(page_size=4096,
         for i in range(valid_ll_pages):
             pte_address_u = base_address_new >> power
             pte_address_u = pte_address_u << 10
-            pte_entry_u = pte_address_u | dirty_bit | access_bit |\
-                global_bit | u_bit_u | execute_bit | write_bit |\
-                read_bit | valid_bit
-            ll_entries_u += '.dword {0} # entry_{1}\n'.format(
+            pte_entry_u = pte_address_u | dirty_bit | access_bit | \
+                          global_bit | u_bit_u | execute_bit | write_bit | \
+                          read_bit | valid_bit
+            ll_entries_u += '{0} {1} # entry_{2}\n'.format(word_fill,
                 hex(pte_entry_u), i)
             base_address_new += page_size
 
@@ -982,22 +1113,24 @@ def setup_pages(page_size=4096,
     for i in range(valid_ll_pages):
         pte_address_s = base_address_new >> power
         pte_address_s = pte_address_s << 10
-        pte_entry_s = pte_address_s | dirty_bit | access_bit |\
-            global_bit | u_bit_s | execute_bit | write_bit |\
-            read_bit | valid_bit
-        ll_entries_s += '.dword {0} # entry_{1}\n'.format(hex(pte_entry_s), i)
+        pte_entry_s = pte_address_s | dirty_bit | access_bit | \
+                      global_bit | u_bit_s | execute_bit | write_bit | \
+                      read_bit | valid_bit
+        ll_entries_s += '{0} {1} # entry_{2}\n'.format(word_fill,hex(pte_entry_s), i)
         base_address_new += page_size
 
-    ll_page_s = f'l{levels-1}_pt:\n'\
-                f'{ll_entries_s}.rept {entries-valid_ll_pages}\n'\
-                f'.dword 0x0\n.endr\n'
-
-    ll_page_u = f'l{levels-1}_u_pt:\n'\
-                f'{ll_entries_u}.rept {entries-valid_ll_pages}\n'\
-                f'.dword 0x0\n.endr\n'
+    ll_page_s = f'l{levels - 1}_pt:\n' \
+                f'{ll_entries_s}.rept {entries - valid_ll_pages}\n' \
+                f'{word_fill} 0x0\n.endr\n'
+    if mode == 'user':
+        ll_page_u = f'l{levels - 1}_u_pt:\n' \
+                    f'{ll_entries_u}.rept {entries - valid_ll_pages}\n' \
+                    f'{word_fill} 0x0\n.endr\n'
+    else:
+        ll_page_u = ''
 
     out_data_string = pre + initial_level_pages_s + ll_page_s + \
-        initial_level_pages_u + ll_page_u
+                      initial_level_pages_u + ll_page_u
 
     # code section
     # using the macro
@@ -1005,59 +1138,173 @@ def setup_pages(page_size=4096,
     out_code_string = []
 
     # calculation to set up root level pages
-    pte_updation = f"\n.option norvc"\
-                   f"\n\t# setting up root PTEs\n"\
+    pte_updation = f"\n.option norvc" \
+                   f"\n\t# setting up root PTEs\n" \
                    f"\tla t0, l0_pt # load address of root page\n\n"
 
-    shift_string = f"\t# calculation for offset\n"\
-                   f"\taddi t6, x0, 3\n\tslli t6, t6, 10\n\tadd t0, t0, t6\n"
-
+    data_for_misaligned_test = f"\n\tla t4, faulty_page_address\n"\
+                               f"\tSREG t0, (t4)\n"\
+                               f"\tla t4, misaligned_superpage\n"\
+                               f"\taddi t5, x0, 1\n"\
+                               f"\tSREG t5, (t4)\n"
+ 
     for i in range(levels - 1):
-        offset = 24 if i == (levels - 3) else 0
-        offset_calc = shift_string if i == (levels - 2) else ""
-        pte_updation += f"\t# setting up l{i} table to point l{i+1} table\n"\
-                        f"\taddi t1, x0, 1 # add value 1 to reg\n"\
-                        f"\tslli t2, t1, {power} # left shift to create a page"\
-                        f"with value == page size\n"\
-                        f"\tadd t3, t2, t0 # add with the existing "\
-                        f"address to get address of level l page\n"\
-                        f"\tsrli t4, t3, {power} # divide that address with "\
-                        f"page size\n"\
-                        f"\tslli t4, t4, 10 # left shift for PTE format\n"\
-                        f"\tadd t4, t4, t1 # set valid bit to 1\n"\
-                        f"{offset_calc}"\
-                        f"\tsd t4, {offset}(t0) "\
-                        f"# store l{i+1} first entry address "\
+        offset = f'\tmv t2, t0\n\tli t1, {paging_offset_constant}'\
+                 f'\n\tadd t0, t0, t1\n'
+        move_t0 = '\tmv t0, t2\n'
+        offset_root = offset if i == 0 else ''
+        offset_move_t0 = move_t0 if i == 0 else ''
+        superpage_entry_s = leaf_pte_s if i == (spage_level - 1) else ''
+        s_superpage_address_load = data_for_misaligned_test \
+                                    if (i == (spage_level-1)) and \
+                                       (misaligned_superpage == True) \
+                                       and \
+                                       (user_superpage == False) \
+                                       else ''
+
+        pte_updation += f"\t# setting up l{i} table to point l{i + 1} table\n" \
+                        f"\taddi t1, x0, 1 # add value 1 to reg\n" \
+                        f"\tslli t2, t1, {power} # left shift to create a " \
+                        f"page with value == page size\n" \
+                        f"\tadd t3, t2, t0 # add with the existing " \
+                        f"address to get address of level l page\n" \
+                        f"\tsrli t4, t3, {power} # divide that address with " \
+                        f"page size\n" \
+                        f"\tslli t4, t4, 10 # left shift for PTE format\n" \
+                        f"\tadd t4, t4, t1 # set valid bit to 1\n" \
+                        f"{offset_root}"\
+                        f"{superpage_entry_s}"\
+                        f"\tSREG t4, (t0)\n"\
+                        f"{s_superpage_address_load}\n"\
+                        f"{offset_move_t0}"\
+                        f"# store l{i + 1} first entry address " \
                         f"into the first entry of l{i}\n\n"
-        if i < levels - 2:
-            pte_updation += f"\t#address updation\n"\
-                            f"\tadd t0, t3, 0 # move the address of "\
-                            f"level {i+1} page to t0\n\n"
+        if i < levels-2:
+            pte_updation += f"\t#address updation\n" \
+                            f"\tadd t0, t3, 0 # move the address of " \
+                            f"level {i + 1} page to t0\n\n"
 
     pte_updation += "\n"
 
     if mode == 'user':
+        #user_lowest_level = f"{levels-3}_u" if (levels-3 != 0) else "0"
         pte_updation += f"\t# user page table set up\n"
         pte_updation += f"\tla t0, l0_pt # load address of root page\n\n"
         pte_updation += f"\tla t3, l1_u_pt # load address of l1 user page\n\n"
-        common_setup = f"\tsrli t5, t3, 12\n"\
-                       f"\tslli t5, t5, 10\n"\
-                       f"\tli t4, 1\n"\
-                       f"\tadd t5, t5, t4\n"\
-                       f"\tsd t5, (t0)\n"
-        for i in range(levels - 1):
-            pte_updation += f"\t# update l{i} page entry with address "\
-                            f"of l{i+1} page\n"
-            if i != 0:
-                pte_updation += f"\taddi t2, x0, 1\n"\
-                                f"\tslli t2, t2, 12\n"\
-                                f"\tadd t3, t0, t2\n"
-            pte_updation += f"{common_setup}\n"
+        common_setup = f"\tsrli t5, t3, 12\n" \
+                       f"\tslli t5, t5, 10\n" \
+                       f"\tli t4, 1\n" \
+                       f"\tadd t5, t5, t4\n"
+        common_setup_store = f"\tSREG t5, (t0)\n"
 
-            if i < levels - 2:
-                pte_updation += f"\t# address updation\n"\
-                                f"\tadd t0, t3, 0 # move address of \n"\
-                                f"\t\t\t\t #l{i+1} page into t0"
+        for i in range(levels-1):
+            superpage_entry_u = leaf_pte_u if i == (spage_level - 1) else ''
+            u_superpage_address_load = data_for_misaligned_test \
+                                        if (i == (spage_level-1)) and \
+                                           (misaligned_superpage == True) and \
+                                           (user_superpage == True)\
+                                        else ''
+
+            pte_updation += f"\n\t# update l{levels-3+i} page entry with address " \
+                            f"of l{levels-2+i} page\n"
+            if i != 0:
+                pte_updation += f"\taddi t2, x0, 1\n" \
+                                f"\tslli t2, t2, 12\n" \
+                                f"\tadd t3, t0, t2\n"
+            
+            pte_updation += f"{common_setup}\n"
+            pte_updation += f'{superpage_entry_u}'\
+                            f'{common_setup_store}'\
+                            f'{u_superpage_address_load}\n'
+            #pte_updation += f'{common_setup_store}'
+
+            if i < levels-2:
+                pte_updation += f"\t# address updation\n" \
+                                f"\tadd t0, t3, 0 # move address of " \
+                                f"l{i + 1} page into t0\n"
+
+    if (terapage == True) or (petapage == True):
+        a0_reg = 0
+    else:
+        a0_reg = 173
+
+    if (mode == 'user') and (terapage == False) and (petapage == False):
+        # user_supervisor superpgae is not a part of the test because in this 
+        # mode initially there is fault on the supervisor page and then 
+        # on the user page.
+        if (misaligned_superpage == True) and (user_superpage == False):
+            a1_reg = 0
+        else:
+            a1_reg = 173
+        
+        pt_label = f'l{levels - 1}_u_pt'
+    else:
+        a1_reg = 0
+        pt_label = f'l{levels - 1}_pt'
+
+    if mode == 'user' and user_superpage == False and misaligned_superpage == True:
+        handle_in_supervisor = f'\n\tla t3, handle_pf_in_supervisor\n'\
+                               f'\taddi t4, x0, 1\n'\
+                               f'\tSREG t4, (t3)\n\n'
+    else:
+        handle_in_supervisor = ''
+        
+
+    fault_valid_bit = 0x01 if pte_dict['valid'] else 0x00
+    fault_read_bit = 0x02 if pte_dict['read'] else 0x00
+    fault_write_bit = 0x04 if pte_dict['write'] else 0x00
+    fault_execute_bit = 0x08 if pte_dict['execute'] else 0x00
+    fault_u_bit = 0x10 if (pte_dict['user'] and mode == 'user') else 0x00
+    fault_global_bit = 0x20 if pte_dict['globl'] else 0x00
+    fault_access_bit = 0x40 if pte_dict['access'] else 0x00
+    fault_dirty_bit = 0x80 if pte_dict['dirty'] else 0x00
+
+    faulty_pte_bits = fault_valid_bit | fault_read_bit | fault_write_bit | \
+                      fault_execute_bit | fault_u_bit | fault_global_bit | \
+                      fault_access_bit | fault_dirty_bit
+
+    faulty_pte_val = 0xffffffffffffff00 | faulty_pte_bits
+
+    fault_page_label = "faulting_address" if mem_fault else \
+        "faulting_instruction"
+
+    if fault:
+        fault_creation = f"\naddress_loading:\n" \
+                         f"\tli a0, {a0_reg}\n" \
+                         f"\tli a1, {a1_reg}\n" \
+                         f"\tla t5, faulting_instruction\n" \
+                         f"\tla t6, return_address\n" \
+                         f"\tSREG t5, 0(t6)\n\n"\
+                         f"{handle_in_supervisor}\n"
+        
+        if (misaligned_superpage == False):
+            fault_creation += f"offset_adjustment:\n" \
+                              f"\tli t3, 0x1ff\n" \
+                              f"\tli t4, 0x1ff000\n" \
+                              f"\tla t5, {fault_page_label}\n" \
+                              f"\tand t5, t5, t4\n" \
+                              f"\tsrli t5, t5, 12\n" \
+                              f"\tand t5, t5, t3\n" \
+                              f"\tslli t5, t5, 3\n" \
+                              f"\tla t6, {pt_label}\n" \
+                              f"\tadd t6, t6, t5\n" \
+                              f"\tld t3, 0(t6)\n" \
+                              f"\tli t2, {hex(faulty_pte_val)}\n" \
+                              f"\tand t3, t3, t2\n" \
+                              f"\tSREG t3, 0(t6)\n" \
+                              f"\tla t5, faulty_page_address\n" \
+                              f"\tSREG t6, 0(t5)\n"
+
+
+    else:
+        fault_creation = ""
+
+    pte_updation += fault_creation
+
+    if mode == 'user' and user_superpage == False:
+        u_mode_a1_reg = '\n\tli a1, 173\n'
+    else:
+        u_mode_a1_reg = ''
 
     user_entry = "RVTEST_USER_ENTRY()\n" if mode == 'user' else ""
     user_exit = "RVTEST_USER_EXIT()\n" if mode == 'user' else ""
@@ -1066,9 +1313,10 @@ def setup_pages(page_size=4096,
 
     out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "
                            f"{shift_amount})\n"
-                           f"supervisor_entry_label:\n"
+                           f"101:\t# supervisor entry point\n"
+                           f"{u_mode_a1_reg}"
                            f"\n{user_entry}"
-                           f"test_entry:\n.option rvc\n\n")
+                           f"102:\t# user entry point\n.option rvc\n\n")
     out_code_string.append(f"\n\n.option norvc\n{user_exit}"
                            f"test_exit:\n"
                            f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"
@@ -1107,3 +1355,76 @@ def run_make(work_dir, jobs):
     chdir(cwd)
     logger.debug(f'Current directory is: {getcwd()}')
     return 1
+
+
+def paging_modes(yaml_string, isa):
+    """
+        This function reads the YAML entry specifying the valid 
+        paging modses supported by the SATP CSR and returns the mode(s)
+        for the framework to generate tests
+    """
+    split_string = yaml_string.split(' ')
+    values = (split_string[-1][1:-1]).split(',')
+    valid_list = [int(i) for i in values]
+
+    valid_modes = []
+
+    if 'RV64' in isa:
+        if 8 in valid_list:
+            valid_modes.append('sv39')
+        if 9 in valid_list:
+            valid_modes.append('sv48')
+        if 10 in valid_list:
+            valid_modes.append('sv57')
+    else:
+        if 1 in valid_list:
+            valid_modes.append('sv32')
+
+    return valid_modes
+
+
+def select_paging_modes(paging_modes):
+    """
+    Function to read the paging modes specified by the user, 
+    and generate only those modes and not every possible paging mode.
+    Returns a list of the user selected modes
+    """
+    mode = []
+
+    if isinstance(paging_modes, tuple):
+        mode = list(paging_modes)
+        mode.sort()
+    elif paging_modes is not None:
+        try:
+            modes = paging_modes.replace(' ', ',')
+            modes = modes.replace(', ', ',')
+            modes = modes.replace(' ,', ',')
+            mode = list(set(modes.split(",")))
+            mode.remove('')
+            mode.sort()
+
+        except ValueError:
+            pass
+
+    if not mode:
+        mode.append('sv39')
+
+    return mode
+
+
+def macros_parser(_path=[join(dirname(__file__), 'env/arch_test_unpriv.h'),
+                         join(dirname(__file__), 'env/arch_test_priv.h')]):
+    
+    macros = []
+
+    for arch_test_path in _path:
+
+        with open(arch_test_path, 'r') as f:
+            lines = f.readlines()
+        for line in lines:
+            if '#ifdef' in line:
+                pref = line[0:line.find('#ifdef')]
+                if '//' not in pref and '/*' not in pref:
+                    macros.append(line[line.find('#ifdef') + 6:].strip('\n '))
+    
+    return list(set(macros))

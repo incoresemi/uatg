@@ -3,6 +3,7 @@
 from logging import ERROR, CRITICAL, WARNING, INFO, DEBUG, getLogger, \
     StreamHandler, root
 from colorlog import ColoredFormatter
+from sys import stdout
 
 
 class Log:
@@ -83,7 +84,7 @@ class Log:
         """Setup the Logger."""
 
         self._lvl = self._parse_level(lvl)
-        self.stream = StreamHandler()
+        self.stream = StreamHandler(stream=stdout)
         self.stream.setLevel(self._lvl)
 
         self.stream.setLevel(self._lvl)

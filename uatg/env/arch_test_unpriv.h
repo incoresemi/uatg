@@ -1,4 +1,5 @@
 #include "encoding.h"
+
 // TODO the following should come from the YAML.
 #ifndef NUM_SPECD_INTCAUSES 
   #define NUM_SPECD_INTCAUSES 16
@@ -92,261 +93,22 @@
   #define CODE_REL_TVAL_MSK 0xD008 << (REGWIDTH*8-16)
 #endif
 
-// load the trap handler address to mtvec
-// on trap, update mcause and copy mepc
-// save mepc, increment by 4 or 2
-
-//initialize trap address into mtvec
-
-.macro RVTEST_CODE_BEGIN
-  .align UNROLLSZ
-  .section .text.init;
-  .global rvtest_init;
-
-  rvtest_init:
-#ifdef rvtest_mtrap_routine
-  la t1, trap_handler_entry
-  csrw CSR_MTVEC, t1
+#ifdef privileged_test_enable
+  #include "arch_test_priv.h"
 #endif
-  .globl rvtest_code_begin
-  rvtest_code_begin:
-.endm
-
-.macro RVTEST_CODE_END
-  .align 4;
-  .global rvtest_code_end
-  rvtest_code_end:
-#ifdef rvtest_mtrap_routine
-  .option push
-  .option norvc
-  j end_code
-  
-
-
-// the current handler works only for illegal instructions. Illegal trap caused by Jumping in the 
-// middle of a 32-bit instruction will not be handled. to return from illegal traps, we check the
-// lower 2 bits of the instruction and increment mepc accordingly. Basically, we are categorizing
-// illegals as 32-bit illegals or 16-bit illegals.
-trap_handler_entry:
-  // store the current registers into memory
-  // using space in memory instead of allocating a stack
-  csrrw sp, mscratch, sp // save sp to mscratch before destroying it
-  la sp, trapreg_sv 
-
-  // we will only store 6 registers which will be used in the routine
-  SREG t0, 1*REGWIDTH(sp)
-  SREG t1, 2*REGWIDTH(sp)
-  SREG t2, 3*REGWIDTH(sp)
-  SREG t3, 4*REGWIDTH(sp)
-  SREG t4, 5*REGWIDTH(sp)
-  SREG t5, 6*REGWIDTH(sp)
-  SREG t6, 7*REGWIDTH(sp)
-  
-  // copy the exception cause into t0
-  csrr t0, CSR_MCAUSE
-
-  // copy the mtval into t1
-  csrr t1, CSR_MTVAL
-
-  // copy the mepc into t2
-  csrr t2, CSR_MEPC
- 
-  // load the current trap count from signature to t4. t3 used to hold the address of mtrap_count
-  la t3, mtrap_count
-  LREG t4, 0(t3)
-
-  // adjust sp to point to the mtrap_signature where the above csrs need to be stored
-  la sp, mtrap_sigptr
-  add sp, sp, t4
-
-  // store mcause, mtval and mepc to signature region
-  SREG t0, 0(sp)
-  SREG t1, 1*REGWIDTH(sp)
-  SREG t2, 2*REGWIDTH(sp)
-
-  //store the updated number of bytes in mtrap_count region
-  addi t4, t4, 3*REGWIDTH
-  SREG t4, 0(t3)
-
-  li t3, 173
-  bne t3, a0, unintended_trap_handler
-
-intended_trap_handler:
-  
-  // instruction address misaligned
-  li t3, 0
-  beq t3, t0, instruction_misaligned_handler
-
-  // breakpoint
-  li t3, 3
-  beq t3, t0, increment_pc
-
-  // load access fault
-  li t3, 5
-  beq t3, t0, increment_pc
-  
-  // store/AMO misaligned
-  li  t3, 6
-  beq t3, t0, increment_pc
-
-  // store access fault
-  li t3, 7
-  beq t3, t0, increment_pc
-
-  // e-call from M
-  li t3, 11
-  beq t3, t0, increment_pc
-
-#ifdef s_u_mode_test
-  // ecall from Supervisor Mode. rets to Machine mode
-  li t3, 9
-  beq t3, t0, supervisor_to_machine_ecall_handler // if t0 == 9, the trap is due to an ecall from S
-  // ecall from user mode, rets to supervisor mode
-  li t3, 8
-  beq t3, t0, user_to_supervisor_ecall_handler // if t0 == 8, the trap is due to an ecall from U
-  // load page fault
-  li t3, 13
-  beq t3, t0, increment_pc
-  // store/AMO page fault
-  li t3, 15
-  beq t3, t0, increment_pc
-
-#endif
-  j unintended_trap_handler
-
-#ifdef s_u_mode_test
-user_to_supervisor_ecall_handler:
-  la t5, test_exit
-  // update MPP to perform MRET into Supervisor
-  li t6, 0xF0000000/*for supervisor*/;\
-  /*update MEPC*/\
-  /*supervisor virtula address is F000000..*/\
-  or t5, t5, t6;/*for supervisor*/\
-  addi t6, x0, 1
-  slli t6, t6, 11
-  csrs CSR_MSTATUS, t6
-  j mepc_updation
-
-supervisor_to_machine_ecall_handler:
-  la t5, supervisor_exit_label
-  // update MPP in mstatus to perform an MRET
-  addi t6, x0, 3
-  slli t6, t6, 11
-  csrs CSR_MSTATUS, t6
-#endif
-mepc_updation:
-  csrw CSR_MEPC, t5
-  
-  // jump to restoring registers and exiting trap handler
-  j restore_and_exit_trap
-
-unintended_trap_handler:
-  // mcause value of illegal initialized in t3
-  li t3, 2 
-  beq t3, t0, illegal_handler
-  li t3, 4
-  beq t3, t0, load_misaligned_handler
-  li t3, 6
-  beq t3, t0, store_misaligned_handler
-  // for all other cause values restore and exit handler
-  j restore_and_exit_trap
-
-instruction_misaligned_handler:
-store_misaligned_handler:
-load_misaligned_handler:
-  // load the lowest byte of the instruction into t3. address of instruction in 
-  lb t1, 0(t2)
-  // we then follow the same stuff we do for illegal
-
-illegal_handler:
-increment_pc:
-  andi t1, t1, 0x3
-  addi t4, x0, 2
-  beq t4, t1, two_byte
-  
-  // checks if C is enabled in MISA
-  // csrr t6, CSR_MISA
-  // slli t6, t6, (XLEN-4)
-  // srli t6, t6, (XLEN-1)
-  // beq t6, x0, four_byte
-
-  four_byte:
-    addi t2, t2, 0x4
-    j adjust_mepc
- 
-  two_byte:
-    addi t2, t2, 0x2
-    j adjust_mepc
-  
-// update the MEPC value to point to the next instruction.
-adjust_mepc:
-  csrw CSR_MEPC, t2
-
-// Restore Register values 
-restore_and_exit_trap:
-  la sp, trapreg_sv
-  LREG t0, 1*REGWIDTH(sp)
-  LREG t1, 2*REGWIDTH(sp)
-  LREG t2, 3*REGWIDTH(sp)
-  LREG t3, 4*REGWIDTH(sp)
-  LREG t4, 5*REGWIDTH(sp)
-  LREG t5, 6*REGWIDTH(sp)
-  LREG t6, 7*REGWIDTH(sp)
-  csrrw sp, mscratch, sp
-
-trap_handler_exit:
-  .option pop
-  mret
-#endif
-
-#ifdef rvtest_gpr_save
-  la x31, mscratch_space
-  csrw CSR_MSCRATCH, x31
-  SREG x0, 0*REGWIDTH(x31)
-  SREG x1, 1*REGWIDTH(x31)
-  SREG x2, 2*REGWIDTH(x31)
-  SREG x3, 3*REGWIDTH(x31)
-  SREG x4, 4*REGWIDTH(x31)
-  SREG x5, 5*REGWIDTH(x31)
-  SREG x6, 6*REGWIDTH(x31)
-  SREG x7, 7*REGWIDTH(x31)
-  SREG x8, 8*REGWIDTH(x31)
-  SREG x9, 9*REGWIDTH(x31)
-  SREG x10, 10*REGWIDTH(x31)
-  SREG x11, 11*REGWIDTH(x31)
-  SREG x12, 12*REGWIDTH(x31)
-  SREG x13, 13*REGWIDTH(x31)
-  SREG x14, 14*REGWIDTH(x31)
-  SREG x15, 15*REGWIDTH(x31)
-  SREG x16, 16*REGWIDTH(x31)
-  SREG x17, 17*REGWIDTH(x31)
-  SREG x18, 18*REGWIDTH(x31)
-  SREG x19, 19*REGWIDTH(x31)
-  SREG x20, 20*REGWIDTH(x31)
-  SREG x21, 21*REGWIDTH(x31)
-  SREG x22, 22*REGWIDTH(x31)
-  SREG x23, 23*REGWIDTH(x31)
-  SREG x24, 24*REGWIDTH(x31)
-  SREG x25, 25*REGWIDTH(x31)
-  SREG x26, 26*REGWIDTH(x31)
-  SREG x27, 27*REGWIDTH(x31)
-  SREG x28, 28*REGWIDTH(x31)
-  SREG x29, 29*REGWIDTH(x31)
-  SREG x30, 30*REGWIDTH(x31)
-  addi x30, x31, 0                // mv gpr pointer to x30
-  csrr x31, CSR_MSCRATCH          // restore value of x31
-  SREG x31, 31*REGWIDTH(x30)      // store x31
-#endif
-end_code:
-.endm
 
 .macro RVTEST_DATA_BEGIN
 .data
 .align 4
 .global rvtest_data_begin
 rvtest_data_begin:
+
 #ifdef rvtest_mtrap_routine
-trapreg_sv:
+trapreg_sv_m:
+  .fill 7, REGWIDTH, 0xdeadbeef
+#endif
+#ifdef rvtest_strap_routine
+trapreg_sv_s:
   .fill 7, REGWIDTH, 0xdeadbeef
 #endif
 .endm
@@ -400,62 +162,6 @@ rvtest_data_end:
     or x2, x3, x2;\
     csrrw x0,mstatus,x2;
 
-#ifdef s_u_mode_test
-//--------------------------------Supervisor Test Macros------------------------------------------//
-#define RVTEST_SUPERVISOR_ENTRY(pg_size_exp, mode, shift_amount)\
-  /*setting up SATP*/\
-  addi t0, x0, mode;/*mode field value based on paging mode in SATP*/\
-  slli t1, t0, shift_amount;/*left shift to move it to the mode field of SATP*/\
-  /*slli t2, t0, pg_size_exp;*/\
-  la t3, l0_pt;/*load the address of the root page*/\
-  srli t4, t3, pg_size_exp;/*divide the address by the page size*/\
-  add t5, t1, t4;/*add the t1 reg with mode value with the t3 reg*/\
-  csrw CSR_SATP, t5;/*load the value into SATP*/\
-  /*update MPP with 1 to go into supervisor mode*/\
-  addi t6, x0, 1;/*supervisor*/\
-  slli t6, t6, 11;\
-  csrs CSR_MSTATUS, t6;/*set MPP bits in MSTATUS*/\
-  /*value to convert the Physical address to Virtual address*/\
-  li t6, 0xF0000000/*for supervisor*/;\
-  /*update MEPC*/\
-  /*supervisor virtula address is F000000..*/\
-  la t1, supervisor_entry_label;/*label for loading MEPC*/\
-  or t5, t1, t6;/*for supervisor*/\
-  csrw CSR_MEPC, t5;/*update MEPC*/\
-  /*mret*/\
-  mret;
-
-#define RVTEST_SUPERVISOR_EXIT()\
-  /*loading an error code to indicate exit*/\
-  li a0, 173;\
-  /*performing an ecall to exit*/\
-  ecall;
-
-//--------------------------------User Test Macros------------------------------------------//
-#define RVTEST_USER_ENTRY()\
-  /*update SPP with 0 to go into user mode*/\
-  addi t6, x0, 0;\
-  /*set SUM bit in STATUS*/\
-  addi t5, x0, 1;\
-  slli t5, t5, 18;\
-  add t6, t6,t5;\
-  csrs CSR_SSTATUS, t6;/*set SPP bits in SSTATUS*/\
-  li t6, 0x0fffffff;\
-  /*user address is 00000000*/\
-  /*update MEPC*/\
-  la t1, test_entry;/*label for loading SEPC*/\
-  and t5, t1, t6;/*for user*/\
-  csrw CSR_SEPC, t5;/*update MEPC*/\
-  /*mret*/\
-  sret;
-
-#define RVTEST_USER_EXIT()\
-  /*loading an error code to indicate exit*/\
-  li a0, 173;\
-  /*performing an ecall to exit*/\
-  ecall;
-
-#endif
 
 //------------------------------ BORROWED FROM ANDREW's RISC-V TEST MACROS -----------------------//
 #define MASK_XLEN(x) ((x) & ((1 << (__riscv_xlen - 1) << 1) - 1))

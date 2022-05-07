@@ -16,7 +16,8 @@ from uatg import __file__
 from uatg.log import logger
 from uatg.utils import create_plugins, generate_test_list, create_linker, \
     create_model_test_h, join_yaml_reports, generate_sv_components, \
-    list_of_modules, rvtest_data, dump_makefile, setup_pages
+    list_of_modules, rvtest_data, dump_makefile, setup_pages, \
+    select_paging_modes, macros_parser
 
 # create a manager for shared resources
 process_manager = Manager()
@@ -29,8 +30,8 @@ def asm_generation_process(args):
     """
     # unpacking the args tuple
     plugin, core_yaml, isa_yaml, isa, test_format_string, work_tests_dir, \
-        make_file, module, linker_dir, uarch_dir, work_dir, \
-        compile_macros_dict, module_test_count_dict = args
+    make_file, module, linker_dir, uarch_dir, work_dir, \
+    compile_macros_dict, module_test_count_dict, page_modes = args
 
     # actual generation process
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
@@ -48,7 +49,6 @@ def asm_generation_process(args):
         seq = '001'
         for ret_list_of_dicts in test_gen:
             test_name = t_name + '-' + seq
-            logger.debug(f'Selected test: {test_name}')
 
             assert isinstance(ret_list_of_dicts, dict)
             # Checking for the returned sections from each test
@@ -64,6 +64,7 @@ def asm_generation_process(args):
 
             # add inst name to test name as postfix
             test_name = test_name + inst_name_postfix
+            logger.debug(f'Selected test: {test_name}')
 
             try:
                 asm_data = ret_list_of_dicts['asm_data']
@@ -81,16 +82,22 @@ def asm_generation_process(args):
             else:
                 compile_macros_dict[test_name] = ['XLEN=32']
 
+            list_of_env_paths = [join(dirname(__file__), 'env/arch_test_unpriv.h'),
+                                 join(dirname(__file__), 'env/arch_test_priv.h')]
+            
             try:
-                compile_macros_dict[test_name] = compile_macros_dict[
-                                                     test_name] + \
-                                                 ret_list_of_dicts[
-                                                     'compile_macros']
+                available_macros = macros_parser(list_of_env_paths)
+                for i in ret_list_of_dicts['compile_macros']:
+                    if i not in available_macros:
+                        logger.error(f'{i}: Macro undefined in arch_test.h ')
+                        raise Exception('Undefined Macro')
+                        exit()
+                compile_macros_dict[test_name] += ret_list_of_dicts[
+                    'compile_macros']
             except KeyError:
                 logger.debug(f'No custom Compile macros specified for '
                              f'{test_name}')
 
-            # generate and setup page tables based on info from plugin
             # generate and setup page tables based on info from plugin
             privileged_dict = {'page_size': 4096,
                                'll_pages': 64,
@@ -101,13 +108,110 @@ def asm_generation_process(args):
                 privileged_dict = ret_list_of_dicts['privileged_test']
             except KeyError:
                 privileged_dict['enable'] = False
+            
+            # check to add privileged_test macro in compile macros list
+
+            if privileged_dict['enable'] == True or \
+               ('rvtest_mtrap_routine' in compile_macros_dict[test_name]) or \
+               ('rvtest_strap_routine' in compile_macros_dict[test_name]):
+                   logger.debug('This test is a privileged test. Including arch_test_priv header')
+                   compile_macros_dict[test_name] += ['privileged_test_enable']
+
+            try:
+                pt_fault = privileged_dict['fault']
+            except KeyError:
+                logger.debug("test does not generate a PT fault")
+                pt_fault = False
+                pass
+
+            try:
+                pt_mem_fault = privileged_dict['mem_fault']
+            except KeyError:
+                pt_mem_fault = False
+                pass
+
+            try:
+                pte_bit_dict = privileged_dict['pte_dict']
+            except KeyError:
+                pte_bit_dict = None
+                pass
+
+            try:
+                pt_megapage = privileged_dict['megapage']
+            except KeyError:
+                pt_megapage = False
+                pass
+
+            try:
+                pt_gigapage = privileged_dict['gigapage']
+            except KeyError:
+                pt_gigapage = False
+                pass
+
+            try:
+                pt_terapage = privileged_dict['terapage']
+            except KeyError:
+                pt_terapage = False
+                pass
+
+            try:
+                pt_petapage = privileged_dict['petapage']
+            except KeyError:
+                pt_petapage = False
+                pass
+
+            try:
+                pt_user_superpage = privileged_dict['user_superpage']
+            except KeyError:
+                pt_user_superpage = False
+                pass
+
+            try:
+                pt_user_supervisor_superpage = privileged_dict['user_supervisor_superpage']
+            except KeyError:
+                pt_user_supervisor_superpage =  False
+                pass
+
+            try:
+                pt_misaligned_superpage = privileged_dict['misaligned_superpage']
+            except KeyError:
+                pt_misaligned_superpage = False
+                pass
+
+            required_paging_modes = select_paging_modes(page_modes)
+            current_paging_mode = privileged_dict['paging_mode']
 
             if privileged_dict['enable']:
-                priv_asm_code, priv_asm_data = setup_pages(
-                    page_size=privileged_dict['page_size'],
-                    paging_mode=privileged_dict['paging_mode'],
-                    valid_ll_pages=privileged_dict['ll_pages'],
-                    mode=privileged_dict['mode'])
+                if (privileged_dict['paging_mode'] == 'sv39') and \
+                        (privileged_dict['mode'] == 'machine'):
+                    current_paging_mode = required_paging_modes[0]
+
+                if current_paging_mode in required_paging_modes:
+                    logger.debug(f"{current_paging_mode} is in user listed " \
+                                 "paging modes")
+                    priv_asm_code, priv_asm_data = setup_pages(
+                        pte_dict=pte_bit_dict,
+                        page_size=privileged_dict['page_size'],
+                        paging_mode=current_paging_mode,
+                        valid_ll_pages=privileged_dict['ll_pages'],
+                        mode=privileged_dict['mode'],
+                        megapage=pt_megapage,
+                        gigapage=pt_gigapage,
+                        terapage=pt_terapage,
+                        petapage=pt_petapage,
+                        user_superpage=pt_user_superpage,
+                        user_supervisor_superpage=pt_user_supervisor_superpage,
+                        fault=pt_fault,
+                        mem_fault=pt_mem_fault,
+                        misaligned_superpage=pt_misaligned_superpage
+                    )
+
+                else:
+                    logger.warning(
+                        f'{current_paging_mode} is not in user listed' \
+                        ' paging modes')
+                    logger.warning(f'skipping test generation for {test_name}')
+                    continue
 
             # Adding License, includes and macros
             # asm = license_str + includes + test_entry
@@ -118,19 +222,19 @@ def asm_generation_process(args):
             # asm += rvcode_begin + asm_code + rvcode_end
 
             asm += test_format_string[3] + priv_asm_code[0] + \
-                priv_asm_code[1] + asm_code + \
-                priv_asm_code[2] + test_format_string[4]
+                   priv_asm_code[1] + asm_code + \
+                   priv_asm_code[2] + test_format_string[4]
 
             # Appending RVTEST_DATA macros and data values
             # asm += rvtest_data_begin + asm_data + rvtest_data_end
             asm += test_format_string[5] + asm_data + priv_asm_data + \
-                test_format_string[6]
+                   test_format_string[6]
 
             # Appending RVMODEL macros
             # asm += rvmodel_data_begin + asm_sig + rvmodel_data_end
 
             asm += test_format_string[7] + asm_sig + \
-                test_format_string[8]
+                   test_format_string[8]
 
             mkdir(join(work_tests_dir, test_name))
             with open(join(work_tests_dir, test_name, test_name + '.S'),
@@ -201,7 +305,7 @@ def sv_generation_process(args):
 
 
 def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
-                   modules_dir, index_path, jobs):
+                   modules_dir, index_path, paging_modes, jobs):
     """
     The function generates ASM files for all the test classes specified within
     the module_dir. The user can also select the modules for which he would want
@@ -284,7 +388,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         license_str = f'# Licensing information can be found at ' \
                       f'LICENSE.incore\n# Test generated by user - {username}' \
                       f' at {time}\n\n'
-        includes = f'#include \"model_test.h\" \n#include \"arch_test.h\"\n'
+        includes = f'#include \"model_test.h\" \n#include \"arch_test_unpriv.h\"\n'
         test_entry = f'RVTEST_ISA(\"{isa}\")\n\n.section .text.init\n.globl' \
                      f' rvtest_entry_point\nrvtest_entry_point:'
 
@@ -331,7 +435,8 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
-                 work_dir, compile_macros_dict, module_test_count_dict))
+                 work_dir, compile_macros_dict, module_test_count_dict,
+                 paging_modes))
 
         # multi processing process pool
         logger.info(f"Spawning {jobs} processes")
@@ -403,12 +508,11 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         logger.info(f'Creating Model_test.h file at {work_dir}')
     if test_list:
         logger.info('Test List was generated by UATG. You can find it in '
-                    'the work dir ')
-    else:
-        logger.info('Test list will not be generated by uatg')
-    if test_list.lower() == 'true':
+                    f'the work dir{work_dir}')
         with open(join(work_dir, 'test_list.yaml'), 'w') as outfile:
             dump(test_list_dict, outfile)
+    else:
+        logger.info('Test list will not be generated by uatg')
 
     logger.info('\n****** Number of tests generated (per module) '
                 'by UATG ******')
