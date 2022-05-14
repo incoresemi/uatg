@@ -781,8 +781,12 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
     march = ''
     if 'rv32' in isa.lower():
         march += 'rv32i'
+        xlen = 32
+        mabi = 'ilp32'
     elif 'rv64' in isa.lower():
         march += 'rv64i'
+        xlen = 64
+        mabi = 'lp64'
     if 'M' in extension_list:
         march += 'm'
     if 'A' in extension_list:
@@ -802,8 +806,8 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
         test_list[base_key]['work_dir'] = abspath(asm_dir + '/' + base_key)
         test_list[base_key]['isa'] = isa
         test_list[base_key]['march'] = march
-        test_list[base_key]['mabi'] = 'lp64'
-        test_list[base_key]['cc'] = 'riscv64-unknown-elf-gcc'
+        test_list[base_key]['mabi'] = mabi
+        test_list[base_key]['cc'] = f'riscv{xlen}-unknown-elf-gcc'
         test_list[base_key][
             'cc_args'] = '-mcmodel=medany -static -std=gnu99 -O2 -fno-common ' \
                          '-fno-builtin-printf -fvisibility=hidden '
