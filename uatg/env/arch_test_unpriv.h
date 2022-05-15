@@ -309,9 +309,9 @@ rvtest_data_end:
 4:   RVTEST_SIGUPD(swreg,tempreg,offset) 
 //SREG tempreg, offset(swreg);                
 
-#define TEST_STORE(swreg,testreg,index,rs1,rs2,rs2_val,imm_val,offset,inst,adj)   ;\
+#define TEST_STORE(swreg,testreg,index,rs1,rs2,rs2_val,imm_val,offset,inst)   ;\
 LI(rs2,rs2_val)                                                             ;\
-addi rs1,swreg,offset+adj                                                     ;\
+addi rs1,swreg, offset                                                     ;\
 LI(testreg,imm_val)                                                         ;\
 sub rs1,rs1,testreg                                                          ;\
 inst rs2, imm_val(rs1)                                                      ;\
