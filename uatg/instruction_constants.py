@@ -565,6 +565,7 @@ def illegal_generator(isa='RV32I') -> list:
         # Handling special cases for instructions
         # 1. Converting hint instructions to non-hint instructions
         # 2. Modifying load/stores to work on valid addresses
+        insts_to_remove = []
         for i in range(len(illegal_list)):
             inst = illegal_list[i]
             opcode = inst % 128
@@ -584,16 +585,13 @@ def illegal_generator(isa='RV32I') -> list:
                     if opcode == 15 and (illegal_list[i] >> 12) % 8:
                         # Fence pred/succ != 0x0
                         inst += 1 << 20
-            # Making load/stores to use proper address values
-            # 3-lb, lh, lw, lbu, lhu, ld, lwu
-            # 35-sb, sh, sw, sd
-            if opcode == 3 and (illegal_list[i] >> 15) % 32 == 0:
-                # illegal_list[i] += rd << 7  # rd != x0
-                illegal_list[i] += rs << 15  # rs != x0
-            if opcode == 35 and (illegal_list[i] >> 15) % 32 == 0:
-                illegal_list[i] += rs << 15  # rs1 != x0
             if opcode == 47 and (illegal_list[i] >> 12) % 8 in (2, 3):
                 # TODO: Temporary fix for AMO instructions
                 illegal_list[i] -= 2 << 12  # converting illegal 2,3 to 0,1
 
+            # Removing load,stores, jumps, branches, ecall instuctions
+            if opcode in (3, 35, 111, 103, 99, 153):
+                insts_to_remove.append(illegal_list[i])
+        for i in insts_to_remove:
+            illegal_list.remove(i)
     return illegal_list
