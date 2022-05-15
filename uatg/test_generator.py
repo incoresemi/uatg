@@ -178,6 +178,18 @@ def asm_generation_process(args):
                 pt_misaligned_superpage = False
                 pass
 
+            try:
+                pt_sum_bit = privileged_dict['sum_bit']
+            except KeyError:
+                pt_sum_bit = False
+                pass
+            
+            try:
+                pt_mxr_bit = privileged_dict['mxr_bit']
+            except KeyError:
+                pt_mxr_bit = False
+                pass
+
             required_paging_modes = select_paging_modes(page_modes)
             current_paging_mode = privileged_dict['paging_mode']
 
@@ -203,7 +215,9 @@ def asm_generation_process(args):
                         user_supervisor_superpage=pt_user_supervisor_superpage,
                         fault=pt_fault,
                         mem_fault=pt_mem_fault,
-                        misaligned_superpage=pt_misaligned_superpage
+                        misaligned_superpage=pt_misaligned_superpage,
+                        mstatus_sum_bit=pt_sum_bit,
+                        mstatus_mxr_bit=pt_mxr_bit
                     )
 
                 else:
@@ -217,13 +231,12 @@ def asm_generation_process(args):
             # asm = license_str + includes + test_entry
             asm = (test_format_string[0] + test_format_string[1] +
                    test_format_string[2])
-
+            
             # Appending Coding Macros & Instructions
             # asm += rvcode_begin + asm_code + rvcode_end
-
             asm += test_format_string[3] + priv_asm_code[0] + \
-                   priv_asm_code[1] + asm_code + \
-                   priv_asm_code[2] + test_format_string[4]
+                   priv_asm_code[1] + priv_asm_code[2] + priv_asm_code[3] + \
+                   asm_code + priv_asm_code[4] + test_format_string[4]
 
             # Appending RVTEST_DATA macros and data values
             # asm += rvtest_data_begin + asm_data + rvtest_data_end
