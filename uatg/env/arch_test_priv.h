@@ -236,10 +236,11 @@ s_ls_fault_handler_entry:
 #endif
 
   // fix page table entry
-  li t4, 0xef
+  li t4, 0x200000ef
+  // li t4, 0xef
   LREG t6, faulty_page_address
   LREG t3, 0(t6)
-  or t4, t3, t4
+  // or t4, t3, t4
   j s_ls_fault_handler
 #ifdef misaligned_superpage_test
   // this does not have to necessarily be inside ifdefs. 
@@ -332,10 +333,11 @@ s_i_fault_handler_entry:
   beq t3, t4, misaligned_supervisor_superpage_i_fault_pte_val_loading
 #endif
   // update PTE
-  li t4, 0xef
+  // li t4, 0xef
+  li t4, 0x200000ef
   LREG t6, faulty_page_address
   LREG t3, 0(t6)
-  or t4, t3, t4
+  // or t4, t3, t4
   j s_i_fault_handler
 #ifdef misaligned_superpage_test
 misaligned_supervisor_superpage_i_fault_pte_val_loading:
