@@ -927,7 +927,7 @@ def setup_pages(pte_dict,
             'read': True,
             'write': True,
             'execute': True,
-            'user': True,
+            'user': True if mode=='user' else False,
             'globl': True,
             'access': True,
             'dirty': True
@@ -1265,6 +1265,16 @@ def setup_pages(pte_dict,
     fault_access_bit = 0x40 if pte_dict['access'] else 0x00
     fault_dirty_bit = 0x80 if pte_dict['dirty'] else 0x00
 
+    # a special case where the PTE bits are set rather than unset
+    # hence, we need to perform an OR with the faulty_pte_val rather tham
+    # the usual AND.
+    if pte_dict['user'] == True and mode != 'user':
+        fault_set = f"\t#set u bit in the PTE\n"\
+                    f"\tli t2, 0xff\n" \
+                    f"\tor t3, t3, t2\n"
+    else:
+        fault_set = ''
+
     faulty_pte_bits = fault_valid_bit | fault_read_bit | fault_write_bit | \
                       fault_execute_bit | fault_u_bit | fault_global_bit | \
                       fault_access_bit | fault_dirty_bit
@@ -1297,6 +1307,7 @@ def setup_pages(pte_dict,
                               f"\tld t3, 0(t6)\n" \
                               f"\tli t2, {hex(faulty_pte_val)}\n" \
                               f"\tand t3, t3, t2\n" \
+                              f"{fault_set}"\
                               f"\tSREG t3, 0(t6)\n" \
                               f"\tla t5, faulty_page_address\n" \
                               f"\tSREG t6, 0(t5)\n"
