@@ -590,7 +590,7 @@ def illegal_generator(isa='RV32I') -> list:
                 illegal_list[i] -= 2 << 12  # converting illegal 2,3 to 0,1
 
             # Removing load,stores, jumps, branches, ecall instuctions
-            if opcode in (3, 35, 111, 103, 99, 153):
+            if opcode in (3, 35, 111, 103, 99, 115):
                 insts_to_remove.append(illegal_list[i])
         for i in insts_to_remove:
             illegal_list.remove(i)
