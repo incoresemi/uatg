@@ -1,4 +1,5 @@
 # See LICENSE.incore for license details
+import os.path
 import re
 from glob import glob
 from os import remove, listdir, getcwd, chdir
@@ -807,7 +808,7 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
         test_list[base_key]['isa'] = isa
         test_list[base_key]['march'] = march
         test_list[base_key]['mabi'] = mabi
-        test_list[base_key]['cc'] = f'riscv{xlen}-unknown-elf-gcc'
+        test_list[base_key]['cc'] = f'riscv64-unknown-elf-gcc'
         test_list[base_key][
             'cc_args'] = '-mcmodel=medany -static -std=gnu99 -O2 -fno-common ' \
                          '-fno-builtin-printf -fvisibility=hidden '
@@ -866,9 +867,10 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
                   compile_macros):
     compiler = 'riscv64-unknown-elf-gcc'
     mcmodel = 'medany'
-    mabi = 'lp64'
-    march = isa.lower()[:8]
+    mabi = 'lp64' if '64' in isa else 'ilp32'
+    march = 'rv32imafdc' if '32' in isa else 'rv64imafdc'
     macros = ''
+    output = '/dev/null'  # 'dut.elf'
 
     if compile_macros:
         macros = '-D' + ' -D'.join(compile_macros)
@@ -879,8 +881,7 @@ def dump_makefile(isa, link_path, test_path, test_name, env_path, work_dir,
           f' -lm -lgcc -T {join(link_path, "link.ld")} {test_path}' \
           f' -I {env_path}' \
           f' -I {work_dir} {macros}' \
-          f' -o /dev/null'
-
+          f' -o {os.path.join(os.path.dirname(test_path), output)}\n'
     return cmd
 
 
