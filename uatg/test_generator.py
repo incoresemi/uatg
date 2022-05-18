@@ -99,19 +99,26 @@ def asm_generation_process(args):
                              f'{test_name}')
 
             # generate and setup page tables based on info from plugin
-            privileged_dict = {'page_size': 4096,
-                               'll_pages': 64,
-                               'paging_mode': 'sv39',
-                               'mode': 'machine',
-                               'enable': False}
+            #privileged_dict = {'page_size': 4096,
+            #                   'll_pages': 64,
+            #                   'paging_mode': 'sv39',
+            #                   'mode': 'machine',
+            #                  'enable': False}
+            
+            privileged_dict = {}
+
             try:
                 privileged_dict = ret_list_of_dicts['privileged_test']
             except KeyError:
                 privileged_dict['enable'] = False
             
-            # check to add privileged_test macro in compile macros list
+            # check to add privileged_test macro in compile macros list            
+            try: 
+                pt_enable = privileged_dict['enable']
+            except KeyError:
+                pt_enable = False
 
-            if privileged_dict['enable'] == True or \
+            if pt_enable == True or \
                ('rvtest_mtrap_routine' in compile_macros_dict[test_name]) or \
                ('rvtest_strap_routine' in compile_macros_dict[test_name]):
                    logger.debug('This test is a privileged test. Including arch_test_priv header')
@@ -191,22 +198,40 @@ def asm_generation_process(args):
                 pass
 
             required_paging_modes = select_paging_modes(page_modes)
-            current_paging_mode = privileged_dict['paging_mode']
 
-            if privileged_dict['enable']:
-                if (privileged_dict['paging_mode'] == 'sv39') and \
-                        (privileged_dict['mode'] == 'machine'):
-                    current_paging_mode = required_paging_modes[0]
+            try:
+                pt_current_paging_mode = privileged_dict['paging_mode']
+            except KeyError:
+                pt_current_paging_mode = 'sv39'
 
-                if current_paging_mode in required_paging_modes:
-                    logger.debug(f"{current_paging_mode} is in user listed " \
+            try:
+                pt_mode = privileged_dict['mode']
+            except KeyError:
+                pt_mode = 'machine'
+
+            try:
+                pt_page_size = privileged_dict['page_size']
+            except KeyError:
+                pt_page_size = 4096
+
+            try:
+                pt_ll_pages = privileged_dict['ll_pages']
+            except KeyError:
+                pt_ll_pages = 64
+
+            if pt_enable:
+                if (pt_current_paging_mode == 'sv39') and (pt_mode == 'machine'):
+                    pt_current_paging_mode = required_paging_modes[0]
+
+                if pt_current_paging_mode in required_paging_modes:
+                    logger.debug(f"{pt_current_paging_mode} is in user listed " \
                                  "paging modes")
                     priv_asm_code, priv_asm_data = setup_pages(
                         pte_dict=pte_bit_dict,
-                        page_size=privileged_dict['page_size'],
-                        paging_mode=current_paging_mode,
-                        valid_ll_pages=privileged_dict['ll_pages'],
-                        mode=privileged_dict['mode'],
+                        page_size=pt_page_size,
+                        paging_mode=pt_current_paging_mode,
+                        valid_ll_pages=pt_ll_pages,
+                        mode=pt_mode,
                         megapage=pt_megapage,
                         gigapage=pt_gigapage,
                         terapage=pt_terapage,
