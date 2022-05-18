@@ -898,7 +898,9 @@ def setup_pages(pte_dict,
                 user_supervisor_superpage=False,
                 fault=False,
                 mem_fault=False,
-                misaligned_superpage=False):
+                misaligned_superpage=False,
+                mstatus_sum_bit=False,
+                mstatus_mxr_bit=False):
     """
         creates pagetables to run tests in User and Supervisor modes
         Currently works with the sv39 virtual memory addressing.
@@ -918,7 +920,7 @@ def setup_pages(pte_dict,
     if mode == 'machine':
         # machine mode tests don't have anything to do with pages.
         # so, we return a list of empty strings.
-        return ['', '', ''], ''
+        return ['', '', '', '', ''], ''
     
     if pte_dict is None:
         pte_dict = {
@@ -1259,7 +1261,7 @@ def setup_pages(pte_dict,
     fault_read_bit = 0x02 if pte_dict['read'] else 0x00
     fault_write_bit = 0x04 if pte_dict['write'] else 0x00
     fault_execute_bit = 0x08 if pte_dict['execute'] else 0x00
-    fault_u_bit = 0x10 if (pte_dict['user'] and mode == 'user') else 0x00
+    fault_u_bit = 0x10 if pte_dict['user'] else 0x00
     fault_global_bit = 0x20 if pte_dict['globl'] else 0x00
     fault_access_bit = 0x40 if pte_dict['access'] else 0x00
     fault_dirty_bit = 0x80 if pte_dict['dirty'] else 0x00
@@ -1314,7 +1316,15 @@ def setup_pages(pte_dict,
     user_entry = "RVTEST_USER_ENTRY()\n" if mode == 'user' else ""
     user_exit = "RVTEST_USER_EXIT()\n" if mode == 'user' else ""
 
+    mxr_bit_update = "\n\t#sum bit updation\n\taddi x1, x0, 1\n\tslli x2, x1, 19\n\tcsrs CSR_MSTATUS, x2\n\n" if mstatus_mxr_bit == True else ""
+    
+    sum_bit_update = "\n\t#sum bit updation\n\taddi x1, x0, 1\n\tslli x2, x1, 18\n\tcsrs CSR_MSTATUS, x2\n\n" if mstatus_sum_bit == True else ""
+
     out_code_string.append(pte_updation)
+
+    out_code_string.append(sum_bit_update)
+
+    out_code_string.append(mxr_bit_update)
 
     out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "
                            f"{shift_amount})\n"

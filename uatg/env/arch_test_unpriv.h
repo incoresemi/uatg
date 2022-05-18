@@ -93,6 +93,67 @@
   #define CODE_REL_TVAL_MSK 0xD008 << (REGWIDTH*8-16)
 #endif
 
+#ifdef rvtest_privileged_enable
+  #include "arch_test_priv.h"
+#else
+  .macro RVTEST_CODE_BEGIN
+    .align UNROLLSZ
+    .section .text.init;
+    .globl rvtest_init;
+
+    rvtest_init:
+    .globl rvtest_code_begin
+    rvtest_code_begin:
+  .endm
+
+  .macro RVTEST_CODE_END
+    .align 4;
+    .globl rvtest_code_end
+    rvtest_code_end:
+
+  #ifdef rvtest_gpr_save
+    la x31, mscratch_space
+    csrw CSR_MSCRATCH, x31
+    SREG x0, 0*REGWIDTH(x31)
+    SREG x1, 1*REGWIDTH(x31)
+    SREG x2, 2*REGWIDTH(x31)
+    SREG x3, 3*REGWIDTH(x31)
+    SREG x4, 4*REGWIDTH(x31)
+    SREG x5, 5*REGWIDTH(x31)
+    SREG x6, 6*REGWIDTH(x31)
+    SREG x7, 7*REGWIDTH(x31)
+    SREG x8, 8*REGWIDTH(x31)
+    SREG x9, 9*REGWIDTH(x31)
+    SREG x10, 10*REGWIDTH(x31)
+    SREG x11, 11*REGWIDTH(x31)
+    SREG x12, 12*REGWIDTH(x31)
+    SREG x13, 13*REGWIDTH(x31)
+    SREG x14, 14*REGWIDTH(x31)
+    SREG x15, 15*REGWIDTH(x31)
+    SREG x16, 16*REGWIDTH(x31)
+    SREG x17, 17*REGWIDTH(x31)
+    SREG x18, 18*REGWIDTH(x31)
+    SREG x19, 19*REGWIDTH(x31)
+    SREG x20, 20*REGWIDTH(x31)
+    SREG x21, 21*REGWIDTH(x31)
+    SREG x22, 22*REGWIDTH(x31)
+    SREG x23, 23*REGWIDTH(x31)
+    SREG x24, 24*REGWIDTH(x31)
+    SREG x25, 25*REGWIDTH(x31)
+    SREG x26, 26*REGWIDTH(x31)
+    SREG x27, 27*REGWIDTH(x31)
+    SREG x28, 28*REGWIDTH(x31)
+    SREG x29, 29*REGWIDTH(x31)
+    SREG x30, 30*REGWIDTH(x31)
+    addi x30, x31, 0                // mv gpr pointer to x30
+    csrr x31, CSR_MSCRATCH          // restore value of x31
+    SREG x31, 31*REGWIDTH(x30)      // store x31
+  #endif
+
+    end_code:
+  .endm  
+#endif
+
 .macro RVTEST_DATA_BEGIN
 .data
 .align 4

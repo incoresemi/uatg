@@ -10,7 +10,7 @@
 .macro RVTEST_CODE_BEGIN
   .align UNROLLSZ
   .section .text.init;
-  .global rvtest_init;
+  .globl rvtest_init;
 
   rvtest_init:
 
@@ -38,7 +38,7 @@
 
 .macro RVTEST_CODE_END
   .align 4;
-  .global rvtest_code_end
+  .globl rvtest_code_end
   rvtest_code_end:
 #ifdef rvtest_mtrap_routine
   .option push
