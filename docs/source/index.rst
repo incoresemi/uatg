@@ -17,4 +17,6 @@ Welcome to UATG
    creating_new_tests
    coding_style
    code-doc
+   uatg_trap_handler
+   paging_scheme
    changelog
