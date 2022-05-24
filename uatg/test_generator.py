@@ -40,7 +40,7 @@ def asm_generation_process(args):
     t_name = ((name[1].split(" ", 1))[0])
 
     # data section for paging pages
-    priv_asm_code = ['', '', '']
+    priv_asm_code = ['', '', '', '', '']
     priv_asm_data = ""
 
     if check:
