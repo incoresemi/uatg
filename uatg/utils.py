@@ -901,19 +901,46 @@ def setup_pages(pte_dict,
                 mstatus_sum_bit=False,
                 mstatus_mxr_bit=False):
     """
-        creates pagetables to run tests in User and Supervisor modes
-        Currently works with the sv39 virtual memory addressing.
+        Sets up pages using Assembly to run tests in User and Supervisor modes.
+        More documentation can be found in the Paging Modes section of UATG's 
+        documentation.
 
-        :param page_size: Size of the pages - 4kiB.
-        :param paging_mode: Paging mode used in the tests - sv39, for now.
+        :param pte_dict: Dictionary containing information about the PTE bits in LL pages.
+        :param page_size: Size of the pages (default - 4KiB)
+        :param paging_mode: Paging mode used in the tests ( default - sv39)
         :param valid_ll_pages: Valid last level pages to be created.
         :param mode: Mode of execution for which the test is being generated.
+        :param megapage: True when a megapage is to be created.
+        :param gigapage: True when a gigapage is to be created.
+        :param terapage: True when a terapage is to be created.
+        :param petapage: True when a petapage is to be created.
+        :param user_superpage: True when user superpage is to be created.
+        :param user_supervisor_superpage: True when user as well as supervisor superpage is to be generated.
+        :param fault: True when the test is supposed to create a fault.
+        :param mem_fault: True when the test creates a virtual memory fault.
+        :param misaligned_superpage: True when a misaligned superpage (fault) is to be created
+        :param mstatus_mxr_bit: True when the MSTATUS.MXR bit is to be set
+        :param mstatus_sum_bit: True when the MSTATUS.SUM bit is to be set
+        
+        :type pte_dict: dict
         :type page_size: int
-        :type paging_mode: string
+        :type paging_mode: str
         :type valid_ll_pages: int
-        :type mode: string
+        :type mode: str
+        :type megapage: bool
+        :type gigapage: bool
+        :type terapage: bool
+        :type petapage: bool
+        :type user_superpage: bool
+        :type user_supervisor_superpage: bool
+        :type fault: bool
+        :type mem_fault: bool
+        :type misaligned_superpage: bool
+        :type mstatus_mxr_bit: bool
+        :type mstatus_sum_bit: bool
+
         :returns: ([out_code_string], out_data_string)
-        :rtype: tuple(list, string)
+        :rtype: tuple(list, str)
     """
 
     if mode == 'machine':
@@ -1037,10 +1064,9 @@ def setup_pages(pte_dict,
     leaf_pte_s = ''
     if user_supervisor_superpage == True:
         if misaligned_superpage == True:
-            logger.debug("Currently, when user and supervisor superpages are "\
-                         "present,\nOnly the S page is set to be misaligned."\
-                         "\nSupport for both misaligned user and supervisor "\
-                         "pages is not present, yet!")
+            logger.debug("""Currently, when user and supervisor superpages are 
+present, Only the S page is set to be misaligned.
+Support for both misaligned user and supervisor pages is not present, yet!""")
             logger.debug('creating misaligned page')
             leaf_pte_u = '\tli t5, 0x200000ff\n'
             leaf_pte_s = '\tli t4, 0x20eeeeef\n'
@@ -1074,14 +1100,14 @@ def setup_pages(pte_dict,
 
     initial_level_pages_s = ''
     for level in range(levels - 1):
-        initial_level_pages_s += f"l{level}_pt:\n.rept {entries}\n{word_fill} 0x0" \
-                                 f"\n.endr\n"
+        initial_level_pages_s += (f"l{level}_pt:\n.rept {entries}\n{word_fill} 0x0"
+                                  f"\n.endr\n")
 
     initial_level_pages_u = ''
     if mode == 'user':
         for level in range(1, levels - 1):
-            initial_level_pages_u += f"l{level}_u_pt:\n.rept {entries}\n" \
-                                     f"{word_fill} 0x0\n.endr\n"
+            initial_level_pages_u += (f"l{level}_u_pt:\n.rept {entries}\n"
+                                      f"{word_fill} 0x0\n.endr\n")
 
     # assumption that the l3 pt entry 0 will point to 80000000
 
@@ -1125,13 +1151,13 @@ def setup_pages(pte_dict,
         ll_entries_s += '{0} {1} # entry_{2}\n'.format(word_fill,hex(pte_entry_s), i)
         base_address_new += page_size
 
-    ll_page_s = f'l{levels - 1}_pt:\n' \
-                f'{ll_entries_s}.rept {entries - valid_ll_pages}\n' \
-                f'{word_fill} 0x0\n.endr\n'
+    ll_page_s = (f'l{levels - 1}_pt:\n'
+                 f'{ll_entries_s}.rept {entries - valid_ll_pages}\n'
+                 f'{word_fill} 0x0\n.endr\n')
     if mode == 'user':
-        ll_page_u = f'l{levels - 1}_u_pt:\n' \
-                    f'{ll_entries_u}.rept {entries - valid_ll_pages}\n' \
-                    f'{word_fill} 0x0\n.endr\n'
+        ll_page_u = (f'l{levels - 1}_u_pt:\n'
+                     f'{ll_entries_u}.rept {entries - valid_ll_pages}\n'
+                     f'{word_fill} 0x0\n.endr\n')
     else:
         ll_page_u = ''
 
@@ -1144,19 +1170,19 @@ def setup_pages(pte_dict,
     out_code_string = []
 
     # calculation to set up root level pages
-    pte_updation = f"\n.option norvc" \
-                   f"\n\t# setting up root PTEs\n" \
-                   f"\tla t0, l0_pt # load address of root page\n\n"
+    pte_updation = """\n.option norvc
+\t# setting up root PTEs
+\tla t0, l0_pt # load address of root page\n"""
 
-    data_for_misaligned_test = f"\n\tla t4, faulty_page_address\n"\
-                               f"\tSREG t0, (t4)\n"\
-                               f"\tla t4, misaligned_superpage\n"\
-                               f"\taddi t5, x0, 1\n"\
-                               f"\tSREG t5, (t4)\n"
+    data_for_misaligned_test = """\n\tla t4, faulty_page_address
+\tSREG t0, (t4)
+\tla t4, misaligned_superpage
+\taddi t5, x0, 1
+\tSREG t5, (t4)\n"""
  
     for i in range(levels - 1):
-        offset = f'\tmv t2, t0\n\tli t1, {paging_offset_constant}'\
-                 f'\n\tadd t0, t0, t1\n'
+        offset = (f'\tmv t2, t0\n\tli t1, {paging_offset_constant}'
+                  '\n\tadd t0, t0, t1\n')
         move_t0 = '\tmv t0, t2\n'
         offset_root = offset if i == 0 else ''
         offset_move_t0 = move_t0 if i == 0 else ''
@@ -1168,40 +1194,38 @@ def setup_pages(pte_dict,
                                        (user_superpage == False) \
                                        else ''
 
-        pte_updation += f"\t# setting up l{i} table to point l{i + 1} table\n" \
-                        f"\taddi t1, x0, 1 # add value 1 to reg\n" \
-                        f"\tslli t2, t1, {power} # left shift to create a " \
-                        f"page with value == page size\n" \
-                        f"\tadd t3, t2, t0 # add with the existing " \
-                        f"address to get address of level l page\n" \
-                        f"\tsrli t4, t3, {power} # divide that address with " \
-                        f"page size\n" \
-                        f"\tslli t4, t4, 10 # left shift for PTE format\n" \
-                        f"\tadd t4, t4, t1 # set valid bit to 1\n" \
-                        f"{offset_root}"\
-                        f"{superpage_entry_s}"\
-                        f"\tSREG t4, (t0)\n"\
-                        f"{s_superpage_address_load}\n"\
-                        f"{offset_move_t0}"\
-                        f"# store l{i + 1} first entry address " \
-                        f"into the first entry of l{i}\n\n"
+        pte_updation += (f"\t# setting up l{i} table to point l{i + 1} table\n"
+                         f"\taddi t1, x0, 1 # add value 1 to reg\n"
+                         f"\tslli t2, t1, {power} # left shift to create a page with value == page size\n"
+                         "\tadd t3, t2, t0 # add with the existing "
+                         "address to get address of level l page\n"
+                         f"\tsrli t4, t3, {power} # divide that address with page size\n"
+                         "\tslli t4, t4, 10 # left shift for PTE format\n"
+                         "\tadd t4, t4, t1 # set valid bit to 1\n"
+                         f"{offset_root}"
+                         f"{superpage_entry_s}"
+                         "\tSREG t4, (t0)\n"
+                         f"{s_superpage_address_load}\n"
+                         f"{offset_move_t0}"
+                         f"# store l{i + 1} first entry address into the first entry of l{i}\n\n")
         if i < levels-2:
-            pte_updation += f"\t#address updation\n" \
-                            f"\tadd t0, t3, 0 # move the address of " \
-                            f"level {i + 1} page to t0\n\n"
+            pte_updation += ("\t#address updation\n"
+                             "\tadd t0, t3, 0 # move the address of "
+                             f"level {i + 1} page to t0\n\n")
 
     pte_updation += "\n"
 
     if mode == 'user':
         #user_lowest_level = f"{levels-3}_u" if (levels-3 != 0) else "0"
-        pte_updation += f"\t# user page table set up\n"
-        pte_updation += f"\tla t0, l0_pt # load address of root page\n\n"
-        pte_updation += f"\tla t3, l1_u_pt # load address of l1 user page\n\n"
-        common_setup = f"\tsrli t5, t3, 12\n" \
-                       f"\tslli t5, t5, 10\n" \
-                       f"\tli t4, 1\n" \
-                       f"\tadd t5, t5, t4\n"
-        common_setup_store = f"\tSREG t5, (t0)\n"
+        pte_updation += ("""\t# user page table set up
+\tla t0, l0_pt # load address of root page\n\n
+\tla t3, l1_u_pt # load address of l1 user page\n\n""")
+        
+        common_setup = ("""\tsrli t5, t3, 12\n
+\tslli t5, t5, 10\n
+\tli t4, 1\n
+\tadd t5, t5, t4\n""")
+        common_setup_store = "\tSREG t5, (t0)\n"
 
         for i in range(levels-1):
             superpage_entry_u = leaf_pte_u if i == (spage_level - 1) else ''
@@ -1211,23 +1235,21 @@ def setup_pages(pte_dict,
                                            (user_superpage == True)\
                                         else ''
 
-            pte_updation += f"\n\t# update l{levels-3+i} page entry with address " \
-                            f"of l{levels-2+i} page\n"
+            pte_updation += f"\n\t# update l{levels-3+i} page entry with address of l{levels-2+i} page\n"
             if i != 0:
-                pte_updation += f"\taddi t2, x0, 1\n" \
-                                f"\tslli t2, t2, 12\n" \
-                                f"\tadd t3, t0, t2\n"
+                pte_updation += """\taddi t2, x0, 1
+\tslli t2, t2, 12
+\tadd t3, t0, t2\n"""
             
             pte_updation += f"{common_setup}\n"
-            pte_updation += f'{superpage_entry_u}'\
-                            f'{common_setup_store}'\
-                            f'{u_superpage_address_load}\n'
+            pte_updation += (f'{superpage_entry_u}\n'
+                             f'{common_setup_store}\n'
+                             f'{u_superpage_address_load}\n')
             #pte_updation += f'{common_setup_store}'
 
             if i < levels-2:
-                pte_updation += f"\t# address updation\n" \
-                                f"\tadd t0, t3, 0 # move address of " \
-                                f"l{i + 1} page into t0\n"
+                pte_updation += ("\t# address updation\n"
+                                f"\tadd t0, t3, 0 # move address of l{i + 1} page into t0\n")
 
     if (terapage == True) or (petapage == True):
         a0_reg = 0
@@ -1249,9 +1271,9 @@ def setup_pages(pte_dict,
         pt_label = f'l{levels - 1}_pt'
 
     if mode == 'user' and user_superpage == False and misaligned_superpage == True:
-        handle_in_supervisor = f'\n\tla t3, handle_pf_in_supervisor\n'\
-                               f'\taddi t4, x0, 1\n'\
-                               f'\tSREG t4, (t3)\n\n'
+        handle_in_supervisor = """\n\tla t3, handle_pf_in_supervisor
+\taddi t4, x0, 1
+\tSREG t4, (t3)\n\n"""
     else:
         handle_in_supervisor = ''
         
@@ -1269,9 +1291,10 @@ def setup_pages(pte_dict,
     # hence, we need to perform an OR with the faulty_pte_val rather tham
     # the usual AND.
     if pte_dict['user'] == True and mode != 'user':
-        fault_set = f"\t#set u bit in the PTE\n"\
-                    f"\tli t2, 0xff\n" \
-                    f"\tor t3, t3, t2\n"
+        fault_set = """\t#set u bit in the PTE
+\tli t2, 0xff
+\tor t3, t3, t2\n"""
+
     else:
         fault_set = ''
 
@@ -1285,32 +1308,32 @@ def setup_pages(pte_dict,
         "faulting_instruction"
 
     if fault:
-        fault_creation = f"\naddress_loading:\n" \
-                         f"\tli a0, {a0_reg}\n" \
-                         f"\tli a1, {a1_reg}\n" \
-                         f"\tla t5, faulting_instruction\n" \
-                         f"\tla t6, return_address\n" \
-                         f"\tSREG t5, 0(t6)\n\n"\
-                         f"{handle_in_supervisor}\n"
+        fault_creation = ("\naddress_loading:\n"
+                         f"\tli a0, {a0_reg}\n"
+                         f"\tli a1, {a1_reg}\n"
+                         "\tla t5, faulting_instruction\n"
+                         "\tla t6, return_address\n"
+                         "\tSREG t5, 0(t6)\n\n"
+                         f"{handle_in_supervisor}\n")
         
         if (misaligned_superpage == False):
-            fault_creation += f"offset_adjustment:\n" \
-                              f"\tli t3, 0x1ff\n" \
-                              f"\tli t4, 0x1ff000\n" \
-                              f"\tla t5, {fault_page_label}\n" \
-                              f"\tand t5, t5, t4\n" \
-                              f"\tsrli t5, t5, 12\n" \
-                              f"\tand t5, t5, t3\n" \
-                              f"\tslli t5, t5, 3\n" \
-                              f"\tla t6, {pt_label}\n" \
-                              f"\tadd t6, t6, t5\n" \
-                              f"\tld t3, 0(t6)\n" \
-                              f"\tli t2, {hex(faulty_pte_val)}\n" \
-                              f"\tand t3, t3, t2\n" \
-                              f"{fault_set}"\
-                              f"\tSREG t3, 0(t6)\n" \
-                              f"\tla t5, faulty_page_address\n" \
-                              f"\tSREG t6, 0(t5)\n"
+            fault_creation += ("offset_adjustment:\n"
+                              "\tli t3, 0x1ff\n"
+                              "\tli t4, 0x1ff000\n"
+                              f"\tla t5, {fault_page_label}\n"
+                              "\tand t5, t5, t4\n"
+                              "\tsrli t5, t5, 12\n"
+                              "\tand t5, t5, t3\n"
+                              "\tslli t5, t5, 3\n"
+                              f"\tla t6, {pt_label}\n"
+                              "\tadd t6, t6, t5\n"
+                              "\tld t3, 0(t6)\n"
+                              f"\tli t2, {hex(faulty_pte_val)}\n"
+                              "\tand t3, t3, t2\n"
+                              f"{fault_set}"
+                              "\tSREG t3, 0(t6)\n"
+                              "\tla t5, faulty_page_address\n"
+                              "\tSREG t6, 0(t5)\n")
 
 
     else:
@@ -1326,9 +1349,15 @@ def setup_pages(pte_dict,
     user_entry = "RVTEST_USER_ENTRY()\n" if mode == 'user' else ""
     user_exit = "RVTEST_USER_EXIT()\n" if mode == 'user' else ""
 
-    mxr_bit_update = "\n\t#sum bit updation\n\taddi x1, x0, 1\n\tslli x2, x1, 19\n\tcsrs CSR_MSTATUS, x2\n\n" if mstatus_mxr_bit == True else ""
+    mxr_bit_update = ("""\n\t#sum bit updation
+\taddi x1, x0, 1
+\tslli x2, x1, 19
+\tcsrs CSR_MSTATUS, x2\n\n""") if mstatus_mxr_bit == True else ""
     
-    sum_bit_update = "\n\t#sum bit updation\n\taddi x1, x0, 1\n\tslli x2, x1, 18\n\tcsrs CSR_MSTATUS, x2\n\n" if mstatus_sum_bit == True else ""
+    sum_bit_update = ("""\n\t#sum bit updation
+\taddi x1, x0, 1
+\tslli x2, x1, 18
+\tcsrs CSR_MSTATUS, x2\n\n""") if mstatus_sum_bit == True else ""
 
     out_code_string.append(pte_updation)
 
@@ -1336,16 +1365,16 @@ def setup_pages(pte_dict,
 
     out_code_string.append(mxr_bit_update)
 
-    out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, "
-                           f"{shift_amount})\n"
-                           f"101:\t# supervisor entry point\n"
+    out_code_string.append(f"\nRVTEST_SUPERVISOR_ENTRY({power}, {mode_val}, {shift_amount})\n"
+                           "101:\t# supervisor entry point\n"
                            f"{u_mode_a1_reg}"
                            f"\n{user_entry}"
-                           f"102:\t# user entry point\n.option rvc\n\n")
+                           "102:\t# user entry point\n"
+                           f".option rvc\n\n")
     out_code_string.append(f"\n\n.option norvc\n{user_exit}"
-                           f"test_exit:\n"
-                           f"\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"
-                           f"supervisor_exit_label:\n")
+                           "test_exit:\n"
+                           "\nRVTEST_SUPERVISOR_EXIT()\n#assuming va!=pa\n"
+                           "supervisor_exit_label:\n")
 
     return out_code_string, out_data_string
 
