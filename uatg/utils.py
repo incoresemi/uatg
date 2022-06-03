@@ -808,7 +808,7 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
         test_list[base_key]['isa'] = isa
         test_list[base_key]['march'] = march
         test_list[base_key]['mabi'] = mabi
-        test_list[base_key]['cc'] = f'riscv64-unknown-elf-gcc'
+        test_list[base_key]['cc'] = f'riscv{xlen}-unknown-elf-gcc'
         test_list[base_key][
             'cc_args'] = '-mcmodel=medany -static -std=gnu99 -O2 -fno-common ' \
                          '-fno-builtin-printf -fvisibility=hidden '
