@@ -39,7 +39,7 @@ if certain features in the configuration have been disabled.
 UATG has ensured that the framework and tests are decoupled. Thus, the tests themselves can be
 hosted as a separate directory or repository and can be fed into UATG to generate Assembly tests. 
 Examples of python-plugins for some of Chromite's modules are present in the 
-`chromite-uatg-tests <https://github.com/incoresemi/chromite_uatg_tests>`_ repository.
+`chromite_uatg_tests <https://github.com/incoresemi/chromite_uatg_tests>`_ repository.
 
 The tests generated using UATG can be run on the DUT in the conventional way or by using a 
 framework like `RiVer Core <https://github.com/incoresemi/river_core>`_. The `UATG plugin
