@@ -1,6 +1,7 @@
 include LICENSE.incore
 include README.md
 include uatg/requirements.txt
+include uatg/isem.yaml
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
