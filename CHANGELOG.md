@@ -2,6 +2,9 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2022-09-08
+- path added to MANIFEST.in to include isem.yaml 
+
 ## [1.5.0] - 2022-05-06
 - UATG can generate tests with all possible page table configurations.
 - UATG can generate aligned and misaligned superpages
