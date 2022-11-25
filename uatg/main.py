@@ -131,7 +131,7 @@ def clean(module_dir, work_dir, verbose):
               multiple=False,
               is_flag=False,
               help="Enter a list of modules as a string in a comma separated "
-              "format.\ndefault-all",
+              "format.\ndefault: all",
               type=str)
 @click.option('--verbose',
               '-v',
