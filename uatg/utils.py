@@ -778,21 +778,9 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
     target_dir = abspath(asm_dir + '/../')
 
     extension_list = split_isa_string(isa)
-    march = ''
-    if 'rv32' in isa.lower():
-        march += 'rv32i'
-    elif 'rv64' in isa.lower():
-        march += 'rv64i'
-    if 'M' in extension_list:
-        march += 'm'
-    if 'A' in extension_list:
-        march += 'a'
-    if 'F' in extension_list:
-        march += 'f'
-    if 'D' in extension_list:
-        march += 'd'
-    if 'C' in extension_list:
-        march += 'c'
+    march = isa.replace('S','').replace('U','').replace('Zicsr','').replace('H','').lower()
+    xlen = 32 if '32' in isa else 64
+    mabi = 'ilp32' if xlen == 32 else 'lp64'
 
     for test in asm_test_list:
         logger.debug(f"Current test is {test}")
@@ -802,8 +790,8 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
         test_list[base_key]['work_dir'] = abspath(asm_dir + '/' + base_key)
         test_list[base_key]['isa'] = isa
         test_list[base_key]['march'] = march
-        test_list[base_key]['mabi'] = 'lp64'
-        test_list[base_key]['cc'] = 'riscv64-unknown-elf-gcc'
+        test_list[base_key]['mabi'] = mabi
+        test_list[base_key]['cc'] = f'riscv{xlen}-unknown-elf-gcc'
         test_list[base_key][
             'cc_args'] = '-mcmodel=medany -static -std=gnu99 -O2 -fno-common ' \
                          '-fno-builtin-printf -fvisibility=hidden '

@@ -2,6 +2,9 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2022-11-25
+- fix march and mabi generation
+
 ## [1.5.1] - 2022-09-08
 - path added to MANIFEST.in to include isem.yaml 
 
