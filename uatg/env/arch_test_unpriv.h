@@ -93,6 +93,8 @@
   #define CODE_REL_TVAL_MSK 0xD008 << (REGWIDTH*8-16)
 #endif
 
+#include "arch_test_priv.h"
+
 .macro RVTEST_DATA_BEGIN
 .data
 .align 4

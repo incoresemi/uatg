@@ -778,25 +778,9 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict):
     target_dir = abspath(asm_dir + '/../')
 
     extension_list = split_isa_string(isa)
-    march = ''
-    if 'rv32' in isa.lower():
-        march += 'rv32i'
-        xlen = 32
-        mabi = 'ilp32'
-    elif 'rv64' in isa.lower():
-        march += 'rv64i'
-        xlen = 64
-        mabi = 'lp64'
-    if 'M' in extension_list:
-        march += 'm'
-    if 'A' in extension_list:
-        march += 'a'
-    if 'F' in extension_list:
-        march += 'f'
-    if 'D' in extension_list:
-        march += 'd'
-    if 'C' in extension_list:
-        march += 'c'
+    march = isa.replace('S','').replace('U','').replace('Zicsr','').replace('H','').lower()
+    xlen = 32 if '32' in isa else 64
+    mabi = 'ilp32' if xlen == 32 else 'lp64'
 
     for test in asm_test_list:
         logger.debug(f"Current test is {test}")
