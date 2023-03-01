@@ -430,6 +430,90 @@ def bit_walker(bit_width=8, n_ones=1, invert=False, signed=True):
                 break
         return walked
 
+def bit_marcher(bit_width):
+    """Returns marching pattern of the given number of bits
+    
+    Args:
+        bit_width (int): width of the 0s over which 1s are to be marched
+    
+    Returns:
+        list: list of numbers in decimal value which represents bit_width
+        marching pattern
+    """
+    march = []
+    limit = 2**bit_width
+    i = 0
+    for j in range(bit_width):
+        march.append((i << 1) + 1)
+        i = ((i << 1) + 1) % 2**(bit_width)
+    for j in range(bit_width - 1):
+        march.append((i << 1) % 2**(bit_width))
+        i = (i << 1) % 2**(bit_width)
+    return march
+
+def pattern_walk(max_width: int, fill: str, pattern: str) -> list:
+    """Returns a list of test vectors (of width max_width) with the
+    given pattern walked (digit-by-digit in hex) through the fill-string.
+
+    A pattern longer than max_width would result can be tricky to use.
+
+    Args:
+        max_width (int): width of each list element to be returned.
+        fill (str): hex-digit to be used for filling spaces.
+        pattern (str): pattern to be walked. 
+
+    Returns:
+        list: list of test vectors (with the 0x) prefix.
+    """
+
+    temp_list = []
+    for iter_count in range(max_width):
+        temp_entry = pattern[len(pattern) - iter_count:] + (fill * max_width)
+        temp_list.append(temp_entry[:max_width])
+        if iter_count >= len(pattern):
+            break
+    for iter_count in range(max_width):
+        temp_entry = (fill * iter_count) + pattern + (fill * max_width)
+        temp_list.append(temp_entry[:max_width])
+
+    my_list = [f'0x{entry[:max_width]}' for entry in temp_list]
+    return my_list
+
+def signed_special(size, signed=True):
+    if signed:
+        conv_func = lambda x: twos(x,size)
+        sqrt_min = int(-sqrt(2**(size-1)))
+        sqrt_max = int(sqrt((2**(size-1)-1)))
+    else:
+        sqrt_min = 0
+        sqrt_max = int(sqrt((2**size)-1))
+        conv_func = lambda x: (int(x,16) if '0x' in x else int(x,2)) if isinstance(x,str) else x
+
+    dataset = [3, "0x"+"".join(["5"]*int(size/4)), "0x"+"".join(["a"]*int(size/4)), 5, "0x"+"".join(["3"]*int(size/4)), "0x"+"".join(["6"]*int(size/4))]
+    dataset = list(map(conv_func,dataset)) + [int(sqrt(abs(conv_func("0x8"+"".join(["0"]*int((size/4)-1)))))*(-1 if signed else 1))] + [sqrt_min,sqrt_max]
+    return dataset
+
+def alternate_ones(size, signed=True):
+    coverpoints=[]
+    for s in range(2, size):
+        t1 =( '' if s%2 == 0 else '1') + ''.join(['01']*int(s/2))
+        if not signed:
+             dataset = int(t1,2)
+        else:
+            dataset = twos(t1,s)
+        coverpoints.append(dataset)
+    return coverpoints
+    
+def alternate_zeros(size, signed=True):
+    coverpoints=[]
+    for s in range(2, size):
+        t1 =( '' if s%2 == 0 else '0') + ''.join(['10']*int(s/2))
+        if not signed:
+             dataset = int(t1,2)
+        else:
+            dataset = twos(t1,s)
+        coverpoints.append(dataset)
+    return coverpoints
 
 def illegal_generator(isa='RV32I') -> list:
     """
