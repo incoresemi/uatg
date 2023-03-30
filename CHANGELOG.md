@@ -2,6 +2,9 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2023-03-29
+- added functions in instruction_constants.py to generate ASM strings for various instruction sequences
+
 ## [1.6.0] - 2022-11-25
 - fix march and mabi generation
 

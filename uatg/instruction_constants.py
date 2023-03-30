@@ -681,3 +681,1062 @@ def illegal_generator(isa='RV32I') -> list:
                 illegal_list[i] -= 2 << 12  # converting illegal 2,3 to 0,1
 
     return illegal_list
+
+
+
+############################################################################
+# Function to return ASM-string of reg-reg dependent sequences #
+############################################################################
+
+def seq_test_rr_rr_op(inst1, inst2, destreg1, destreg2, reg1, reg2, reg3, \
+                      val1, val2, val3, swreg, offset, depth, dependency):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg2}, {val2}
+        li {reg3}, {val3}
+        '''
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        if dependency == 'RAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {nop_op}
+                {inst2} {destreg2}, {destreg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+                '''
+        if dependency == 'WAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {nop_op}
+                {inst2} {destreg1}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+            
+        if dependency == 'WAR':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {nop_op}
+                {inst2} {reg1}, {reg2}, {reg3}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+    else:
+
+        if dependency == 'RAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {inst2} {destreg2}, {destreg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+                '''
+            
+        if dependency == 'WAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {inst2} {destreg1}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+            
+        if dependency == 'WAR':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {inst2} {reg1}, {reg2}, {reg3}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+        
+    return asm_string
+
+      
+############################################################################
+# Function to return ASM-string of imm-imm dependent sequences #
+############################################################################
+def seq_test_ri_ri_op(inst1, inst2, destreg1, destreg2, reg1, reg2, val1, val2,\
+                       imm_val, swreg, offset, depth, dependency=''):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg2}, {val2}
+        '''
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        if dependency == 'RAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                {inst2} {destreg2}, {destreg1}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+                '''
+            
+        if dependency == 'WAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                {inst2} {destreg1}, {reg2}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+
+        if dependency == 'WAR':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                {inst2} {reg1}, {reg2}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+    else:
+        if dependency == 'RAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {inst2} {destreg2}, {destreg1}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+                '''
+            
+        if dependency == 'WAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {inst2} {destreg1}, {reg2}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+
+        if dependency == 'WAR':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {inst2} {reg1}, {reg2}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+            
+    return asm_string
+
+    
+
+############################################################################
+# Function to return ASM-string of reg-imm dependent inst sequences #
+############################################################################
+def seq_test_rr_ri_op(inst1, inst2, destreg1, destreg2, \
+                          reg1, reg2, val1, val2, imm_val, \
+                            swreg, offset, depth, dependency=''):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg2}, {val2}
+        '''
+    
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        if dependency == 'RAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {nop_op}
+                {inst2} {destreg2}, {destreg1}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+                '''
+            
+        if dependency == 'WAR':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {nop_op}
+                {inst2} {reg1}, {reg2}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {nop_op}
+                {inst2} {destreg1}, {reg2}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+    
+    else:
+        if dependency == 'RAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {inst2} {destreg2}, {destreg1}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {inst2} {reg1}, {reg2}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, {reg2}
+                {inst2} {destreg1}, {reg2}, SEXT_IMM({imm_val})
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+    return asm_string
+
+    
+
+############################################################################
+# Function to return ASM-string of imm-reg dependent inst sequences #
+############################################################################
+def seq_test_ri_rr_op(inst1, inst2, destreg1, destreg2, \
+                        reg1, reg2, reg3, val1, val2, val3, \
+                        imm_val, swreg, offset, depth, dependency=''):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg2}, {val2}
+        li {reg3}, {val3}
+        '''
+    
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        if dependency == 'RAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                {inst2} {destreg2}, {destreg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+                '''
+            
+        if dependency == 'WAR':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                {inst2} {reg1}, {reg2}, {reg3}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                {inst2} {destreg1}, {reg1}, {reg2} 
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+
+    else:
+        if dependency == 'RAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {inst2} {destreg2}, {destreg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+                '''
+            
+        if dependency == 'WAR':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {inst2} {reg1}, {reg2}, {reg3}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {inst1} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {inst2} {destreg1}, {reg1}, {reg2} 
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+            
+    return asm_string
+
+    
+
+###################################################################
+# Function to return 3 back to back dependent reg inst ASM-String #
+###################################################################
+def seq_test_three_back_to_back_reg_op(inst, destreg1, destreg2, destreg3, \
+                                        reg1, reg2, reg3, reg4, val1, val2, val3, val4,\
+                                        swreg, offset, dependency=''):
+    asm_string = ''
+
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg2}, {val2}
+        li {reg3}, {val3}
+        li {reg4}, {val4}
+        '''
+
+    if dependency == 'RAW':
+        asm_string += f'''
+            {inst} {destreg1}, {reg1}, {reg2}
+            {inst} {destreg2}, {destreg1}, {reg2}
+            {inst} {destreg3}, {destreg2}, {reg2}
+            RVTEST_SIGUPD({swreg}, {destreg3}, {offset})
+            '''
+    if dependency == 'WAR':
+        asm_string += f'''
+            {inst} {destreg1}, {reg1}, {reg2}
+            {inst} {reg1}, {reg2}, {reg3}
+            {inst} {reg2}, {reg3}, {reg4}
+            RVTEST_SIGUPD({swreg}, {reg2}, {offset})
+            '''
+    if dependency == 'WAW':
+        asm_string += f'''
+            {inst} {destreg1}, {reg1}, {reg2}
+            {inst} {destreg1}, {reg1}, {reg2}
+            {inst} {destreg1}, {reg2}, {reg2}
+            RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+            '''
+    return asm_string
+
+    
+###################################################################
+# Function to return 3 back to back dependent imm inst ASM-String #
+###################################################################
+def seq_test_three_back_to_back_dep_imm_op(inst, destreg1, destreg2, destreg3, \
+                                        reg1, reg1_val, reg2, reg2_val, reg3, reg3_val,\
+                                        imm_val, swreg, offset,  dependency=''):
+    asm_string = ''
+
+    asm_string = f'''  
+        li {reg1}, {reg1_val}
+        li {reg2}, {reg2_val}
+        li {reg3}, {reg3_val}
+        '''
+
+    if dependency == 'RAW':
+        asm_string = f'''
+            {inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+            {inst} {destreg2}, {destreg1}, SEXT_IMM({imm_val})
+            {inst} {destreg3}, {destreg2}, SEXT_IMM({imm_val})
+            RVTEST_SIGUPD({swreg}, {destreg3}, {offset})
+            '''
+    if dependency == 'WAR':
+        asm_string = f'''  
+            {inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+            {inst} {reg1}, {reg2}, SEXT_IMM({imm_val})
+            {inst} {reg2}, {reg3}, SEXT_IMM({imm_val}) 
+            RVTEST_SIGUPD({swreg}, {reg2}, {offset})
+            '''
+    if dependency == 'WAW':
+        asm_string = f'''
+            {inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+            {inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+            {inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+            RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+            '''
+    return asm_string
+
+
+############################################################################
+# Function to return ASM-string of inst pipeline sequences #
+############################################################################
+def seq_test_rr_inst_pipeline_check_op(inst, destreg, reg1, reg2, val1, val2, swreg, offset, pipeline_depth):
+    asm_string = ''
+    inst_seq = ''
+    d=0
+    if pipeline_depth>0:
+        while d != pipeline_depth:
+            inst_seq += f'{inst} {destreg}, {reg1}, {reg2}\n'
+            d += 1
+
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg2}, {val2}
+        {inst_seq}
+        RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+        '''
+    return asm_string
+
+
+############################################################################
+# Function to return ASM-string of reg-branch RAW dependent inst sequences #
+############################################################################
+def seq_test_rr_branch_raw_op(reg_inst, branch_inst, destreg, reg1, reg2, val1, val2, swreg, offset, depth):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        asm_string = f'''
+            li {reg1}, {val1}
+            li {reg2}, {val2}
+            {reg_inst} {destreg}, {reg1}, {reg2}
+            {nop_op}
+            {branch_inst} {destreg}, {reg2}, 1f
+            add {destreg}, {reg1}, {reg2}
+            1: add {destreg}, {reg1}, {reg2}
+            RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+            '''
+    else:
+        asm_string = f'''
+            li {reg1}, {val1}
+            li {reg2}, {val2}
+            {reg_inst} {destreg}, {reg1}, {reg2}
+            {branch_inst} {destreg}, {reg2}, 1f
+            add {destreg}, {reg1}, {reg2}
+            1: add {destreg}, {reg1}, {reg2}
+            RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+            '''
+    return asm_string
+
+
+############################################################################
+# Function to return ASM-string of imm-branch RAW dependent inst sequences #
+############################################################################
+def seq_test_imm_branch_raw_op(imm_inst, branch_inst, destreg, reg1, reg2, val1, val2, imm_val, swreg, offset, depth):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        asm_string = f'''
+            li {reg1}, {val1}
+            li {reg2}, {val2}
+            {imm_inst} {destreg}, {reg1}, SEXT_IMM({imm_val})
+            {nop_op}
+            {branch_inst} {destreg}, {reg2}, 1f
+            add {destreg}, {reg1}, {reg2}
+            1: add {destreg}, {reg1}, {reg2}
+            RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+            '''
+    else:
+        asm_string = f'''
+            li {reg1}, {val1}
+            li {reg2}, {val2}
+            {imm_inst} {destreg}, {reg1}, SEXT_IMM({imm_val})
+            {branch_inst} {destreg}, {reg2}, 1f
+            add {destreg}, {reg1}, {reg2}
+            1: add {destreg}, {reg1}, {reg2}
+            RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+            '''
+    return asm_string
+
+
+
+############################################################################
+# Function to return ASM-string of load-reg dependent inst sequences #
+############################################################################
+def seq_test_load_rr_raw_op(load_inst, reg_inst, destreg1, destreg2, reg1, reg2, reg3, val2, val3,  imm_val, swreg, offset, depth, dependency='', index=0,adj=0):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        asm_string = f'''
+            LA({reg1},rvtest_data+({index}*4)+{adj}-{imm_val})
+            li {reg2}, {val2}
+            li {reg3}, {val3}
+            '''
+        if dependency == 'RAW':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {nop_op}
+                {reg_inst} {destreg2}, {destreg1}, {reg2}
+                '''
+        if dependency == 'WAW':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {nop_op}
+                {reg_inst} {destreg1}, {reg2}, {reg3}
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {nop_op}
+                {reg_inst} {reg1}, {reg2}, {reg3}
+                '''
+        asm_string += f'''
+            RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+            '''
+    else:
+        asm_string = f'''
+            LA({reg1},rvtest_data+({index}*4)+{adj}-{imm_val})
+            li {reg2}, {val2}
+            li {reg3}, {val3}
+            '''
+        if dependency == 'RAW':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {reg_inst} {destreg2}, {destreg1}, {reg2}
+                '''
+        if dependency == 'WAW':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {reg_inst} {destreg1}, {reg2}, {reg3}
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {reg_inst} {reg1}, {reg2}, {reg3}
+                '''
+        asm_string += f'''
+            RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+            '''        
+
+
+    return asm_string
+
+
+############################################################################
+# Function to return ASM-string of load-imm dependent inst sequences #
+############################################################################
+def seq_test_load_ri_op(load_inst, imm_inst, destreg1, destreg2, reg1, reg2, val2, imm_val, swreg, offset, depth, dependency='', index=0,adj=0):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        asm_string = f'''
+            LA({reg1},rvtest_data+({index}*4)+{adj}-{imm_val})
+            li {reg2}, {val2}
+            '''
+        if dependency == 'RAW':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {nop_op}
+                {imm_inst} {destreg2}, {destreg1}, SEXT_IMM({imm_val})
+                '''
+        if dependency == 'WAW':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {nop_op}
+                {imm_inst} {destreg1}, {reg2}, SEXT_IMM({imm_val})
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {nop_op}
+                {imm_inst} {reg1}, {reg2}, SEXT_IMM({imm_val})
+                '''
+        asm_string += f'''
+            RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+            '''
+    else:
+        asm_string = f'''
+            LA({reg1},rvtest_data+({index}*4)+{adj}-{imm_val})
+            li {reg2}, {val2}
+            '''
+        if dependency == 'RAW':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {imm_inst} {destreg2}, {destreg1}, SEXT_IMM({imm_val})
+                '''
+        if dependency == 'WAW':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {imm_inst} {destreg1}, {reg2}, SEXT_IMM({imm_val})
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {load_inst} {destreg1}, {imm_val}({reg1})
+                {imm_inst} {reg1}, {reg2}, SEXT_IMM({imm_val})
+                '''
+        asm_string += f'''
+            RVTEST_SIGUPD({swreg}, {destreg2}, {offset})
+            '''        
+
+    return asm_string
+
+
+############################################################################
+# Function to return ASM-string of reg-load dependent inst sequences #
+############################################################################
+def seq_test_rr_load_op(reg_inst, load_inst, destreg, reg1, reg2, reg3, val1, val2, imm_val, swreg, offset, depth, dependency='', index=0,adj=0):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        asm_string = f'''
+            LA({reg3},rvtest_data+({index}*4)+{adj}-{imm_val})
+            li {reg2}, {val2}
+            li {reg1}, {val1}
+            '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {reg_inst} {destreg}, {reg1}, {reg2}
+                {nop_op}
+                {load_inst} {destreg}, {imm_val}({reg3})
+                RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {reg_inst} {destreg}, {reg1}, {reg2}
+                {nop_op}
+                {load_inst} {reg1}, {imm_val}({reg3})
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+    else:
+        asm_string = f'''
+            LA({reg3},rvtest_data+({index}*4)+{adj}-{imm_val})
+            li {reg2}, {val2}
+            li {reg1}, {val1}
+            '''
+        if dependency == 'WAW':
+            asm_string += f'''
+                {reg_inst} {destreg}, {reg1}, {reg2}
+                {load_inst} {destreg}, {imm_val}({reg3})
+                RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+                
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {reg_inst} {destreg}, {reg1}, {reg2}
+                {load_inst} {reg1}, {imm_val}({reg3})
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                ''' 
+    return asm_string
+
+
+############################################################################
+# Function to return ASM-string of imm-load dependent inst sequences #
+############################################################################
+def seq_test_ri_load_op(imm_inst, load_inst, destreg, reg1, reg2, reg_val, imm_val, swreg, offset, depth, dependency='', index=0,adj=0):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        asm_string = f'''
+            LA({reg2},rvtest_data+({index}*4)+{adj}-{imm_val})
+            li {reg1}, {reg_val}
+            '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {imm_inst} {destreg}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                {load_inst} {destreg}, {imm_val}({reg2}) 
+                RVTEST_SIGUPD({swreg}, {destreg}, {offset})           
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {imm_inst} {destreg}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                {load_inst} {reg1}, {imm_val}({reg2})
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+    else:
+        asm_string = f'''
+            LA({reg2},rvtest_data+({index}*4)+{adj}-{imm_val})
+            li {reg1}, {reg_val}
+            '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {imm_inst} {destreg}, {reg1}, SEXT_IMM({imm_val})
+                {load_inst} {destreg}, {imm_val}({reg2})
+                RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {imm_inst} {destreg}, {reg1}, SEXT_IMM({imm_val})
+                {load_inst} {reg1}, {imm_val}({reg2})
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''       
+
+    return asm_string
+
+
+############################################################################
+# Function to return ASM-string of load-branch RAW dependent inst sequences #
+############################################################################
+def seq_test_load_branch_raw_op(load_inst, branch_inst, destreg, reg1, reg2, val2, imm_val, swreg, offset, depth, index=0,adj=0):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        asm_string = f'''
+            LA({reg1},rvtest_data+({index}*4)+{adj}-{imm_val})
+            li {reg2}, {val2}
+            {load_inst} {destreg}, {imm_val}({reg1})
+            {nop_op}
+            {branch_inst} {destreg}, {reg2}, 1f
+            add {destreg}, {reg1}, {reg2}
+            1: add {destreg}, {reg1}, {reg2}
+            RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+            '''
+    else:
+        asm_string = f'''
+            LA({reg1},rvtest_data+({index}*4)+{adj}-{imm_val})
+            li {reg2}, {val2}
+            {load_inst} {destreg}, {imm_val}({reg1})
+            {branch_inst} {destreg}, {reg2}, 1f
+            add {destreg}, {reg1}, {reg2}
+            1: add {destreg}, {reg1}, {reg2}
+            RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+            '''        
+    return asm_string
+
+
+############################################################################
+# Function to return ASM-string of reg-store dependent inst sequences #
+############################################################################
+def seq_test_rr_store_raw_op(reg_inst, store_inst, destreg, reg1, reg2, reg3, val1, val2, imm_val, swreg, offset, depth, dependency):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+        asm_string = f'''
+            li {reg1}, {val1}
+            li {reg2}, {val2}
+            LA({reg3},rvtest_data-{imm_val})
+            '''
+        if dependency == 'RAW':
+            asm_string += f'''
+                {reg_inst} {destreg}, {reg1}, {reg2}
+                {nop_op}
+                {store_inst} {destreg}, {imm_val}({reg3})
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {reg_inst} {destreg}, {reg1}, {reg2}
+                {nop_op}
+                {store_inst} {destreg}, {imm_val}({reg3})
+                '''
+        asm_string += f'''
+            RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+            '''
+    else:
+        asm_string = f'''
+            li {reg1}, {val1}
+            li {reg2}, {val2}
+            LA({reg3},rvtest_data-{imm_val})
+            '''
+        if dependency == 'RAW':
+            asm_string += f'''
+                {reg_inst} {destreg}, {reg1}, {reg2}
+                {store_inst} {destreg}, {imm_val}({reg3})
+                '''
+        if dependency == 'WAR':
+            asm_string += f'''
+                {reg_inst} {destreg}, {reg1}, {reg2}
+                {store_inst} {destreg}, {imm_val}({reg3})
+                '''
+        asm_string += f'''
+            RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+            '''
+    return asm_string
+
+
+############################################################################
+# Function to return ASM-string of imm-store dependent inst sequences #
+############################################################################
+def seq_test_ri_store_op(imm_inst, store_inst, destreg, reg1, reg2, val1, imm_val, swreg, offset, depth, dependency=''):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+
+        asm_string = f'''
+            li {reg1}, {val1}
+            LA({reg2},rvtest_data-{imm_val})
+            '''
+        if dependency == 'RAW': #imm inst followed by store inst
+            asm_string += f'''
+                {imm_inst} {destreg}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                {store_inst} {destreg}, {imm_val}({reg2})
+                '''
+        if dependency == 'WAR': #store inst followed by imm inst
+            asm_string += f'''
+                {store_inst} {destreg}, {imm_val}({reg2})
+                {nop_op}
+                {imm_inst} {destreg}, {reg1}, SEXT_IMM({imm_val})
+                '''
+        asm_string += f'''
+            RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+            '''
+
+    else:
+        asm_string = f'''
+            li {reg1}, {val1}
+            LA({reg2},rvtest_data-{imm_val})
+            '''
+        if dependency == 'RAW': #imm inst followed by store inst
+            asm_string += f'''
+                {imm_inst} {destreg}, {reg1}, SEXT_IMM({imm_val})
+                {store_inst} {destreg}, {imm_val}({reg2})
+                '''
+        if dependency == 'WAR': #store inst followed by imm inst
+            asm_string += f'''
+                {store_inst} {destreg}, {imm_val}({reg2})
+                {imm_inst} {destreg}, {reg1}, SEXT_IMM({imm_val})
+                '''
+        asm_string += f'''
+            RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+            '''
+    return asm_string
+
+
+###################################################################################
+# Function to return ASM-string of reg-jal dependent sequences #
+###################################################################################
+def seq_test_rr_jal_op(reg_inst, destreg1, destreg2, \
+                          reg1, reg2, val1, val2, \
+                            swreg, offset, depth, dependency=''):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg2}, {val2}
+        '''
+    
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+            
+        if dependency == 'WAR':
+            asm_string += f'''
+                {reg_inst} {destreg1}, {reg1}, {reg2}
+                {nop_op}
+                jal {reg1}, 1f
+                1: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {reg_inst} {destreg1}, {reg1}, {reg2}
+                {nop_op}
+                jal {destreg1}, 2f
+                2: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+    
+    else:
+
+        if dependency == 'WAR':
+            asm_string += f'''
+                {reg_inst} {destreg1}, {reg1}, {reg2}
+                jal {reg1}, 1f
+                1: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {reg_inst} {destreg1}, {reg1}, {reg2}
+                jal {destreg1}, 2f
+                2: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+    return asm_string
+
+
+###################################################################################
+# Function to return ASM-string of  imm-jal dependent sequences #
+###################################################################################
+def seq_test_ri_jal_op(imm_inst, destreg1, destreg2,\
+                       reg1, reg2, val1, val2, imm_val,\
+                        swreg, offset, depth, dependency=''):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg2}, {val2}
+        '''
+    
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+            
+        if dependency == 'WAR':
+            asm_string += f'''
+                {imm_inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                jal {reg1}, 1f
+                1: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {imm_inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                jal {destreg1}, 2f
+                2: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+    
+    else:
+
+        if dependency == 'WAR':
+            asm_string += f'''
+                {imm_inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                jal {reg1}, 1f
+                1: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                {imm_inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                jal {destreg1}, 2f
+                2: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+    return asm_string
+
+
+###################################################################################
+# Function to return ASM-string of imm-jalr dependent sequences #
+###################################################################################
+def seq_test_ri_jalr_op(imm_inst, destreg1, destreg2, \
+                          reg1, reg2, reg3, reg4, val1, val2, imm_val, \
+                            swreg, offset, depth, dependency=''):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg2}, {val2}
+        '''
+    
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+            
+        if dependency == 'WAR':
+            asm_string += f'''
+                la {reg3}, 1f
+                {imm_inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                jalr {reg1}, {imm_val}({reg3})
+                1: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                la {reg4}, 2f
+                {imm_inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                {nop_op}
+                jalr {destreg1}, {imm_val}({reg4})
+                2: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+    
+    else:
+
+        if dependency == 'WAR':
+            asm_string += f'''
+                la {reg3}, 1f
+                {imm_inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                jalr {reg1}, {imm_val}({reg3})
+                1: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                la {reg4}, 2f
+                {imm_inst} {destreg1}, {reg1}, SEXT_IMM({imm_val})
+                jalr {destreg1}, {imm_val}({reg4})
+                2: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+    return asm_string
+
+
+###################################################################################
+# Function to return ASM-string of reg-jalr dependent sequences #
+###################################################################################
+def seq_test_rr_jalr_op(reg_inst, destreg1, destreg2, \
+                          reg1, reg2, reg3, reg4, val1, val2, imm_val, \
+                            swreg, offset, depth, dependency=''):
+    asm_string = ''
+    nop_op = ''
+    d=0
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg2}, {val2}
+        '''
+    
+    if depth>0:
+        while d != depth:
+            nop_op += 'addi x0, x0, 0\n'
+            d += 1
+            
+        if dependency == 'WAR':
+            asm_string += f'''
+                la {reg3}, 1f
+                {reg_inst} {destreg1}, {reg1}, {reg2}
+                {nop_op}
+                jalr {reg1}, {imm_val}({reg3})
+                1: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                la {reg4}, 2f
+                {reg_inst} {destreg1}, {reg1}, {reg2}
+                {nop_op}
+                jalr {destreg1}, {imm_val}({reg4})
+                2: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+    
+    else:
+
+        if dependency == 'WAR':
+            asm_string += f'''
+                la {reg3}, 1f
+                {reg_inst} {destreg1}, {reg1}, {reg2}
+                jalr {reg1}, {imm_val}({reg3})
+                1: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {reg1}, {offset})
+                '''
+
+        if dependency == 'WAW':
+            asm_string += f'''
+                la {reg4}, 2f
+                {reg_inst} {destreg1}, {reg1}, {reg2}
+                jalr {destreg1}, {imm_val}({reg4})
+                2: add {destreg2}, {reg1}, {reg2}
+                RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
+                '''
+    return asm_string
+#####################################################################################################################
