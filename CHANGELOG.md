@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2023-03-30
+- Added functions that generate special lists of binaries for bit marcher, pattern walk, alternate 0s and 1s and
+  signed specials
+
 ## [1.7.0] - 2023-03-29
 - added functions in instruction_constants.py to generate ASM strings for various instruction sequences
 
