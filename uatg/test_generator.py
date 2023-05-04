@@ -31,7 +31,7 @@ def asm_generation_process(args):
     # unpacking the args tuple
     plugin, core_yaml, isa_yaml, isa, test_format_string, work_tests_dir, \
     make_file, module, linker_dir, uarch_dir, work_dir, \
-    compile_macros_dict, module_test_count_dict, page_modes = args
+    compile_macros_dict, self_checking, module_test_count_dict, page_modes = args
 
     # actual generation process
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
@@ -81,6 +81,13 @@ def asm_generation_process(args):
                 compile_macros_dict[test_name] = ['XLEN=64']
             else:
                 compile_macros_dict[test_name] = ['XLEN=32']
+            
+            # if self_checking is included in returned dictionary, set the value accordingly
+            # else, default it to False
+            try:
+                self_checking[test_name] = ret_list_of_dicts['self_checking']
+            except KeyError:
+                self_checking[test_name] = False
 
             list_of_env_paths = [join(dirname(__file__), 'env/arch_test_unpriv.h'),
                                  join(dirname(__file__), 'env/arch_test_priv.h')]
@@ -357,6 +364,10 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
     # this dictionary will contain all the compile macros for each test
     compile_macros_dict = process_manager.dict()
 
+    # Create a shared self_checking flag dict
+    # this dictionary will store the status of self_check flag for each test
+    self_checking_dict = process_manager.dict()
+
     if exists(join(work_dir, 'makefile')):
         remove(join(work_dir, 'makefile'))
 
@@ -431,17 +442,17 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
         arg_list = []
-        self_checking = False
+        #self_checking = False
         for plugin in manager.getAllPlugins():
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
-                 work_dir, compile_macros_dict, module_test_count_dict,
+                 work_dir, compile_macros_dict, self_checking_dict, module_test_count_dict,
                  paging_modes))
             
             # Check if self_check variable is defined in the class. If defined, the value is passed for test_list generation
-            if 'self_checking' in plugin.plugin_object.__dict__.keys():
-                self_checking = plugin.plugin_object.__dict__['self_checking']
+            #if 'self_checking' in plugin.plugin_object.__dict__.keys():
+            #    self_checking = plugin.plugin_object.__dict__['self_checking']
 
         # multi processing process pool
         logger.info(f"Spawning {jobs} processes")
@@ -470,7 +481,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
             logger.info(f'Creating test_list for the {module}')
             test_list_dict.update(
                 generate_test_list(work_tests_dir, uarch_dir, isa,
-                                   test_list_dict, compile_macros_dict, self_checking))
+                                   test_list_dict, compile_macros_dict, self_checking_dict))
 
     logger.info('Assembly generation for all modules completed')
 
