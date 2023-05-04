@@ -31,7 +31,7 @@ def asm_generation_process(args):
     # unpacking the args tuple
     plugin, core_yaml, isa_yaml, isa, test_format_string, work_tests_dir, \
     make_file, module, linker_dir, uarch_dir, work_dir, \
-    compile_macros_dict, self_checking, module_test_count_dict, page_modes = args
+    compile_macros_dict, self_checking_dict, module_test_count_dict, page_modes = args
 
     # actual generation process
     check = plugin.plugin_object.execute(core_yaml, isa_yaml)
@@ -85,9 +85,9 @@ def asm_generation_process(args):
             # if self_checking is included in returned dictionary, set the value accordingly
             # else, default it to False
             try:
-                self_checking[test_name] = ret_list_of_dicts['self_checking']
+                self_checking_dict[test_name] = ret_list_of_dicts['self_checking']
             except KeyError:
-                self_checking[test_name] = False
+                self_checking_dict[test_name] = False
 
             list_of_env_paths = [join(dirname(__file__), 'env/arch_test_unpriv.h'),
                                  join(dirname(__file__), 'env/arch_test_priv.h')]
