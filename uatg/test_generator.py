@@ -445,10 +445,6 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
                  work_dir, compile_macros_dict, self_checking_dict, module_test_count_dict,
                  paging_modes))
-            
-            # Check if self_check variable is defined in the class. If defined, the value is passed for test_list generation
-            #if 'self_checking' in plugin.plugin_object.__dict__.keys():
-            #    self_checking = plugin.plugin_object.__dict__['self_checking']
 
         # multi processing process pool
         logger.info(f"Spawning {jobs} processes")
