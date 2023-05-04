@@ -442,7 +442,6 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         # Loop around and find the plugins and writes the contents from the
         # plugins into an asm file
         arg_list = []
-        #self_checking = False
         for plugin in manager.getAllPlugins():
             arg_list.append(
                 (plugin, core_yaml, isa_yaml, isa, test_format_string,
