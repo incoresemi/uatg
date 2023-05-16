@@ -1401,8 +1401,7 @@ def select_paging_modes(paging_modes):
 
 
 def macros_parser(_path=[join(dirname(__file__), 'env/arch_test_unpriv.h'),
-                         join(dirname(__file__), 'env/arch_test_priv.h'),
-                         join(dirname(__file__), 'env/encoding.h')]):
+                         join(dirname(__file__), 'env/arch_test_priv.h')]):
     
     macros = []
 
