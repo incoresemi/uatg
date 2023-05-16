@@ -429,9 +429,8 @@ def create_plugins(plugins_path, index_yaml, module):
         logger.debug('using the default index.yaml file ')
 
     files = listdir(plugins_path)
-
     for file in files:
-        if ('.py' in file) and (not file.startswith('.')):
+        if ('.py' in file) and (not file.startswith('.')) and file != 'consts.py':
             test_name = file[0:-3]
 
             val = False
@@ -1417,3 +1416,6 @@ def macros_parser(_path=[join(dirname(__file__), 'env/arch_test_unpriv.h'),
                     macros.append(line[line.find('#ifdef') + 6:].strip('\n '))
     
     return list(set(macros))
+
+if __name__ == '__main__':
+    print(macros_parser())
