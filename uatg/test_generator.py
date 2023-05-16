@@ -10,7 +10,7 @@ from shutil import rmtree, copyfile
 from sys import exit
 
 from ruamel.yaml import dump
-from yapsy.PluginManager import PluginManager
+from yapsy.PluginManager import PluginManager, PluginInfo
 
 from uatg import __file__
 from uatg.log import logger
@@ -407,12 +407,21 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         rvmodel_data_begin = '\nRVMODEL_DATA_BEGIN\n'
         rvmodel_data_end = '\nRVMODEL_DATA_END\n\n'
 
+        # This function adds module directory to python path
+        def add_module_to_path(plugin_info):
+            import sys
+            from os.path import dirname
+            sys.path.insert(0, dirname(plugin_info.path))
+
         manager = PluginManager()
         logger.debug('Loaded PluginManager')
         manager.setPluginPlaces([module_dir])
         # plugins are stored in module_dir
         manager.locatePlugins()
-        x = manager.loadPlugins()
+        
+        # passing add_module_to_path to callback ensures the run of the function
+        # before the plugin is loaded
+        x = manager.loadPlugins(callback=add_module_to_path)
         error_status = [i.error for i in x if i.error is not None]
 
         if len(error_status) > 0:
