@@ -90,7 +90,8 @@ def asm_generation_process(args):
                 self_checking_dict[test_name] = False
 
             list_of_env_paths = [join(dirname(__file__), 'env/arch_test_unpriv.h'),
-                                 join(dirname(__file__), 'env/arch_test_priv.h')]
+                                 join(dirname(__file__), 'env/arch_test_priv.h'),
+                                 join(dirname(__file__), 'env/encoding.h')]
             
             try:
                 available_macros = macros_parser(list_of_env_paths)
