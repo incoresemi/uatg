@@ -777,7 +777,7 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict, 
     target_dir = abspath(asm_dir + '/../')
 
     extension_list = split_isa_string(isa)
-    march = isa.replace('S','').replace('U','').replace('Zicsr','').replace('H','').lower()
+    march = isa.replace('S','').replace('U','').replace('H','').lower()
     xlen = 32 if '32' in isa else 64
     mabi = 'ilp32' if xlen == 32 else 'lp64'
 
@@ -800,7 +800,7 @@ def generate_test_list(asm_dir, uarch_dir, isa, test_list, compile_macros_dict, 
             target_dir, 'link.ld'))
         test_list[base_key]['asm_file'] = abspath(
             join(asm_dir, base_key, base_key + '.S'))
-        test_list[base_key]['include'] = [env_dir, target_dir]
+        test_list[base_key]['include'] = [env_dir, target_dir, asm_dir]
         test_list[base_key]['compile_macros'] = compile_macros_dict[base_key]
         test_list[base_key]['extra_compile'] = []
         test_list[base_key]['result'] = 'Unavailable'
