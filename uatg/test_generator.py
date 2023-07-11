@@ -10,7 +10,7 @@ from shutil import rmtree, copyfile
 from sys import exit
 
 from ruamel.yaml import dump
-from yapsy.PluginManager import PluginManager
+from yapsy.PluginManager import PluginManager, PluginInfo
 
 from uatg import __file__
 from uatg.log import logger
@@ -29,12 +29,12 @@ def asm_generation_process(args):
         The new process shall create an Assembly test file.
     """
     # unpacking the args tuple
-    plugin, core_yaml, isa_yaml, isa, test_format_string, work_tests_dir, \
+    plugin, config_dict, isa, test_format_string, work_tests_dir, \
     make_file, module, linker_dir, uarch_dir, work_dir, \
     compile_macros_dict, self_checking_dict, module_test_count_dict, page_modes = args
 
     # actual generation process
-    check = plugin.plugin_object.execute(core_yaml, isa_yaml)
+    check = plugin.plugin_object.execute(config_dict)
 
     name = (str(plugin.plugin_object).split(".", 1))
     t_name = ((name[1].split(" ", 1))[0])
@@ -285,12 +285,11 @@ def sv_generation_process(args):
     """
     # unpack the args
     plugin = args[0]
-    core_yaml = args[1]
-    isa_yaml = args[2]
+    config_dict = args[1]
     alias_dict = args[3]
     cover_list = args[4]
 
-    _check = plugin.plugin_object.execute(core_yaml, isa_yaml)
+    _check = plugin.plugin_object.execute(config_dict)
     _name = (str(plugin.plugin_object).split(".", 1))
     _test_name = ((_name[1].split(" ", 1))[0])
     if _check:
@@ -385,8 +384,6 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         work_tests_dir = join(work_dir, module)
 
         # initializing make commands for individual modules
-        # the yaml file containing configuration data for the DUT
-        core_yaml = config_dict['core_config']
 
         logger.debug(f'Directory for {module} is {module_dir}')
         logger.info(f'Starting plugin Creation for {module}')
@@ -410,12 +407,21 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         rvmodel_data_begin = '\nRVMODEL_DATA_BEGIN\n'
         rvmodel_data_end = '\nRVMODEL_DATA_END\n\n'
 
+        # This function adds module directory to python path
+        def add_module_to_path(plugin_info):
+            import sys
+            from os.path import dirname
+            sys.path.insert(0, dirname(plugin_info.path))
+
         manager = PluginManager()
         logger.debug('Loaded PluginManager')
         manager.setPluginPlaces([module_dir])
         # plugins are stored in module_dir
         manager.locatePlugins()
-        x = manager.loadPlugins()
+        
+        # passing add_module_to_path to callback ensures the run of the function
+        # before the plugin is loaded
+        x = manager.loadPlugins(callback=add_module_to_path)
         error_status = [i.error for i in x if i.error is not None]
 
         if len(error_status) > 0:
@@ -444,7 +450,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         arg_list = []
         for plugin in manager.getAllPlugins():
             arg_list.append(
-                (plugin, core_yaml, isa_yaml, isa, test_format_string,
+                (plugin, config_dict, isa, test_format_string,
                  work_tests_dir, make_file, module, linker_dir, uarch_dir,
                  work_dir, compile_macros_dict, self_checking_dict, module_test_count_dict,
                  paging_modes))
@@ -475,7 +481,7 @@ def generate_tests(work_dir, linker_dir, modules, config_dict, test_list,
         if test_list:
             logger.info(f'Creating test_list for the {module}')
             test_list_dict.update(
-                generate_test_list(work_tests_dir, uarch_dir, isa,
+                generate_test_list(work_tests_dir, uarch_dir, module_dir, isa,
                                    test_list_dict, compile_macros_dict, self_checking_dict))
 
     logger.info('Assembly generation for all modules completed')

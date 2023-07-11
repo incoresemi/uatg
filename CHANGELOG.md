@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2023-06-6
+- Execute method for UATG plugins to take not only ispec and cspec but all config files
+- Removed `Zicsr` filter while populating test_list
+
 ## [1.9.0] - 2023-04-25
 - Added feature that checks for self-checking flag in plugins and accordingly updates the test list
 
