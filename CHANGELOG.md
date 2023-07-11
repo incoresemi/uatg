@@ -2,6 +2,9 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2023-04-25
+- Added feature that checks for self-checking flag in plugins and accordingly updates the test list
+
 ## [1.8.0] - 2023-03-30
 - Added functions that generate special lists of binaries for bit marcher, pattern walk, alternate 0s and 1s and
   signed specials
