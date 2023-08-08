@@ -174,7 +174,7 @@ psimd_instructions = {
 
     'rv32-signed-mul-rs1+1-rd+1-reg': [
                                     # Signed 16-bit Multiply 64-bit Add/Subtract Instructions 
-                                    'smal',\
+                                    'smal'
 
                                     ],
 
