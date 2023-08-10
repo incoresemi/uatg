@@ -205,9 +205,6 @@ psimd_instructions = {
                             # Non-SIMD Q31 saturation ALU Instructions 
                             'kdmbb' ,'kdmbt' ,'kdmtt','kdmabb', 'kdmabt' ,'kdmatt',\
 
-                            # 32-bit Computation Instructions 
-                            'msubr32',\
-
                             # Non-SIMD Miscellaneous Instructions 
                             'maddr32' , 'msubr32' ],
 
@@ -276,9 +273,6 @@ psimd_instructions = {
 
                             # Non-SIMD Q31 saturation ALU Instructions 
                             'kdmbb' ,'kdmbt' ,'kdmtt','kdmabb', 'kdmabt' ,'kdmatt',\
-
-                            # 32-bit Computation Instructions 
-                            'msubr32',\
 
                             # Non-SIMD Miscellaneous Instructions 
                             'maddr32', 'msubr32',\
