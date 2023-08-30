@@ -148,10 +148,10 @@ psimd_instructions = {
                                 'smul8','smulx8','khm8','khmx8', \
                                 
                                 #SIMD 16-bit Signed Multiply Instructions
-                                'smul16','smulx16','khm16','khmx16',\
+                                'smul16','smulx16','khm16', 'khmx16',\
 
                                 # 32-bit Multiply 64-bit Add/Subtract Instructions
-                                'smar64', 'smsr64', 'kmar64' ,'kmsr64',\
+                                'smar64', 'smsr64', 'kmar64' , 'kmsr64',\
 
                                 # 32-bit computation instructions
                                 'mulr64' ,'mulsr64',\
@@ -165,10 +165,10 @@ psimd_instructions = {
     
     
     'rv32-unsigned-mul-rd+1-reg': [
-                                # SIMD Unsigned Multiply Instructions
+                                 # SIMD Unsigned Multiply Instructions
                                 'umul8', 'umulx8','umul16', 'umulx16',\
-                                
-                                # 32-bit Multiply 64-bit Add/Subtract Instructions 
+                            
+                                 # 32-bit Multiply 64-bit Add/Subtract Instructions 
                                 'umar64', 'umsr64', 'ukmar64', 'ukmsr64'
                                 ],
 
@@ -319,6 +319,14 @@ psimd_instructions = {
                             'umaqa'
 
                             ],
+
+    'rv32-signed-adder-reg': [
+                                'add64','kadd64','ksub64','radd64','rsub64','sub64'
+                            ],
+
+    'rv32-unsigned-adder-reg': [
+                                'ukadd64','uksub64','uradd64','ursub64'
+                                    ]
 
 }
 
@@ -1926,4 +1934,44 @@ def seq_test_rr_jalr_op(reg_inst, destreg1, destreg2, \
                 RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
                 '''
     return asm_string
+
+
+###################################################################################
+# Function to return ASM-string of instr with couple registers(reg, reg+1) #
+###################################################################################
+
+def couple_reg_op(reg_inst, destreg,\
+            reg1, reg1plusone, reg2, reg2plusone, \
+                val1, val1plusone, val2, val2plusone, \
+                    swreg, offset):
+
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg1plusone}, {val1plusone}
+        li {reg2}, {val2}
+        li {reg2plusone}, {val2plusone}
+        {reg_inst} {destreg}, {reg1}, {reg2}
+        RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+        '''
+    return asm_string
+
+
+###################################################################################
+# Function to return ASM-string of instr with rs1 couple registers(reg, reg+1) #
+###################################################################################
+
+def rs1_couple_reg_op(reg_inst, destreg,\
+            reg1, reg1plusone, reg2, \
+                val1, val1plusone, val2, \
+                    swreg, offset):
+
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg1plusone}, {val1plusone}
+        li {reg2}, {val2}
+        {reg_inst} {destreg}, {reg1}, {reg2}
+        RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+        '''
+    return asm_string
+
 #####################################################################################################################
