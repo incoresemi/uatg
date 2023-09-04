@@ -150,33 +150,38 @@ psimd_instructions = {
                                 #SIMD 16-bit Signed Multiply Instructions
                                 'smul16','smulx16','khm16', 'khmx16',\
 
-                                # 32-bit Multiply 64-bit Add/Subtract Instructions
-                                'smar64', 'smsr64', 'kmar64' , 'kmsr64',\
-
                                 # 32-bit computation instructions
                                 'mulr64' ,'mulsr64',\
+                                
+                                ],
+
+    'rv32-signed-mul-rd+1-rd_input-reg': [
+                                # 32-bit Multiply 64-bit Add/Subtract Instructions
+                                'smar64', 'smsr64', 'kmar64' , 'kmsr64',\
                                 
                                 # Signed 16-bit Multiply 64-bit Add/Subtract Instructions 
                                 'smalbb' ,'smalbt' ,'smaltt' ,'smalda' ,\
                                     'smalxda' ,'smalds' ,'smaldrs', 'smalxds',\
-                                        'smslda' ,'smslxda',\
-                                ],
-
+                                        'smslda' ,'smslxda'
+    ],
     
     
     'rv32-unsigned-mul-rd+1-reg': [
                                  # SIMD Unsigned Multiply Instructions
-                                'umul8', 'umulx8','umul16', 'umulx16',\
+                                'umul8', 'umulx8','umul16', 'umulx16'
                             
-                                 # 32-bit Multiply 64-bit Add/Subtract Instructions 
-                                'umar64', 'umsr64', 'ukmar64', 'ukmsr64'
+
                                 ],
+    
+    'rv32-unsigned-mul-rd+1-rd_input-reg': [
+                                            # 32-bit Multiply 64-bit Add/Subtract Instructions 
+                                            'umar64', 'umsr64', 'ukmar64', 'ukmsr64'
+                                           ],
 
     'rv32-signed-mul-rs1+1-rd+1-reg': [
-                                    # Signed 16-bit Multiply 64-bit Add/Subtract Instructions 
-                                    'smal'
-
-                                    ],
+                                        # Signed 16-bit Multiply 64-bit Add/Subtract Instructions 
+                                        'smal'
+                                        ],
 
     'rv32-signed-mul-reg': [
 
@@ -298,6 +303,15 @@ psimd_instructions = {
 
                             ],
 
+    'rv64-signed-mul-rd+1-rd_input-reg': [
+                                # 32-bit Multiply 64-bit Add/Subtract Instructions
+                                'smar64', 'smsr64', 'kmar64' , 'kmsr64',\
+                                
+                                # Signed 16-bit Multiply 64-bit Add/Subtract Instructions 
+                                'smalbb' ,'smalbt' ,'smaltt' ,'smalda' ,\
+                                    'smalxda' ,'smalds' ,'smaldrs', 'smalxds',\
+                                        'smslda' ,'smslxda'
+    ],
 
     'rv64-unsigned-mul-reg': [
 
@@ -319,6 +333,11 @@ psimd_instructions = {
                             'umaqa'
 
                             ],
+
+    'rv32-unsigned-mul-rd+1-rd_input-reg': [
+                                            # 32-bit Multiply 64-bit Add/Subtract Instructions 
+                                            'umar64', 'umsr64', 'ukmar64', 'ukmsr64'
+                                           ],
 
     'rv32-signed-adder-reg': [
                                 'add64','kadd64','ksub64','radd64','rsub64','sub64'
