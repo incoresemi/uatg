@@ -281,7 +281,7 @@ psimd_instructions = {
                             # SIMD Unsigned Multiply Instructions
                             'umul8', 'umulx8','umul16', 'umulx16',\
                             # 32-bit Multiply 64-bit Add/Subtract Instructions 
-                            'umar64', 'umsr64', 'ukmar64', 'ukmsr64'\
+                            'umar64', 'umsr64', 'ukmar64', 'ukmsr64',\
                             #---------------------------------------------------------------
                             # rv32-unsigned-mul-reg instructions:
                             #---------------------------------------------------------------
