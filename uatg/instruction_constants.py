@@ -137,6 +137,171 @@ compressed_instructions = {
     'rv128-regCA': ['c.addw', 'c.subw']
 }
 
+
+# P-SIMD instructions 
+psimd_instructions = {
+
+    'rv32-signed-mul-reg': [
+
+                            #--------------------------------------------
+                            # signed instr with rs1,rs2,rd,rd+1 
+                            #--------------------------------------------
+                            # SIMD 8-bit Signed Multiply Instructions
+                            'smul8','smulx8','khm8','khmx8', \
+                            #SIMD 16-bit Signed Multiply Instructions
+                            'smul16','smulx16','khm16', 'khmx16',\
+                            # 32-bit computation instructions
+                            'mulr64' ,'mulsr64',\
+                            # 32-bit Multiply 64-bit Add/Subtract Instructions
+                            'smar64', 'smsr64', 
+                            'kmar64' , 'kmsr64',\
+                            # Signed 16-bit Multiply 64-bit Add/Subtract Instructions 
+                            'smalbb' ,'smalbt' ,'smaltt' ,'smalda' ,\
+                            'smalxda' ,'smalds' ,'smaldrs', 'smalxds',\
+                            'smslda' ,'smslxda',\
+                            #-----------------------------------------------
+                            ################################################
+                            #-----------------------------------------------
+                            # signed instr with rs1, rs1+1, rs2, rd, rd+1
+                            #-------------------------------------------
+                            # Signed 16-bit Multiply 64-bit Add/Subtract Instructions 
+                            'smal',\
+                            #-------------------------------------------
+                            #################################################
+                            #--------------------------------------------
+                            # signed instr with rs1, rs2, rd
+                            #--------------------------------------------
+                            # Signed MSW 32x32 Multiply and Add Instructions 
+                            'smmul', 'smmul.u', 'kmmac', 'kmmac.u',\
+                            'kmmsb', 'kmmsb.u', 'kwmmul', 'kwmmul.u',\
+                            # Signed MSW 32x16 Multiply and Add Instructions 
+                            'smmwb', 'smmwb.u', 'smmwt', 'smmwt.u', \
+                            'kmmawb', 'kmmawb.u', 'kmmawt' , 'kmmawt.u', \
+                            'kmmwb2', 'kmmwb2.u', 'kmmwt2', 'kmmwt2.u',\
+                            'kmmawb2', 'kmmawb2.u', 'kmmawt2', 'kmmawt2.u',\
+                            # Signed 16-bit Multiply 32-bit Add/Subtract Instructions      
+                            'smbb16', 'smbt16' ,'smtt16' ,'kmda' ,'kmxda' ,'smds' ,'smdrs',\
+                            'smxds', 'kmabb' ,'kmabt' ,'kmatt' ,'kmada' ,'kmaxda' , \
+                            'kmads' ,'kmadrs' ,'kmaxds' ,'kmsda' ,'kmsxda',\
+                            # 8-bit Multiply with 32-bit Add Instructions 
+                            'smaqa', 'smaqa.su',\
+                            # Non-SIMD Q15 saturation ALU Instructions 
+                            'khmbb' ,'khmbt', 'khmtt ',\
+                            # Non-SIMD Q31 saturation ALU Instructions 
+                            'kdmbb' ,'kdmbt' ,'kdmtt','kdmabb', 'kdmabt' ,'kdmatt',\
+                            # Non-SIMD Miscellaneous Instructions 
+                            'maddr32' , 'msubr32'
+                            #---------------------------------------------------------
+                            ],
+    
+    
+    'rv32-unsigned-mul-reg': [
+                            #--------------------------------------------
+                            # unsigned instr with rs1,rs2,rd,rd+1 
+                            #--------------------------------------------
+                            # SIMD Unsigned Multiply Instructions
+                            'umul8', 'umulx8','umul16', 'umulx16',\
+                            # 32-bit Multiply 64-bit Add/Subtract Instructions 
+                            'umar64', 'umsr64', 'ukmar64', 'ukmsr64',\
+                            #--------------------------------------------
+                            #############################################
+                            #--------------------------------------------
+                            # unsigned instr with rs1,rs2, rd
+                            #--------------------------------------------
+                            # 8-bit Multiply with 32-bit Add Instructions
+                            'umaqa'
+                            #--------------------------------------------
+                            ],
+
+
+    'rv64-signed-mul-reg': [
+                            #------------------------------------------------------------
+                            # rv32-signed-mul-rd+1-reg instructions:
+                            #-------------------------------------------------------------
+                            # SIMD 8-bit Signed Multiply Instructions
+                            'smul8','smulx8','khm8','khmx8',\
+                            #SIMD 16-bit Signed Multiply Instructions
+                            'smul16','smulx16','khm16','khmx16',\
+                            # 32-bit Multiply 64-bit Add/Subtract Instructions
+                            'smar64', 'smsr64', 'kmar64' ,'kmsr64',\
+                            # 32-bit computation instructions
+                            'mulr64' ,'mulsr64',\
+                            # Signed 16-bit Multiply 64-bit Add/Subtract Instructions 
+                            'smalbb' ,'smalbt' ,'smaltt' ,'smalda' ,\
+                            'smalxda' ,'smalds' ,'smaldrs', 'smalxds',\
+                            'smslda' ,'smslxda',\
+                            #------------------------------------------------------------
+                            # rv32-signed-mul-rs1+1-rd+1-reg instructions:
+                            #------------------------------------------------------------                            
+                            # Signed 16-bit Multiply 64-bit Add/Subtract Instructions 
+                            'smal',\
+                            #------------------------------------------------------------
+                            # rv32-signed-mul-reg instructions:
+                            #------------------------------------------------------------                            
+                            # Signed MSW 32x32 Multiply and Add Instructions 
+                            'smmul', 'smmul.u', 'kmmac', 'kmmac.u',\
+                            'kmmsb', 'kmmsb.u', 'kwmmul', 'kwmmul.u',\
+                            # Signed MSW 32x16 Multiply and Add Instructions 
+                            'smmwb', 'smmwb.u', 'smmwt', 'smmwt.u', \
+                            'kmmawb', 'kmmawb.u', 'kmmawt' , 'kmmawt.u', \
+                            'kmmwb2', 'kmmwb2.u', 'kmmwt2', 'kmmwt2.u',\
+                            'kmmawb2', 'kmmawb2.u', 'kmmawt2', 'kmmawt2.u',\
+                            # Signed 16-bit Multiply 32-bit Add/Subtract Instructions      
+                            'smbb16', 'smbt16' ,'smtt16' ,'kmda' ,'kmxda' ,'smds' ,'smdrs',\
+                            'smxds', 'kmabb' ,'kmabt' ,'kmatt' ,'kmada' ,'kmaxda' ,\
+                            'kmads' ,'kmadrs' ,'kmaxds' ,'kmsda' ,'kmsxda',\
+                            # 8-bit Multiply with 32-bit Add Instructions 
+                            'smaqa', 'smaqa.su',\
+                            # Non-SIMD Q15 saturation ALU Instructions 
+                            'khmbb' ,'khmbt', 'khmtt',\
+                            # Non-SIMD Q31 saturation ALU Instructions 
+                            'kdmbb' ,'kdmbt' ,'kdmtt','kdmabb', 'kdmabt' ,'kdmatt',\
+                            # Non-SIMD Miscellaneous Instructions 
+                            'maddr32', 'msubr32',\
+                            #------------------------------------------------------------
+                            # RV64 instructions only:
+                            #------------------------------------------------------------                          
+                            # SIMD Q15 saturating Multiply Instructions   
+                            'khmbb16', 'khmbt16', 'khmtt16', 'kdmbb16' ,\
+                            'kdmbt16', 'kdmtt16', 'kdmabb16' ,'kdmabt16' ,'kdmatt16' ,\
+                            # 32-bit Multiply Instructions 
+                            'smbb32', 'smbt32' ,'smtt32' ,\
+                            # 32-bit Multiply & Add Instructions 
+                            'kmabb32' ,'kmabt32', 'kmatt32', \
+                            # 32-bit Parallel Multiply & Add Instructions
+                            'kmda32' ,'kmxda32' ,'kmada32', 'kmaxda32' ,'kmads32',\
+                            'kmadrs32' ,'kmaxds32' ,'kmsda32', 'kmsxda32' ,\
+                            'smds32' ,'smdrs32' ,'smxds32'
+                            ],
+
+    'rv64-unsigned-mul-reg': [
+                            #---------------------------------------------------------------
+                            # rv32-unsigned-mul-rd+1-reg instructions:
+                            #---------------------------------------------------------------
+                            # SIMD Unsigned Multiply Instructions
+                            'umul8', 'umulx8','umul16', 'umulx16',\
+                            # 32-bit Multiply 64-bit Add/Subtract Instructions 
+                            'umar64', 'umsr64', 'ukmar64', 'ukmsr64',\
+                            #---------------------------------------------------------------
+                            # rv32-unsigned-mul-reg instructions:
+                            #---------------------------------------------------------------
+                            # 8-bit Multiply with 32-bit Add Instructions
+                            'umaqa'
+                            #---------------------------------------------------------------
+                            ],
+
+    'rv32-signed-adder-reg': [
+                                'add64','kadd64','ksub64','radd64','rsub64','sub64'
+                            ],
+
+    'rv32-unsigned-adder-reg': [
+                                'ukadd64','uksub64','uradd64','ursub64'
+                                ]
+
+}
+
+
+
 # Instruction encodings for illegals generation
 
 # 32bit instructions
@@ -1739,4 +1904,46 @@ def seq_test_rr_jalr_op(reg_inst, destreg1, destreg2, \
                 RVTEST_SIGUPD({swreg}, {destreg1}, {offset})
                 '''
     return asm_string
+
+
+###################################################################################
+# Function to return ASM-string of instr with couple registers(reg, reg+1) #
+###################################################################################
+
+def couple_reg_op(reg_inst, destreg,destregplusone,\
+            reg1, reg1plusone, reg2, reg2plusone, \
+                destval, destvalplusone, val1, val1plusone, val2, val2plusone, \
+                    swreg, offset):
+
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg1plusone}, {val1plusone}
+        li {reg2}, {val2}
+        li {reg2plusone}, {val2plusone}
+        li {destreg}, {destval}
+        li {destregplusone}, {destvalplusone}
+        {reg_inst} {destreg}, {reg1}, {reg2}
+        RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+        '''
+    return asm_string
+
+
+###################################################################################
+# Function to return ASM-string of instr with rs1 couple registers(reg, reg+1) #
+###################################################################################
+
+def rs1_couple_reg_op(reg_inst, destreg,\
+            reg1, reg1plusone, reg2, \
+                val1, val1plusone, val2, \
+                    swreg, offset):
+
+    asm_string = f'''
+        li {reg1}, {val1}
+        li {reg1plusone}, {val1plusone}
+        li {reg2}, {val2}
+        {reg_inst} {destreg}, {reg1}, {reg2}
+        RVTEST_SIGUPD({swreg}, {destreg}, {offset})
+        '''
+    return asm_string
+
 #####################################################################################################################

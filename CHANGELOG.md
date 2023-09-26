@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2023-09-20
+- Added psimd instruction dictionary to instruction_constants.py
+- Added methods to return ASM strings for instructions with couple registers
+ 
 ## [1.10.0] - 2023-06-6
 - Execute method for UATG plugins to take not only ispec and cspec but all config files
 - Removed `Zicsr` filter while populating test_list
