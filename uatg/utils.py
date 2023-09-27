@@ -430,7 +430,7 @@ def create_plugins(plugins_path, index_yaml, module):
 
     files = listdir(plugins_path)
     for file in files:
-        if ('.py' in file) and (not file.startswith('.')) and file != 'consts.py':
+        if ('.py' in file) and (not file.startswith('.')) and (file.startswith('uatg_')):
             test_name = file[0:-3]
 
             val = False
