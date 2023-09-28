@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2023-09-27
+- Added function to return rs1,rs2 and rd values to pbox saturating mul instructions plugin
+- Added condition to check if the plugin name starts with "uatg_" in utils.py
+
 ## [1.11.0] - 2023-09-20
 - Added psimd instruction dictionary to instruction_constants.py
 - Added methods to return ASM strings for instructions with couple registers

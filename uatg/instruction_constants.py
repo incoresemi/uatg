@@ -1926,24 +1926,201 @@ def couple_reg_op(reg_inst, destreg,destregplusone,\
         RVTEST_SIGUPD({swreg}, {destreg}, {offset})
         '''
     return asm_string
+################################################################################################
+# List to hold all the saturation type of instruction which sets OV bit 
+################################################################################################
+mul_saturation_insts = ['khm8','khmx8','khm16','khmx16','kmar64','kmsr64',\
+                        'kmmac','kmmac.u','kmmsb','kmmsb.u','kwmmul','kwmmul.u',\
+                        'kmmawb','kmmawb.u', 'kmmawt', 'kmmawt.u', 'kmmwb2', 'kmmwb2.u',\
+                        'kmmwt2', 'kmmwt2.u', 'kmmawb2', 'kmmawb2.u', 'kmmawt2', 'kmmawt2.u',\
+                        'kmda', 'kmxda', 'kmabb', 'kmabt',  'kmatt','kmada','kmaxda','kmads', 'kmadrs',\
+                        'kmaxds','kmsda','kmsxda','khmbb','khmbt','khmtt','kdmabb','kdmabt','kdmatt','ukmar64','ukmsr64']
 
-
-###################################################################################
-# Function to return ASM-string of instr with rs1 couple registers(reg, reg+1) #
-###################################################################################
-
-def rs1_couple_reg_op(reg_inst, destreg,\
-            reg1, reg1plusone, reg2, \
-                val1, val1plusone, val2, \
-                    swreg, offset):
-
-    asm_string = f'''
-        li {reg1}, {val1}
-        li {reg1plusone}, {val1plusone}
-        li {reg2}, {val2}
-        {reg_inst} {destreg}, {reg1}, {reg2}
-        RVTEST_SIGUPD({swreg}, {destreg}, {offset})
-        '''
-    return asm_string
+###################################################################################################
+# function to return rs1,rs2 and rd values of instruction specified
+###################################################################################################
+def register_values(inst):
+    if inst=='khm8':
+        rs1reg_val = [(2155905152,0),(128,0),(32768,0),(8388608,0),(2147483648,0)]
+        rs2reg_val = [(2155905152,0),(128,0),(32768,0),(8388608,0),(2147483648,0)]
+        rdreg_val =  [(0,0),(0,0),(0,0),(0,0),(0,0)]
+    elif inst=='khmx8':
+        rs1reg_val=[(2147516416,0),(8388736,0),(2155905152,0),(2155905152,0),(2147516416,0),(8388736,0)] 
+        rs2reg_val = [(8388736,0),(2147516416,0),(2147516416,0),(8388736,0),(2155905152,0),(2155905152,0)]
+        rdreg_val  = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)]
+    elif inst=='khm16':
+        rs1reg_val = [(2147516416,0),(32768,0),(2147483648,0)]
+        rs2reg_val = [(2147516416,0),(32768,0),(2147483648,0)] 
+        rdreg_val =  [(0,0),(0,0),(0,0)]
+    elif inst=='khmx16':
+        rs1reg_val = [(2147516416,0),(2147516416,0),(2147516416,0),(32768,0),(2147483648,0),(32768,0),(2147483648,0)]
+        rs2reg_val = [(2147516416,0),(32768,0),(2147483648,0),(2147516416,0),(2147516416,0),(2147483648,0),(32768,0)]
+        rdreg_val =  [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0)]
+    elif inst == 'kmar64':
+        rs1reg_val = [(0x80000000, 0)]
+        rs2reg_val = [(0x10000000, 0)]
+        rdreg_val =  [(0,0x80000000)]
+    elif inst == 'kmsr64':
+        rs1reg_val = [(1,0)]
+        rs2reg_val = [(1,0)]
+        rdreg_val =  [(0,0x80000000)]
+    elif inst == 'kmmac':
+        rs1reg_val = [(0x7FFFFFFF,0),(0xFFFFFFFF,0)]
+        rs2reg_val = [(0x10000000,0),(0x10000000,0)]
+        rdreg_val =  [(0x00000001,0),(0x80000000,0)]
+    elif inst == 'kmmac.u': 
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x10000000,0)] 
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kmmsb':
+        rs1reg_val = [(0x7FFFFFFF,0),(0x00000002,0)]
+        rs2reg_val = [(0x10000000,0),(0x10000000,0)]
+        rdreg_val =  [(0xFFFFFFFF,0),(0x80000000,0)]
+    elif inst == 'kmmsb.u':
+        rs1reg_val = [(0x10000000,0)]
+        rs2reg_val = [(0x100,0)] 
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kwmmul':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x80000000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'kwmmul.u':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x80000000,0)] 
+        rdreg_val =  [(0,0)]
+    elif inst == 'kmmawb':
+        rs1reg_val = [(0x7FFFFFFF,1)]
+        rs2reg_val = [(0x00000001,1)]
+        rdreg_val =  [(0x7FFFFFFF,1)]
+    elif inst == 'kmmawb.u':
+        rs1reg_val = [(0x7FFFFFFF,0)]
+        rs2reg_val = [(0x00000001,0)] 
+        rdreg_val =  [(0x7FFFFFFF,0)]
+    elif inst == 'kmmawt':
+        rs1reg_val = [(0x7FFFFFFF,0)]
+        rs2reg_val = [(0x00010000,0)]
+        rdreg_val =  [(0x7FFFFFFF,0)]
+    elif inst == 'kmmawt.u':
+        rs1reg_val = [(0x7FFFFFFF,0)]
+        rs2reg_val = [(0x00010000,0)] 
+        rdreg_val =  [(0x7FFFFFFF,0)]
+    elif inst == 'kmmwb2':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x8000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'kmmwb2.u':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x8000,0)] 
+        rdreg_val =  [(0,0)]
+    elif inst == 'kmmwt2':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x80000000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'kmmwt2.u':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x80000000,0)] 
+        rdreg_val =  [(0,0)]
+    elif inst == 'kmmawb2':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x8000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'kmmawb2.u':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x8000,0)] 
+        rdreg_val =  [(0,0)]
+    elif inst == 'kmmawt2':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x80000000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'kmmawt2.u':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x80000000,0)] 
+        rdreg_val =  [(0,0)] 
+    elif inst == 'kmda':
+        rs1reg_val = [(0x80008000,0)]
+        rs2reg_val = [(0x80008000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'kmxda':
+        rs1reg_val = [(0x80008000,0)]
+        rs2reg_val = [(0x80008000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'kmabb':
+        rs1reg_val = [(0x8000,0)]
+        rs2reg_val = [(1,0)]
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kmabt':
+        rs1reg_val = [(0x8000,0)]
+        rs2reg_val = [(0x00010000,0)]
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kmatt':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x00010000,0)]
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kmada':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x00010000,0)]
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kmaxda':
+        rs1reg_val = [(0x00008000,0)]
+        rs2reg_val = [(0x00010000,0)]
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kmads':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x00010000,0)]
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kmadrs':
+        rs1reg_val = [(0x00008000,0)]
+        rs2reg_val = [(0x00000001,0)]
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kmaxds':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x00000001,0)]
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kmsda':
+        rs1reg_val = [(1,0)]
+        rs2reg_val = [(1,0)]
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'kmsxda':
+        rs1reg_val = [(0x00020001,0)]
+        rs2reg_val = [(0x00010001,0)]
+        rdreg_val =  [(0x80000000,0)]
+    elif inst == 'khmbb':
+        rs1reg_val = [(0x00008000,0)]
+        rs2reg_val = [(0x00008000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'khmbt':
+        rs1reg_val = [(0x00008000,0)]
+        rs2reg_val = [(0x80000000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'khmtt':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x80000000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'kdmabb':
+        rs1reg_val = [(0x8000,0)]
+        rs2reg_val = [(0x8000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'kdmabt':
+        rs1reg_val = [(0x8000,0)]
+        rs2reg_val = [(0x80000000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'kdmatt':
+        rs1reg_val = [(0x80000000,0)]
+        rs2reg_val = [(0x80000000,0)]
+        rdreg_val =  [(0,0)]
+    elif inst == 'ukmar64':
+        rs1reg_val = [(1,0)]
+        rs2reg_val = [(1,0)]
+        rdreg_val =  [(0xFFFFFFFF,0xFFFFFFFF)]
+    elif inst == 'ukmsr64':
+        rs1reg_val = [(1,0)]
+        rs2reg_val = [(2,0)]
+        rdreg_val =  [(0,0)]
+    else:
+        rs1reg_val = [(0,0)]
+        rs2reg_val = [(0,0)] 
+        rdreg_val =  [(0,0)]
+    
+    return rs1reg_val, rs2reg_val, rdreg_val
 
 #####################################################################################################################
