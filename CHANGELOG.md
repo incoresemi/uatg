@@ -2,6 +2,9 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.2] - 2023-11-16
+- Added python-constraint to requirements
+
 ## [1.12.1] - 2023-11-10
 - Forced click to 7.0.0
 
