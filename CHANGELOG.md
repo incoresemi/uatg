@@ -2,6 +2,9 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2023-11-16
+- march generation to account for Smrnmi in isa string
+
 ## [1.12.2] - 2023-11-16
 - Added python-constraint to requirements
 
