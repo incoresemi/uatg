@@ -777,7 +777,7 @@ def generate_test_list(asm_dir, uarch_dir, module_dir, isa, test_list, compile_m
     target_dir = abspath(asm_dir + '/../')
 
     extension_list = split_isa_string(isa)
-    march = isa.replace('Zihpm','').replace('Zicntr','').replace('Smrnmi','').replace('S','').replace('U','').replace('H','').lower()
+    march = isa.replace('Zihpm','').replace('Zicntr','').replace('Smrnmi','').replace('Sdext').replace('Sdtrig').replace('S','').replace('U','').replace('H','').lower()
     xlen = 32 if '32' in isa else 64
     mabi = 'ilp32' if xlen == 32 else 'lp64'
 
