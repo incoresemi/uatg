@@ -2,6 +2,9 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2023-12-10
+- Sdext from isa string must not be forwarded to the march string in the test-list
+
 ## [1.13.1] - 2023-12-9
 - patch to revert back click version constriant
 
